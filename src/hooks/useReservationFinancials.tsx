@@ -60,6 +60,15 @@ export const useReservationFinancials = () => {
 
 			if (error) throw error;
 
+			// Get income records for expense calculations
+			const { data: incomeRecords, error: incomeError } = await supabase
+				.from("income")
+				.select("*")
+				.eq("tenant_id", tenant.id)
+				.in("booking_id", reservations?.map((r) => r.id) || []);
+
+			if (incomeError) throw incomeError;
+
 			// Calculate financial data with USD conversion
 			const financialData: ReservationFinancial[] =
 				reservations?.map((reservation) => {
@@ -68,8 +77,17 @@ export const useReservationFinancials = () => {
 					const roomAmountUsd = roomAmountOriginal / rate;
 					const paidAmountUsd = (reservation.paid_amount || 0) / rate;
 
-					// For now, expenses will be 0 - can be enhanced later with actual expense calculations
-					const expensesUsd = 0;
+					// Calculate expenses from income records (additional services)
+					const reservationIncomeRecords =
+						incomeRecords?.filter((inc) => inc.booking_id === reservation.id) ||
+						[];
+
+					const totalExpensesOriginal = reservationIncomeRecords.reduce(
+						(sum, inc) => sum + Number(inc.amount),
+						0,
+					);
+
+					const expensesUsd = totalExpensesOriginal / rate;
 					const needsToPayUsd = roomAmountUsd + expensesUsd - paidAmountUsd;
 
 					return {

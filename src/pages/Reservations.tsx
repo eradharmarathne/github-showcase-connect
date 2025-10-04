@@ -15,6 +15,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ViewReservationDialog } from "@/components/ViewReservationDialog";
 import { useLocationContext } from "@/context/LocationContext";
 import { useIncomeData } from "@/hooks/useIncomeData";
+import { useReservationFinancials } from "@/hooks/useReservationFinancials";
 import { useReservationsData } from "@/hooks/useReservationsData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -23,6 +24,7 @@ type Currency = Database["public"]["Enums"]["currency_type"];
 export default function Reservations() {
 	const { locations } = useLocationContext();
 	const { refetch } = useReservationsData();
+	const { refetch: refetchFinancials } = useReservationFinancials();
 	const { accounts } = useIncomeData();
 	const navigate = useNavigate();
 
@@ -94,7 +96,8 @@ export default function Reservations() {
 	};
 
 	const handleIncomeSuccess = () => {
-		refetch();
+		refetch(); // Refetch mobile cards data
+		refetchFinancials(); // Refetch desktop table data
 		setIsIncomeDialogOpen(false);
 		setSelectedReservation(null);
 	};
@@ -105,7 +108,8 @@ export default function Reservations() {
 	};
 
 	const handlePaymentSuccess = () => {
-		refetch();
+		refetch(); // Refetch mobile cards data
+		refetchFinancials(); // Refetch desktop table data
 		setIsPaymentDialogOpen(false);
 		setPaymentData(null);
 	};
@@ -116,7 +120,8 @@ export default function Reservations() {
 	};
 
 	const handleDataUpdate = () => {
-		refetch();
+		refetch(); // Refetch mobile cards data
+		refetchFinancials(); // Refetch desktop table data
 	};
 
 	return (
