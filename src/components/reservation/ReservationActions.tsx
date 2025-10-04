@@ -1,4 +1,11 @@
-import { CreditCard, DollarSign, Edit, Eye, MoreHorizontal, Printer } from "lucide-react";
+import {
+	CreditCard,
+	DollarSign,
+	Edit,
+	Eye,
+	MoreHorizontal,
+	Printer,
+} from "lucide-react";
 import { OTPVerification } from "@/components/OTPVerification";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,27 +84,21 @@ export function ReservationActions({
 	isMobile = false,
 	showPaymentAndIncome = true,
 }: ReservationActionsProps) {
-		// Disable income and payment actions when reservation is checked out (complete)
-		const isReservationComplete = reservation.status === "checked_out";
-		
-		if (isMobile) {
-			return (
-				<div className="flex gap-2 mt-4">
-					<Button variant="outline" size="sm" className="flex-1" onClick={onView}>
-						<Eye className="size-4 mr-1" />
-						View
-					</Button>
+	// Disable income and payment actions when reservation is checked out (complete)
+	const isReservationComplete = reservation.status === "checked_out";
 
+	if (isMobile) {
+		return (
+			<div className="flex gap-2 mt-4">
+				<Button variant="outline" size="sm" className="flex-1" onClick={onView}>
+					<Eye className="size-4 mr-1" />
+					View
+				</Button>
 				{onPrint && (
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={onPrint}
-					>
+					<Button variant="outline" size="sm" onClick={onPrint}>
 						<Printer className="size-4" />
 					</Button>
 				)}
-
 				{showPaymentAndIncome && onAddIncome && (
 					<Button
 						variant="outline"
@@ -105,12 +106,15 @@ export function ReservationActions({
 						onClick={onAddIncome}
 						className="text-blue-600 hover:text-blue-700"
 						disabled={isReservationComplete}
-						title={isReservationComplete ? "Cannot add income - reservation is complete" : ""}
+						title={
+							isReservationComplete
+								? "Cannot add income - reservation is complete"
+								: ""
+						}
 					>
 						<DollarSign className="size-4" />
 					</Button>
 				)}
-
 				{showPaymentAndIncome && canShowPayment && onPayment && (
 					<Button
 						variant="outline"
@@ -118,76 +122,93 @@ export function ReservationActions({
 						onClick={onPayment}
 						className="text-green-600 hover:text-green-700"
 						disabled={isReservationComplete}
-						title={isReservationComplete ? "Cannot make payment - reservation is complete" : ""}
+						title={
+							isReservationComplete
+								? "Cannot make payment - reservation is complete"
+								: ""
+						}
 					>
 						<CreditCard className="size-4" />
 					</Button>
-				)}					<OTPVerification
-						onVerified={onEdit}
-						triggerComponent={
-							<Button variant="outline" size="sm">
-								<Edit className="size-4" />
-							</Button>
-						}
-					/>
-				</div>
-			);
-		}
+				)}{" "}
+				<OTPVerification
+					onVerified={onEdit}
+					triggerComponent={
+						<Button variant="outline" size="sm">
+							<Edit className="size-4" />
+						</Button>
+					}
+				/>
+			</div>
+		);
+	}
 
-		return (
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="icon">
-						<MoreHorizontal className="size-4" />
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-48">
-					<DropdownMenuItem onClick={onView}>
-						<Eye className="size-4 mr-2" />
-						View Details
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="ghost" size="icon">
+					<MoreHorizontal className="size-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end" className="w-48">
+				<DropdownMenuItem onClick={onView}>
+					<Eye className="size-4 mr-2" />
+					View Details
+				</DropdownMenuItem>
+				{onPrint && (
+					<DropdownMenuItem onClick={onPrint}>
+						<Printer className="size-4 mr-2" />
+						Print Reservation
 					</DropdownMenuItem>
-					{onPrint && (
-						<DropdownMenuItem onClick={onPrint}>
-							<Printer className="size-4 mr-2" />
-							Print Reservation
+				)}
+				{showPaymentAndIncome && (
+					<>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							onClick={isReservationComplete ? undefined : onAddIncome}
+							className={
+								isReservationComplete
+									? "text-gray-400 cursor-not-allowed"
+									: "text-blue-600"
+							}
+							disabled={isReservationComplete}
+						>
+							<DollarSign className="size-4 mr-2" />
+							Add Income
+							{isReservationComplete && (
+								<span className="text-xs ml-2">(Complete)</span>
+							)}
 						</DropdownMenuItem>
-					)}
-					{showPaymentAndIncome && (
-						<>
-							<DropdownMenuSeparator />
-							<DropdownMenuItem 
-								onClick={isReservationComplete ? undefined : onAddIncome}
-								className={isReservationComplete ? "text-gray-400 cursor-not-allowed" : "text-blue-600"}
+						{canShowPayment && (
+							<DropdownMenuItem
+								onClick={isReservationComplete ? undefined : onPayment}
+								className={
+									isReservationComplete
+										? "text-gray-400 cursor-not-allowed"
+										: "text-green-600"
+								}
 								disabled={isReservationComplete}
 							>
-								<DollarSign className="size-4 mr-2" />
-								Add Income
-								{isReservationComplete && <span className="text-xs ml-2">(Complete)</span>}
+								<CreditCard className="size-4 mr-2" />
+								Pay Now
+								{isReservationComplete && (
+									<span className="text-xs ml-2">(Complete)</span>
+								)}
 							</DropdownMenuItem>
-							{canShowPayment && (
-								<DropdownMenuItem 
-									onClick={isReservationComplete ? undefined : onPayment}
-									className={isReservationComplete ? "text-gray-400 cursor-not-allowed" : "text-green-600"}
-									disabled={isReservationComplete}
-								>
-									<CreditCard className="size-4 mr-2" />
-									Pay Now
-									{isReservationComplete && <span className="text-xs ml-2">(Complete)</span>}
-								</DropdownMenuItem>
-							)}
-						</>
-					)}
-					<DropdownMenuSeparator />
-					<OTPVerification
-						onVerified={onEdit}
-						triggerComponent={
-							<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-								<Edit className="size-4 mr-2" />
-								Edit Reservation
-							</DropdownMenuItem>
-						}
-					/>
-				</DropdownMenuContent>
-			</DropdownMenu>
-		);
+						)}
+					</>
+				)}
+				<DropdownMenuSeparator />
+				<OTPVerification
+					onVerified={onEdit}
+					triggerComponent={
+						<DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+							<Edit className="size-4 mr-2" />
+							Edit Reservation
+						</DropdownMenuItem>
+					}
+				/>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
 }

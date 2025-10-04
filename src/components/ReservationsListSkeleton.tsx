@@ -15,27 +15,39 @@ export function ReservationsListSkeleton() {
 		<div className="max-w-full w-full pb-20 sm:pb-0 mx-auto space-y-6">
 			{/* Header Skeleton */}
 
-
 			{/* Tabs Skeleton */}
 			<div className="w-full">
-
 				<div className="space-y-4">
 					{/* Desktop Table View Skeleton */}
 					<div className="hidden lg:block">
 						<Card>
 							<CardHeader>
-								<CardTitle className="px-4"><Skeleton className="h-6 w-24" /></CardTitle>
+								<CardTitle className="px-4">
+									<Skeleton className="h-6 w-24" />
+								</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead><Skeleton className="h-6 w-24" /></TableHead>
-											<TableHead><Skeleton className="h-6 w-24" /></TableHead>
-											<TableHead><Skeleton className="h-6 w-24" /></TableHead>
-											<TableHead><Skeleton className="h-6 w-24" /></TableHead>
-											<TableHead><Skeleton className="h-6 w-24" /></TableHead>
-											<TableHead><Skeleton className="h-6 w-24" /></TableHead>
+											<TableHead>
+												<Skeleton className="h-6 w-24" />
+											</TableHead>
+											<TableHead>
+												<Skeleton className="h-6 w-24" />
+											</TableHead>
+											<TableHead>
+												<Skeleton className="h-6 w-24" />
+											</TableHead>
+											<TableHead>
+												<Skeleton className="h-6 w-24" />
+											</TableHead>
+											<TableHead>
+												<Skeleton className="h-6 w-24" />
+											</TableHead>
+											<TableHead>
+												<Skeleton className="h-6 w-24" />
+											</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>

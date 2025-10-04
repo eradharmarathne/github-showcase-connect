@@ -2,12 +2,12 @@ import { Calendar, DollarSign, MapPin } from "lucide-react";
 import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
+import { useReservationPrint } from "@/hooks/useReservationPrint";
 import {
 	type ReservationWithJoins,
 	useReservationsData,
 } from "@/hooks/useReservationsData";
-import { useReservationPrint } from "@/hooks/useReservationPrint";
-import { useAuth } from "@/context/AuthContext";
 import { ReservationActions } from "./ReservationActions";
 import { ReservationExpensesDisplay } from "./ReservationExpensesDisplay";
 
@@ -159,7 +159,9 @@ export function ReservationsMobileCards({
 								<DollarSign className="h-3 w-3" />
 								<span>
 									Room: {getCurrencySymbol(reservation.currency)}{" "}
-									{(reservation.room_rate * reservation.nights).toLocaleString()}
+									{(
+										reservation.room_rate * reservation.nights
+									).toLocaleString()}
 								</span>
 							</div>
 

@@ -14,8 +14,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ViewReservationDialog } from "@/components/ViewReservationDialog";
 import { useLocationContext } from "@/context/LocationContext";
-import { useReservationsData } from "@/hooks/useReservationsData";
 import { useIncomeData } from "@/hooks/useIncomeData";
+import { useReservationsData } from "@/hooks/useReservationsData";
 
 export default function Reservations() {
 	const { locations } = useLocationContext();
@@ -27,9 +27,12 @@ export default function Reservations() {
 	const [activeTab, setActiveTab] = useState("reservations");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
-	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] = useState(false);
+	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
+		useState(false);
 	const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-	const [viewingReservationId, setViewingReservationId] = useState<string | null>(null);
+	const [viewingReservationId, setViewingReservationId] = useState<
+		string | null
+	>(null);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [editingReservation, setEditingReservation] = useState<any>(null);
 	const [showOTPVerification, setShowOTPVerification] = useState(false);

@@ -56,7 +56,8 @@ export function ReservationExpensesDisplay({
 		<div className="text-sm">
 			<div className="space-y-1">
 				<div className="font-medium">
-					{getCurrencySymbol(currency)} {totalAdditionalServices.toLocaleString()}
+					{getCurrencySymbol(currency)}{" "}
+					{totalAdditionalServices.toLocaleString()}
 				</div>
 				{additionalServices > 0 && (
 					<div className="text-yellow-600 text-xs">

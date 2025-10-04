@@ -163,7 +163,7 @@ export function PaymentDialog({
 	}, [isOpen, reservationId, fetchReservationAndAccounts]);
 
 	useEffect(() => {
-		setFormData(prev => ({
+		setFormData((prev) => ({
 			...prev,
 			amount: initialAmount,
 			currency: initialCurrency as any,
@@ -177,7 +177,9 @@ export function PaymentDialog({
 		setSubmitting(true);
 		try {
 			// Convert amount to the account currency if needed
-			const selectedAccount = accounts.find(acc => acc.id === formData.account_id);
+			const selectedAccount = accounts.find(
+				(acc) => acc.id === formData.account_id,
+			);
 			const accountCurrency = selectedAccount?.currency || "LKR";
 			const convertedAmount = await convertCurrency(
 				formData.amount,
@@ -276,31 +278,42 @@ export function PaymentDialog({
 							<CardContent className="space-y-3">
 								<div className="grid grid-cols-2 gap-4 text-sm">
 									<div>
-										<span className="font-medium">Guest:</span> {reservation.guest_name}
+										<span className="font-medium">Guest:</span>{" "}
+										{reservation.guest_name}
 									</div>
 									<div>
-										<span className="font-medium">Room:</span> {reservation.rooms?.room_number}
+										<span className="font-medium">Room:</span>{" "}
+										{reservation.rooms?.room_number}
 									</div>
 									<div>
 										<span className="font-medium">Check-in:</span>{" "}
-										{format(new Date(reservation.check_in_date), "MMM dd, yyyy")}
+										{format(
+											new Date(reservation.check_in_date),
+											"MMM dd, yyyy",
+										)}
 									</div>
 									<div>
 										<span className="font-medium">Check-out:</span>{" "}
-										{format(new Date(reservation.check_out_date), "MMM dd, yyyy")}
+										{format(
+											new Date(reservation.check_out_date),
+											"MMM dd, yyyy",
+										)}
 									</div>
 									<div>
 										<span className="font-medium">Total Amount:</span>{" "}
-										{reservation.currency} {reservation.total_amount.toLocaleString()}
+										{reservation.currency}{" "}
+										{reservation.total_amount.toLocaleString()}
 									</div>
 									<div>
 										<span className="font-medium">Paid Amount:</span>{" "}
-										{reservation.currency} {(reservation.paid_amount || 0).toLocaleString()}
+										{reservation.currency}{" "}
+										{(reservation.paid_amount || 0).toLocaleString()}
 									</div>
 									<div className="col-span-2">
 										<span className="font-medium">Balance Amount:</span>{" "}
 										<span className="text-red-600 font-semibold">
-											{reservation.currency} {(reservation.balance_amount || 0).toLocaleString()}
+											{reservation.currency}{" "}
+											{(reservation.balance_amount || 0).toLocaleString()}
 										</span>
 									</div>
 								</div>
@@ -326,8 +339,12 @@ export function PaymentDialog({
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="room_payment">Room Payment</SelectItem>
-											<SelectItem value="advance_payment">Advance Payment</SelectItem>
-											<SelectItem value="partial_payment">Partial Payment</SelectItem>
+											<SelectItem value="advance_payment">
+												Advance Payment
+											</SelectItem>
+											<SelectItem value="partial_payment">
+												Partial Payment
+											</SelectItem>
 											<SelectItem value="full_payment">Full Payment</SelectItem>
 										</SelectContent>
 									</Select>
@@ -348,8 +365,12 @@ export function PaymentDialog({
 										<SelectContent>
 											<SelectItem value="cash">Cash</SelectItem>
 											<SelectItem value="card">Credit/Debit Card</SelectItem>
-											<SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-											<SelectItem value="mobile_payment">Mobile Payment</SelectItem>
+											<SelectItem value="bank_transfer">
+												Bank Transfer
+											</SelectItem>
+											<SelectItem value="mobile_payment">
+												Mobile Payment
+											</SelectItem>
 											<SelectItem value="cheque">Cheque</SelectItem>
 										</SelectContent>
 									</Select>
@@ -407,12 +428,17 @@ export function PaymentDialog({
 								</div>
 
 								<div>
-									<Label htmlFor="reference_number">Reference Number (Optional)</Label>
+									<Label htmlFor="reference_number">
+										Reference Number (Optional)
+									</Label>
 									<Input
 										id="reference_number"
 										value={formData.reference_number}
 										onChange={(e) =>
-											setFormData({ ...formData, reference_number: e.target.value })
+											setFormData({
+												...formData,
+												reference_number: e.target.value,
+											})
 										}
 										placeholder="Transaction ID, Cheque number, etc."
 									/>
@@ -440,7 +466,9 @@ export function PaymentDialog({
 							</Button>
 							<Button
 								type="submit"
-								disabled={submitting || !formData.payment_method || !formData.account_id}
+								disabled={
+									submitting || !formData.payment_method || !formData.account_id
+								}
 							>
 								<Save className="size-4 mr-2" />
 								{submitting ? "Recording..." : "Record Payment"}

@@ -100,14 +100,15 @@ export function AddIncomeDialog({
 
 	const handleIncomeSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!selectedReservation) return;
-
+		// Allow income creation with or without a reservation
+		
 		try {
 			const incomeData = {
 				note:
 					incomeForm.note ||
-					t("income.addDialog.reservationInfo.reservation") +
-						` ${selectedReservation.reservation_number}`,
+					(selectedReservation 
+						? t("income.addDialog.reservationInfo.reservation") + ` ${selectedReservation.reservation_number}`
+						: "General income entry"),
 				amount: incomeForm.amount,
 				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP", // Cast to correct enum type
 				// For direct payments: require account_id, for deferred: set to null
@@ -119,37 +120,40 @@ export function AddIncomeDialog({
 					incomeForm.payment_type === "direct" ? "cash" : "pending",
 				location_id: selectedLocation,
 				tenant_id: profile?.tenant_id,
-				// booking_id now references reservations table (renamed foreign key constraint)
-				booking_id: selectedReservation.id,
+				// Only set booking_id if there's a valid reservation selected
+				booking_id: selectedReservation?.id || null,
 			}; // Start transaction-like operations
 			const { error: incomeError } = await supabase
 				.from("income")
 				.insert(incomeData);
 			if (incomeError) throw incomeError;
 
-			// If deferred payment, update reservation total amount
-			if (incomeForm.payment_type === "deferred") {
-				const newTotal = selectedReservation.total_amount + incomeForm.amount;
-				const { error: reservationError } = await supabase
-					.from("reservations")
-					.update({
-						total_amount: newTotal,
-						updated_at: new Date().toISOString(),
-					})
-					.eq("id", selectedReservation.id);
-				if (reservationError) throw reservationError;
-			} else if (incomeForm.payment_type === "direct") {
-				// For direct payments, update paid_amount to reflect the payment received
-				const newPaidAmount =
-					(selectedReservation.paid_amount || 0) + incomeForm.amount;
-				const { error: reservationError } = await supabase
-					.from("reservations")
-					.update({
-						paid_amount: newPaidAmount,
-						updated_at: new Date().toISOString(),
-					})
-					.eq("id", selectedReservation.id);
-				if (reservationError) throw reservationError;
+			// Only update reservation amounts if there's a selected reservation
+			if (selectedReservation) {
+				// If deferred payment, update reservation total amount
+				if (incomeForm.payment_type === "deferred") {
+					const newTotal = selectedReservation.total_amount + incomeForm.amount;
+					const { error: reservationError } = await supabase
+						.from("reservations")
+						.update({
+							total_amount: newTotal,
+							updated_at: new Date().toISOString(),
+						})
+						.eq("id", selectedReservation.id);
+					if (reservationError) throw reservationError;
+				} else if (incomeForm.payment_type === "direct") {
+					// For direct payments, update paid_amount to reflect the payment received
+					const newPaidAmount =
+						(selectedReservation.paid_amount || 0) + incomeForm.amount;
+					const { error: reservationError } = await supabase
+						.from("reservations")
+						.update({
+							paid_amount: newPaidAmount,
+							updated_at: new Date().toISOString(),
+						})
+						.eq("id", selectedReservation.id);
+					if (reservationError) throw reservationError;
+				}
 			}
 
 			const successMessage =
@@ -356,7 +360,6 @@ export function AddIncomeDialog({
 							type="submit"
 							disabled={
 								!incomeForm.amount ||
-								!selectedReservation ||
 								(incomeForm.payment_type === "direct" && !incomeForm.account_id)
 							}
 						>
