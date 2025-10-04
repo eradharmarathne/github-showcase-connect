@@ -63,8 +63,8 @@ export function MultiRoomSelector({
 			id: generateId(),
 			room_id: "",
 			room_rate: 0,
-			check_in_date: format(new Date(), "yyyy-MM-dd"),
-			check_out_date: format(addDays(new Date(), 1), "yyyy-MM-dd"),
+			check_in_date: "", // Start with empty dates so user can select room first
+			check_out_date: "", // Then pick available dates
 			adults: 1,
 			children: 0,
 			currency: defaultCurrency,

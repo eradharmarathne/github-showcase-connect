@@ -187,6 +187,19 @@ export function NewReservationDialog({
 			return;
 		}
 
+		// Validate that all room selections have dates
+		const missingDatesSelections = roomSelections.filter(
+			(selection) => !selection.check_in_date || !selection.check_out_date,
+		);
+		if (missingDatesSelections.length > 0) {
+			toast({
+				title: "Error", 
+				description: "Please select check-in and check-out dates for all room selections",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		// Validate room availability for all selections
 		const unavailableSelections = roomSelections.filter((selection) => {
 			const checkIn = new Date(selection.check_in_date);

@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,12 +44,14 @@ export function ReservationsFilters({
 	onCurrencyChange,
 	onNewReservation,
 }: ReservationsFiltersProps) {
+	const { t } = useTranslation();
+
 	return (
 		<div className="flex flex-col lg:flex-row gap-4">
 			{locations.length > 1 && (
 				<Select value={selectedLocation} onValueChange={onLocationChange}>
 					<SelectTrigger className="w-full lg:w-48">
-						<SelectValue placeholder="Select location" />
+						<SelectValue placeholder={t("reservations.filters.selectLocation")} />
 					</SelectTrigger>
 					<SelectContent className="z-50 bg-background border">
 						{locations.map((location) => (
@@ -63,7 +66,7 @@ export function ReservationsFilters({
 			<div className="relative flex-1 lg:w-64">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
 				<Input
-					placeholder="Search reservations..."
+					placeholder={t("reservations.filters.searchPlaceholder")}
 					value={searchQuery}
 					onChange={(e) => onSearchChange(e.target.value)}
 					className="pl-10 w-full"
@@ -72,16 +75,16 @@ export function ReservationsFilters({
 
 			<Select value={statusFilter} onValueChange={onStatusFilterChange}>
 				<SelectTrigger className="w-full lg:w-48">
-					<SelectValue placeholder="Filter by status" />
+					<SelectValue placeholder={t("reservations.filters.filterByStatus")} />
 				</SelectTrigger>
 				<SelectContent className="z-50 bg-background border">
-					<SelectItem value="all">All Statuses</SelectItem>
-					<SelectItem value="confirmed">Confirmed</SelectItem>
-					<SelectItem value="tentative">Tentative</SelectItem>
-					<SelectItem value="pending">Pending</SelectItem>
-					<SelectItem value="checked_in">Checked In</SelectItem>
-					<SelectItem value="checked_out">Checked Out</SelectItem>
-					<SelectItem value="cancelled">Cancelled</SelectItem>
+					<SelectItem value="all">{t("reservations.filters.allStatuses")}</SelectItem>
+					<SelectItem value="confirmed">{t("reservations.status.confirmed")}</SelectItem>
+					<SelectItem value="tentative">{t("reservations.status.tentative")}</SelectItem>
+					<SelectItem value="pending">{t("reservations.status.pending")}</SelectItem>
+					<SelectItem value="checked_in">{t("reservations.status.checked_in")}</SelectItem>
+					<SelectItem value="checked_out">{t("reservations.status.checked_out")}</SelectItem>
+					<SelectItem value="cancelled">{t("reservations.status.cancelled")}</SelectItem>
 				</SelectContent>
 			</Select>
 
@@ -94,7 +97,7 @@ export function ReservationsFilters({
 
 			<Button onClick={onNewReservation} className="flex-shrink-0">
 				<Calendar className="size-4 mr-2" />
-				New Reservation
+				{t("reservations.filters.newReservation")}
 			</Button>
 		</div>
 	);

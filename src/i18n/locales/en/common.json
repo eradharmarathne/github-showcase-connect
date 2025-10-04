@@ -184,6 +184,95 @@
     "reservationDetails": "Reservation Details",
     "hotelManagement": "Hotel Management"
   },
+  "reservations": {
+    "title": "Reservations",
+    "subtitle": "Manage your property reservations and bookings",
+    "tabs": {
+      "reservations": "Reservations",
+      "payments": "Payments"
+    },
+    "filters": {
+      "selectLocation": "Select location",
+      "searchPlaceholder": "Search reservations...",
+      "filterByStatus": "Filter by status",
+      "allStatuses": "All Statuses",
+      "newReservation": "New Reservation"
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "tentative": "Tentative",
+      "pending": "Pending",
+      "checked_in": "Checked In",
+      "checked_out": "Checked Out",
+      "cancelled": "Cancelled"
+    },
+    "table": {
+      "headers": {
+        "reservation": "Reservation",
+        "guest": "Guest",
+        "dates": "Dates",
+        "room": "Room",
+        "amount": "Amount",
+        "balance": "Balance",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "View",
+        "edit": "Edit",
+        "payNow": "Pay Now",
+        "addIncome": "Add Income",
+        "reservationCompleted": "Reservation Completed"
+      },
+      "noReservations": "No reservations found",
+      "loadingReservations": "Loading reservations..."
+    },
+    "mobileCard": {
+      "guest": "Guest:",
+      "dates": "Dates:",
+      "room": "Room:",
+      "amount": "Amount:",
+      "balance": "Balance:",
+      "status": "Status:",
+      "nights": "{{count}} night",
+      "nights_other": "{{count}} nights"
+    },
+    "dialog": {
+      "viewTitle": "Reservation Details",
+      "editTitle": "Edit Reservation",
+      "newTitle": "New Reservation",
+      "deleteTitle": "Delete Reservation",
+      "deleteConfirmation": "Are you sure you want to delete this reservation?",
+      "deleteButton": "Delete",
+      "cancelButton": "Cancel",
+      "saveButton": "Save Changes",
+      "createButton": "Create Reservation"
+    },
+    "form": {
+      "guestName": "Guest Name",
+      "guestEmail": "Guest Email",
+      "guestPhone": "Guest Phone",
+      "checkInDate": "Check-in Date",
+      "checkOutDate": "Check-out Date",
+      "room": "Room",
+      "adults": "Adults",
+      "children": "Children",
+      "totalAmount": "Total Amount",
+      "paidAmount": "Paid Amount",
+      "notes": "Notes",
+      "required": "Required field"
+    },
+    "messages": {
+      "createSuccess": "Reservation created successfully",
+      "updateSuccess": "Reservation updated successfully",
+      "deleteSuccess": "Reservation deleted successfully",
+      "createError": "Failed to create reservation",
+      "updateError": "Failed to update reservation",
+      "deleteError": "Failed to delete reservation",
+      "paymentSuccess": "Payment recorded successfully",
+      "paymentError": "Failed to record payment"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",

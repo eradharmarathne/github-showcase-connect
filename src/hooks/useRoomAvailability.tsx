@@ -61,25 +61,6 @@ export function useRoomAvailability({
 			const { data, error } = await query;
 
 			if (error) throw error;
-			
-			// Debug logging for room availability queries
-			console.log("🔍 Room availability query result:", {
-				location: selectedLocation,
-				tenant: tenant.id,
-				roomId,
-				startDate: startDate ? format(startDate, "yyyy-MM-dd") : null,
-				endDate: endDate ? format(endDate, "yyyy-MM-dd") : null,
-				excludeReservationId,
-				reservationsFound: data?.length || 0,
-				reservations: data?.map(r => ({
-					id: r.id,
-					roomId: r.room_id,
-					checkIn: r.check_in_date,
-					checkOut: r.check_out_date,
-					status: r.status
-				})) || []
-			});
-			
 			return data || [];
 		},
 		enabled: !!selectedLocation && !!tenant?.id,
@@ -95,7 +76,7 @@ export function useRoomAvailability({
 		const dateStr = format(date, "yyyy-MM-dd");
 
 		// Check if date falls within any existing reservation
-		const isUnavailable = reservations.some((reservation) => {
+		return !reservations.some((reservation) => {
 			// Only check reservations for the target room
 			if (reservation.room_id !== targetRoomId) return false;
 
@@ -103,32 +84,13 @@ export function useRoomAvailability({
 			const checkOut = parseISO(reservation.check_out_date);
 
 			// Date is unavailable if it's between check-in (inclusive) and check-out (exclusive)
-			const dateInRange = (
+			return (
 				isWithinInterval(date, {
 					start: checkIn,
 					end: checkOut,
 				}) && format(date, "yyyy-MM-dd") !== format(checkOut, "yyyy-MM-dd")
 			);
-			
-			// Debug logging for room 101
-			if (targetRoomId === "74435f82-eb71-40be-8f4e-523bc1a194c2") {
-				console.log("🏨 Room 101 availability check:", {
-					date: dateStr,
-					reservation: {
-						id: reservation.id,
-						checkIn: format(checkIn, "yyyy-MM-dd"),
-						checkOut: format(checkOut, "yyyy-MM-dd"),
-						status: reservation.status
-					},
-					dateInRange,
-					isUnavailable: dateInRange
-				});
-			}
-			
-			return dateInRange;
 		});
-
-		return !isUnavailable;
 	};
 
 	/**
@@ -143,7 +105,7 @@ export function useRoomAvailability({
 		if (!targetRoomId) return true;
 
 		// Check if there's any overlap with existing reservations
-		const hasConflict = reservations.some((reservation) => {
+		return !reservations.some((reservation) => {
 			if (reservation.room_id !== targetRoomId) return false;
 
 			const existingCheckIn = parseISO(reservation.check_in_date);
@@ -151,30 +113,8 @@ export function useRoomAvailability({
 
 			// Check for any overlap
 			// Overlap exists if: (newCheckIn < existingCheckOut) AND (newCheckOut > existingCheckIn)
-			const hasOverlap = checkInDate < existingCheckOut && checkOutDate > existingCheckIn;
-			
-			// Debug logging for room 101
-			if (targetRoomId === "74435f82-eb71-40be-8f4e-523bc1a194c2") {
-				console.log("🏨 Room 101 range availability check:", {
-					requestedRange: {
-						checkIn: format(checkInDate, "yyyy-MM-dd"),
-						checkOut: format(checkOutDate, "yyyy-MM-dd")
-					},
-					existingReservation: {
-						id: reservation.id,
-						checkIn: format(existingCheckIn, "yyyy-MM-dd"),
-						checkOut: format(existingCheckOut, "yyyy-MM-dd"),
-						status: reservation.status
-					},
-					hasOverlap,
-					available: !hasOverlap
-				});
-			}
-			
-			return hasOverlap;
+			return checkInDate < existingCheckOut && checkOutDate > existingCheckIn;
 		});
-
-		return !hasConflict;
 	};
 
 	/**

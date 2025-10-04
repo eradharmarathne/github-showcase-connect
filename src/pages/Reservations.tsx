@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { NewReservationDialog } from "@/components/NewReservationDialog";
 import { OTPVerification } from "@/components/OTPVerification";
 import { ReservationEditDialog } from "@/components/ReservationEditDialog";
@@ -22,6 +23,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Currency = Database["public"]["Enums"]["currency_type"];
 
 export default function Reservations() {
+	const { t } = useTranslation();
 	const { locations } = useLocationContext();
 	const { refetch } = useReservationsData();
 	const { refetch: refetchFinancials } = useReservationFinancials();

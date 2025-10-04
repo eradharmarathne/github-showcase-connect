@@ -184,6 +184,95 @@
     "reservationDetails": "වෙන්කරණ විස්තර",
     "hotelManagement": "හෝටල් කළමනාකරණය"
   },
+  "reservations": {
+    "title": "වෙන්කරණ",
+    "subtitle": "ඔබේ දේපළ වෙන්කරණ සහ වෙන්කරණ කළමනාකරණය කරන්න",
+    "tabs": {
+      "reservations": "වෙන්කරණ",
+      "payments": "ගෙවීම්"
+    },
+    "filters": {
+      "selectLocation": "ස්ථානය තෝරන්න",
+      "searchPlaceholder": "වෙන්කරණ සොයන්න...",
+      "filterByStatus": "තත්ත්වය අනුව පෙරහන",
+      "allStatuses": "සියලුම තත්ත්වයන්",
+      "newReservation": "නව වෙන්කරණය"
+    },
+    "status": {
+      "confirmed": "තහවුරු කළ",
+      "tentative": "තාවකාලික",
+      "pending": "අපේක්ෂිත",
+      "checked_in": "ඇතුළු වී ඇත",
+      "checked_out": "පිටව ගිණි",
+      "cancelled": "අවලංගු කළ"
+    },
+    "table": {
+      "headers": {
+        "reservation": "වෙන්කරණය",
+        "guest": "අමුත්තා",
+        "dates": "දින",
+        "room": "කාමරය",
+        "amount": "මුදල",
+        "balance": "ශේෂය",
+        "status": "තත්ත්වය",
+        "actions": "ක්‍රියාමාර්ග"
+      },
+      "actions": {
+        "view": "බලන්න",
+        "edit": "සංස්කරණය",
+        "payNow": "දැන් ගෙවන්න",
+        "addIncome": "ආදායම එකතු කරන්න",
+        "reservationCompleted": "වෙන්කරණය සම්පූර්ණයි"
+      },
+      "noReservations": "වෙන්කරණ හමු නොවීය",
+      "loadingReservations": "වෙන්කරණ පූරණය වෙමින්..."
+    },
+    "mobileCard": {
+      "guest": "අමුත්තා:",
+      "dates": "දින:",
+      "room": "කාමරය:",
+      "amount": "මුදල:",
+      "balance": "ශේෂය:",
+      "status": "තත්ත්වය:",
+      "nights": "රාත්‍රිය {{count}}",
+      "nights_other": "රාත්‍රි {{count}}"
+    },
+    "dialog": {
+      "viewTitle": "වෙන්කරණ විස්තර",
+      "editTitle": "වෙන්කරණය සංස්කරණය කරන්න",
+      "newTitle": "නව වෙන්කරණය",
+      "deleteTitle": "වෙන්කරණය මකන්න",
+      "deleteConfirmation": "ඔබට මෙම වෙන්කරණය මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
+      "deleteButton": "මකන්න",
+      "cancelButton": "අවලංගු කරන්න",
+      "saveButton": "වෙනස්කම් සුරකින්න",
+      "createButton": "වෙන්කරණය සාදන්න"
+    },
+    "form": {
+      "guestName": "අමුත්තාගේ නම",
+      "guestEmail": "අමුත්තාගේ ඊමේල්",
+      "guestPhone": "අමුත්තාගේ දුරකථනය",
+      "checkInDate": "ඇතුළු වන දිනය",
+      "checkOutDate": "පිටවන දිනය",
+      "room": "කාමරය",
+      "adults": "වැඩිහිටියන්",
+      "children": "ළමයින්",
+      "totalAmount": "මුළු මුදල",
+      "paidAmount": "ගෙවන ලද මුදල",
+      "notes": "සටහන්",
+      "required": "අවශ්‍ය ක්ෂේත්‍රය"
+    },
+    "messages": {
+      "createSuccess": "වෙන්කරණය සාර්ථකව නිර්මාණය කරන ලදී",
+      "updateSuccess": "වෙන්කරණය සාර්ථකව යාවත්කාලීන කරන ලදී",
+      "deleteSuccess": "වෙන්කරණය සාර්ථකව මකා දමන ලදී",
+      "createError": "වෙන්කරණය නිර්මාණය කිරීමට අසමත් විය",
+      "updateError": "වෙන්කරණය යාවත්කාලීන කිරීමට අසමත් විය",
+      "deleteError": "වෙන්කරණය මකා දැමීමට අසමත් විය",
+      "paymentSuccess": "ගෙවීම සාර්ථකව වාර්තා කරන ලදී",
+      "paymentError": "ගෙවීම වාර්තා කිරීමට අසමත් විය"
+    }
+  },
   "common": {
     "loading": "පූරණය වෙමින්...",
     "save": "සුරකින්න",
