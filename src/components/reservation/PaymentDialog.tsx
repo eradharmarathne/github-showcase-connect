@@ -74,6 +74,14 @@ export function PaymentDialog({
 		reference_number: "",
 	});
 
+	// State for display amounts (converted for consistency with reservation list)
+	const [displayAmounts, setDisplayAmounts] = useState({
+		totalAmount: 0,
+		paidAmount: 0,
+		balanceAmount: initialAmount,
+		currency: initialCurrency,
+	});
+
 	const fetchLocation = useCallback(
 		async (locationId: string) => {
 			if (!tenant?.id) return;
@@ -167,7 +175,46 @@ export function PaymentDialog({
 			amount: initialAmount,
 			currency: initialCurrency as any,
 		}));
+		
+		// Update display amounts to match the currency shown in reservation list
+		setDisplayAmounts({
+			balanceAmount: initialAmount,
+			currency: initialCurrency,
+			totalAmount: 0, // Will be updated when reservation loads
+			paidAmount: 0, // Will be updated when reservation loads
+		});
 	}, [initialAmount, initialCurrency]);
+
+	// Convert reservation amounts to display currency when reservation loads
+	useEffect(() => {
+		if (reservation && initialCurrency) {
+			const convertAmounts = async () => {
+				try {
+					const convertedTotal = await convertCurrency(
+						reservation.total_amount,
+						reservation.currency,
+						initialCurrency
+					);
+					const convertedPaid = await convertCurrency(
+						reservation.paid_amount || 0,
+						reservation.currency,
+						initialCurrency
+					);
+					
+					setDisplayAmounts({
+						totalAmount: Math.round(convertedTotal * 100) / 100,
+						paidAmount: Math.round(convertedPaid * 100) / 100,
+						balanceAmount: initialAmount, // Use the amount passed from reservation list
+						currency: initialCurrency,
+					});
+				} catch (error) {
+					console.error('Error converting currency for display:', error);
+				}
+			};
+			
+			convertAmounts();
+		}
+	}, [reservation, initialCurrency, initialAmount]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -290,19 +337,19 @@ export function PaymentDialog({
 									</div>
 									<div>
 										<span className="font-medium">Total Amount:</span>{" "}
-										{reservation.currency}{" "}
-										{reservation.total_amount.toLocaleString()}
+										{displayAmounts.currency}{" "}
+										{displayAmounts.totalAmount.toLocaleString()}
 									</div>
 									<div>
 										<span className="font-medium">Paid Amount:</span>{" "}
-										{reservation.currency}{" "}
-										{(reservation.paid_amount || 0).toLocaleString()}
+										{displayAmounts.currency}{" "}
+										{displayAmounts.paidAmount.toLocaleString()}
 									</div>
 									<div className="col-span-2">
 										<span className="font-medium">Balance Amount:</span>{" "}
 										<span className="text-red-600 font-semibold">
-											{reservation.currency}{" "}
-											{(reservation.balance_amount || 0).toLocaleString()}
+											{displayAmounts.currency}{" "}
+											{displayAmounts.balanceAmount.toLocaleString()}
 										</span>
 									</div>
 								</div>
