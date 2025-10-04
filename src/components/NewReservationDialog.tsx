@@ -1,11 +1,11 @@
 import { addDays, format } from "date-fns";
 import { Calendar, Save, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { CurrencySelector } from "@/components/CurrencySelector";
-import { PricingDisplay } from "@/components/PricingDisplay";
-import { ReservationDateSelector } from "@/components/reservation";
+import {
+	MultiRoomSelector,
+	type RoomSelection,
+} from "@/components/reservation/MultiRoomSelector";
 import { Button } from "@/components/ui/button";
-import { DatePicker } from "@/components/ui/date-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -16,13 +16,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +24,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { convertCurrency } from "@/utils/currency";
 
 type Room = Tables<"rooms">;
 
@@ -55,9 +47,9 @@ export function NewReservationDialog({
 	const [rooms, setRooms] = useState<Room[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
+	const [roomSelections, setRoomSelections] = useState<RoomSelection[]>([]);
 
-	const [formData, setFormData] = useState({
-		room_id: "",
+	const [guestData, setGuestData] = useState({
 		guest_name: "",
 		guest_email: "",
 		guest_phone: "",
@@ -65,35 +57,21 @@ export function NewReservationDialog({
 		guest_nationality: "",
 		guest_passport_number: "",
 		guest_id_number: "",
-		adults: 1,
-		children: 0,
-		check_in_date: format(new Date(), "yyyy-MM-dd"),
-		check_out_date: format(addDays(new Date(), 1), "yyyy-MM-dd"),
-		room_rate: 0,
-		total_amount: 0,
-		advance_amount: 0,
-		currency: "LKR" as string,
-		arrival_time: "",
 		special_requests: "",
 	});
 
-	// Calculate nights when dates change
-	const nights = Math.max(
-		1,
-		Math.ceil(
-			formData.check_in_date && formData.check_out_date
-				? (new Date(formData.check_out_date).getTime() -
-						new Date(formData.check_in_date).getTime()) /
-						(1000 * 60 * 60 * 24)
-				: 1,
-		),
-	);
+	const [paymentData, setPaymentData] = useState({
+		advance_amount: 0,
+		currency: "LKR" as string,
+	});
 
-	// Calculate total amount when room rate or nights change
-	useEffect(() => {
-		const total = formData.room_rate * nights;
-		setFormData((prev) => ({ ...prev, total_amount: total }));
-	}, [formData.room_rate, nights]);
+	// Calculate total amount across all room selections
+	const calculateTotalAmount = () => {
+		return roomSelections.reduce(
+			(sum, selection) => sum + selection.total_amount,
+			0,
+		);
+	};
 
 	// Fetch rooms for selected location
 	const fetchRooms = useCallback(async () => {
@@ -127,83 +105,12 @@ export function NewReservationDialog({
 		}
 	}, [isOpen, fetchRooms]);
 
-	const handleInputChange = (field: string, value: any) => {
-		setFormData((prev) => ({ ...prev, [field]: value }));
+	const handleGuestDataChange = (field: string, value: any) => {
+		setGuestData((prev) => ({ ...prev, [field]: value }));
 	};
 
-	// Handle currency change and recalculate room rate if room is selected
-	const handleCurrencyChange = async (newCurrency: string) => {
-		const selectedRoom = rooms.find((room) => room.id === formData.room_id);
-
-		if (selectedRoom) {
-			const roomCurrency = selectedRoom.currency || "LKR";
-			let newRoomRate = selectedRoom.base_price || 0;
-
-			// Convert room price to new currency if they differ
-			if (roomCurrency !== newCurrency) {
-				try {
-					newRoomRate = await convertCurrency(
-						selectedRoom.base_price || 0,
-						roomCurrency,
-						newCurrency,
-					);
-				} catch (error) {
-					console.error("Error converting currency:", error);
-					toast({
-						title: "Currency Conversion Warning",
-						description: `Could not convert from ${roomCurrency} to ${newCurrency}. Using original price.`,
-						variant: "default",
-					});
-					newRoomRate = selectedRoom.base_price || 0;
-				}
-			}
-
-			setFormData((prev) => ({
-				...prev,
-				currency: newCurrency,
-				room_rate: Math.round(newRoomRate * 100) / 100,
-			}));
-		} else {
-			// No room selected, just change currency
-			setFormData((prev) => ({ ...prev, currency: newCurrency }));
-		}
-	};
-
-	// Handle room selection and auto-populate room rate from base_price with currency conversion
-	const handleRoomChange = async (roomId: string) => {
-		const selectedRoom = rooms.find((room) => room.id === roomId);
-		if (selectedRoom) {
-			// Check if room currency differs from selected currency
-			const roomCurrency = selectedRoom.currency || "LKR";
-			let roomRate = selectedRoom.base_price || 0;
-
-			// Convert room price to selected currency if they differ
-			if (roomCurrency !== formData.currency) {
-				try {
-					roomRate = await convertCurrency(
-						selectedRoom.base_price || 0,
-						roomCurrency,
-						formData.currency,
-					);
-				} catch (error) {
-					console.error("Error converting currency:", error);
-					toast({
-						title: "Currency Conversion Warning",
-						description: `Could not convert from ${roomCurrency} to ${formData.currency}. Using original price.`,
-						variant: "default",
-					});
-					roomRate = selectedRoom.base_price || 0;
-				}
-			}
-
-			setFormData((prev) => ({
-				...prev,
-				room_id: roomId,
-				room_rate: Math.round(roomRate * 100) / 100, // Round to 2 decimal places
-			}));
-		} else {
-			setFormData((prev) => ({ ...prev, room_id: roomId }));
-		}
+	const handlePaymentDataChange = (field: string, value: any) => {
+		setPaymentData((prev) => ({ ...prev, [field]: value }));
 	};
 
 	// Get currency symbol helper
@@ -251,10 +158,28 @@ export function NewReservationDialog({
 			return;
 		}
 
-		if (!selectedLocation || !formData.room_id || !formData.guest_name) {
+		if (
+			!selectedLocation ||
+			!guestData.guest_name ||
+			roomSelections.length === 0
+		) {
 			toast({
 				title: "Error",
-				description: "Please fill in all required fields",
+				description:
+					"Please fill in all required fields and select at least one room",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		// Validate that all room selections have room_id
+		const invalidSelections = roomSelections.filter(
+			(selection) => !selection.room_id,
+		);
+		if (invalidSelections.length > 0) {
+			toast({
+				title: "Error",
+				description: "Please select a room for all room selections",
 				variant: "destructive",
 			});
 			return;
@@ -263,52 +188,68 @@ export function NewReservationDialog({
 		setSubmitting(true);
 
 		try {
-			const reservationNumber = await generateReservationNumber();
+			// Generate a group ID for multiple rooms
+			const bookingGroupId = crypto.randomUUID();
+			const reservations = [];
 
-			const reservationData = {
-				reservation_number: reservationNumber,
-				location_id: selectedLocation,
-				room_id: formData.room_id,
-				guest_name: formData.guest_name,
-				guest_email: formData.guest_email || null,
-				guest_phone: formData.guest_phone || null,
-				guest_address: formData.guest_address || null,
-				guest_nationality: formData.guest_nationality || null,
-				guest_passport_number: formData.guest_passport_number || null,
-				guest_id_number: formData.guest_id_number || null,
-				adults: formData.adults,
-				children: formData.children,
-				check_in_date: formData.check_in_date,
-				check_out_date: formData.check_out_date,
-				nights: nights,
-				room_rate: formData.room_rate,
-				total_amount: formData.total_amount,
-				advance_amount: formData.advance_amount,
-				paid_amount: formData.advance_amount,
-				balance_amount: formData.total_amount - formData.advance_amount,
-				currency: formData.currency as any, // Allow dynamic currency from DB
-				status: "tentative" as const,
-				arrival_time: formData.arrival_time || null,
-				special_requests: formData.special_requests || null,
-				booking_source: "direct",
-				created_by: profile.id,
-				tenant_id: tenant.id,
-			};
+			// Create reservation data for each room
+			for (const selection of roomSelections) {
+				const reservationNumber = await generateReservationNumber();
 
+				const reservationData = {
+					reservation_number: reservationNumber,
+					booking_group_id: roomSelections.length > 1 ? bookingGroupId : null,
+					location_id: selectedLocation,
+					room_id: selection.room_id,
+					guest_name: guestData.guest_name,
+					guest_email: guestData.guest_email || null,
+					guest_phone: guestData.guest_phone || null,
+					guest_address: guestData.guest_address || null,
+					guest_nationality: guestData.guest_nationality || null,
+					guest_passport_number: guestData.guest_passport_number || null,
+					guest_id_number: guestData.guest_id_number || null,
+					adults: selection.adults,
+					children: selection.children,
+					check_in_date: selection.check_in_date,
+					check_out_date: selection.check_out_date,
+					nights: selection.nights,
+					room_rate: selection.room_rate,
+					total_amount: selection.total_amount,
+					advance_amount: paymentData.advance_amount / roomSelections.length, // Split advance across rooms
+					paid_amount: paymentData.advance_amount / roomSelections.length,
+					balance_amount:
+						selection.total_amount -
+						paymentData.advance_amount / roomSelections.length,
+					currency: selection.currency as any,
+					status: "tentative" as const,
+					arrival_time: selection.arrival_time || null,
+					special_requests: guestData.special_requests || null,
+					booking_source: "direct",
+					created_by: profile.id,
+					tenant_id: tenant.id,
+				};
+
+				reservations.push(reservationData);
+			}
+
+			// Insert all reservations in a single transaction
 			const { error } = await supabase
 				.from("reservations")
-				.insert([reservationData]);
+				.insert(reservations);
 
 			if (error) throw error;
 
+			const reservationNumbers = reservations
+				.map((r) => r.reservation_number)
+				.join(", ");
 			toast({
 				title: "Success",
-				description: `Reservation ${reservationNumber} created successfully`,
+				description: `Reservation(s) ${reservationNumbers} created successfully`,
 			});
 
 			// Reset form and close dialog
-			setFormData({
-				room_id: "",
+			setRoomSelections([]);
+			setGuestData({
 				guest_name: "",
 				guest_email: "",
 				guest_phone: "",
@@ -316,16 +257,11 @@ export function NewReservationDialog({
 				guest_nationality: "",
 				guest_passport_number: "",
 				guest_id_number: "",
-				adults: 1,
-				children: 0,
-				check_in_date: format(new Date(), "yyyy-MM-dd"),
-				check_out_date: format(addDays(new Date(), 1), "yyyy-MM-dd"),
-				room_rate: 0,
-				total_amount: 0,
+				special_requests: "",
+			});
+			setPaymentData({
 				advance_amount: 0,
 				currency: "LKR",
-				arrival_time: "",
-				special_requests: "",
 			});
 
 			onReservationCreated();
@@ -344,50 +280,30 @@ export function NewReservationDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-4xl sm:max-w-6xl md:max-w-8xl max-h-[90vh] sm:min-h-[95vh] overflow-y-auto">
+			<DialogContent className="max-w-4xl sm:max-w-6xl md:max-w-7xl max-h-[90vh] sm:min-h-[95vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Calendar className="h-5 w-5" />
 						Create New Reservation
 					</DialogTitle>
 					<DialogDescription>
-						Fill in the details to create a new reservation
+						Fill in the details to create a new reservation for one or more
+						rooms
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
-					{/* Room Selection */}
-					<div className="space-y-2">
-						<Label htmlFor="room">Room *</Label>
-						<Select
-							value={formData.room_id}
-							onValueChange={handleRoomChange}
-							required
-						>
-							<SelectTrigger>
-								<SelectValue placeholder="Select room" />
-							</SelectTrigger>
-							<SelectContent>
-								{rooms.map((room) => (
-									<SelectItem key={room.id} value={room.id}>
-										{room.room_number} - {room.room_type} (
-										{getCurrencySymbol(room.currency || "LKR")}
-										{room.base_price})
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>{" "}
+				<form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto">
 					{/* Guest Information */}
 					<div className="space-y-4">
+						<h3 className="text-lg font-semibold">Guest Information</h3>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div className="md:col-span-2 space-y-2">
 								<Label htmlFor="guest_name">Guest Name *</Label>
 								<Input
 									id="guest_name"
-									value={formData.guest_name}
+									value={guestData.guest_name}
 									onChange={(e) =>
-										handleInputChange("guest_name", e.target.value)
+										handleGuestDataChange("guest_name", e.target.value)
 									}
 									placeholder="Enter guest name"
 									required
@@ -400,9 +316,9 @@ export function NewReservationDialog({
 									<Input
 										id="guest_email"
 										type="email"
-										value={formData.guest_email}
+										value={guestData.guest_email}
 										onChange={(e) =>
-											handleInputChange("guest_email", e.target.value)
+											handleGuestDataChange("guest_email", e.target.value)
 										}
 										placeholder="Enter email address"
 									/>
@@ -415,9 +331,9 @@ export function NewReservationDialog({
 									<PhoneInput
 										defaultCountry="LK"
 										international
-										value={formData.guest_phone}
+										value={guestData.guest_phone}
 										onChange={(value) =>
-											handleInputChange("guest_phone", value || "")
+											handleGuestDataChange("guest_phone", value || "")
 										}
 										placeholder="Enter phone number"
 									/>
@@ -429,9 +345,9 @@ export function NewReservationDialog({
 									<Label htmlFor="guest_nationality">Nationality</Label>
 									<Input
 										id="guest_nationality"
-										value={formData.guest_nationality}
+										value={guestData.guest_nationality}
 										onChange={(e) =>
-											handleInputChange("guest_nationality", e.target.value)
+											handleGuestDataChange("guest_nationality", e.target.value)
 										}
 										placeholder="Enter nationality"
 									/>
@@ -443,69 +359,40 @@ export function NewReservationDialog({
 									<Label htmlFor="guest_passport_number">Passport Number</Label>
 									<Input
 										id="guest_passport_number"
-										value={formData.guest_passport_number}
+										value={guestData.guest_passport_number}
 										onChange={(e) =>
-											handleInputChange("guest_passport_number", e.target.value)
+											handleGuestDataChange(
+												"guest_passport_number",
+												e.target.value,
+											)
 										}
 										placeholder="Enter passport number"
 									/>
 								</div>
 							)}
 
-							{fieldPreferences?.show_guest_id_number === true && (
+							{fieldPreferences?.show_guest_id_number !== false && (
 								<div className="space-y-2">
 									<Label htmlFor="guest_id_number">ID Number</Label>
 									<Input
 										id="guest_id_number"
-										value={formData.guest_id_number}
+										value={guestData.guest_id_number}
 										onChange={(e) =>
-											handleInputChange("guest_id_number", e.target.value)
+											handleGuestDataChange("guest_id_number", e.target.value)
 										}
 										placeholder="Enter ID number"
 									/>
 								</div>
 							)}
 
-							<div className="grid grid-cols-2 gap-4">
-								{fieldPreferences?.show_adults !== false && (
-									<div className="space-y-2">
-										<Label htmlFor="adults">Adults *</Label>
-										<Input
-											id="adults"
-											type="number"
-											min="1"
-											value={formData.adults}
-											onChange={(e) =>
-												handleInputChange("adults", Number(e.target.value))
-											}
-											required
-										/>
-									</div>
-								)}
-								{fieldPreferences?.show_children !== false && (
-									<div className="space-y-2">
-										<Label htmlFor="children">Children</Label>
-										<Input
-											id="children"
-											type="number"
-											min="0"
-											value={formData.children}
-											onChange={(e) =>
-												handleInputChange("children", Number(e.target.value))
-											}
-										/>
-									</div>
-								)}
-							</div>
-
 							{fieldPreferences?.show_guest_address !== false && (
 								<div className="md:col-span-2 space-y-2">
 									<Label htmlFor="guest_address">Address</Label>
 									<Textarea
 										id="guest_address"
-										value={formData.guest_address}
+										value={guestData.guest_address}
 										onChange={(e) =>
-											handleInputChange("guest_address", e.target.value)
+											handleGuestDataChange("guest_address", e.target.value)
 										}
 										placeholder="Enter address"
 										rows={3}
@@ -514,82 +401,34 @@ export function NewReservationDialog({
 							)}
 						</div>
 					</div>
-					{/* Stay Details */}
-					<div className="space-y-2">
-						<div className="flex items-center gap-2">
-							<h3 className="text-sm font-semibold">Stay Details</h3>
+
+					{/* Room Selections */}
+					<MultiRoomSelector
+						rooms={rooms}
+						roomSelections={roomSelections}
+						onRoomSelectionsChange={setRoomSelections}
+						defaultCurrency={paymentData.currency}
+					/>
+
+					{/* Special Requests */}
+					{fieldPreferences?.show_special_requests !== false && (
+						<div className="space-y-2">
+							<Label htmlFor="special_requests">Special Requests</Label>
+							<Textarea
+								id="special_requests"
+								value={guestData.special_requests}
+								onChange={(e) =>
+									handleGuestDataChange("special_requests", e.target.value)
+								}
+								placeholder="Any special requests or notes"
+							/>
 						</div>
+					)}
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{fieldPreferences?.show_arrival_time !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="arrival_time">Arrival Time</Label>
-									<Input
-										id="arrival_time"
-										type="time"
-										value={formData.arrival_time}
-										onChange={(e) =>
-											handleInputChange("arrival_time", e.target.value)
-										}
-									/>
-								</div>
-							)}
-						</div>
-
-						{/* Date Selection using ReservationDateSelector */}
-						<ReservationDateSelector
-							checkInDate={formData.check_in_date}
-							checkOutDate={formData.check_out_date}
-							onDatesChange={(checkIn, checkOut) => {
-								handleInputChange("check_in_date", checkIn);
-								handleInputChange("check_out_date", checkOut);
-							}}
-							minDate={new Date()}
-							showNights={true}
-							roomId={formData.room_id || undefined}
-						/>
-
-						{fieldPreferences?.show_special_requests !== false && (
-							<div className="space-y-2">
-								<Label htmlFor="special_requests">Special Requests</Label>
-								<Textarea
-									id="special_requests"
-									value={formData.special_requests}
-									onChange={(e) =>
-										handleInputChange("special_requests", e.target.value)
-									}
-									placeholder="Any special requests or notes"
-								/>
-							</div>
-						)}
-					</div>
-					{/* Pricing */}
+					{/* Payment Information */}
 					<div className="space-y-4">
-						<h3 className="text-lg font-semibold">Pricing</h3>
-
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<div className="space-y-2">
-								<Label htmlFor="currency">Currency</Label>
-								<CurrencySelector
-									currency={formData.currency}
-									onCurrencyChange={handleCurrencyChange}
-								/>
-							</div>
-
-							<div className="space-y-2">
-								<Label htmlFor="room_rate">Room Rate per Night</Label>
-								<Input
-									id="room_rate"
-									type="number"
-									step="0.01"
-									value={formData.room_rate}
-									onChange={(e) =>
-										handleInputChange("room_rate", Number(e.target.value))
-									}
-									placeholder="Enter room rate"
-								/>
-							</div>
-
+						<h3 className="text-lg font-semibold">Payment Information</h3>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{fieldPreferences?.show_advance_amount !== false && (
 								<div className="space-y-2">
 									<Label htmlFor="advance_amount">Advance Amount</Label>
@@ -597,9 +436,9 @@ export function NewReservationDialog({
 										id="advance_amount"
 										type="number"
 										step="0.01"
-										value={formData.advance_amount}
+										value={paymentData.advance_amount}
 										onChange={(e) =>
-											handleInputChange(
+											handlePaymentDataChange(
 												"advance_amount",
 												Number(e.target.value),
 											)
@@ -610,16 +449,45 @@ export function NewReservationDialog({
 							)}
 						</div>
 
-						{formData.room_rate > 0 && (
-							<PricingDisplay
-								roomRate={formData.room_rate}
-								nights={nights}
-								currency={formData.currency}
-								totalAmount={formData.total_amount}
-								advanceAmount={formData.advance_amount}
-							/>
+						{/* Total Summary */}
+						{roomSelections.length > 0 && (
+							<div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+								<div className="space-y-2">
+									<div className="flex justify-between items-center">
+										<span className="font-semibold">
+											Grand Total ({roomSelections.length} room
+											{roomSelections.length > 1 ? "s" : ""}):
+										</span>
+										<span className="text-xl font-bold text-blue-700">
+											{getCurrencySymbol(paymentData.currency)}
+											{calculateTotalAmount().toFixed(2)}
+										</span>
+									</div>
+									{paymentData.advance_amount > 0 && (
+										<>
+											<div className="flex justify-between items-center text-sm">
+												<span>Advance Amount:</span>
+												<span>
+													{getCurrencySymbol(paymentData.currency)}
+													{paymentData.advance_amount.toFixed(2)}
+												</span>
+											</div>
+											<div className="flex justify-between items-center text-sm font-semibold">
+												<span>Balance Amount:</span>
+												<span>
+													{getCurrencySymbol(paymentData.currency)}
+													{(
+														calculateTotalAmount() - paymentData.advance_amount
+													).toFixed(2)}
+												</span>
+											</div>
+										</>
+									)}
+								</div>
+							</div>
 						)}
 					</div>
+
 					{/* Action Buttons */}
 					<div className="flex w-full items-center justify-end gap-3 py-4 border-t">
 						<Button type="button" variant="outline" onClick={onClose}>
@@ -628,7 +496,9 @@ export function NewReservationDialog({
 						</Button>
 						<Button className="border" type="submit" disabled={submitting}>
 							<Save className="h-4 w-4 mr-2" />
-							{submitting ? "Creating..." : "Create Reservation"}
+							{submitting
+								? "Creating..."
+								: `Create Reservation${roomSelections.length > 1 ? "s" : ""}`}
 						</Button>
 					</div>
 				</form>
