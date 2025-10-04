@@ -1,5 +1,4 @@
 import { Navigate } from "react-router";
-import { FullScreenLoader } from "@/components/ui/loading-spinner";
 import { useLocationContext } from "@/context/LocationContext";
 import { usePermissions } from "@/hooks/usePermissions";
 

@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import {
 	Select,
 	SelectContent,
@@ -240,11 +239,7 @@ export default function FinancialReports() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center h-64">
-				<SectionLoader />
-			</div>
-		);
+		return null;
 	}
 
 	return (

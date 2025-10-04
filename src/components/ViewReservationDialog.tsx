@@ -20,7 +20,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -170,13 +169,7 @@ export function ViewReservationDialog({
 
 	if (loading) {
 		return (
-			<Dialog open={isOpen} onOpenChange={onClose}>
-				<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-					<div className="flex items-center justify-center py-12">
-						<SectionLoader />
-					</div>
-				</DialogContent>
-			</Dialog>
+			null
 		);
 	}
 

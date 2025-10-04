@@ -1,5 +1,4 @@
 import { Navigate, useLocation } from "react-router";
-import { FullScreenLoader } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/context/AuthContext";
 
 interface ProtectedRouteProps {

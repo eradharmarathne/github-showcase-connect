@@ -124,12 +124,12 @@ export function Layout() {
 								<BreadcrumbList>
 									<BreadcrumbItem className="hidden md:block">
 										<BreadcrumbLink href="/dashboard">
-											<span className="text-black">{t("breadcrumb.home")}</span>
+											<span>{t("breadcrumb.home")}</span>
 										</BreadcrumbLink>
 									</BreadcrumbItem>
 									<BreadcrumbSeparator className="hidden md:block" />
 									<BreadcrumbItem>
-										<BreadcrumbPage className="text-black text-md font-normal">
+										<BreadcrumbPage className="text-md font-normal">
 											{getPageTitle()}
 										</BreadcrumbPage>
 									</BreadcrumbItem>

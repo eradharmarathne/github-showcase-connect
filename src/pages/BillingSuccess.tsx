@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,11 +143,7 @@ export default function BillingSuccess() {
 	}, [loading, redirectTo, redirectCountdown, navigate]);
 
 	if (loading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<SectionLoader className="min-h-64" />
-			</div>
-		);
+		return null;
 	}
 
 	if (!checkoutId) {

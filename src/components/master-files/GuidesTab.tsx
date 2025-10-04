@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InlineLoader } from "@/components/ui/loading-spinner";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
 	Select,
@@ -43,6 +42,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
+import { n } from "node_modules/react-router/dist/development/index-react-server-client-2EDmGlsZ.d.mts";
 
 type Guide = {
 	id: string;
@@ -207,11 +207,7 @@ export default function GuidesTab() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center h-64">
-				<InlineLoader />
-			</div>
-		);
+		return null;
 	}
 
 	return (

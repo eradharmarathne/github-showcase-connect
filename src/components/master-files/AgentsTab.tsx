@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InlineLoader } from "@/components/ui/loading-spinner";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
 	Select,
@@ -216,9 +215,7 @@ export default function AgentsTab() {
 
 	if (loading) {
 		return (
-			<div className="flex items-center justify-center h-64">
-				<InlineLoader />
-			</div>
+			null
 		);
 	}
 

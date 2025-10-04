@@ -25,6 +25,7 @@ import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { convertCurrency } from "@/utils/currency";
 
 type Room = Tables<"rooms">;
 
@@ -67,13 +68,50 @@ export function NewReservationDialog({
 		currency: "LKR" as string,
 	});
 
-	// Calculate total amount across all room selections
-	const calculateTotalAmount = () => {
-		return roomSelections.reduce(
-			(sum, selection) => sum + selection.total_amount,
-			0,
-		);
-	};
+	// Sync payment currency with the first room selection's currency
+	useEffect(() => {
+		if (roomSelections.length > 0 && roomSelections[0].currency) {
+			const newCurrency = roomSelections[0].currency;
+			if (newCurrency !== paymentData.currency) {
+				setPaymentData(prev => ({ ...prev, currency: newCurrency }));
+			}
+		}
+	}, [roomSelections, paymentData.currency]);
+
+	// Calculate total amount across all room selections in payment currency
+	const calculateTotalAmount = useCallback(async () => {
+		let total = 0;
+		for (const selection of roomSelections) {
+			if (selection.currency === paymentData.currency) {
+				total += selection.total_amount;
+			} else {
+				try {
+					const convertedAmount = await convertCurrency(
+						selection.total_amount,
+						selection.currency,
+						paymentData.currency
+					);
+					total += convertedAmount;
+				} catch (error) {
+					console.error('Currency conversion error:', error);
+					total += selection.total_amount; // Fallback to original amount
+				}
+			}
+		}
+		return total;
+	}, [roomSelections, paymentData.currency]);
+
+	// State to store converted total amount
+	const [convertedTotal, setConvertedTotal] = useState(0);
+
+	// Update converted total when room selections or payment currency changes
+	useEffect(() => {
+		const updateTotal = async () => {
+			const total = await calculateTotalAmount();
+			setConvertedTotal(total);
+		};
+		updateTotal();
+	}, [calculateTotalAmount]);
 
 	// Fetch rooms for selected location
 	const fetchRooms = useCallback(async () => {
@@ -493,7 +531,7 @@ export function NewReservationDialog({
 										</span>
 										<span className="text-xl font-bold text-blue-700">
 											{getCurrencySymbol(paymentData.currency)}
-											{calculateTotalAmount().toFixed(2)}
+											{convertedTotal.toFixed(2)}
 										</span>
 									</div>
 									{paymentData.advance_amount > 0 && (
@@ -510,7 +548,7 @@ export function NewReservationDialog({
 												<span>
 													{getCurrencySymbol(paymentData.currency)}
 													{(
-														calculateTotalAmount() - paymentData.advance_amount
+														convertedTotal - paymentData.advance_amount
 													).toFixed(2)}
 												</span>
 											</div>

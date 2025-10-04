@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { InlineLoader } from "@/components/ui/loading-spinner";
 import {
 	Select,
 	SelectContent,
@@ -364,11 +363,7 @@ export default function LocationsTab() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center h-64">
-				<InlineLoader />
-			</div>
-		);
+		return null;
 	}
 
 	return (
@@ -490,7 +485,7 @@ export default function LocationsTab() {
 										disabled={deletingLocationId === location.id}
 									>
 										{deletingLocationId === location.id ? (
-											<InlineLoader />
+											null
 										) : (
 											<Trash2 className="size-4" />
 										)}

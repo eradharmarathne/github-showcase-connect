@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import {
 	Select,
 	SelectContent,
@@ -363,7 +362,7 @@ export default function PaymentForm() {
 	);
 
 	if (loading) {
-		return <SectionLoader className="min-h-64" />;
+		return null;
 	}
 
 	if (!reservation) {

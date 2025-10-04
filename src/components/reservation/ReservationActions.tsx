@@ -110,7 +110,7 @@ export function ReservationActions({
 							disabled
 						>
 							<CheckCircle className="size-4 mr-1" />
-							Reservation Completed
+							<span className="hidden sm:block">Reservation Completed</span>
 						</Button>
 					) : (
 						<>

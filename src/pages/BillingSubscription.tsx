@@ -15,7 +15,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -371,7 +370,7 @@ export default function BillingSubscription() {
 		: 0;
 
 	if (loading) {
-		return <SectionLoader className="min-h-64" />;
+		return null;
 	}
 
 	return (

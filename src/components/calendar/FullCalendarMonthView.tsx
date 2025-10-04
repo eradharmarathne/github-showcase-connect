@@ -493,7 +493,7 @@ export function FullCalendarMonthView({
 											key={`${reservation.id}-${segmentIndex}`}
 											className={cn(
 												"absolute pointer-events-auto cursor-pointer transition-colors",
-												"text-xs border text-black font-medium flex items-center",
+												"text-xs border font-medium flex items-center",
 												getStatusColor(reservation.status),
 												"rounded-md truncate shadow-xs h-6", // Reduced from h-8 to h-6
 												"bg-size-[6px_6px] bg-fixed",

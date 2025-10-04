@@ -18,22 +18,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { SectionLoader } from "@/components/ui/loading-spinner";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -361,11 +345,7 @@ export default function DetailedBalanceSheet() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center h-64">
-				<SectionLoader />
-			</div>
-		);
+		return null;
 	}
 
 	return (

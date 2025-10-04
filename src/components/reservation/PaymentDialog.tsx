@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import {
 	Select,
 	SelectContent,
@@ -242,15 +241,7 @@ export function PaymentDialog({
 	};
 
 	if (loading) {
-		return (
-			<Dialog open={isOpen} onOpenChange={handleClose}>
-				<DialogContent className="max-w-2xl">
-					<div className="flex justify-center items-center py-8">
-						<SectionLoader />
-					</div>
-				</DialogContent>
-			</Dialog>
-		);
+		return null;
 	}
 
 	return (

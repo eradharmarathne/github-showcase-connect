@@ -16,7 +16,6 @@ import { SignatureCapture } from "@/components/SignatureCapture";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SectionLoader } from "@/components/ui/loading-spinner";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,7 +153,7 @@ export default function ReservationDetails() {
 	};
 
 	if (loading) {
-		return <SectionLoader className="min-h-64" />;
+		return null;
 	}
 
 	if (!reservation) {
