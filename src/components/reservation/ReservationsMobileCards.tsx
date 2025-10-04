@@ -1,5 +1,6 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +36,7 @@ export function ReservationsMobileCards({
 	onPayment,
 	onAddIncome,
 }: ReservationsMobileCardsProps) {
+	const { t } = useTranslation();
 	const { reservations, loading } = useReservationsData();
 	const { printReservation } = useReservationPrint();
 	const { tenant } = useAuth();
@@ -86,6 +88,23 @@ export function ReservationsMobileCards({
 			tentative: "bg-orange-100 text-orange-800",
 		};
 		return colors[status] || "bg-gray-100 text-gray-800";
+	};
+
+	const getStatusText = (status: string) => {
+		switch (status?.toLowerCase()) {
+			case "confirmed":
+				return t("reservations.status.confirmed");
+			case "checked_in":
+				return t("reservations.status.checked_in");
+			case "checked_out":
+				return t("reservations.status.checked_out");
+			case "cancelled":
+				return t("reservations.status.cancelled");
+			case "tentative":
+				return t("reservations.status.tentative");
+			default:
+				return status;
+		}
 	};
 
 	const canShowPaymentButton = (reservation: any): boolean => {
@@ -169,7 +188,7 @@ export function ReservationsMobileCards({
 							<Badge
 								className={`${getStatusColor(reservation.status)} text-xs`}
 							>
-								{reservation.status}
+								{getStatusText(reservation.status)}
 							</Badge>
 						</div>
 

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
 import {
 	Table,
@@ -26,6 +27,7 @@ interface PaymentsTableProps {
 }
 
 export function PaymentsTable() {
+	const { t } = useTranslation();
 	const { selectedLocation } = useLocationContext();
 	const { incomeRecords, loading, refetch } = useIncomeData();
 
@@ -62,12 +64,26 @@ export function PaymentsTable() {
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Date</TableHead>
-										<TableHead>Amount</TableHead>
-										<TableHead>Payment Method</TableHead>
-										<TableHead>Account</TableHead>
-										<TableHead>Reference</TableHead>
-										<TableHead>Notes</TableHead>
+										<TableHead>
+											{t("reservations.paymentsTable.headers.date")}
+										</TableHead>
+										<TableHead>
+											{t("reservations.paymentsTable.headers.amount")}
+										</TableHead>
+										<TableHead>
+											{t("reservations.paymentsTable.headers.method")}
+										</TableHead>
+										<TableHead>
+											{t("reservations.addIncomeDialog.form.account")}
+										</TableHead>
+										<TableHead>
+											{t(
+												"reservations.paymentsTable.headers.reservationNumber",
+											)}
+										</TableHead>
+										<TableHead>
+											{t("reservations.paymentsTable.headers.note")}
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>

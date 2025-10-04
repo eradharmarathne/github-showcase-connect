@@ -215,17 +215,29 @@
         "amount": "Amount",
         "balance": "Balance",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "location": "Location",
+        "nights": "Nights",
+        "adults": "Adults",
+        "children": "Children",
+        "total": "Total",
+        "paid": "Paid",
+        "method": "Method",
+        "date": "Date",
+        "note": "Note"
       },
       "actions": {
         "view": "View",
         "edit": "Edit",
         "payNow": "Pay Now",
         "addIncome": "Add Income",
-        "reservationCompleted": "Reservation Completed"
+        "reservationCompleted": "Reservation Completed",
+        "print": "Print",
+        "quickEdit": "Quick Edit"
       },
       "noReservations": "No reservations found",
-      "loadingReservations": "Loading reservations..."
+      "loadingReservations": "Loading reservations...",
+      "noData": "No data available"
     },
     "mobileCard": {
       "guest": "Guest:",
@@ -235,7 +247,10 @@
       "balance": "Balance:",
       "status": "Status:",
       "nights": "{{count}} night",
-      "nights_other": "{{count}} nights"
+      "nights_other": "{{count}} nights",
+      "location": "Location:",
+      "total": "Total:",
+      "paid": "Paid:"
     },
     "dialog": {
       "viewTitle": "Reservation Details",
@@ -246,7 +261,10 @@
       "deleteButton": "Delete",
       "cancelButton": "Cancel",
       "saveButton": "Save Changes",
-      "createButton": "Create Reservation"
+      "createButton": "Create Reservation",
+      "closeButton": "Close",
+      "printButton": "Print",
+      "editButton": "Edit"
     },
     "form": {
       "guestName": "Guest Name",
@@ -260,7 +278,149 @@
       "totalAmount": "Total Amount",
       "paidAmount": "Paid Amount",
       "notes": "Notes",
-      "required": "Required field"
+      "required": "Required field",
+      "currency": "Currency",
+      "location": "Location",
+      "guide": "Tour Guide",
+      "agent": "Travel Agent",
+      "commission": "Commission",
+      "roomRate": "Room Rate",
+      "extraCharges": "Extra Charges",
+      "discount": "Discount"
+    },
+    "viewDialog": {
+      "guestInformation": "Guest Information",
+      "stayDetails": "Stay Details",
+      "roomInformation": "Room Information",
+      "financialDetails": "Financial Details",
+      "paymentHistory": "Payment History",
+      "expensesDetails": "Expenses Details",
+      "commissionDetails": "Commission Details",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "nights": "Nights",
+      "guestCount": "Guest Count",
+      "roomNumber": "Room Number",
+      "roomType": "Room Type",
+      "reservationNumber": "Reservation Number",
+      "bookingDate": "Booking Date",
+      "totalAmount": "Total Amount",
+      "paidAmount": "Paid Amount",
+      "balanceAmount": "Balance Amount",
+      "roomCharges": "Room Charges",
+      "expenses": "Expenses",
+      "commissionAmount": "Commission Amount",
+      "noPayments": "No payments recorded",
+      "noExpenses": "No expenses recorded",
+      "unknownGuest": "Unknown Guest",
+      "unknownRoom": "Unknown Room",
+      "unknownLocation": "Unknown Location"
+    },
+    "paymentsTable": {
+      "title": "Payment History",
+      "description": "All payments and income records for reservations",
+      "headers": {
+        "reservationNumber": "Reservation #",
+        "guest": "Guest",
+        "amount": "Amount",
+        "method": "Payment Method",
+        "date": "Date",
+        "note": "Note",
+        "currency": "Currency"
+      },
+      "noPayments": "No payments found",
+      "loadingPayments": "Loading payments...",
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Card",
+        "bank_transfer": "Bank Transfer",
+        "mobile_payment": "Mobile Payment",
+        "other": "Other"
+      }
+    },
+    "addIncomeDialog": {
+      "title": "Add Income",
+      "description": "Record income for the selected reservation",
+      "reservationInfo": "Reservation Information",
+      "reservationNumber": "Reservation:",
+      "guestName": "Guest:",
+      "totalAmount": "Total Amount:",
+      "form": {
+        "amount": "Amount",
+        "currency": "Currency",
+        "paymentMethod": "Payment Method",
+        "note": "Note (Optional)",
+        "notePlaceholder": "Additional notes about this payment...",
+        "account": "Account",
+        "accountRequired": "Account *",
+        "accountPlaceholder": "Select account to record payment",
+        "incomeType": "Income Type",
+        "incomeTypePlaceholder": "Select income type",
+        "date": "Payment Date"
+      },
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Credit/Debit Card",
+        "bank_transfer": "Bank Transfer",
+        "mobile_payment": "Mobile Payment",
+        "other": "Other"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "record": "Record Payment",
+        "recording": "Recording..."
+      },
+      "validation": {
+        "amountRequired": "Amount is required",
+        "accountRequired": "Account selection is required",
+        "methodRequired": "Payment method is required"
+      }
+    },
+    "paymentDialog": {
+      "title": "Record Payment",
+      "description": "Record a payment for this reservation",
+      "form": {
+        "amount": "Payment Amount",
+        "currency": "Currency",
+        "method": "Payment Method",
+        "note": "Notes",
+        "account": "Account"
+      }
+    },
+    "reservationActions": {
+      "quickActions": "Quick Actions",
+      "moreActions": "More Actions",
+      "viewDetails": "View Details",
+      "editReservation": "Edit Reservation",
+      "recordPayment": "Record Payment",
+      "addExpense": "Add Expense",
+      "printReceipt": "Print Receipt",
+      "cancelReservation": "Cancel Reservation",
+      "checkIn": "Check In",
+      "checkOut": "Check Out",
+      "sendConfirmation": "Send Confirmation"
+    },
+    "expenses": {
+      "title": "Reservation Expenses",
+      "description": "Additional expenses for this reservation",
+      "totalExpenses": "Total Expenses",
+      "addExpense": "Add Expense",
+      "noExpenses": "No expenses recorded for this reservation"
+    },
+    "dateSelector": {
+      "selectDates": "Select Dates",
+      "checkIn": "Check-in Date",
+      "checkOut": "Check-out Date",
+      "nights": "{{count}} night",
+      "nights_other": "{{count}} nights"
+    },
+    "roomSelector": {
+      "selectRoom": "Select Room",
+      "availableRooms": "Available Rooms",
+      "roomNotAvailable": "Room not available for selected dates",
+      "noRoomsAvailable": "No rooms available for selected dates",
+      "roomRate": "Rate per night",
+      "capacity": "Capacity"
     },
     "messages": {
       "createSuccess": "Reservation created successfully",
@@ -270,7 +430,13 @@
       "updateError": "Failed to update reservation",
       "deleteError": "Failed to delete reservation",
       "paymentSuccess": "Payment recorded successfully",
-      "paymentError": "Failed to record payment"
+      "paymentError": "Failed to record payment",
+      "loadError": "Failed to load reservation data",
+      "checkInSuccess": "Guest checked in successfully",
+      "checkOutSuccess": "Guest checked out successfully",
+      "cancelSuccess": "Reservation cancelled successfully",
+      "printSuccess": "Reservation printed successfully",
+      "sendConfirmationSuccess": "Confirmation sent successfully"
     }
   },
   "bookingChannels": {

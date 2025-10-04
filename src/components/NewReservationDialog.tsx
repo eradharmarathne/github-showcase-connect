@@ -193,8 +193,9 @@ export function NewReservationDialog({
 		);
 		if (missingDatesSelections.length > 0) {
 			toast({
-				title: "Error", 
-				description: "Please select check-in and check-out dates for all room selections",
+				title: "Error",
+				description:
+					"Please select check-in and check-out dates for all room selections",
 				variant: "destructive",
 			});
 			return;

@@ -8,6 +8,7 @@ import {
 	MapPin,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,23 @@ const getStatusColor = (status: string) => {
 	}
 };
 
+const getStatusText = (status: string, t: any) => {
+	switch (status?.toLowerCase()) {
+		case "confirmed":
+			return t("reservations.status.confirmed");
+		case "checked_in":
+			return t("reservations.status.checked_in");
+		case "checked_out":
+			return t("reservations.status.checked_out");
+		case "cancelled":
+			return t("reservations.status.cancelled");
+		case "tentative":
+			return t("reservations.status.tentative");
+		default:
+			return status;
+	}
+};
+
 const formatDate = (dateString: string) => {
 	return new Date(dateString).toLocaleDateString("en-US", {
 		month: "short",
@@ -82,6 +100,7 @@ export function ReservationsDesktopTable({
 	onPayment,
 	onAddIncome,
 }: ReservationsDesktopTableProps) {
+	const { t } = useTranslation();
 	const { data: reservations, isLoading, error } = useReservationFinancials();
 
 	// State for converted amounts
@@ -213,13 +232,19 @@ export function ReservationsDesktopTable({
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Reservation</TableHead>
-								<TableHead>Room Amount</TableHead>
-								<TableHead>Expenses</TableHead>
-								<TableHead>User Paid Amount</TableHead>
-								<TableHead>Needs to Pay</TableHead>
-								<TableHead>Quick Actions</TableHead>
-								<TableHead className="text-right">More</TableHead>
+								<TableHead>
+									{t("reservations.table.headers.reservation")}
+								</TableHead>
+								<TableHead>{t("reservations.table.headers.amount")}</TableHead>
+								<TableHead>{t("reservations.expenses.title")}</TableHead>
+								<TableHead>{t("reservations.table.headers.paid")}</TableHead>
+								<TableHead>{t("reservations.table.headers.balance")}</TableHead>
+								<TableHead>
+									{t("reservations.reservationActions.quickActions")}
+								</TableHead>
+								<TableHead className="text-right">
+									{t("reservations.reservationActions.moreActions")}
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -234,7 +259,7 @@ export function ReservationsDesktopTable({
 												<Badge
 													className={`text-xs ${getStatusColor(reservation.status)}`}
 												>
-													{reservation.status}
+													{getStatusText(reservation.status, t)}
 												</Badge>
 											</div>
 											<div className="text-sm text-gray-600">
@@ -310,7 +335,7 @@ export function ReservationsDesktopTable({
 													className="text-green-600 cursor-not-allowed"
 												>
 													<CheckCircle className="size-4 mr-1" />
-													Reservation Completed
+													{t("reservations.table.actions.reservationCompleted")}
 												</Button>
 											) : (
 												// Show Add Income and Pay Now buttons for other statuses
@@ -323,12 +348,14 @@ export function ReservationsDesktopTable({
 														disabled={reservation.status === "checked_out"}
 														title={
 															reservation.status === "checked_out"
-																? "Cannot add income - reservation is complete"
+																? t(
+																		"reservations.table.actions.reservationCompleted",
+																	)
 																: ""
 														}
 													>
 														<DollarSign className="size-4 mr-1" />
-														Add Income
+														{t("reservations.table.actions.addIncome")}
 													</Button>
 													{canShowPaymentButton(reservation) &&
 														reservation.status !== "checked_out" && (
@@ -345,7 +372,7 @@ export function ReservationsDesktopTable({
 																className="text-green-600 hover:text-green-700 cursor-pointer"
 															>
 																<CreditCard className="size-4 mr-1" />
-																Pay Now
+																{t("reservations.table.actions.payNow")}
 															</Button>
 														)}
 												</>

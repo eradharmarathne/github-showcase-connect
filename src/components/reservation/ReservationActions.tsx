@@ -86,7 +86,8 @@ export function ReservationActions({
 	showPaymentAndIncome = true,
 }: ReservationActionsProps) {
 	// Disable income and payment actions when reservation is checked out (complete)
-	const isReservationComplete = reservation.status === "checked_out" || reservation.status === "confirmed";
+	const isReservationComplete =
+		reservation.status === "checked_out" || reservation.status === "confirmed";
 
 	if (isMobile) {
 		return (
@@ -100,8 +101,8 @@ export function ReservationActions({
 						<Printer className="size-4" />
 					</Button>
 				)}
-				{showPaymentAndIncome && (
-					isReservationComplete ? (
+				{showPaymentAndIncome &&
+					(isReservationComplete ? (
 						<Button
 							variant="outline"
 							size="sm"
@@ -134,8 +135,7 @@ export function ReservationActions({
 								</Button>
 							)}
 						</>
-					)
-				)}{" "}
+					))}{" "}
 				<OTPVerification
 					onVerified={onEdit}
 					triggerComponent={

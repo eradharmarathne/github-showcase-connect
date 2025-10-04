@@ -185,92 +185,258 @@
     "hotelManagement": "හෝටල් කළමනාකරණය"
   },
   "reservations": {
-    "title": "වෙන්කරණ",
-    "subtitle": "ඔබේ දේපළ වෙන්කරණ සහ වෙන්කරණ කළමනාකරණය කරන්න",
+    "title": "වෙන්කරණය",
+    "subtitle": "ඔබේ දේපළ වෙන්කරණය සහ වෙන්කිරීම් කළමනාකරණය කරන්න",
     "tabs": {
-      "reservations": "වෙන්කරණ",
+      "reservations": "වෙන්කරණය",
       "payments": "ගෙවීම්"
     },
     "filters": {
       "selectLocation": "ස්ථානය තෝරන්න",
-      "searchPlaceholder": "වෙන්කරණ සොයන්න...",
-      "filterByStatus": "තත්ත්වය අනුව පෙරහන",
+      "searchPlaceholder": "වෙන්කරණය සොයන්න...",
+      "filterByStatus": "තත්ත්වය අනුව පෙරන්න",
       "allStatuses": "සියලුම තත්ත්වයන්",
-      "newReservation": "නව වෙන්කරණය"
+      "newReservation": "නව වෙන්කරණයක්"
     },
     "status": {
       "confirmed": "තහවුරු කළ",
       "tentative": "තාවකාලික",
-      "pending": "අපේක්ෂිත",
-      "checked_in": "ඇතුළු වී ඇත",
-      "checked_out": "පිටව ගිණි",
+      "pending": "පරීක්ෂාවට",
+      "checked_in": "පැමිණ ඇත",
+      "checked_out": "පිටත්ව ගියා",
       "cancelled": "අවලංගු කළ"
     },
     "table": {
       "headers": {
         "reservation": "වෙන්කරණය",
         "guest": "අමුත්තා",
-        "dates": "දින",
+        "dates": "දිනයන්",
         "room": "කාමරය",
         "amount": "මුදල",
         "balance": "ශේෂය",
         "status": "තත්ත්වය",
-        "actions": "ක්‍රියාමාර්ග"
+        "actions": "ක්‍රියා",
+        "location": "ස්ථානය",
+        "nights": "රාත්‍රීන්",
+        "adults": "වැඩිහිටියන්",
+        "children": "දරුවන්",
+        "total": "මුළු",
+        "paid": "ගෙවූ",
+        "method": "ක්‍රමය",
+        "date": "දිනය",
+        "note": "සටහන"
       },
       "actions": {
         "view": "බලන්න",
         "edit": "සංස්කරණය",
         "payNow": "දැන් ගෙවන්න",
         "addIncome": "ආදායම එකතු කරන්න",
-        "reservationCompleted": "වෙන්කරණය සම්පූර්ණයි"
+        "reservationCompleted": "වෙන්කරණය සම්පූර්ණයි",
+        "print": "මුද්‍රණය",
+        "quickEdit": "ඉක්මන් සංස්කරණය"
       },
-      "noReservations": "වෙන්කරණ හමු නොවීය",
-      "loadingReservations": "වෙන්කරණ පූරණය වෙමින්..."
+      "noReservations": "වෙන්කරණයන් සොයාගත නොහැක",
+      "loadingReservations": "වෙන්කරණයන් පූරණය වෙමින්...",
+      "noData": "දත්ත නොමැත"
     },
     "mobileCard": {
       "guest": "අමුත්තා:",
-      "dates": "දින:",
+      "dates": "දිනයන්:",
       "room": "කාමරය:",
       "amount": "මුදල:",
       "balance": "ශේෂය:",
       "status": "තත්ත්වය:",
-      "nights": "රාත්‍රිය {{count}}",
-      "nights_other": "රාත්‍රි {{count}}"
+      "nights": "රාත්‍රී {{count}}",
+      "nights_other": "රාත්‍රී {{count}}",
+      "location": "ස්ථානය:",
+      "total": "මුළු:",
+      "paid": "ගෙවූ:"
     },
     "dialog": {
       "viewTitle": "වෙන්කරණ විස්තර",
-      "editTitle": "වෙන්කරණය සංස්කරණය කරන්න",
-      "newTitle": "නව වෙන්කරණය",
+      "editTitle": "වෙන්කරණය සංස්කරණය",
+      "newTitle": "නව වෙන්කරණයක්",
       "deleteTitle": "වෙන්කරණය මකන්න",
-      "deleteConfirmation": "ඔබට මෙම වෙන්කරණය මකා දැමීමට අවශ්‍ය බව ඔබට විශ්වාසද?",
+      "deleteConfirmation": "ඔබට මෙම වෙන්කරණය මකා දැමීමට අවශ්‍යද?",
       "deleteButton": "මකන්න",
-      "cancelButton": "අවලංගු කරන්න",
+      "cancelButton": "අවලංගු",
       "saveButton": "වෙනස්කම් සුරකින්න",
-      "createButton": "වෙන්කරණය සාදන්න"
+      "createButton": "වෙන්කරණය නිර්මාණය",
+      "closeButton": "වසන්න",
+      "printButton": "මුද්‍රණය",
+      "editButton": "සංස්කරණය"
     },
     "form": {
       "guestName": "අමුත්තාගේ නම",
       "guestEmail": "අමුත්තාගේ ඊමේල්",
-      "guestPhone": "අමුත්තාගේ දුරකථනය",
-      "checkInDate": "ඇතුළු වන දිනය",
-      "checkOutDate": "පිටවන දිනය",
+      "guestPhone": "අමුත්තාගේ දුරකථන",
+      "checkInDate": "පැමිණීමේ දිනය",
+      "checkOutDate": "පිටත්වීමේ දිනය",
       "room": "කාමරය",
       "adults": "වැඩිහිටියන්",
-      "children": "ළමයින්",
+      "children": "දරුවන්",
       "totalAmount": "මුළු මුදල",
-      "paidAmount": "ගෙවන ලද මුදල",
+      "paidAmount": "ගෙවූ මුදල",
       "notes": "සටහන්",
-      "required": "අවශ්‍ය ක්ෂේත්‍රය"
+      "required": "අවශ්‍ය ක්ෂේත්‍රය",
+      "currency": "මුදල් වර්ගය",
+      "location": "ස්ථානය",
+      "guide": "සංචාරක මාර්ගදර්ශක",
+      "agent": "සංචාරක නියෝජිත",
+      "commission": "කොමිස්",
+      "roomRate": "කාමර ගාස්තු",
+      "extraCharges": "අමතර ගාස්තු",
+      "discount": "වට්ටම්"
+    },
+    "viewDialog": {
+      "guestInformation": "අමුත්තා තොරතුරු",
+      "stayDetails": "රැඳෙන විස්තර",
+      "roomInformation": "කාමර තොරතුරු",
+      "financialDetails": "මූල්‍ය විස්තර",
+      "paymentHistory": "ගෙවීම් ඉතිහාසය",
+      "expensesDetails": "වියදම් විස්තර",
+      "commissionDetails": "කොමිස් විස්තර",
+      "checkIn": "පැමිණීම",
+      "checkOut": "පිටත්වීම",
+      "nights": "රාත්‍රීන්",
+      "guestCount": "අමුත්තන් සංඛ්‍යාව",
+      "roomNumber": "කාමර අංකය",
+      "roomType": "කාමර වර්ගය",
+      "reservationNumber": "වෙන්කරණ අංකය",
+      "bookingDate": "වෙන්කරණ දිනය",
+      "totalAmount": "මුළු මුදල",
+      "paidAmount": "ගෙවූ මුදල",
+      "balanceAmount": "ශේෂ මුදල",
+      "roomCharges": "කාමර ගාස්තු",
+      "expenses": "වියදම්",
+      "commissionAmount": "කොමිස් මුදල",
+      "noPayments": "ගෙවීම් වාර්තා වී නැත",
+      "noExpenses": "වියදම් වාර්තා වී නැත",
+      "unknownGuest": "නොදන්නා අමුත්තා",
+      "unknownRoom": "නොදන්නා කාමරය",
+      "unknownLocation": "නොදන්නා ස්ථානය"
+    },
+    "paymentsTable": {
+      "title": "ගෙවීම් ඉතිහාසය",
+      "description": "වෙන්කරණ සඳහා සියලුම ගෙවීම් සහ ආදායම් වාර්තා",
+      "headers": {
+        "reservationNumber": "වෙන්කරණ #",
+        "guest": "අමුත්තා",
+        "amount": "මුදල",
+        "method": "ගෙවීම් ක්‍රමය",
+        "date": "දිනය",
+        "note": "සටහන",
+        "currency": "මුදල් වර්ගය"
+      },
+      "noPayments": "ගෙවීම් සොයාගත නොහැක",
+      "loadingPayments": "ගෙවීම් පූරණය වෙමින්...",
+      "paymentMethods": {
+        "cash": "මුදල්",
+        "card": "කාඩ්පත",
+        "bank_transfer": "බැංකු ස්ථාන මාරුව",
+        "mobile_payment": "ජංගම ගෙවීම",
+        "other": "වෙනත්"
+      }
+    },
+    "addIncomeDialog": {
+      "title": "ආදායම එකතු කරන්න",
+      "description": "තෝරාගත් වෙන්කරණය සඳහා ආදායම වාර්තා කරන්න",
+      "reservationInfo": "වෙන්කරණ තොරතුරු",
+      "reservationNumber": "වෙන්කරණය:",
+      "guestName": "අමුත්තා:",
+      "totalAmount": "මුළු මුදල:",
+      "form": {
+        "amount": "මුදල",
+        "currency": "මුදල් වර්ගය",
+        "paymentMethod": "ගෙවීම් ක්‍රමය",
+        "note": "සටහන (විකල්ප)",
+        "notePlaceholder": "මෙම ගෙවීම ගැන අමතර සටහන්...",
+        "account": "ගිණුම",
+        "accountRequired": "ගිණුම *",
+        "accountPlaceholder": "ගෙවීම වාර්තා කිරීමට ගිණුම තෝරන්න",
+        "incomeType": "ආදායම් වර්ගය",
+        "incomeTypePlaceholder": "ආදායම් වර්ගය තෝරන්න",
+        "date": "ගෙවීම් දිනය"
+      },
+      "paymentMethods": {
+        "cash": "මුදල්",
+        "card": "ක්‍රෙඩිට්/ඩෙබිට් කාඩ්පත",
+        "bank_transfer": "බැංකු ස්ථාන මාරුව",
+        "mobile_payment": "ජංගම ගෙවීම",
+        "other": "වෙනත්"
+      },
+      "buttons": {
+        "cancel": "අවලංගු",
+        "record": "ගෙවීම වාර්තා කරන්න",
+        "recording": "වාර්තා කරමින්..."
+      },
+      "validation": {
+        "amountRequired": "මුදල අවශ්‍යයි",
+        "accountRequired": "ගිණුම තේරීම අවශ්‍යයි",
+        "methodRequired": "ගෙවීම් ක්‍රමය අවශ්‍යයි"
+      }
+    },
+    "paymentDialog": {
+      "title": "ගෙවීම වාර්තා කරන්න",
+      "description": "මෙම වෙන්කරණය සඳහා ගෙවීමක් වාර්තා කරන්න",
+      "form": {
+        "amount": "ගෙවීම් මුදල",
+        "currency": "මුදල් වර්ගය",
+        "method": "ගෙවීම් ක්‍රමය",
+        "note": "සටහන්",
+        "account": "ගිණුම"
+      }
+    },
+    "reservationActions": {
+      "quickActions": "ඉක්මන් ක්‍රියා",
+      "moreActions": "තවත් ක්‍රියා",
+      "viewDetails": "විස්තර බලන්න",
+      "editReservation": "වෙන්කරණය සංස්කරණය",
+      "recordPayment": "ගෙවීම වාර්තා කරන්න",
+      "addExpense": "වියදම එකතු කරන්න",
+      "printReceipt": "රිසිට්පත මුද්‍රණය",
+      "cancelReservation": "වෙන්කරණය අවලංගු කරන්න",
+      "checkIn": "පැමිණීම",
+      "checkOut": "පිටත්වීම",
+      "sendConfirmation": "තහවුරුව යවන්න"
+    },
+    "expenses": {
+      "title": "වෙන්කරණ වියදම්",
+      "description": "මෙම වෙන්කරණය සඳහා අමතර වියදම්",
+      "totalExpenses": "මුළු වියදම්",
+      "addExpense": "වියදම එකතු කරන්න",
+      "noExpenses": "මෙම වෙන්කරණය සඳහා වියදම් වාර්තා වී නැත"
+    },
+    "dateSelector": {
+      "selectDates": "දිනයන් තෝරන්න",
+      "checkIn": "පැමිණීමේ දිනය",
+      "checkOut": "පිටත්වීමේ දිනය",
+      "nights": "රාත්‍රී {{count}}",
+      "nights_other": "රාත්‍රී {{count}}"
+    },
+    "roomSelector": {
+      "selectRoom": "කාමරය තෝරන්න",
+      "availableRooms": "ලබා ගත හැකි කාමර",
+      "roomNotAvailable": "තෝරාගත් දිනයන් සඳහා කාමරය ලබා ගත නොහැක",
+      "noRoomsAvailable": "තෝරාගත් දිනයන් සඳහා කාමර ලබා ගත නොහැක",
+      "roomRate": "රාත්‍රියට ගාස්තු",
+      "capacity": "ධාරිතාව"
     },
     "messages": {
-      "createSuccess": "වෙන්කරණය සාර්ථකව නිර්මාණය කරන ලදී",
-      "updateSuccess": "වෙන්කරණය සාර්ථකව යාවත්කාලීන කරන ලදී",
-      "deleteSuccess": "වෙන්කරණය සාර්ථකව මකා දමන ලදී",
-      "createError": "වෙන්කරණය නිර්මාණය කිරීමට අසමත් විය",
-      "updateError": "වෙන්කරණය යාවත්කාලීන කිරීමට අසමත් විය",
-      "deleteError": "වෙන්කරණය මකා දැමීමට අසමත් විය",
-      "paymentSuccess": "ගෙවීම සාර්ථකව වාර්තා කරන ලදී",
-      "paymentError": "ගෙවීම වාර්තා කිරීමට අසමත් විය"
+      "createSuccess": "වෙන්කරණය සාර්ථකව නිර්මාණය කරන ලදි",
+      "updateSuccess": "වෙන්කරණය සාර්ථකව යාවත්කාලීන කරන ලදි",
+      "deleteSuccess": "වෙන්කරණය සාර්ථකව මකා දමන ලදි",
+      "createError": "වෙන්කරණය නිර්මාණය කිරීමට අසමත්",
+      "updateError": "වෙන්කරණය යාවත්කාලීන කිරීමට අසමත්",
+      "deleteError": "වෙන්කරණය මකා දැමීමට අසමත්",
+      "paymentSuccess": "ගෙවීම සාර්ථකව වාර්තා කරන ලදි",
+      "paymentError": "ගෙවීම වාර්තා කිරීමට අසමත්",
+      "loadError": "වෙන්කරණ දත්ත පූරණය කිරීමට අසමත්",
+      "checkInSuccess": "අමුත්තා සාර්ථකව පැමිණ ඇත",
+      "checkOutSuccess": "අමුත්තා සාර්ථකව පිටත්ව ගියා",
+      "cancelSuccess": "වෙන්කරණය සාර්ථකව අවලංගු කරන ලදි",
+      "printSuccess": "වෙන්කරණය සාර්ථකව මුද්‍රණය කරන ලදි",
+      "sendConfirmationSuccess": "තහවුරුව සාර්ථකව යවන ලදි"
     }
   },
   "bookingChannels": {

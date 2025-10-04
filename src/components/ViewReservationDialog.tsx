@@ -9,6 +9,7 @@ import {
 	X,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,7 @@ export function ViewReservationDialog({
 	onClose,
 	reservationId,
 }: ViewReservationDialogProps) {
+	const { t } = useTranslation();
 	const { toast } = useToast();
 	const [reservation, setReservation] = useState<Reservation | null>(null);
 	const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
@@ -118,6 +120,23 @@ export function ViewReservationDialog({
 		return incomeRecords.reduce((sum, inc) => sum + Number(inc.amount), 0);
 	};
 
+	const getStatusText = (status: string) => {
+		switch (status?.toLowerCase()) {
+			case "confirmed":
+				return t("reservations.status.confirmed");
+			case "checked_in":
+				return t("reservations.status.checked_in");
+			case "checked_out":
+				return t("reservations.status.checked_out");
+			case "cancelled":
+				return t("reservations.status.cancelled");
+			case "tentative":
+				return t("reservations.status.tentative");
+			default:
+				return status;
+		}
+	};
+
 	const getTotalBalance = () => {
 		const roomBalance = reservation?.balance_amount || 0;
 		const pendingExpenses = getPendingExpenses();
@@ -179,10 +198,11 @@ export function ViewReservationDialog({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-xl">
 						<Calendar className="size-5" />
-						Reservation Details
+						{t("reservations.dialog.viewTitle")}
 					</DialogTitle>
 					<DialogDescription>
-						Reservation #{reservation.reservation_number}
+						{t("reservations.viewDialog.reservationNumber")} #
+						{reservation.reservation_number}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -191,7 +211,7 @@ export function ViewReservationDialog({
 					<div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b">
 						<div className="flex items-center gap-3">
 							<Badge className={getStatusColor(reservation.status)}>
-								{reservation.status.toUpperCase()}
+								{getStatusText(reservation.status).toUpperCase()}
 							</Badge>
 							{reservation.locations && (
 								<div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -211,7 +231,7 @@ export function ViewReservationDialog({
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-base">
 									<User className="size-4" />
-									Guest Information
+									{t("reservations.viewDialog.guestInformation")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
@@ -299,7 +319,7 @@ export function ViewReservationDialog({
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-base">
 									<Calendar className="size-4" />
-									Stay Details
+									{t("reservations.viewDialog.stayDetails")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
@@ -364,7 +384,7 @@ export function ViewReservationDialog({
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-base">
 									<BedDouble className="size-4" />
-									Room Information
+									{t("reservations.viewDialog.roomInformation")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
@@ -425,7 +445,7 @@ export function ViewReservationDialog({
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-base">
 									<DollarSign className="size-4" />
-									Pricing & Payment
+									{t("reservations.viewDialog.financialDetails")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
@@ -494,7 +514,7 @@ export function ViewReservationDialog({
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-base">
 									<CreditCard className="size-4" />
-									Commission Details
+									{t("reservations.viewDialog.commissionDetails")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">

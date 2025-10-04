@@ -136,7 +136,7 @@ export function AddIncomeDialog({
 				const convertedAmount = await convertCurrency(
 					incomeForm.amount,
 					incomeForm.currency,
-					selectedReservation.currency
+					selectedReservation.currency,
 				);
 
 				// If deferred payment, update reservation total amount

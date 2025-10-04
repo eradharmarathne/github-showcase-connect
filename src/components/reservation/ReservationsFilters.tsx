@@ -51,7 +51,9 @@ export function ReservationsFilters({
 			{locations.length > 1 && (
 				<Select value={selectedLocation} onValueChange={onLocationChange}>
 					<SelectTrigger className="w-full lg:w-48">
-						<SelectValue placeholder={t("reservations.filters.selectLocation")} />
+						<SelectValue
+							placeholder={t("reservations.filters.selectLocation")}
+						/>
 					</SelectTrigger>
 					<SelectContent className="z-50 bg-background border">
 						{locations.map((location) => (
@@ -78,13 +80,27 @@ export function ReservationsFilters({
 					<SelectValue placeholder={t("reservations.filters.filterByStatus")} />
 				</SelectTrigger>
 				<SelectContent className="z-50 bg-background border">
-					<SelectItem value="all">{t("reservations.filters.allStatuses")}</SelectItem>
-					<SelectItem value="confirmed">{t("reservations.status.confirmed")}</SelectItem>
-					<SelectItem value="tentative">{t("reservations.status.tentative")}</SelectItem>
-					<SelectItem value="pending">{t("reservations.status.pending")}</SelectItem>
-					<SelectItem value="checked_in">{t("reservations.status.checked_in")}</SelectItem>
-					<SelectItem value="checked_out">{t("reservations.status.checked_out")}</SelectItem>
-					<SelectItem value="cancelled">{t("reservations.status.cancelled")}</SelectItem>
+					<SelectItem value="all">
+						{t("reservations.filters.allStatuses")}
+					</SelectItem>
+					<SelectItem value="confirmed">
+						{t("reservations.status.confirmed")}
+					</SelectItem>
+					<SelectItem value="tentative">
+						{t("reservations.status.tentative")}
+					</SelectItem>
+					<SelectItem value="pending">
+						{t("reservations.status.pending")}
+					</SelectItem>
+					<SelectItem value="checked_in">
+						{t("reservations.status.checked_in")}
+					</SelectItem>
+					<SelectItem value="checked_out">
+						{t("reservations.status.checked_out")}
+					</SelectItem>
+					<SelectItem value="cancelled">
+						{t("reservations.status.cancelled")}
+					</SelectItem>
 				</SelectContent>
 			</Select>
 

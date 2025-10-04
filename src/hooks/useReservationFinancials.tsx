@@ -66,20 +66,38 @@ export const useReservationFinancials = () => {
 				reservations?.map(async (reservation) => {
 					// Convert reservation amounts to USD
 					const roomAmountOriginal = reservation.room_rate * reservation.nights;
-					const roomAmountUsd = await convertCurrency(roomAmountOriginal, reservation.currency, "USD");
-					const paidAmountUsd = await convertCurrency(reservation.paid_amount || 0, reservation.currency, "USD");
+					const roomAmountUsd = await convertCurrency(
+						roomAmountOriginal,
+						reservation.currency,
+						"USD",
+					);
+					const paidAmountUsd = await convertCurrency(
+						reservation.paid_amount || 0,
+						reservation.currency,
+						"USD",
+					);
 
 					// Calculate expenses from income records with proper currency conversion
 					const reservationIncomeRecords =
-						incomeRecords?.filter((inc) => inc.booking_id === reservation.id) || [];
+						incomeRecords?.filter((inc) => inc.booking_id === reservation.id) ||
+						[];
 
 					// Convert each income record to USD individually
-					const expensesUsdPromises = reservationIncomeRecords.map(async (inc) => {
-						return await convertCurrency(Number(inc.amount), inc.currency, "USD");
-					});
+					const expensesUsdPromises = reservationIncomeRecords.map(
+						async (inc) => {
+							return await convertCurrency(
+								Number(inc.amount),
+								inc.currency,
+								"USD",
+							);
+						},
+					);
 
 					const expensesUsdArray = await Promise.all(expensesUsdPromises);
-					const expensesUsd = expensesUsdArray.reduce((sum, amount) => sum + amount, 0);
+					const expensesUsd = expensesUsdArray.reduce(
+						(sum, amount) => sum + amount,
+						0,
+					);
 					const needsToPayUsd = roomAmountUsd + expensesUsd - paidAmountUsd;
 
 					return {
@@ -102,7 +120,7 @@ export const useReservationFinancials = () => {
 						paid_amount: reservation.paid_amount,
 						balance_amount: reservation.balance_amount,
 					};
-				}) || []
+				}) || [],
 			);
 
 			return financialData;
