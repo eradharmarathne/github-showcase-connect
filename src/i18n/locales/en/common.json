@@ -273,6 +273,137 @@
       "paymentError": "Failed to record payment"
     }
   },
+  "bookingChannels": {
+    "title": "Booking Channels Integration",
+    "subtitle": "Manage external booking channels and synchronize bookings",
+    "header": {
+      "syncNow": "Sync Now",
+      "syncing": "Syncing...",
+      "autoSyncNote": "Auto-syncs every hour",
+      "lastSync": "Last sync: {{date}}"
+    },
+    "stats": {
+      "totalBookings": "Total Bookings",
+      "externalBookingsSynced": "External bookings synced",
+      "lastSync": "Last Sync",
+      "never": "Never",
+      "noSyncYet": "No sync yet",
+      "revenue": "Revenue",
+      "totalBookingValue": "Total booking value",
+      "activeSources": "Active Sources",
+      "bookingChannels": "Booking channels"
+    },
+    "tabs": {
+      "bookings": "Bookings",
+      "analytics": "Analytics",
+      "settings": "Settings"
+    },
+    "locationFilter": {
+      "title": "Filter by Location",
+      "switchingNote": "Location switching is now handled in the sidebar"
+    },
+    "bookingsTable": {
+      "title": "External Bookings",
+      "description": "Bookings synchronized from booking channels and other external sources",
+      "headers": {
+        "property": "Property",
+        "location": "Location",
+        "guest": "Guest",
+        "dates": "Dates",
+        "guests": "Guests",
+        "amount": "Amount",
+        "source": "Source",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "unknownProperty": "Unknown Property",
+      "unmapped": "Unmapped",
+      "needsMapping": "Needs Mapping",
+      "nights": "{{count}} night",
+      "nights_other": "{{count}} nights",
+      "adultsChildren": "{{adults}}A + {{children}}C",
+      "payout": "Payout: {{amount}} LKR",
+      "noBookings": "No bookings found for the selected location.",
+      "viewDetails": "View Details"
+    },
+    "bookingDialog": {
+      "title": "Booking Details",
+      "guestDetails": "Guest Details",
+      "property": "Property",
+      "unknown": "Unknown",
+      "unmappedLocation": "Unmapped Location",
+      "checkInOut": "Check-in / Check-out",
+      "guests": "Guests",
+      "total": "{{count}} total",
+      "adultsChildren": "{{adults}} adults, {{children}} children",
+      "sourceStatus": "Source & Status",
+      "amount": "Amount",
+      "expectedPayout": "Expected Payout: {{amount}} LKR",
+      "paymentBreakdown": "Payment Breakdown",
+      "basePrice": "Base Price:",
+      "hostFee": "Host Fee:",
+      "bookingDetails": "Booking Details",
+      "externalId": "External ID:",
+      "propertyId": "Property ID:",
+      "lastSynced": "Last Synced:"
+    },
+    "analytics": {
+      "title": "Booking Analytics",
+      "description": "Insights and trends from your external bookings",
+      "sourceBreakdown": "Source Breakdown",
+      "statusBreakdown": "Status Breakdown",
+      "bookings": "{{count}} booking",
+      "bookings_other": "{{count}} bookings"
+    },
+    "settings": {
+      "propertyMapping": {
+        "title": "Channel Property Mapping",
+        "description": "Map your booking channel properties to internal locations and rooms",
+        "notMapped": "Not Mapped",
+        "propertiesCount": "{{count}} Properties",
+        "mappedProperties": "Mapped Channel Properties:",
+        "addPropertyName": "Add Channel Property Name",
+        "propertyPlaceholder": "e.g., Rusty Bunk Villa",
+        "addMapping": "Add Property Mapping"
+      },
+      "apiConfig": {
+        "title": "API Configuration",
+        "description": "Configure your booking channel API connection",
+        "alreadyConfigured": "API connection is already configured.",
+        "lastSuccessfulSync": "Last successful sync: {{date}}",
+        "noSuccessfulSync": "No successful sync yet",
+        "reconfigure": "Reconfigure API",
+        "setupInstructions": "Setup Instructions",
+        "instructionsList": [
+          "Log into your booking channel account",
+          "Go to Settings → Channel Manager → API",
+          "Generate an invite code for this application",
+          "Enter the invite code below to complete setup"
+        ],
+        "inviteCodeLabel": "Channel Invite Code",
+        "inviteCodePlaceholder": "Enter your booking channel invite code",
+        "setupButton": "Setup",
+        "setupInProgress": "Setup...",
+        "cancelSetup": "Cancel Setup"
+      }
+    },
+    "status": {
+      "confirmed": "Confirmed",
+      "new": "New",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "checked_in": "Checked In",
+      "checked_out": "Checked Out"
+    },
+    "messages": {
+      "syncSuccess": "Booking channel data synced successfully",
+      "syncError": "Failed to sync booking channel data",
+      "fetchError": "Failed to fetch booking channel data",
+      "tokenExchangeSuccess": "Token exchange successful! You can now sync with booking channels.",
+      "tokenExchangeInfo": "Please save your refresh token in Supabase secrets as CHANNEL_REFRESH_TOKEN",
+      "tokenExchangeError": "Token exchange failed: {{error}}"
+    }
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",

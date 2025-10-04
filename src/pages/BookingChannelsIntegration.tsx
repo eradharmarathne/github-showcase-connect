@@ -15,6 +15,7 @@ import {
 	Wifi,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { BookingChannelsSkeleton } from "@/components/BookingChannelsSkeleton";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,43 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
+
+// Helper functions
+const getGuestName = (booking: ExternalBooking): string => {
+	return booking.guest_name || booking.raw_data?.guest?.name || "Unknown Guest";
+};
+
+const getEmail = (booking: ExternalBooking): string | null => {
+	return booking.raw_data?.guest?.email || null;
+};
+
+const formatDate = (dateString: string): string => {
+	return format(new Date(dateString), "MMM dd");
+};
+
+const calculateNights = (checkIn: string, checkOut: string): number => {
+	const start = new Date(checkIn);
+	const end = new Date(checkOut);
+	const diffTime = Math.abs(end.getTime() - start.getTime());
+	return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+const formatPrice = (booking: ExternalBooking): string => {
+	return `${booking.total_amount?.toLocaleString() || 0} ${booking.currency || 'USD'}`;
+};
+
+const getPaymentInfo = (booking: ExternalBooking): any => {
+	if (booking.source === 'airbnb' && booking.raw_data?.pricing) {
+		const pricing = booking.raw_data.pricing;
+		return {
+			type: 'airbnb',
+			basePrice: pricing.basePrice || 0,
+			hostFee: pricing.hostFee || 0,
+			payout: pricing.hostPayout || 0
+		};
+	}
+	return null;
+};
 
 interface ExternalBooking {
 	id: string;
@@ -89,6 +127,7 @@ interface SyncStats {
 }
 
 export default function BookingChannelsIntegration() {
+	const { t } = useTranslation();
 	const { selectedLocation } = useLocationContext();
 	const [bookings, setBookings] = useState<ExternalBooking[]>([]);
 	const [locations, setLocations] = useState<Location[]>([]);
@@ -177,7 +216,7 @@ export default function BookingChannelsIntegration() {
 				}
 			} catch (error) {
 				console.error("Error fetching data:", error);
-				toast.error("Failed to fetch booking channel data");
+				toast.error(t("bookingChannels.messages.fetchError"));
 			} finally {
 				setLoading(false);
 			}
@@ -333,16 +372,16 @@ export default function BookingChannelsIntegration() {
 
 			if (error) {
 				console.error("Error syncing booking channel data:", error);
-				toast.error("Failed to sync booking channel data");
+				toast.error(t("bookingChannels.messages.syncError"));
 			} else {
 				console.log("Booking channel sync response:", data);
-				toast.success("Booking channel data synced successfully");
+				toast.success(t("bookingChannels.messages.syncSuccess"));
 				// Refresh the data after sync
 				fetchData();
 			}
 		} catch (error) {
 			console.error("Error syncing booking channel data:", error);
-			toast.error("Failed to sync booking channel data");
+			toast.error(t("bookingChannels.messages.syncError"));
 		} finally {
 			setSyncing(false);
 		}
@@ -361,12 +400,8 @@ export default function BookingChannelsIntegration() {
 			if (error) throw error;
 
 			if (data && data.success) {
-				toast.success(
-					"Token exchange successful! You can now sync with booking channels.",
-				);
-				toast.info(
-					"Please save your refresh token in Supabase secrets as CHANNEL_REFRESH_TOKEN",
-				);
+				toast.success(t("bookingChannels.messages.tokenExchangeSuccess"));
+				toast.info(t("bookingChannels.messages.tokenExchangeInfo"));
 				console.log("Refresh token:", data.data.refreshToken);
 				setSetupMode(false);
 			} else {
@@ -374,7 +409,7 @@ export default function BookingChannelsIntegration() {
 			}
 		} catch (error: any) {
 			console.error("Token exchange error:", error);
-			toast.error(`Token exchange failed: ${error.message || "Unknown error"}`);
+			toast.error(t("bookingChannels.messages.tokenExchangeError", { error: error.message || "Unknown error" }));
 		} finally {
 			setExchangingToken(false);
 		}
@@ -567,19 +602,19 @@ export default function BookingChannelsIntegration() {
 					{syncing ? (
 						<>
 							<RefreshCw className="size-4 mr-2 animate-spin" />
-							Syncing...
+							{t("bookingChannels.header.syncing")}
 						</>
 					) : (
 						<>
 							<Wifi className="size-4 mr-2" />
-							Sync Now
+							{t("bookingChannels.header.syncNow")}
 						</>
 					)}
 				</Button>
 				<div className="text-xs text-muted-foreground">
-					Auto-syncs every hour
+					{t("bookingChannels.header.autoSyncNote")}
 					{lastSyncTime && (
-						<div>Last sync: {format(lastSyncTime, "MMM dd, HH:mm")}</div>
+						<div>{t("bookingChannels.header.lastSync", { date: format(lastSyncTime, "MMM dd, HH:mm") })}</div>
 					)}
 				</div>
 			</div>
@@ -589,7 +624,7 @@ export default function BookingChannelsIntegration() {
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Total Bookings
+							{t("bookingChannels.stats.totalBookings")}
 						</CardTitle>
 						<Calendar className="size-4 text-muted-foreground" />
 					</CardHeader>
@@ -598,33 +633,33 @@ export default function BookingChannelsIntegration() {
 							{syncStats.totalBookings}
 						</div>
 						<p className="text-xs text-muted-foreground">
-							External bookings synced
+							{t("bookingChannels.stats.externalBookingsSynced")}
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Last Sync</CardTitle>
+						<CardTitle className="text-sm font-medium">{t("bookingChannels.stats.lastSync")}</CardTitle>
 						<Clock className="size-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-lg sm:text-2xl font-bold">
 							{syncStats.recentSync
 								? format(new Date(syncStats.recentSync), "MMM dd")
-								: "Never"}
+								: t("bookingChannels.stats.never")}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							{syncStats.recentSync
 								? format(new Date(syncStats.recentSync), "HH:mm")
-								: "No sync yet"}
+								: t("bookingChannels.stats.noSyncYet")}
 						</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Revenue</CardTitle>
+						<CardTitle className="text-sm font-medium">{t("bookingChannels.stats.revenue")}</CardTitle>
 						<DollarSign className="size-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -634,14 +669,14 @@ export default function BookingChannelsIntegration() {
 								.reduce((sum, booking) => sum + (booking.total_amount || 0), 0)
 								.toLocaleString()}
 						</div>
-						<p className="text-xs text-muted-foreground">Total booking value</p>
+						<p className="text-xs text-muted-foreground">{t("bookingChannels.stats.totalBookingValue")}</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Active Sources
+							{t("bookingChannels.stats.activeSources")}
 						</CardTitle>
 						<Wifi className="size-4 text-muted-foreground" />
 					</CardHeader>
@@ -649,7 +684,7 @@ export default function BookingChannelsIntegration() {
 						<div className="text-lg sm:text-2xl font-bold">
 							{Object.keys(syncStats.sourceBreakdown).length}
 						</div>
-						<p className="text-xs text-muted-foreground">Booking channels</p>
+						<p className="text-xs text-muted-foreground">{t("bookingChannels.stats.bookingChannels")}</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -657,9 +692,9 @@ export default function BookingChannelsIntegration() {
 			{/* Main Content */}
 			<Tabs defaultValue="bookings" className="space-y-4">
 				<TabsList>
-					<TabsTrigger value="bookings">Bookings</TabsTrigger>
-					<TabsTrigger value="analytics">Analytics</TabsTrigger>
-					<TabsTrigger value="settings">Settings</TabsTrigger>
+					<TabsTrigger value="bookings">{t("bookingChannels.tabs.bookings")}</TabsTrigger>
+					<TabsTrigger value="analytics">{t("bookingChannels.tabs.analytics")}</TabsTrigger>
+					<TabsTrigger value="settings">{t("bookingChannels.tabs.settings")}</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="bookings" className="space-y-4">
@@ -668,7 +703,7 @@ export default function BookingChannelsIntegration() {
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<MapPin className="size-5" />
-								Filter by Location
+								{t("bookingChannels.locationFilter.title")}
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
@@ -687,7 +722,7 @@ export default function BookingChannelsIntegration() {
 											}
 											size="sm"
 											disabled
-											title="Location switching is now handled in the sidebar"
+											title={t("bookingChannels.locationFilter.switchingNote")}
 										>
 											{location.name} ({locationBookings})
 										</Button>
@@ -700,10 +735,9 @@ export default function BookingChannelsIntegration() {
 					{/* Bookings Table */}
 					<Card>
 						<CardHeader>
-							<CardTitle>External Bookings</CardTitle>
+							<CardTitle>{t("bookingChannels.bookingsTable.title")}</CardTitle>
 							<CardDescription>
-								Bookings synchronized from booking channels and other external
-								sources
+								{t("bookingChannels.bookingsTable.description")}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -711,15 +745,15 @@ export default function BookingChannelsIntegration() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Property</TableHead>
-											<TableHead>Location</TableHead>
-											<TableHead>Guest</TableHead>
-											<TableHead>Dates</TableHead>
-											<TableHead>Guests</TableHead>
-											<TableHead>Amount</TableHead>
-											<TableHead>Source</TableHead>
-											<TableHead>Status</TableHead>
-											<TableHead>Actions</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.property")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.location")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.guest")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.dates")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.guests")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.amount")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.source")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.status")}</TableHead>
+											<TableHead>{t("bookingChannels.bookingsTable.headers.actions")}</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -728,7 +762,7 @@ export default function BookingChannelsIntegration() {
 												<TableCell className="font-medium">
 													<div className="space-y-1">
 														<div className="text-sm font-medium">
-															{booking.room_name || "Unknown Property"}
+															{booking.room_name || t("bookingChannels.bookingsTable.unknownProperty")}
 														</div>
 														<div className="text-xs text-muted-foreground">
 															ID: {booking.external_id}
@@ -825,7 +859,7 @@ export default function BookingChannelsIntegration() {
 								{filteredBookings.length === 0 && (
 									<div className="text-center py-8">
 										<p className="text-muted-foreground">
-											No bookings found for the selected location.
+											{t("bookingChannels.bookingsTable.noBookings")}
 										</p>
 										<Button
 											onClick={syncChannelData}
@@ -836,12 +870,12 @@ export default function BookingChannelsIntegration() {
 											{syncing ? (
 												<>
 													<RefreshCw className="size-4 mr-2 animate-spin" />
-													Syncing...
+													{t("bookingChannels.header.syncing")}
 												</>
 											) : (
 												<>
 													<RefreshCw className="size-4 mr-2" />
-													Sync Now
+													{t("bookingChannels.header.syncNow")}
 												</>
 											)}
 										</Button>

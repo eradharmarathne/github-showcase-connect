@@ -273,6 +273,137 @@
       "paymentError": "ගෙවීම වාර්තා කිරීමට අසමත් විය"
     }
   },
+  "bookingChannels": {
+    "title": "වෙන්කරණ නාලිකා සම්බන්ධිකරණය",
+    "subtitle": "බාහිර වෙන්කරණ නාලිකා කළමනාකරණය කරන්න සහ වෙන්කරණ සමමුහූර්ත කරන්න",
+    "header": {
+      "syncNow": "දැන් සමමුහූර්ත කරන්න",
+      "syncing": "සමමුහූර්ත වෙමින්...",
+      "autoSyncNote": "සෑම පැයකටම ස්වයංක්‍රීයව සමමුහූර්ත වේ",
+      "lastSync": "අවසන් සමමුහූර්තය: {{date}}"
+    },
+    "stats": {
+      "totalBookings": "මුළු වෙන්කරණ",
+      "externalBookingsSynced": "බාහිර වෙන්කරණ සමමුහූර්ත කරන ලදී",
+      "lastSync": "අවසන් සමමුහූර්තය",
+      "never": "කිසි විටෙකත්",
+      "noSyncYet": "තවම සමමුහූර්ත වෙලා නැත",
+      "revenue": "ආදායම",
+      "totalBookingValue": "මුළු වෙන්කරණ වටිනාකම",
+      "activeSources": "ක්‍රියාකාරී මූලාශ්‍ර",
+      "bookingChannels": "වෙන්කරණ නාලිකා"
+    },
+    "tabs": {
+      "bookings": "වෙන්කරණ",
+      "analytics": "විශ්ලේෂණ",
+      "settings": "සැකසීම්"
+    },
+    "locationFilter": {
+      "title": "ස්ථානය අනුව පෙරහන",
+      "switchingNote": "ස්ථාන මාරු කිරීම දැන් පැති තීරුවෙන් හසුරුවනු ලැබේ"
+    },
+    "bookingsTable": {
+      "title": "බාහිර වෙන්කරණ",
+      "description": "වෙන්කරණ නාලිකා සහ අනෙකුත් බාහිර මූලාශ්‍රවලින් සමමුහූර්ත කරන ලද වෙන්කරණ",
+      "headers": {
+        "property": "දේපළ",
+        "location": "ස්ථානය",
+        "guest": "අමුත්තා",
+        "dates": "දින",
+        "guests": "අමුත්තන්",
+        "amount": "මුදල",
+        "source": "මූලාශ්‍රය",
+        "status": "තත්ත්වය",
+        "actions": "ක්‍රියාමාර්ග"
+      },
+      "unknownProperty": "නොදන්නා දේපළ",
+      "unmapped": "සිතියම්ගත නොකළ",
+      "needsMapping": "සිතියම්ගත කිරීම අවශ්‍යයි",
+      "nights": "රාත්‍රිය {{count}}",
+      "nights_other": "රාත්‍රි {{count}}",
+      "adultsChildren": "{{adults}}වැ + {{children}}ළ",
+      "payout": "ගෙවීම: {{amount}} LKR",
+      "noBookings": "තෝරන ලද ස්ථානය සඳහා වෙන්කරණ හමු නොවීය.",
+      "viewDetails": "විස්තර බලන්න"
+    },
+    "bookingDialog": {
+      "title": "වෙන්කරණ විස්තර",
+      "guestDetails": "අමුත්තාගේ විස්තර",
+      "property": "දේපළ",
+      "unknown": "නොදන්නා",
+      "unmappedLocation": "සිතියම්ගත නොකළ ස්ථානය",
+      "checkInOut": "ඇතුළුවීම / පිටවීම",
+      "guests": "අමුත්තන්",
+      "total": "මුළු {{count}}",
+      "adultsChildren": "වැඩිහිටියන් {{adults}}, ළමයින් {{children}}",
+      "sourceStatus": "මූලාශ්‍රය සහ තත්ත්වය",
+      "amount": "මුදල",
+      "expectedPayout": "අපේක්ෂිත ගෙවීම: {{amount}} LKR",
+      "paymentBreakdown": "ගෙවීම් බෙදීම",
+      "basePrice": "මූලික මිල:",
+      "hostFee": "සත්කාරක ගාස්තුව:",
+      "bookingDetails": "වෙන්කරණ විස්තර",
+      "externalId": "බාහිර ID:",
+      "propertyId": "දේපළ ID:",
+      "lastSynced": "අවසන් සමමුහූර්තය:"
+    },
+    "analytics": {
+      "title": "වෙන්කරණ විශ්ලේෂණ",
+      "description": "ඔබේ බාහිර වෙන්කරණවලින් අවබෝධ සහ ප්‍රවණතා",
+      "sourceBreakdown": "මූලාශ්‍ර බෙදීම",
+      "statusBreakdown": "තත්ත්ව බෙදීම",
+      "bookings": "වෙන්කරණය {{count}}",
+      "bookings_other": "වෙන්කරණ {{count}}"
+    },
+    "settings": {
+      "propertyMapping": {
+        "title": "නාලිකා දේපළ සිතියම්ගත කිරීම",
+        "description": "ඔබේ වෙන්කරණ නාලිකා දේපළ අභ්‍යන්තර ස්ථාන සහ කාමරවලට සිතියම්ගත කරන්න",
+        "notMapped": "සිතියම්ගත නොකළ",
+        "propertiesCount": "දේපළ {{count}}",
+        "mappedProperties": "සිතියම්ගත කළ නාලිකා දේපළ:",
+        "addPropertyName": "නාලිකා දේපළ නම එකතු කරන්න",
+        "propertyPlaceholder": "උදා: Rusty Bunk Villa",
+        "addMapping": "දේපළ සිතියම්ගත කිරීම එකතු කරන්න"
+      },
+      "apiConfig": {
+        "title": "API වින්‍යාසය",
+        "description": "ඔබේ වෙන්කරණ නාලිකා API සම්බන්ධතාවය වින්‍යාස කරන්න",
+        "alreadyConfigured": "API සම්බන්ධතාවය දැනටමත් වින්‍යාස කර ඇත.",
+        "lastSuccessfulSync": "අවසන් සාර්ථක සමමුහූර්තය: {{date}}",
+        "noSuccessfulSync": "තවම සාර්ථක සමමුහූර්තයක් නැත",
+        "reconfigure": "API නැවත වින්‍යාස කරන්න",
+        "setupInstructions": "සැකසීම් උපදෙස්",
+        "instructionsList": [
+          "ඔබේ වෙන්කරණ නාලිකා ගිණුමට ප්‍රවේශ වන්න",
+          "සැකසීම් → නාලිකා කළමනාකරු → API වෙත යන්න",
+          "මෙම යෙදුම සඳහා ආරාධනා කේතයක් ජනනය කරන්න",
+          "සැකසීම සම්පූර්ණ කිරීමට පහත ආරාධනා කේතය ඇතුළත් කරන්න"
+        ],
+        "inviteCodeLabel": "නාලිකා ආරාධනා කේතය",
+        "inviteCodePlaceholder": "ඔබේ වෙන්කරණ නාලිකා ආරාධනා කේතය ඇතුළත් කරන්න",
+        "setupButton": "සැකසීම",
+        "setupInProgress": "සැකසෙමින්...",
+        "cancelSetup": "සැකසීම අවලංගු කරන්න"
+      }
+    },
+    "status": {
+      "confirmed": "තහවුරු කළ",
+      "new": "නව",
+      "pending": "අපේක්ෂිත",
+      "cancelled": "අවලංගු කළ",
+      "checked_in": "ඇතුළු වී ඇත",
+      "checked_out": "පිටව ගිණි"
+    },
+    "messages": {
+      "syncSuccess": "වෙන්කරණ නාලිකා දත්ත සාර්ථකව සමමුහූර්ත කරන ලදී",
+      "syncError": "වෙන්කරණ නාලිකා දත්ත සමමුහූර්ත කිරීමට අසමත් විය",
+      "fetchError": "වෙන්කරණ නාලිකා දත්ත ලබා ගැනීමට අසමත් විය",
+      "tokenExchangeSuccess": "ටෝකන් හුවමාරුව සාර්ථකයි! ඔබට දැන් වෙන්කරණ නාලිකා සමඟ සමමුහූර්ත කළ හැක.",
+      "tokenExchangeInfo": "කරුණාකර ඔබේ refresh token එක Supabase secrets හි CHANNEL_REFRESH_TOKEN ලෙස සුරකින්න",
+      "tokenExchangeError": "ටෝකන් හුවමාරුව අසාර්ථකයි: {{error}}"
+    }
+  },
   "common": {
     "loading": "පූරණය වෙමින්...",
     "save": "සුරකින්න",
