@@ -307,7 +307,7 @@ export function ReservationsDesktopTable({
 													variant="outline"
 													size="sm"
 													disabled
-													className="text-green-600 cursor-not-allowed opacity-75"
+													className="text-green-600 cursor-not-allowed"
 												>
 													<CheckCircle className="size-4 mr-1" />
 													Reservation Completed
