@@ -10,3 +10,4 @@ export { ComprehensiveReportsSkeleton } from './ComprehensiveReportsSkeleton';
 export { EnhancedFinancialReportsSkeleton } from './EnhancedFinancialReportsSkeleton';
 export { AccountsReportsSkeleton } from './AccountsReportsSkeleton';
 export { CommissionReportsSkeleton } from './CommissionReportsSkeleton';
+export { DetailedBalanceSheetSkeleton } from './DetailedBalanceSheetSkeleton';

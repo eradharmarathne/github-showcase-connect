@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useReservationPrint } from "@/hooks/useReservationPrint";
 import {
-	type ReservationWithJoins,
 	useReservationsData,
 } from "@/hooks/useReservationsData";
 import type { Database } from "@/integrations/supabase/types";

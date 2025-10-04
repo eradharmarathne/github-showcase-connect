@@ -36,7 +36,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { DetailedBalanceSheetSkeleton } from "@/pages/Reports";
+import { DetailedBalanceSheetSkeleton } from "@/components/reports";
 import { formatCurrency } from "@/utils/currency";
 
 type Account = {

@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CommissionReportsSkeleton } from "@/pages/Reports";
+import { CommissionReportsSkeleton } from "@/components/reports";
 
 type CommissionData = {
 	reservation_id: string;
