@@ -283,12 +283,20 @@ export default function PaymentForm() {
 				(reservation.paid_amount || 0) + paymentAmountInReservationCurrency;
 			const newBalanceAmount = reservation.total_amount - newPaidAmount;
 
+			// Check if there are any pending expenses
+			const pendingExpenses = incomeRecords
+				.filter((inc) => inc.payment_method === "pending")
+				.reduce((sum, inc) => sum + Number(inc.amount), 0);
+
+			// Only mark as confirmed if both room balance is paid AND no pending expenses exist
+			const shouldMarkConfirmed = newBalanceAmount <= 0 && pendingExpenses <= 0;
+
 			await supabase
 				.from("reservations")
 				.update({
 					paid_amount: newPaidAmount,
 					balance_amount: newBalanceAmount,
-					status: newBalanceAmount <= 0 ? "confirmed" : reservation.status,
+					status: shouldMarkConfirmed ? "confirmed" : reservation.status,
 				})
 				.eq("id", reservationId)
 				.eq("tenant_id", tenant?.id);
