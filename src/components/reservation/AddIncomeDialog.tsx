@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CurrencySelector } from "@/components/CurrencySelector";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -18,9 +19,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CurrencySelector } from "@/components/CurrencySelector";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
+import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 
 type Database = any;
@@ -51,6 +52,7 @@ export function AddIncomeDialog({
 	const { t } = useTranslation();
 	const { toast } = useToast();
 	const { profile } = useProfile();
+	const { selectedLocation } = useLocationContext();
 	const [incomeTypes, setIncomeTypes] = useState<IncomeType[]>([]);
 	const [incomeForm, setIncomeForm] = useState({
 		amount: 0,
@@ -101,25 +103,25 @@ export function AddIncomeDialog({
 		if (!selectedReservation) return;
 
 		try {
-		const incomeData = {
-			note:
-				incomeForm.note ||
-				t("income.addDialog.reservationInfo.reservation") +
-					` ${selectedReservation.reservation_number}`,
-			amount: incomeForm.amount,
-			currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP", // Cast to correct enum type
-			// For direct payments: require account_id, for deferred: set to null
-			account_id:
-				incomeForm.payment_type === "direct" ? incomeForm.account_id : null,
-			income_type_id: incomeForm.income_type_id || null,
-			type: "booking" as const,
-			payment_method:
-				incomeForm.payment_type === "direct" ? "cash" : "pending",
-			location_id: selectedReservation.location_id,
-			tenant_id: profile?.tenant_id,
-			// booking_id now references reservations table (renamed foreign key constraint)
-			booking_id: selectedReservation.id,
-		};			// Start transaction-like operations
+			const incomeData = {
+				note:
+					incomeForm.note ||
+					t("income.addDialog.reservationInfo.reservation") +
+						` ${selectedReservation.reservation_number}`,
+				amount: incomeForm.amount,
+				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP", // Cast to correct enum type
+				// For direct payments: require account_id, for deferred: set to null
+				account_id:
+					incomeForm.payment_type === "direct" ? incomeForm.account_id : null,
+				income_type_id: incomeForm.income_type_id || null,
+				type: "booking" as const,
+				payment_method:
+					incomeForm.payment_type === "direct" ? "cash" : "pending",
+				location_id: selectedLocation,
+				tenant_id: profile?.tenant_id,
+				// booking_id now references reservations table (renamed foreign key constraint)
+				booking_id: selectedReservation.id,
+			}; // Start transaction-like operations
 			const { error: incomeError } = await supabase
 				.from("income")
 				.insert(incomeData);
@@ -138,7 +140,8 @@ export function AddIncomeDialog({
 				if (reservationError) throw reservationError;
 			} else if (incomeForm.payment_type === "direct") {
 				// For direct payments, update paid_amount to reflect the payment received
-				const newPaidAmount = (selectedReservation.paid_amount || 0) + incomeForm.amount;
+				const newPaidAmount =
+					(selectedReservation.paid_amount || 0) + incomeForm.amount;
 				const { error: reservationError } = await supabase
 					.from("reservations")
 					.update({
@@ -208,7 +211,8 @@ export function AddIncomeDialog({
 							</p>
 							<p>
 								<strong>{t("income.addDialog.reservationInfo.amount")}</strong>{" "}
-								{incomeForm.currency} {selectedReservation.total_amount.toLocaleString()}
+								{incomeForm.currency}{" "}
+								{selectedReservation.total_amount.toLocaleString()}
 							</p>
 						</div>
 					)}
