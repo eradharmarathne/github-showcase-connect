@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
+import { convertCurrency } from "@/utils/currency";
 
 // Type for the simplified financial view
 export interface ReservationFinancial {
@@ -25,15 +26,6 @@ export interface ReservationFinancial {
 	paid_amount: number | null;
 	balance_amount: number | null;
 }
-
-// Currency conversion rates (hardcoded for now, can be moved to database later)
-const CURRENCY_RATES: Record<string, number> = {
-	USD: 1,
-	LKR: 300,
-	EUR: 0.85,
-	GBP: 0.73,
-	AUD: 1.51,
-};
 
 export const useReservationFinancials = () => {
 	const { tenant } = useAuth();
@@ -69,25 +61,25 @@ export const useReservationFinancials = () => {
 
 			if (incomeError) throw incomeError;
 
-			// Calculate financial data with USD conversion
-			const financialData: ReservationFinancial[] =
-				reservations?.map((reservation) => {
-					const rate = CURRENCY_RATES[reservation.currency] || 1;
+			// Calculate financial data with USD conversion using proper currency conversion
+			const financialData: ReservationFinancial[] = await Promise.all(
+				reservations?.map(async (reservation) => {
+					// Convert reservation amounts to USD
 					const roomAmountOriginal = reservation.room_rate * reservation.nights;
-					const roomAmountUsd = roomAmountOriginal / rate;
-					const paidAmountUsd = (reservation.paid_amount || 0) / rate;
+					const roomAmountUsd = await convertCurrency(roomAmountOriginal, reservation.currency, "USD");
+					const paidAmountUsd = await convertCurrency(reservation.paid_amount || 0, reservation.currency, "USD");
 
-					// Calculate expenses from income records (additional services)
+					// Calculate expenses from income records with proper currency conversion
 					const reservationIncomeRecords =
-						incomeRecords?.filter((inc) => inc.booking_id === reservation.id) ||
-						[];
+						incomeRecords?.filter((inc) => inc.booking_id === reservation.id) || [];
 
-					const totalExpensesOriginal = reservationIncomeRecords.reduce(
-						(sum, inc) => sum + Number(inc.amount),
-						0,
-					);
+					// Convert each income record to USD individually
+					const expensesUsdPromises = reservationIncomeRecords.map(async (inc) => {
+						return await convertCurrency(Number(inc.amount), inc.currency, "USD");
+					});
 
-					const expensesUsd = totalExpensesOriginal / rate;
+					const expensesUsdArray = await Promise.all(expensesUsdPromises);
+					const expensesUsd = expensesUsdArray.reduce((sum, amount) => sum + amount, 0);
 					const needsToPayUsd = roomAmountUsd + expensesUsd - paidAmountUsd;
 
 					return {
@@ -110,7 +102,8 @@ export const useReservationFinancials = () => {
 						paid_amount: reservation.paid_amount,
 						balance_amount: reservation.balance_amount,
 					};
-				}) || [];
+				}) || []
+			);
 
 			return financialData;
 		},

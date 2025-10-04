@@ -23,6 +23,7 @@ import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
+import { convertCurrency } from "@/utils/currency";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -131,9 +132,16 @@ export function AddIncomeDialog({
 
 			// Only update reservation amounts if there's a selected reservation
 			if (selectedReservation) {
+				// Convert income amount to reservation currency for updating reservation totals
+				const convertedAmount = await convertCurrency(
+					incomeForm.amount,
+					incomeForm.currency,
+					selectedReservation.currency
+				);
+
 				// If deferred payment, update reservation total amount
 				if (incomeForm.payment_type === "deferred") {
-					const newTotal = selectedReservation.total_amount + incomeForm.amount;
+					const newTotal = selectedReservation.total_amount + convertedAmount;
 					const { error: reservationError } = await supabase
 						.from("reservations")
 						.update({
@@ -145,7 +153,7 @@ export function AddIncomeDialog({
 				} else if (incomeForm.payment_type === "direct") {
 					// For direct payments, update paid_amount to reflect the payment received
 					const newPaidAmount =
-						(selectedReservation.paid_amount || 0) + incomeForm.amount;
+						(selectedReservation.paid_amount || 0) + convertedAmount;
 					const { error: reservationError } = await supabase
 						.from("reservations")
 						.update({
