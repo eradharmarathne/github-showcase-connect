@@ -13,9 +13,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import {
-	type IncomeRecord,
 	type ReservationWithJoins,
-	useIncomeData,
 	useReservationsData,
 } from "@/hooks/useReservationsData";
 import { useReservationPrint } from "@/hooks/useReservationPrint";
@@ -41,7 +39,6 @@ export function ReservationsDesktopTable({
 	onAddIncome,
 }: ReservationsDesktopTableProps) {
 	const { reservations, loading } = useReservationsData();
-	const { incomeRecords } = useIncomeData();
 	const { printReservation } = useReservationPrint();
 	const { tenant } = useAuth();
 
@@ -75,15 +72,10 @@ export function ReservationsDesktopTable({
 	};
 
 	const getTotalPayableAmount = (reservation: any): number => {
-		const roomAmount = reservation.room_rate * reservation.nights; // Use calculated room amount, not total_amount
-		// Only include deferred payments in total payable (unpaid services)
-		const unpaidServices = incomeRecords
-			.filter((inc) => 
-				inc.booking_id === reservation.id && 
-				inc.payment_method === "pending" // Only deferred/unpaid services
-			)
-			.reduce((sum, inc) => sum + Number(inc.amount), 0);
-		return roomAmount + unpaidServices;
+		// Use database-calculated total that includes room amount and pending services
+		// The trigger already calculates: balance_amount = (total_amount + pending_income) - paid_amount
+		// So total payable = total_amount + pending services = paid_amount + balance_amount
+		return (reservation.paid_amount || 0) + (reservation.balance_amount || 0);
 	};
 
 	// Transform reservation data for printing
@@ -216,7 +208,7 @@ export function ReservationsDesktopTable({
 									</TableCell>
 									<TableCell>
 										{getCurrencySymbol(reservation.currency)}{" "}
-										{Math.max(0, getTotalPayableAmount(reservation) - (reservation.paid_amount || 0)).toLocaleString()}
+										{Math.max(0, reservation.balance_amount || 0).toLocaleString()}
 									</TableCell>
 									<TableCell>
 										<div className="flex gap-1">
@@ -224,7 +216,7 @@ export function ReservationsDesktopTable({
 												variant="outline"
 												size="sm"
 												onClick={() => onAddIncome(reservation)}
-												className="text-blue-600 hover:text-blue-700"
+												className="text-blue-600 hover:text-blue-700 cursor-pointer"
 												disabled={reservation.status === "checked_out"}
 												title={reservation.status === "checked_out" ? "Cannot add income - reservation is complete" : ""}
 											>
@@ -242,7 +234,7 @@ export function ReservationsDesktopTable({
 															reservation.currency,
 														)
 													}
-													className="text-green-600 hover:text-green-700"
+													className="text-green-600 hover:text-green-700 cursor-pointer"
 												>
 													<CreditCard className="size-4 mr-1" />
 													Pay Now
