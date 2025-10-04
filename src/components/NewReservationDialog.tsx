@@ -21,6 +21,7 @@ import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { useFormFieldPreferences } from "@/hooks/useFormFieldPreferences";
 import { useProfile } from "@/hooks/useProfile";
+import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -43,6 +44,7 @@ export function NewReservationDialog({
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
 	const { preferences: fieldPreferences } = useFormFieldPreferences();
+	const { isRangeAvailable } = useRoomAvailability();
 
 	const [rooms, setRooms] = useState<Room[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -180,6 +182,23 @@ export function NewReservationDialog({
 			toast({
 				title: "Error",
 				description: "Please select a room for all room selections",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		// Validate room availability for all selections
+		const unavailableSelections = roomSelections.filter((selection) => {
+			const checkIn = new Date(selection.check_in_date);
+			const checkOut = new Date(selection.check_out_date);
+			return !isRangeAvailable(checkIn, checkOut, selection.room_id);
+		});
+
+		if (unavailableSelections.length > 0) {
+			toast({
+				title: "Room Unavailable",
+				description:
+					"One or more selected rooms are not available for the chosen dates. Please adjust your selection.",
 				variant: "destructive",
 			});
 			return;

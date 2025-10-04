@@ -1,5 +1,5 @@
 import { addDays, format } from "date-fns";
-import { Plus, Trash2, Calendar } from "lucide-react";
+import { Calendar, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { ReservationDateSelector } from "@/components/reservation";
@@ -15,6 +15,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
 
@@ -49,7 +50,13 @@ export function MultiRoomSelector({
 }: MultiRoomSelectorProps) {
 	const { toast } = useToast();
 
-	const generateId = useCallback(() => `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`, []);
+	// Room availability checking
+	const { isRangeAvailable } = useRoomAvailability();
+
+	const generateId = useCallback(
+		() => `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+		[],
+	);
 
 	const addRoomSelection = useCallback(() => {
 		const newSelection: RoomSelection = {
@@ -84,14 +91,16 @@ export function MultiRoomSelector({
 			});
 			return;
 		}
-		onRoomSelectionsChange(roomSelections.filter((selection) => selection.id !== id));
+		onRoomSelectionsChange(
+			roomSelections.filter((selection) => selection.id !== id),
+		);
 	};
 
 	const updateRoomSelection = (id: string, updates: Partial<RoomSelection>) => {
 		onRoomSelectionsChange(
 			roomSelections.map((selection) =>
-				selection.id === id ? { ...selection, ...updates } : selection
-			)
+				selection.id === id ? { ...selection, ...updates } : selection,
+			),
 		);
 	};
 
@@ -100,16 +109,17 @@ export function MultiRoomSelector({
 			1,
 			Math.ceil(
 				checkIn && checkOut
-					? (new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)
-					: 1
-			)
+					? (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+							(1000 * 60 * 60 * 24)
+					: 1,
+			),
 		);
 	};
 
 	const handleRoomChange = async (selectionId: string, roomId: string) => {
 		const selectedRoom = rooms.find((room) => room.id === roomId);
 		const selection = roomSelections.find((s) => s.id === selectionId);
-		
+
 		if (!selectedRoom || !selection) return;
 
 		const roomCurrency = selectedRoom.currency || "LKR";
@@ -121,7 +131,7 @@ export function MultiRoomSelector({
 				roomRate = await convertCurrency(
 					selectedRoom.base_price || 0,
 					roomCurrency,
-					selection.currency
+					selection.currency,
 				);
 			} catch (error) {
 				console.error("Currency conversion error:", error);
@@ -133,7 +143,10 @@ export function MultiRoomSelector({
 			}
 		}
 
-		const nights = calculateNights(selection.check_in_date, selection.check_out_date);
+		const nights = calculateNights(
+			selection.check_in_date,
+			selection.check_out_date,
+		);
 		const total = Math.round(roomRate * nights * 100) / 100;
 
 		updateRoomSelection(selectionId, {
@@ -144,7 +157,10 @@ export function MultiRoomSelector({
 		});
 	};
 
-	const handleCurrencyChange = async (selectionId: string, newCurrency: string) => {
+	const handleCurrencyChange = async (
+		selectionId: string,
+		newCurrency: string,
+	) => {
 		const selection = roomSelections.find((s) => s.id === selectionId);
 		const selectedRoom = rooms.find((room) => room.id === selection?.room_id);
 
@@ -162,7 +178,7 @@ export function MultiRoomSelector({
 				newRoomRate = await convertCurrency(
 					selectedRoom.base_price || 0,
 					roomCurrency,
-					newCurrency
+					newCurrency,
 				);
 			} catch (error) {
 				console.error("Currency conversion error:", error);
@@ -183,12 +199,33 @@ export function MultiRoomSelector({
 		});
 	};
 
-	const handleDateChange = (selectionId: string, checkIn: string, checkOut: string) => {
+	const handleDateChange = (
+		selectionId: string,
+		checkIn: string,
+		checkOut: string,
+	) => {
 		const selection = roomSelections.find((s) => s.id === selectionId);
 		if (!selection) return;
 
 		const nights = calculateNights(checkIn, checkOut);
 		const total = Math.round(selection.room_rate * nights * 100) / 100;
+
+		// Check if the currently selected room is still available for the new dates
+		if (
+			selection.room_id &&
+			!isRoomAvailableForSelection(selection.room_id, {
+				...selection,
+				check_in_date: checkIn,
+				check_out_date: checkOut,
+			})
+		) {
+			toast({
+				title: "Room Unavailable",
+				description:
+					"The selected room is not available for these dates. Please select a different room.",
+				variant: "destructive",
+			});
+		}
 
 		updateRoomSelection(selectionId, {
 			check_in_date: checkIn,
@@ -198,7 +235,11 @@ export function MultiRoomSelector({
 		});
 	};
 
-	const handleFieldChange = (selectionId: string, field: keyof RoomSelection, value: any) => {
+	const handleFieldChange = (
+		selectionId: string,
+		field: keyof RoomSelection,
+		value: any,
+	) => {
 		updateRoomSelection(selectionId, { [field]: value });
 	};
 
@@ -218,8 +259,27 @@ export function MultiRoomSelector({
 		}
 	};
 
+	// Check if a room is available for the given selection
+	const isRoomAvailableForSelection = (
+		roomId: string,
+		selection: RoomSelection,
+	): boolean => {
+		if (!selection.check_in_date || !selection.check_out_date) return true; // No dates selected yet
+
+		const checkIn = new Date(selection.check_in_date);
+		const checkOut = new Date(selection.check_out_date);
+
+		// Check if dates are valid
+		if (isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) return true;
+
+		return isRangeAvailable(checkIn, checkOut, roomId);
+	};
+
 	// Calculate total across all rooms
-	const grandTotal = roomSelections.reduce((sum, selection) => sum + selection.total_amount, 0);
+	const grandTotal = roomSelections.reduce(
+		(sum, selection) => sum + selection.total_amount,
+		0,
+	);
 
 	return (
 		<div className="space-y-4">
@@ -265,19 +325,64 @@ export function MultiRoomSelector({
 								<Label htmlFor={`room-${selection.id}`}>Room *</Label>
 								<Select
 									value={selection.room_id}
-									onValueChange={(value) => handleRoomChange(selection.id, value)}
+									onValueChange={(value) =>
+										handleRoomChange(selection.id, value)
+									}
 								>
-									<SelectTrigger id={`room-${selection.id}`}>
+									<SelectTrigger
+										id={`room-${selection.id}`}
+										className={
+											selection.room_id &&
+											!isRoomAvailableForSelection(selection.room_id, selection)
+												? "border-red-500"
+												: ""
+										}
+									>
 										<SelectValue placeholder="Select a room" />
 									</SelectTrigger>
 									<SelectContent>
-										{rooms.map((room) => (
-											<SelectItem key={room.id} value={room.id}>
-												{room.room_number} - {room.room_type} ({getCurrencySymbol(room.currency || "LKR")}{room.base_price})
-											</SelectItem>
-										))}
+										{rooms.map((room) => {
+											const isAvailable = isRoomAvailableForSelection(
+												room.id,
+												selection,
+											);
+											return (
+												<SelectItem
+													key={room.id}
+													value={room.id}
+													disabled={!isAvailable}
+													className={
+														!isAvailable
+															? "opacity-50 text-muted-foreground"
+															: ""
+													}
+												>
+													<div className="flex items-center justify-between w-full">
+														<span>
+															{room.room_number} - {room.room_type} (
+															{getCurrencySymbol(room.currency || "LKR")}
+															{room.base_price})
+														</span>
+														{!isAvailable && (
+															<span className="text-xs text-red-500 ml-2">
+																Unavailable
+															</span>
+														)}
+													</div>
+												</SelectItem>
+											);
+										})}
 									</SelectContent>
 								</Select>
+								{selection.room_id &&
+									!isRoomAvailableForSelection(
+										selection.room_id,
+										selection,
+									) && (
+										<p className="text-xs text-red-500 mt-1">
+											⚠️ This room is not available for the selected dates
+										</p>
+									)}
 							</div>
 
 							{/* Currency Selection */}
@@ -285,7 +390,9 @@ export function MultiRoomSelector({
 								<Label>Currency</Label>
 								<CurrencySelector
 									currency={selection.currency}
-									onCurrencyChange={(value) => handleCurrencyChange(selection.id, value)}
+									onCurrencyChange={(value) =>
+										handleCurrencyChange(selection.id, value)
+									}
 								/>
 							</div>
 						</div>
@@ -295,7 +402,10 @@ export function MultiRoomSelector({
 							<ReservationDateSelector
 								checkInDate={selection.check_in_date}
 								checkOutDate={selection.check_out_date}
-								onDatesChange={(checkIn, checkOut) => handleDateChange(selection.id, checkIn, checkOut)}
+								onDatesChange={(checkIn, checkOut) =>
+									handleDateChange(selection.id, checkIn, checkOut)
+								}
+								roomId={selection.room_id || undefined}
 							/>
 						</div>
 
@@ -308,7 +418,13 @@ export function MultiRoomSelector({
 									type="number"
 									min="1"
 									value={selection.adults}
-									onChange={(e) => handleFieldChange(selection.id, "adults", Number.parseInt(e.target.value) || 1)}
+									onChange={(e) =>
+										handleFieldChange(
+											selection.id,
+											"adults",
+											Number.parseInt(e.target.value) || 1,
+										)
+									}
 								/>
 							</div>
 
@@ -319,7 +435,13 @@ export function MultiRoomSelector({
 									type="number"
 									min="0"
 									value={selection.children}
-									onChange={(e) => handleFieldChange(selection.id, "children", Number.parseInt(e.target.value) || 0)}
+									onChange={(e) =>
+										handleFieldChange(
+											selection.id,
+											"children",
+											Number.parseInt(e.target.value) || 0,
+										)
+									}
 								/>
 							</div>
 
@@ -333,7 +455,8 @@ export function MultiRoomSelector({
 									value={selection.room_rate}
 									onChange={(e) => {
 										const rate = Number.parseFloat(e.target.value) || 0;
-										const total = Math.round(rate * selection.nights * 100) / 100;
+										const total =
+											Math.round(rate * selection.nights * 100) / 100;
 										updateRoomSelection(selection.id, {
 											room_rate: rate,
 											total_amount: total,
@@ -349,7 +472,13 @@ export function MultiRoomSelector({
 									id={`arrival-${selection.id}`}
 									type="time"
 									value={selection.arrival_time}
-									onChange={(e) => handleFieldChange(selection.id, "arrival_time", e.target.value)}
+									onChange={(e) =>
+										handleFieldChange(
+											selection.id,
+											"arrival_time",
+											e.target.value,
+										)
+									}
 								/>
 							</div>
 						</div>
@@ -359,7 +488,8 @@ export function MultiRoomSelector({
 							<div className="flex justify-between items-center text-sm">
 								<span>Nights: {selection.nights}</span>
 								<span className="font-semibold">
-									Total: {getCurrencySymbol(selection.currency)}{selection.total_amount.toFixed(2)}
+									Total: {getCurrencySymbol(selection.currency)}
+									{selection.total_amount.toFixed(2)}
 								</span>
 							</div>
 						</div>
@@ -372,9 +502,12 @@ export function MultiRoomSelector({
 				<Card className="bg-blue-50 border-blue-200">
 					<CardContent className="p-4">
 						<div className="flex justify-between items-center">
-							<span className="text-lg font-semibold">Grand Total ({roomSelections.length} rooms):</span>
+							<span className="text-lg font-semibold">
+								Grand Total ({roomSelections.length} rooms):
+							</span>
 							<span className="text-xl font-bold text-blue-700">
-								{getCurrencySymbol(defaultCurrency)}{grandTotal.toFixed(2)}
+								{getCurrencySymbol(defaultCurrency)}
+								{grandTotal.toFixed(2)}
 							</span>
 						</div>
 					</CardContent>
