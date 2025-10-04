@@ -347,54 +347,6 @@ export function ReservationDateSelector({
 						)}
 					</div>
 				)}
-
-				{/* Quick Selectors */}
-				<div className="flex gap-2">
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						onClick={() => {
-							const today = new Date();
-							const tomorrow = addDays(today, 1);
-							handleCheckInSelect(today);
-							handleCheckOutSelect(tomorrow);
-						}}
-						disabled={disabled}
-						className="text-xs"
-					>
-						Today - Tomorrow
-					</Button>
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						onClick={() => {
-							const today = new Date();
-							const nextWeek = addDays(today, 7);
-							handleCheckInSelect(today);
-							handleCheckOutSelect(nextWeek);
-						}}
-						disabled={disabled}
-						className="text-xs"
-					>
-						1 Week
-					</Button>
-					<Button
-						type="button"
-						variant="outline"
-						size="sm"
-						onClick={() => {
-							setCheckIn(undefined);
-							setCheckOut(undefined);
-							onDatesChange?.("", "");
-						}}
-						disabled={disabled}
-						className="text-xs"
-					>
-						Clear
-					</Button>
-				</div>
 			</CardContent>
 		</Card>
 	);
