@@ -1,4 +1,5 @@
 import {
+	CheckCircle,
 	CreditCard,
 	DollarSign,
 	Edit,
@@ -85,7 +86,7 @@ export function ReservationActions({
 	showPaymentAndIncome = true,
 }: ReservationActionsProps) {
 	// Disable income and payment actions when reservation is checked out (complete)
-	const isReservationComplete = reservation.status === "checked_out";
+	const isReservationComplete = reservation.status === "checked_out" || reservation.status === "confirmed";
 
 	if (isMobile) {
 		return (
@@ -99,37 +100,41 @@ export function ReservationActions({
 						<Printer className="size-4" />
 					</Button>
 				)}
-				{showPaymentAndIncome && onAddIncome && (
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={onAddIncome}
-						className="text-blue-600 hover:text-blue-700"
-						disabled={isReservationComplete}
-						title={
-							isReservationComplete
-								? "Cannot add income - reservation is complete"
-								: ""
-						}
-					>
-						<DollarSign className="size-4" />
-					</Button>
-				)}
-				{showPaymentAndIncome && canShowPayment && onPayment && (
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={onPayment}
-						className="text-green-600 hover:text-green-700"
-						disabled={isReservationComplete}
-						title={
-							isReservationComplete
-								? "Cannot make payment - reservation is complete"
-								: ""
-						}
-					>
-						<CreditCard className="size-4" />
-					</Button>
+				{showPaymentAndIncome && (
+					isReservationComplete ? (
+						<Button
+							variant="outline"
+							size="sm"
+							className="text-green-600 cursor-not-allowed"
+							disabled
+						>
+							<CheckCircle className="size-4 mr-1" />
+							Reservation Completed
+						</Button>
+					) : (
+						<>
+							{onAddIncome && (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={onAddIncome}
+									className="text-blue-600 hover:text-blue-700"
+								>
+									<DollarSign className="size-4" />
+								</Button>
+							)}
+							{canShowPayment && onPayment && (
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={onPayment}
+									className="text-green-600 hover:text-green-700"
+								>
+									<CreditCard className="size-4" />
+								</Button>
+							)}
+						</>
+					)
 				)}{" "}
 				<OTPVerification
 					onVerified={onEdit}
