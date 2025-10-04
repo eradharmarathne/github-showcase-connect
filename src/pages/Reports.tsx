@@ -1,21 +1,19 @@
 import {
-	ArrowLeft,
 	BarChart3,
-	Building2,
-	Calendar,
 	CreditCard,
-	DollarSign,
 	Download,
 	Filter,
 	Percent,
 	RefreshCw,
 	TrendingUp,
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router";
-import AccountsReports from "@/components/reports/AccountsReports";
-import CommissionReports from "@/components/reports/CommissionReports";
-import ComprehensiveReports from "@/components/reports/ComprehensiveReports";
-import EnhancedFinancialReports from "@/components/reports/EnhancedFinancialReports";
+import { useSearchParams } from "react-router";
+import {
+	AccountsReports,
+	CommissionReports,
+	ComprehensiveReports,
+	EnhancedFinancialReports,
+} from "@/components/reports";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -24,10 +22,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
-import FinancialReports from "./FinancialReports";
 
 export default function Reports() {
 	const [searchParams, setSearchParams] = useSearchParams();
@@ -40,7 +35,7 @@ export default function Reports() {
 				<CardHeader className="pb-3">
 					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 						<div>
-							<CardTitle className="text-base  font-semibold">
+							<CardTitle className="text-base font-semibold">
 								Reports Dashboard
 							</CardTitle>
 							<CardDescription className="text-xs lg:text-sm">
@@ -124,28 +119,28 @@ export default function Reports() {
 							<TabsList className="grid w-full grid-cols-4 h-12">
 								<TabsTrigger
 									value="comprehensive"
-									className="flex items-center gap-2 text-md "
+									className="flex items-center gap-2 text-md"
 								>
 									<BarChart3 className="size-4" />
 									Financial Overview
 								</TabsTrigger>
 								<TabsTrigger
 									value="detailed"
-									className="flex items-center gap-2 text-md "
+									className="flex items-center gap-2 text-md"
 								>
 									<TrendingUp className="size-4" />
 									Detailed Reports
 								</TabsTrigger>
 								<TabsTrigger
 									value="accounts"
-									className="flex items-center gap-2 text-md "
+									className="flex items-center gap-2 text-md"
 								>
 									<CreditCard className="size-4" />
 									Account Statements
 								</TabsTrigger>
 								<TabsTrigger
 									value="commission"
-									className="flex items-center gap-2 text-md "
+									className="flex items-center gap-2 text-md"
 								>
 									<Percent className="size-4" />
 									Commissions
@@ -177,310 +172,3 @@ export default function Reports() {
 	);
 }
 
-// Skeleton Loading Components for Reports
-export function ComprehensiveReportsSkeleton() {
-	return (
-		<div className="space-y-6 px-4">
-			{/* Summary Cards Skeleton */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-				{Array.from({ length: 4 }).map((_, i) => (
-					<Card key={i}>
-						<CardHeader className="pb-2">
-							<Skeleton className="h-4 w-24" />
-						</CardHeader>
-						<CardContent>
-							<Skeleton className="h-8 w-32 mb-2" />
-							<Skeleton className="h-3 w-20" />
-						</CardContent>
-					</Card>
-				))}
-			</div>
-
-			{/* Charts Skeleton */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-				<Card>
-					<CardHeader>
-						<Skeleton className="h-6 w-48" />
-						<Skeleton className="h-4 w-32" />
-					</CardHeader>
-					<CardContent>
-						<Skeleton className="h-64 w-full" />
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader>
-						<Skeleton className="h-6 w-48" />
-						<Skeleton className="h-4 w-32" />
-					</CardHeader>
-					<CardContent>
-						<Skeleton className="h-64 w-full" />
-					</CardContent>
-				</Card>
-			</div>
-		</div>
-	);
-}
-
-export function EnhancedFinancialReportsSkeleton() {
-	return (
-		<div className="space-y-6 px-0 sm:px-4">
-			{/* Filter Controls Skeleton */}
-			<Card>
-				<CardHeader>
-					<Skeleton className="h-6 w-40" />
-				</CardHeader>
-				<CardContent>
-					<div className="flex flex-wrap gap-4">
-						<Skeleton className="h-10 w-32" />
-						<Skeleton className="h-10 w-32" />
-						<Skeleton className="h-10 w-32" />
-						<Skeleton className="h-10 w-24" />
-					</div>
-				</CardContent>
-			</Card>
-
-			{/* Financial Tables Skeleton */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-				<Card>
-					<CardHeader>
-						<Skeleton className="h-6 w-32" />
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-3">
-							{Array.from({ length: 6 }).map((_, i) => (
-								<div key={i} className="flex justify-between items-center">
-									<Skeleton className="h-4 w-24" />
-									<Skeleton className="h-4 w-16" />
-								</div>
-							))}
-						</div>
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader>
-						<Skeleton className="h-6 w-32" />
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-3">
-							{Array.from({ length: 6 }).map((_, i) => (
-								<div key={i} className="flex justify-between items-center">
-									<Skeleton className="h-4 w-24" />
-									<Skeleton className="h-4 w-16" />
-								</div>
-							))}
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-
-			{/* Chart Skeleton */}
-			<Card>
-				<CardHeader>
-					<Skeleton className="h-6 w-48" />
-				</CardHeader>
-				<CardContent>
-					<Skeleton className="h-80 w-full" />
-				</CardContent>
-			</Card>
-		</div>
-	);
-}
-
-export function DetailedBalanceSheetSkeleton() {
-	return (
-		<div className="space-y-6 px-4">
-			{/* Header Skeleton */}
-			<div className="flex flex-col sm:flex-row gap-y-2 justify-between items-start sm:items-center">
-				<div>
-					<div className="flex items-center gap-2 mb-2">
-						<Skeleton className="h-6 w-6" />
-						<Skeleton className="h-6 w-48" />
-					</div>
-					<Skeleton className="h-4 w-64" />
-				</div>
-				<div className="flex gap-2">
-					<Skeleton className="h-10 w-24" />
-					<Skeleton className="h-10 w-32" />
-				</div>
-			</div>
-
-			{/* Account Summary Skeleton */}
-			<Card className="bg-muted/20">
-				<CardHeader>
-					<Skeleton className="h-6 w-32" />
-				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-						{Array.from({ length: 4 }).map((_, i) => (
-							<div key={i}>
-								<Skeleton className="h-4 w-24 mb-2" />
-								<Skeleton className="h-6 w-20" />
-							</div>
-						))}
-					</div>
-				</CardContent>
-			</Card>
-
-			{/* Transaction History Skeleton */}
-			<Card>
-				<CardHeader>
-					<Skeleton className="h-5 w-56" />
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-2 max-h-96 overflow-y-auto">
-						{Array.from({ length: 8 }).map((_, i) => (
-							<div
-								key={i}
-								className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg"
-							>
-								<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-									<Skeleton className="h-6 w-16 rounded-full" />
-									<div>
-										<Skeleton className="h-3 w-32 mb-1" />
-										<Skeleton className="h-4 w-40 mb-1" />
-										<Skeleton className="h-3 w-24" />
-									</div>
-								</div>
-								<div className="text-left sm:text-right">
-									<Skeleton className="h-5 w-20 mb-1" />
-									<div className="text-sm">
-										<Skeleton className="h-3 w-16 mb-1" />
-										<Skeleton className="h-4 w-18" />
-									</div>
-								</div>
-							</div>
-						))}
-					</div>
-				</CardContent>
-			</Card>
-
-			{/* Account Details Skeleton */}
-			<div>
-				<Skeleton className="h-6 w-32 mb-4" />
-				<div className="space-y-4">
-					{Array.from({ length: 3 }).map((_, i) => (
-						<Card key={i} className="border-l-2 sm:border-l-4 border-l-primary">
-							<CardHeader className="pb-3">
-								<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
-									<div>
-										<Skeleton className="h-5 w-32 mb-2" />
-										<div className="flex items-center gap-2">
-											<Skeleton className="h-5 w-20 rounded-full" />
-											<Skeleton className="h-4 w-24" />
-										</div>
-									</div>
-									<div className="text-right">
-										<Skeleton className="h-4 w-24 mb-1" />
-										<Skeleton className="h-6 w-20" />
-									</div>
-								</div>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-									{Array.from({ length: 4 }).map((_, j) => (
-										<div key={j} className="text-center">
-											<Skeleton className="h-3 w-20 mx-auto mb-1" />
-											<Skeleton className="h-5 w-16 mx-auto" />
-										</div>
-									))}
-								</div>
-
-								{/* Expandable Transaction Section Skeleton */}
-								<div className="mt-4">
-									<div className="flex items-center gap-2 mb-2">
-										<Skeleton className="h-4 w-4" />
-										<Skeleton className="h-4 w-32" />
-									</div>
-									<div className="space-y-2">
-										{Array.from({ length: 3 }).map((_, k) => (
-											<div
-												key={k}
-												className="flex items-center justify-between p-2 border rounded"
-											>
-												<div className="flex items-center gap-2">
-													<Skeleton className="h-4 w-4" />
-													<div>
-														<Skeleton className="h-3 w-20 mb-1" />
-														<Skeleton className="h-4 w-32" />
-													</div>
-												</div>
-												<Skeleton className="h-4 w-16" />
-											</div>
-										))}
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
-			</div>
-		</div>
-	);
-}
-
-export function CommissionReportsSkeleton() {
-	return (
-		<div className="space-y-6  px-2 sm:px-4">
-			{/* Commission Summary Cards Skeleton */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-				{Array.from({ length: 4 }).map((_, i) => (
-					<Card key={i}>
-						<CardHeader className="pb-2">
-							<div className="flex items-center gap-2">
-								<Skeleton className="h-4 w-4 rounded" />
-								<Skeleton className="h-4 w-28" />
-							</div>
-						</CardHeader>
-						<CardContent>
-							<Skeleton className="h-8 w-24 mb-1" />
-							<Skeleton className="h-3 w-16" />
-						</CardContent>
-					</Card>
-				))}
-			</div>
-
-			{/* Commission Details Table Skeleton */}
-			<Card>
-				<CardHeader>
-					<Skeleton className="h-6 w-40" />
-					<Skeleton className="h-4 w-56" />
-				</CardHeader>
-				<CardContent>
-					<div className="space-y-4">
-						{/* Table Header */}
-						<div className="grid grid-cols-5 gap-4 pb-2 border-b">
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-20" />
-							<Skeleton className="h-4 w-16" />
-							<Skeleton className="h-4 w-18" />
-							<Skeleton className="h-4 w-14" />
-						</div>
-						{/* Table Rows */}
-						{Array.from({ length: 10 }).map((_, i) => (
-							<div
-								key={i}
-								className="grid grid-cols-5 gap-4 py-3 border-b last:border-b-0"
-							>
-								<Skeleton className="h-4 w-20" />
-								<Skeleton className="h-4 w-24" />
-								<Skeleton className="h-4 w-16" />
-								<Skeleton className="h-4 w-12" />
-								<Skeleton className="h-4 w-16" />
-							</div>
-						))}
-					</div>
-				</CardContent>
-			</Card>
-
-			{/* Commission Chart Skeleton */}
-			<Card>
-				<CardHeader>
-					<Skeleton className="h-6 w-44" />
-				</CardHeader>
-				<CardContent>
-					<Skeleton className="h-64 w-full" />
-				</CardContent>
-			</Card>
-		</div>
-	);
-}

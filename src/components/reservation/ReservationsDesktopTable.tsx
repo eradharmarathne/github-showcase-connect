@@ -223,11 +223,6 @@ export function ReservationsDesktopTable({
 	return (
 		<div className="hidden lg:block">
 			<Card>
-				<CardHeader>
-					<CardTitle className="px-4 text-sm font-medium">
-						Reservations
-					</CardTitle>
-				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>

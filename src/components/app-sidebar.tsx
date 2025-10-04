@@ -113,16 +113,6 @@ export function AppSidebar({
 			});
 		}
 
-		// Income/Payments
-		if (hasAnyPermission(["access_income"])) {
-			items.push({
-				title: t("navigation.income"),
-				url: "/income",
-				icon: DollarSign,
-				isActive: location.pathname === "/income",
-			});
-		}
-
 		// Expenses
 		if (hasAnyPermission(["access_expenses"])) {
 			items.push({
