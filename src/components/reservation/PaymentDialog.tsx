@@ -199,8 +199,6 @@ export function PaymentDialog({
 				notes: formData.notes,
 				reference_number: formData.reference_number || null,
 				created_by: user?.id || null,
-				// Add tenant_id for security (will be required soon)
-				tenant_id: tenant.id,
 			});
 
 			if (paymentError) throw paymentError;

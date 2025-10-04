@@ -239,7 +239,7 @@ export function ReservationsDesktopTable({
 											<div className="text-sm text-gray-600">
 												{reservation.guest_name}
 											</div>
-											<div className="flex items-center gap-3 text-xs text-gray-500">
+											<div className="flex flex-col items-start pt-4 gap-1 text-xs text-gray-500">
 												<div className="flex items-center gap-1">
 													<MapPin className="h-3 w-3" />
 													{reservation.rooms?.room_number || "N/A"} -{" "}
