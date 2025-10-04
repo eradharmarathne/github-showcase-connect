@@ -77,6 +77,9 @@ export function ReservationActions({
 	isMobile = false,
 	showPaymentAndIncome = true,
 }: ReservationActionsProps) {
+		// Disable income and payment actions when reservation is checked out (complete)
+		const isReservationComplete = reservation.status === "checked_out";
+		
 		if (isMobile) {
 			return (
 				<div className="flex gap-2 mt-4">
@@ -101,6 +104,8 @@ export function ReservationActions({
 						size="sm"
 						onClick={onAddIncome}
 						className="text-blue-600 hover:text-blue-700"
+						disabled={isReservationComplete}
+						title={isReservationComplete ? "Cannot add income - reservation is complete" : ""}
 					>
 						<DollarSign className="size-4" />
 					</Button>
@@ -112,6 +117,8 @@ export function ReservationActions({
 						size="sm"
 						onClick={onPayment}
 						className="text-green-600 hover:text-green-700"
+						disabled={isReservationComplete}
+						title={isReservationComplete ? "Cannot make payment - reservation is complete" : ""}
 					>
 						<CreditCard className="size-4" />
 					</Button>
@@ -149,19 +156,23 @@ export function ReservationActions({
 						<>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem 
-								onClick={onAddIncome}
-								className="text-blue-600"
+								onClick={isReservationComplete ? undefined : onAddIncome}
+								className={isReservationComplete ? "text-gray-400 cursor-not-allowed" : "text-blue-600"}
+								disabled={isReservationComplete}
 							>
 								<DollarSign className="size-4 mr-2" />
 								Add Income
+								{isReservationComplete && <span className="text-xs ml-2">(Complete)</span>}
 							</DropdownMenuItem>
 							{canShowPayment && (
 								<DropdownMenuItem 
-									onClick={onPayment}
-									className="text-green-600"
+									onClick={isReservationComplete ? undefined : onPayment}
+									className={isReservationComplete ? "text-gray-400 cursor-not-allowed" : "text-green-600"}
+									disabled={isReservationComplete}
 								>
 									<CreditCard className="size-4 mr-2" />
 									Pay Now
+									{isReservationComplete && <span className="text-xs ml-2">(Complete)</span>}
 								</DropdownMenuItem>
 							)}
 						</>

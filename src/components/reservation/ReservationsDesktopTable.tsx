@@ -225,11 +225,13 @@ export function ReservationsDesktopTable({
 												size="sm"
 												onClick={() => onAddIncome(reservation)}
 												className="text-blue-600 hover:text-blue-700"
+												disabled={reservation.status === "checked_out"}
+												title={reservation.status === "checked_out" ? "Cannot add income - reservation is complete" : ""}
 											>
 												<DollarSign className="size-4 mr-1" />
 												Add Income
 											</Button>
-											{canShowPaymentButton(reservation) && (
+											{canShowPaymentButton(reservation) && reservation.status !== "checked_out" && (
 												<Button
 													variant="outline"
 													size="sm"
