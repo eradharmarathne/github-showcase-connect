@@ -6,7 +6,7 @@ import {
 	Eye,
 	MapPin,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,11 +23,15 @@ import {
 	type ReservationFinancial,
 	useReservationFinancials,
 } from "@/hooks/useReservationFinancials";
+import type { Database } from "@/integrations/supabase/types";
+import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 
-const formatUSD = (amount: number) => {
+type Currency = Database["public"]["Enums"]["currency_type"];
+
+const formatCurrency = (amount: number, currency: Currency) => {
 	return new Intl.NumberFormat("en-US", {
 		style: "currency",
-		currency: "USD",
+		currency: currency,
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 2,
 	}).format(amount);
@@ -61,6 +65,7 @@ const formatDate = (dateString: string) => {
 interface ReservationsDesktopTableProps {
 	searchQuery: string;
 	statusFilter: string;
+	selectedCurrency: Currency;
 	onViewReservation: (id: string) => void;
 	onEditReservation: (reservation: any) => void;
 	onPayment: (reservationId: string, amount: number, currency: string) => void;
@@ -70,12 +75,86 @@ interface ReservationsDesktopTableProps {
 export function ReservationsDesktopTable({
 	searchQuery,
 	statusFilter,
+	selectedCurrency,
 	onViewReservation,
 	onEditReservation,
 	onPayment,
 	onAddIncome,
 }: ReservationsDesktopTableProps) {
 	const { data: reservations, isLoading, error } = useReservationFinancials();
+
+	// State for converted amounts
+	const [convertedAmounts, setConvertedAmounts] = useState<
+		Record<
+			string,
+			{
+				roomAmount: number;
+				expensesAmount: number;
+				paidAmount: number;
+				balanceAmount: number;
+			}
+		>
+	>({});
+
+	// Convert currency amounts when selectedCurrency changes
+	useEffect(() => {
+		const convertAmounts = async () => {
+			if (!reservations) return;
+
+			const newConvertedAmounts: typeof convertedAmounts = {};
+
+			for (const reservation of reservations) {
+				try {
+					const [roomAmount, expensesAmount, paidAmount, balanceAmount] =
+						await Promise.all([
+							convertCurrency(
+								reservation.room_amount_usd,
+								"USD",
+								selectedCurrency,
+							),
+							convertCurrency(
+								reservation.expenses_usd,
+								"USD",
+								selectedCurrency,
+							),
+							convertCurrency(
+								reservation.user_paid_amount_usd,
+								"USD",
+								selectedCurrency,
+							),
+							convertCurrency(
+								reservation.needs_to_pay_usd,
+								"USD",
+								selectedCurrency,
+							),
+						]);
+
+					newConvertedAmounts[reservation.id] = {
+						roomAmount,
+						expensesAmount,
+						paidAmount,
+						balanceAmount,
+					};
+				} catch (error) {
+					console.error(
+						`Failed to convert currency for reservation ${reservation.id}:`,
+						error,
+					);
+					// Fallback to USD amounts
+					newConvertedAmounts[reservation.id] = {
+						roomAmount: reservation.room_amount_usd,
+						expensesAmount: reservation.expenses_usd,
+						paidAmount: reservation.user_paid_amount_usd,
+						balanceAmount: reservation.needs_to_pay_usd,
+					};
+				}
+			}
+
+			setConvertedAmounts(newConvertedAmounts);
+		};
+
+		convertAmounts();
+	}, [reservations, selectedCurrency]);
 
 	// Filter reservations
 	const filteredReservations =
@@ -180,7 +259,10 @@ export function ReservationsDesktopTable({
 									</TableCell>
 									<TableCell>
 										<div className="font-medium text-green-600">
-											{formatUSD(reservation.room_amount_usd)}
+											{formatCurrency(
+												convertedAmounts[reservation.id]?.roomAmount || 0,
+												selectedCurrency,
+											)}
 										</div>
 										<div className="text-xs text-gray-500">
 											{reservation.nights} nights
@@ -188,12 +270,18 @@ export function ReservationsDesktopTable({
 									</TableCell>
 									<TableCell>
 										<div className="font-medium text-orange-600">
-											{formatUSD(reservation.expenses_usd)}
+											{formatCurrency(
+												convertedAmounts[reservation.id]?.expensesAmount || 0,
+												selectedCurrency,
+											)}
 										</div>
 									</TableCell>
 									<TableCell>
 										<div className="font-medium text-blue-600">
-											{formatUSD(reservation.user_paid_amount_usd)}
+											{formatCurrency(
+												convertedAmounts[reservation.id]?.paidAmount || 0,
+												selectedCurrency,
+											)}
 										</div>
 									</TableCell>
 									<TableCell>
@@ -204,7 +292,10 @@ export function ReservationsDesktopTable({
 													: "text-green-600"
 											}`}
 										>
-											{formatUSD(reservation.needs_to_pay_usd)}
+											{formatCurrency(
+												convertedAmounts[reservation.id]?.balanceAmount || 0,
+												selectedCurrency,
+											)}
 										</div>
 									</TableCell>
 									<TableCell>

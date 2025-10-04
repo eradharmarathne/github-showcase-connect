@@ -1,4 +1,5 @@
 import { Calendar, MapPin, Search } from "lucide-react";
+import { CurrencySelector } from "@/components/CurrencySelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,6 +9,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { Database } from "@/integrations/supabase/types";
+
+type Currency = Database["public"]["Enums"]["currency_type"];
 
 interface Location {
 	id: string;
@@ -22,6 +26,8 @@ interface ReservationsFiltersProps {
 	onSearchChange: (value: string) => void;
 	statusFilter: string;
 	onStatusFilterChange: (value: string) => void;
+	selectedCurrency: Currency;
+	onCurrencyChange: (currency: Currency) => void;
 	onNewReservation: () => void;
 }
 
@@ -33,6 +39,8 @@ export function ReservationsFilters({
 	onSearchChange,
 	statusFilter,
 	onStatusFilterChange,
+	selectedCurrency,
+	onCurrencyChange,
 	onNewReservation,
 }: ReservationsFiltersProps) {
 	return (
@@ -76,6 +84,13 @@ export function ReservationsFilters({
 					<SelectItem value="cancelled">Cancelled</SelectItem>
 				</SelectContent>
 			</Select>
+
+			<div className="w-full lg:w-48">
+				<CurrencySelector
+					currency={selectedCurrency}
+					onCurrencyChange={onCurrencyChange}
+				/>
+			</div>
 
 			<Button onClick={onNewReservation} className="flex-shrink-0">
 				<Calendar className="size-4 mr-2" />

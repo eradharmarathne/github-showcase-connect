@@ -1,4 +1,5 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
+import { useEffect, useState } from "react";
 import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,12 +9,17 @@ import {
 	type ReservationWithJoins,
 	useReservationsData,
 } from "@/hooks/useReservationsData";
+import type { Database } from "@/integrations/supabase/types";
+import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 import { ReservationActions } from "./ReservationActions";
 import { ReservationExpensesDisplay } from "./ReservationExpensesDisplay";
+
+type Currency = Database["public"]["Enums"]["currency_type"];
 
 interface ReservationsMobileCardsProps {
 	searchQuery: string;
 	statusFilter: string;
+	selectedCurrency: Currency;
 	onViewReservation: (id: string) => void;
 	onEditReservation: (reservation: any) => void;
 	onPayment: (reservationId: string, amount: number, currency: string) => void;
@@ -23,6 +29,7 @@ interface ReservationsMobileCardsProps {
 export function ReservationsMobileCards({
 	searchQuery,
 	statusFilter,
+	selectedCurrency,
 	onViewReservation,
 	onEditReservation,
 	onPayment,
@@ -32,17 +39,43 @@ export function ReservationsMobileCards({
 	const { printReservation } = useReservationPrint();
 	const { tenant } = useAuth();
 
-	// Utility functions
-	const getCurrencySymbol = (currency: string): string => {
-		const symbols: Record<string, string> = {
-			LKR: "Rs.",
-			USD: "$",
-			EUR: "€",
-			GBP: "£",
-		};
-		return symbols[currency] || currency;
-	};
+	// State for converted amounts
+	const [convertedAmounts, setConvertedAmounts] = useState<
+		Record<string, number>
+	>({});
 
+	// Convert currency amounts when selectedCurrency changes
+	useEffect(() => {
+		const convertAmounts = async () => {
+			if (!reservations) return;
+
+			const newConvertedAmounts: Record<string, number> = {};
+
+			for (const reservation of reservations) {
+				const roomAmount = reservation.room_rate * reservation.nights;
+				try {
+					const convertedAmount = await convertCurrency(
+						roomAmount,
+						reservation.currency,
+						selectedCurrency,
+					);
+					newConvertedAmounts[reservation.id] = convertedAmount;
+				} catch (error) {
+					console.error(
+						`Failed to convert currency for reservation ${reservation.id}:`,
+						error,
+					);
+					newConvertedAmounts[reservation.id] = roomAmount; // Fallback to original amount
+				}
+			}
+
+			setConvertedAmounts(newConvertedAmounts);
+		};
+
+		convertAmounts();
+	}, [reservations, selectedCurrency]);
+
+	// Utility functions
 	const getStatusColor = (status: string): string => {
 		const colors: Record<string, string> = {
 			confirmed: "bg-green-100 text-green-800",
@@ -158,10 +191,8 @@ export function ReservationsMobileCards({
 							<div className="flex items-center gap-2">
 								<DollarSign className="h-3 w-3" />
 								<span>
-									Room: {getCurrencySymbol(reservation.currency)}{" "}
-									{(
-										reservation.room_rate * reservation.nights
-									).toLocaleString()}
+									Room: {getCurrencySymbol(selectedCurrency)}{" "}
+									{(convertedAmounts[reservation.id] || 0).toLocaleString()}
 								</span>
 							</div>
 
@@ -170,7 +201,7 @@ export function ReservationsMobileCards({
 								<DollarSign className="h-3 w-3" />
 								<ReservationExpensesDisplay
 									reservationId={reservation.id}
-									currency={reservation.currency}
+									currency={selectedCurrency}
 									isCompact={true}
 								/>
 							</div>

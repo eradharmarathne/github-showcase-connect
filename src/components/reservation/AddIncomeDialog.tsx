@@ -19,9 +19,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/useProfile";
-import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 
 type Database = any;
@@ -101,13 +101,14 @@ export function AddIncomeDialog({
 	const handleIncomeSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		// Allow income creation with or without a reservation
-		
+
 		try {
 			const incomeData = {
 				note:
 					incomeForm.note ||
-					(selectedReservation 
-						? t("income.addDialog.reservationInfo.reservation") + ` ${selectedReservation.reservation_number}`
+					(selectedReservation
+						? t("income.addDialog.reservationInfo.reservation") +
+							` ${selectedReservation.reservation_number}`
 						: "General income entry"),
 				amount: incomeForm.amount,
 				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP", // Cast to correct enum type

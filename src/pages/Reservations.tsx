@@ -16,12 +16,18 @@ import { ViewReservationDialog } from "@/components/ViewReservationDialog";
 import { useLocationContext } from "@/context/LocationContext";
 import { useIncomeData } from "@/hooks/useIncomeData";
 import { useReservationsData } from "@/hooks/useReservationsData";
+import type { Database } from "@/integrations/supabase/types";
+
+type Currency = Database["public"]["Enums"]["currency_type"];
 
 export default function Reservations() {
 	const { locations } = useLocationContext();
 	const { refetch } = useReservationsData();
 	const { accounts } = useIncomeData();
 	const navigate = useNavigate();
+
+	// State management
+	const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USD");
 
 	// Dialog states
 	const [activeTab, setActiveTab] = useState("reservations");
@@ -124,11 +130,13 @@ export default function Reservations() {
 						selectedLocation=""
 						searchQuery={searchQuery}
 						statusFilter={statusFilter}
+						selectedCurrency={selectedCurrency}
 						onLocationChange={() => {
 							// Location switching handled by LocationContext
 						}}
 						onSearchChange={setSearchQuery}
 						onStatusFilterChange={setStatusFilter}
+						onCurrencyChange={setSelectedCurrency}
 						onNewReservation={() => setIsNewReservationDialogOpen(true)}
 					/>
 
@@ -136,6 +144,7 @@ export default function Reservations() {
 						<ReservationsMobileCards
 							searchQuery={searchQuery}
 							statusFilter={statusFilter}
+							selectedCurrency={selectedCurrency}
 							onViewReservation={handleViewReservation}
 							onEditReservation={handleEditReservation}
 							onPayment={handlePayment}
@@ -145,6 +154,7 @@ export default function Reservations() {
 						<ReservationsDesktopTable
 							searchQuery={searchQuery}
 							statusFilter={statusFilter}
+							selectedCurrency={selectedCurrency}
 							onViewReservation={handleViewReservation}
 							onEditReservation={handleEditReservation}
 							onPayment={handlePayment}
