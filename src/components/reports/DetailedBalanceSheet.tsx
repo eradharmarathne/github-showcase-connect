@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { type Currency } from "@/utils/currency";
-import { useAccountData } from "./detailed-balance/useAccountData";
-import { BalanceSheetHeader, exportBalanceSheetToCSV } from "./detailed-balance/BalanceSheetHeader";
-import { AccountSummaryCard } from "./detailed-balance/AccountSummaryCard";
-import { TransactionHistoryCard, type TransactionWithBalance } from "./detailed-balance/TransactionHistoryCard";
-import { AccountDetailsList, type AccountDetail } from "./detailed-balance/AccountDetailsList";
+import { useAccountData } from "./detailed/useAccountData";
+import { BalanceSheetHeader, exportBalanceSheetToCSV } from "./detailed/BalanceSheetHeader";
+import { AccountSummaryCard } from "./detailed/AccountSummaryCard";
+import { TransactionHistoryCard, type TransactionWithBalance } from "./detailed/TransactionHistoryCard";
+import { AccountDetailsList, type AccountDetail } from "./detailed/AccountDetailsList";
 
 export default function DetailedBalanceSheet() {
 	const [accounts, setAccounts] = useState<AccountDetail[]>([]);

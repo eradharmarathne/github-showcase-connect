@@ -10,17 +10,28 @@ const SUPABASE_SERVICE_ROLE_KEY = import.meta.env
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(
-	SUPABASE_URL,
-	SUPABASE_ANON_KEY,
-	{
-		auth: {
-			storage: localStorage,
-			persistSession: true,
-			autoRefreshToken: true,
-		},
-	},
-);
+// Use singleton pattern to prevent multiple client instances
+let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
+
+function getSupabaseClient() {
+	if (!supabaseInstance) {
+		supabaseInstance = createClient<Database>(
+			SUPABASE_URL,
+			SUPABASE_ANON_KEY,
+			{
+				auth: {
+					storage: localStorage,
+					persistSession: true,
+					autoRefreshToken: true,
+					storageKey: 'supabase.auth.token', // Unique storage key
+				},
+			},
+		);
+	}
+	return supabaseInstance;
+}
+
+export const supabase = getSupabaseClient();
 
 // Service role client for admin operations
 export const supabaseAdmin = createClient<Database>(

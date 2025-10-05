@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	ChartContainer,
@@ -189,42 +189,40 @@ export function BookingSourceChart({
 				<div className="h-[400px] flex flex-col">
 					<ChartContainer
 						config={{}}
-						className="mx-auto aspect-square h-[280px] w-[280px]"
+						className="mx-auto aspect-square h-[280px]"
 					>
-						<ResponsiveContainer width="100%" height="100%">
-							<PieChart>
-								<Pie
-									data={sourceData}
-									cx="50%"
-									cy="50%"
-									innerRadius={50}
-									outerRadius={90}
-									paddingAngle={2}
-									dataKey="count"
-								>
-									{sourceData.map((entry, index) => (
-										<Cell
-											key={`cell-${index}`}
-											fill={
-												SOURCE_COLORS[entry.source] ||
-												FALLBACK_COLORS[index % FALLBACK_COLORS.length]
-											}
-										/>
-									))}
-								</Pie>
-								<ChartTooltip
-									content={
-										<ChartTooltipContent
-											labelFormatter={(value) => value}
-											formatter={(value, name, entry) => [
-												`${entry.payload.count} bookings (${entry.payload.percentage.toFixed(1)}%)`,
-												entry.payload.source,
-											]}
-										/>
-									}
-								/>
-							</PieChart>
-						</ResponsiveContainer>
+						<PieChart>
+							<Pie
+								data={sourceData}
+								cx="50%"
+								cy="50%"
+								innerRadius={50}
+								outerRadius={90}
+								paddingAngle={2}
+								dataKey="count"
+							>
+								{sourceData.map((entry, index) => (
+									<Cell
+										key={`cell-${index}`}
+										fill={
+											SOURCE_COLORS[entry.source] ||
+											FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+										}
+									/>
+								))}
+							</Pie>
+							<ChartTooltip
+								content={
+									<ChartTooltipContent
+										labelFormatter={(value) => value}
+										formatter={(value, name, entry) => [
+											`${entry.payload.count} bookings (${entry.payload.percentage.toFixed(1)}%)`,
+											entry.payload.source,
+										]}
+									/>
+								}
+							/>
+						</PieChart>
 					</ChartContainer>
 
 					{/* Legend */}
