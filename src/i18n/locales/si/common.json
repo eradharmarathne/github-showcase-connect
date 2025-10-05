@@ -893,5 +893,28 @@
       "expense": "වියදම",
       "noTransactions": "මෑත ගනුදෙනු හමු නොවීය"
     }
+  },
+  "reports": {
+    "title": "වාර්තා පුවරුව",
+    "subtitle": "සවිස්තරාත්මක මූල්‍ය වාර්තා සහ විශ්ලේෂණ වෙත ප්‍රවේශය",
+    "buttons": {
+      "filter": "පෙරහන",
+      "export": "නිර්යාත",
+      "refresh": "නැවුම් කරන්න"
+    },
+    "tabs": {
+      "mobile": {
+        "overview": "සාරාංශය",
+        "detailed": "සවිස්තරාත්මක",
+        "accounts": "ගිණුම්",
+        "commission": "කොමිස්"
+      },
+      "desktop": {
+        "financialOverview": "මූල්‍ය සාරාංශය",
+        "detailedReports": "සවිස්තරාත්මක වාර්තා",
+        "accountStatements": "ගිණුම් ප්‍රකාශන",
+        "commissions": "කොමිස් වාර්තා"
+      }
+    }
   }
 }

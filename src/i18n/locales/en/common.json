@@ -893,5 +893,28 @@
       "expense": "Expense",
       "noTransactions": "No recent transactions found"
     }
+  },
+  "reports": {
+    "title": "Reports Dashboard",
+    "subtitle": "Access detailed financial reports and analytics",
+    "buttons": {
+      "filter": "Filter",
+      "export": "Export",
+      "refresh": "Refresh"
+    },
+    "tabs": {
+      "mobile": {
+        "overview": "Overview",
+        "detailed": "Detailed",
+        "accounts": "Accounts",
+        "commission": "Commission"
+      },
+      "desktop": {
+        "financialOverview": "Financial Overview",
+        "detailedReports": "Detailed Reports",
+        "accountStatements": "Account Statements",
+        "commissions": "Commissions"
+      }
+    }
   }
 }

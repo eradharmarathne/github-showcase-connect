@@ -7,6 +7,7 @@ import {
 	RefreshCw,
 	TrendingUp,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import {
 	AccountsReports,
@@ -25,6 +26,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Reports() {
+	const { t } = useTranslation();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const activeTab = searchParams.get("tab") || "comprehensive";
 
@@ -36,10 +38,10 @@ export default function Reports() {
 					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 						<div>
 							<CardTitle className="text-base font-semibold">
-								Reports Dashboard
+								{t("reports.title")}
 							</CardTitle>
 							<CardDescription className="text-xs lg:text-sm">
-								Access detailed financial reports and analytics
+								{t("reports.subtitle")}
 							</CardDescription>
 						</div>
 						<div className="flex gap-2 w-full sm:w-auto">
@@ -49,7 +51,7 @@ export default function Reports() {
 								className="flex-1 sm:flex-none"
 							>
 								<Filter className="size-4 mr-2" />
-								<span className="hidden sm:inline">Filter</span>
+								<span className="hidden sm:inline">{t("reports.buttons.filter")}</span>
 							</Button>
 							<Button
 								variant="outline"
@@ -57,7 +59,7 @@ export default function Reports() {
 								className="flex-1 sm:flex-none"
 							>
 								<Download className="size-4 mr-2" />
-								<span className="hidden sm:inline">Export</span>
+								<span className="hidden sm:inline">{t("reports.buttons.export")}</span>
 							</Button>
 							<Button
 								variant="outline"
@@ -65,7 +67,7 @@ export default function Reports() {
 								className="flex-1 sm:flex-none"
 							>
 								<RefreshCw className="size-4 mr-2" />
-								<span className="hidden sm:inline">Refresh</span>
+								<span className="hidden sm:inline">{t("reports.buttons.refresh")}</span>
 							</Button>
 						</div>
 					</div>
@@ -85,14 +87,14 @@ export default function Reports() {
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<BarChart3 className="size-4" />
-									<span className="text-xs">Overview</span>
+									<span className="text-xs">{t("reports.tabs.mobile.overview")}</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="detailed"
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<TrendingUp className="size-4" />
-									<span className="text-xs">Detailed</span>
+									<span className="text-xs">{t("reports.tabs.mobile.detailed")}</span>
 								</TabsTrigger>
 							</TabsList>
 
@@ -102,14 +104,14 @@ export default function Reports() {
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<CreditCard className="size-4" />
-									<span className="text-xs">Accounts</span>
+									<span className="text-xs">{t("reports.tabs.mobile.accounts")}</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="commission"
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<Percent className="size-4" />
-									<span className="text-xs">Commission</span>
+									<span className="text-xs">{t("reports.tabs.mobile.commission")}</span>
 								</TabsTrigger>
 							</TabsList>
 						</div>
@@ -122,28 +124,28 @@ export default function Reports() {
 									className="flex items-center gap-2 text-md"
 								>
 									<BarChart3 className="size-4" />
-									Financial Overview
+									{t("reports.tabs.desktop.financialOverview")}
 								</TabsTrigger>
 								<TabsTrigger
 									value="detailed"
 									className="flex items-center gap-2 text-md"
 								>
 									<TrendingUp className="size-4" />
-									Detailed Reports
+									{t("reports.tabs.desktop.detailedReports")}
 								</TabsTrigger>
 								<TabsTrigger
 									value="accounts"
 									className="flex items-center gap-2 text-md"
 								>
 									<CreditCard className="size-4" />
-									Account Statements
+									{t("reports.tabs.desktop.accountStatements")}
 								</TabsTrigger>
 								<TabsTrigger
 									value="commission"
 									className="flex items-center gap-2 text-md"
 								>
 									<Percent className="size-4" />
-									Commissions
+									{t("reports.tabs.desktop.commissions")}
 								</TabsTrigger>
 							</TabsList>
 						</div>
