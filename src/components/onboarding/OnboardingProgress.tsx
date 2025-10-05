@@ -1,3 +1,4 @@
+import { Check, LoaderCircleIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
 	Stepper,
@@ -10,7 +11,6 @@ import {
 	StepperTitle,
 	StepperTrigger,
 } from "@/components/ui/stepper";
-import { Check, LoaderCircleIcon } from "lucide-react";
 import { STEPS } from "./constants";
 import { OnboardingProgressProps } from "./types";
 
@@ -31,13 +31,22 @@ export function OnboardingProgress({
 				<StepperNav className="gap-3 mb-15">
 					{STEPS.map((step, index) => {
 						return (
-							<StepperItem key={index} step={index + 1} className="relative mx-auto w-full flex-1 items-start">
-								<StepperTrigger className="flex flex-col items-start justify-center gap-2.5 grow" asChild>
+							<StepperItem
+								key={index}
+								step={index + 1}
+								className="relative mx-auto w-full flex-1 items-start"
+							>
+								<StepperTrigger
+									className="flex flex-col items-start justify-center gap-2.5 grow"
+									asChild
+								>
 									<StepperIndicator className="size-8 border-2 data-[state=completed]:text-white data-[state=completed]:bg-green-500 data-[state=inactive]:bg-transparent data-[state=inactive]:border-border data-[state=inactive]:text-muted-foreground">
 										<step.icon className="size-4" />
 									</StepperIndicator>
 									<div className="flex flex-col items-start gap-1">
-										<div className="text-[10px] font-semibold uppercase text-muted-foreground">Step {index + 1}</div>
+										<div className="text-[10px] font-semibold uppercase text-muted-foreground">
+											Step {index + 1}
+										</div>
 										<StepperTitle className="text-start text-base font-semibold group-data-[state=inactive]/step:text-muted-foreground">
 											{step.title}
 										</StepperTitle>

@@ -254,7 +254,10 @@ export function ProfileSettings() {
 			)}
 
 			{/* Phone Verification Dialog */}
-			<Dialog open={showPhoneVerification} onOpenChange={setShowPhoneVerification}>
+			<Dialog
+				open={showPhoneVerification}
+				onOpenChange={setShowPhoneVerification}
+			>
 				<DialogContent className="sm:max-w-md">
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2">

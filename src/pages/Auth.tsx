@@ -276,17 +276,16 @@ export default function Auth() {
 
 					{/* Demo Account Section - Only show on login */}
 					{isLogin && (
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={fillDemoCredentials}
-									disabled={submitting}
-									className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
-								>
-									Try Demo Account
-								</Button>
-
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={fillDemoCredentials}
+							disabled={submitting}
+							className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
+						>
+							Try Demo Account
+						</Button>
 					)}
 
 					{/* Forgot Password Link - Only show on login */}

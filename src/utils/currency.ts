@@ -267,7 +267,10 @@ export function getDisplayCurrency(): string {
 }
 
 // Format amount with currency symbol
-export function formatAmountWithSymbol(amount: number, currency: string = "LKR"): string {
+export function formatAmountWithSymbol(
+	amount: number,
+	currency: string = "LKR",
+): string {
 	const symbol = getCurrencySymbol(currency);
 	return `${symbol} ${amount.toLocaleString()}`;
 }

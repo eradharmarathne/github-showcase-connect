@@ -2,8 +2,8 @@ import { CreditCard, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
-import { useTenant } from "@/hooks/useTenant";
 import { useLocationContext } from "@/context/LocationContext";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency, formatCurrency } from "@/utils/currency";
 
@@ -21,10 +21,10 @@ interface FinancialSummaryCardsProps {
 	dateTo?: string;
 }
 
-export function FinancialSummaryCards({ 
-	baseCurrency, 
-	dateFrom, 
-	dateTo 
+export function FinancialSummaryCards({
+	baseCurrency,
+	dateFrom,
+	dateTo,
 }: FinancialSummaryCardsProps) {
 	const { t } = useTranslation();
 	const { tenant } = useTenant();
@@ -80,7 +80,10 @@ export function FinancialSummaryCards({
 					.eq("reservations.tenant_id", tenant.id);
 
 				if (selectedLocation) {
-					paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
+					paymentsQuery = paymentsQuery.eq(
+						"reservations.location_id",
+						selectedLocation,
+					);
 				}
 				if (dateFrom) {
 					paymentsQuery = paymentsQuery.gte("created_at", dateFrom);
@@ -121,7 +124,8 @@ export function FinancialSummaryCards({
 			}
 
 			const netProfit = totalPayments - totalExpenses;
-			const profitMargin = totalPayments > 0 ? (netProfit / totalPayments) * 100 : 0;
+			const profitMargin =
+				totalPayments > 0 ? (netProfit / totalPayments) * 100 : 0;
 
 			setSummary({
 				totalExpenses,

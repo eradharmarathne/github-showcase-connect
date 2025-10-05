@@ -27,12 +27,24 @@ export function UsersSkeleton() {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-14" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-20" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-12" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-16" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-12" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-14" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-20" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-16" />
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>

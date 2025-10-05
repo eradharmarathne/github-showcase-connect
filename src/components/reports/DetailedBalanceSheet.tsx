@@ -1,14 +1,25 @@
 import { useEffect, useState } from "react";
 import { type Currency } from "@/utils/currency";
-import { useAccountData } from "./detailed/useAccountData";
-import { BalanceSheetHeader, exportBalanceSheetToCSV } from "./detailed/BalanceSheetHeader";
+import {
+	type AccountDetail,
+	AccountDetailsList,
+} from "./detailed/AccountDetailsList";
 import { AccountSummaryCard } from "./detailed/AccountSummaryCard";
-import { TransactionHistoryCard, type TransactionWithBalance } from "./detailed/TransactionHistoryCard";
-import { AccountDetailsList, type AccountDetail } from "./detailed/AccountDetailsList";
+import {
+	BalanceSheetHeader,
+	exportBalanceSheetToCSV,
+} from "./detailed/BalanceSheetHeader";
+import {
+	TransactionHistoryCard,
+	type TransactionWithBalance,
+} from "./detailed/TransactionHistoryCard";
+import { useAccountData } from "./detailed/useAccountData";
 
 export default function DetailedBalanceSheet() {
 	const [accounts, setAccounts] = useState<AccountDetail[]>([]);
-	const [allTransactions, setAllTransactions] = useState<TransactionWithBalance[]>([]);
+	const [allTransactions, setAllTransactions] = useState<
+		TransactionWithBalance[]
+	>([]);
 	const [loading, setLoading] = useState(true);
 	const [baseCurrency, setBaseCurrency] = useState<Currency>("LKR");
 	const [accountSummary, setAccountSummary] = useState({
@@ -64,10 +75,7 @@ export default function DetailedBalanceSheet() {
 				baseCurrency={baseCurrency}
 			/>
 
-			<AccountDetailsList
-				accounts={accounts}
-				baseCurrency={baseCurrency}
-			/>
+			<AccountDetailsList accounts={accounts} baseCurrency={baseCurrency} />
 		</div>
 	);
 }

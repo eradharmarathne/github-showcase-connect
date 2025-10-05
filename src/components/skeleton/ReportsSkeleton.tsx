@@ -34,11 +34,21 @@ export function ReportsSkeleton() {
 			{/* Reports Tabs */}
 			<Tabs defaultValue="comprehensive" className="w-full">
 				<TabsList className="grid w-full grid-cols-5">
-					<TabsTrigger value="comprehensive"><Skeleton className="h-4 w-24" /></TabsTrigger>
-					<TabsTrigger value="financial"><Skeleton className="h-4 w-18" /></TabsTrigger>
-					<TabsTrigger value="accounts"><Skeleton className="h-4 w-16" /></TabsTrigger>
-					<TabsTrigger value="commissions"><Skeleton className="h-4 w-20" /></TabsTrigger>
-					<TabsTrigger value="balance"><Skeleton className="h-4 w-24" /></TabsTrigger>
+					<TabsTrigger value="comprehensive">
+						<Skeleton className="h-4 w-24" />
+					</TabsTrigger>
+					<TabsTrigger value="financial">
+						<Skeleton className="h-4 w-18" />
+					</TabsTrigger>
+					<TabsTrigger value="accounts">
+						<Skeleton className="h-4 w-16" />
+					</TabsTrigger>
+					<TabsTrigger value="commissions">
+						<Skeleton className="h-4 w-20" />
+					</TabsTrigger>
+					<TabsTrigger value="balance">
+						<Skeleton className="h-4 w-24" />
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="comprehensive" className="space-y-4">

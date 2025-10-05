@@ -1,12 +1,12 @@
 import { AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { ExpenseSkeleton } from "@/components/skeleton/ExpenseSkeleton";
 import {
 	ExpenseForm,
 	ExpenseHistoryTable,
 	ExpenseShortcutsSection,
 } from "@/components/expense";
+import { ExpenseSkeleton } from "@/components/skeleton/ExpenseSkeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useLocationContext } from "@/context/LocationContext";

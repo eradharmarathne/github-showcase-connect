@@ -17,10 +17,15 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { convertCurrency, getDisplayCurrency, getCurrencySymbol, formatAmountWithSymbol } from "@/utils/currency";
-import { useIsMobile } from "@/hooks/use-mobile";
+import {
+	convertCurrency,
+	formatAmountWithSymbol,
+	getCurrencySymbol,
+	getDisplayCurrency,
+} from "@/utils/currency";
 
 type Location = Tables<"locations">;
 
@@ -237,7 +242,8 @@ export function IncomeExpenseChart({
 	}
 
 	const locationName = selectedLocation
-		? locations.find((l) => l.id === selectedLocation)?.name || t("dashboard.chart.allLocations")
+		? locations.find((l) => l.id === selectedLocation)?.name ||
+			t("dashboard.chart.allLocations")
 		: t("dashboard.chart.allLocations");
 
 	return (
@@ -247,7 +253,9 @@ export function IncomeExpenseChart({
 				<Card className="bg-card border">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							{selectedMonth ? t("dashboard.summaryCards.monthlyIncome") : t("dashboard.summaryCards.todayIncome")}
+							{selectedMonth
+								? t("dashboard.summaryCards.monthlyIncome")
+								: t("dashboard.summaryCards.todayIncome")}
 						</CardTitle>
 						<ArrowUpCircle className="size-4 text-success" />
 					</CardHeader>
@@ -262,7 +270,9 @@ export function IncomeExpenseChart({
 				<Card className="bg-card border">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium text-muted-foreground">
-							{selectedMonth ? t("dashboard.summaryCards.monthlyExpenses") : t("dashboard.summaryCards.todayExpenses")}
+							{selectedMonth
+								? t("dashboard.summaryCards.monthlyExpenses")
+								: t("dashboard.summaryCards.todayExpenses")}
 						</CardTitle>
 						<ArrowDownCircle className="size-4 text-destructive" />
 					</CardHeader>
@@ -299,7 +309,9 @@ export function IncomeExpenseChart({
 						{t("dashboard.chart.incomeVsExpenses")}
 					</CardTitle>
 					<p className="text-sm text-muted-foreground">
-						{selectedMonth ? t("dashboard.chart.monthlyOverview") : t("dashboard.chart.last30DaysOverview")}
+						{selectedMonth
+							? t("dashboard.chart.monthlyOverview")
+							: t("dashboard.chart.last30DaysOverview")}
 					</p>
 				</CardHeader>
 				<CardContent>
@@ -324,10 +336,10 @@ export function IncomeExpenseChart({
 								interval={isMobile ? 5 : 1}
 								tickFormatter={(value) => {
 									const date = new Date(value);
-										return date.toLocaleDateString("en-US", {
-											month: "short",
-											day: "numeric",
-										});
+									return date.toLocaleDateString("en-US", {
+										month: "short",
+										day: "numeric",
+									});
 								}}
 							/>
 							<YAxis

@@ -21,8 +21,8 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useTenant } from "@/hooks/useTenant";
 import { useLocationContext } from "@/context/LocationContext";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency, formatCurrency } from "@/utils/currency";
 
@@ -55,191 +55,214 @@ interface AccountDetailsProps {
 	dateTo?: string;
 }
 
-export function AccountDetails({ baseCurrency, dateFrom, dateTo }: AccountDetailsProps) {
+export function AccountDetails({
+	baseCurrency,
+	dateFrom,
+	dateTo,
+}: AccountDetailsProps) {
 	const { t } = useTranslation();
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
 	const [accounts, setAccounts] = useState<AccountBalance[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [expandedAccounts, setExpandedAccounts] = useState<Set<string>>(new Set());
+	const [expandedAccounts, setExpandedAccounts] = useState<Set<string>>(
+		new Set(),
+	);
 
-	const calculateAccountBalance = useCallback(async (account: any): Promise<AccountBalance> => {
-		if (!tenant?.id) {
-			throw new Error("Tenant not found");
-		}
-
-		try {
-			let expenseQuery = supabase
-				.from("expenses")
-				.select("id, date, amount, main_type, sub_type, note, currency")
-				.eq("account_id", account.id);
-
-			let paymentsQuery = supabase
-				.from("payments")
-				.select(
-					"id, created_at, amount, payment_type, notes, currency, reservations!inner(guest_name, reservation_number, tenant_id)",
-				)
-				.eq("account_id", account.id)
-				.eq("reservations.tenant_id", tenant.id);
-
-			let transfersFromQuery = supabase
-				.from("account_transfers")
-				.select("id, created_at, amount, note, to_accounts!inner(tenant_id)")
-				.eq("from_account_id", account.id)
-				.eq("to_accounts.tenant_id", tenant.id);
-
-			let transfersToQuery = supabase
-				.from("account_transfers")
-				.select("id, created_at, amount, conversion_rate, note, from_accounts!inner(tenant_id)")
-				.eq("to_account_id", account.id)
-				.eq("from_accounts.tenant_id", tenant.id);
-
-			// Apply location filters
-			if (selectedLocation) {
-				expenseQuery = expenseQuery.eq("location_id", selectedLocation);
-				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
+	const calculateAccountBalance = useCallback(
+		async (account: any): Promise<AccountBalance> => {
+			if (!tenant?.id) {
+				throw new Error("Tenant not found");
 			}
 
-			// Apply date filters
-			if (dateFrom) {
-				expenseQuery = expenseQuery.gte("date", dateFrom);
-				paymentsQuery = paymentsQuery.gte("created_at", dateFrom);
-				transfersFromQuery = transfersFromQuery.gte("created_at", dateFrom);
-				transfersToQuery = transfersToQuery.gte("created_at", dateFrom);
-			}
-			if (dateTo) {
-				expenseQuery = expenseQuery.lte("date", dateTo);
-				paymentsQuery = paymentsQuery.lte("created_at", dateTo);
-				transfersFromQuery = transfersFromQuery.lte("created_at", dateTo);
-				transfersToQuery = transfersToQuery.lte("created_at", dateTo);
-			}
+			try {
+				let expenseQuery = supabase
+					.from("expenses")
+					.select("id, date, amount, main_type, sub_type, note, currency")
+					.eq("account_id", account.id);
 
-			// Execute all queries
-			const [expenseResult, paymentsResult, transfersFromResult, transfersToResult] =
-				await Promise.all([
+				let paymentsQuery = supabase
+					.from("payments")
+					.select(
+						"id, created_at, amount, payment_type, notes, currency, reservations!inner(guest_name, reservation_number, tenant_id)",
+					)
+					.eq("account_id", account.id)
+					.eq("reservations.tenant_id", tenant.id);
+
+				let transfersFromQuery = supabase
+					.from("account_transfers")
+					.select("id, created_at, amount, note, to_accounts!inner(tenant_id)")
+					.eq("from_account_id", account.id)
+					.eq("to_accounts.tenant_id", tenant.id);
+
+				let transfersToQuery = supabase
+					.from("account_transfers")
+					.select(
+						"id, created_at, amount, conversion_rate, note, from_accounts!inner(tenant_id)",
+					)
+					.eq("to_account_id", account.id)
+					.eq("from_accounts.tenant_id", tenant.id);
+
+				// Apply location filters
+				if (selectedLocation) {
+					expenseQuery = expenseQuery.eq("location_id", selectedLocation);
+					paymentsQuery = paymentsQuery.eq(
+						"reservations.location_id",
+						selectedLocation,
+					);
+				}
+
+				// Apply date filters
+				if (dateFrom) {
+					expenseQuery = expenseQuery.gte("date", dateFrom);
+					paymentsQuery = paymentsQuery.gte("created_at", dateFrom);
+					transfersFromQuery = transfersFromQuery.gte("created_at", dateFrom);
+					transfersToQuery = transfersToQuery.gte("created_at", dateFrom);
+				}
+				if (dateTo) {
+					expenseQuery = expenseQuery.lte("date", dateTo);
+					paymentsQuery = paymentsQuery.lte("created_at", dateTo);
+					transfersFromQuery = transfersFromQuery.lte("created_at", dateTo);
+					transfersToQuery = transfersToQuery.lte("created_at", dateTo);
+				}
+
+				// Execute all queries
+				const [
+					expenseResult,
+					paymentsResult,
+					transfersFromResult,
+					transfersToResult,
+				] = await Promise.all([
 					expenseQuery.order("date", { ascending: true }),
 					paymentsQuery.order("created_at", { ascending: true }),
 					transfersFromQuery.order("created_at", { ascending: true }),
 					transfersToQuery.order("created_at", { ascending: true }),
 				]);
 
-			// Process transactions and calculate balances
-			const transactions: TransactionDetail[] = [];
-			let runningBalance = account.initial_balance;
-			let totalExpenses = 0;
-			let totalPayments = 0;
+				// Process transactions and calculate balances
+				const transactions: TransactionDetail[] = [];
+				let runningBalance = account.initial_balance;
+				let totalExpenses = 0;
+				let totalPayments = 0;
 
-			// Combine all transactions
-			const allTransactions: Array<{
-				id: string;
-				date: string;
-				type: TransactionDetail["type"];
-				amount: number;
-				description: string;
-				currency: string;
-				note?: string;
-			}> = [];
+				// Combine all transactions
+				const allTransactions: Array<{
+					id: string;
+					date: string;
+					type: TransactionDetail["type"];
+					amount: number;
+					description: string;
+					currency: string;
+					note?: string;
+				}> = [];
 
-			// Add expense transactions
-			for (const expense of expenseResult.data || []) {
-				allTransactions.push({
-					id: expense.id,
-					date: expense.date,
-					type: "expense",
-					amount: parseFloat(expense.amount.toString()),
-					description: `${expense.main_type} - ${expense.sub_type}`,
-					currency: expense.currency,
-					note: expense.note,
-				});
-				totalExpenses += parseFloat(expense.amount.toString());
-			}
-
-			// Add payment transactions
-			for (const payment of paymentsResult.data || []) {
-				allTransactions.push({
-					id: payment.id,
-					date: payment.created_at,
-					type: "payment",
-					amount: parseFloat(payment.amount.toString()),
-					description: `${payment.payment_type} - ${
-						(payment as any).reservations?.guest_name || "Unknown"
-					} (${(payment as any).reservations?.reservation_number || "N/A"})`,
-					currency: payment.currency,
-					note: payment.notes,
-				});
-				totalPayments += parseFloat(payment.amount.toString());
-			}
-
-			// Add transfer transactions
-			for (const transfer of transfersFromResult.data || []) {
-				allTransactions.push({
-					id: transfer.id,
-					date: transfer.created_at,
-					type: "transfer_out",
-					amount: parseFloat(transfer.amount.toString()),
-					description: `Transfer Out${transfer.note ? ` - ${transfer.note}` : ""}`,
-					currency: account.currency,
-					note: transfer.note,
-				});
-			}
-
-			for (const transfer of transfersToResult.data || []) {
-				const amount =
-					parseFloat(transfer.amount.toString()) *
-					parseFloat(transfer.conversion_rate.toString());
-				allTransactions.push({
-					id: transfer.id,
-					date: transfer.created_at,
-					type: "transfer_in",
-					amount: amount,
-					description: `Transfer In${transfer.note ? ` - ${transfer.note}` : ""}`,
-					currency: account.currency,
-					note: transfer.note,
-				});
-			}
-
-			// Sort by date and calculate running balances
-			allTransactions.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-			for (const txn of allTransactions) {
-				if (txn.type === "payment" || txn.type === "transfer_in") {
-					runningBalance += txn.amount;
-				} else {
-					runningBalance -= txn.amount;
+				// Add expense transactions
+				for (const expense of expenseResult.data || []) {
+					allTransactions.push({
+						id: expense.id,
+						date: expense.date,
+						type: "expense",
+						amount: parseFloat(expense.amount.toString()),
+						description: `${expense.main_type} - ${expense.sub_type}`,
+						currency: expense.currency,
+						note: expense.note,
+					});
+					totalExpenses += parseFloat(expense.amount.toString());
 				}
 
-				transactions.push({
-					...txn,
-					running_balance: runningBalance,
-				});
-			}
+				// Add payment transactions
+				for (const payment of paymentsResult.data || []) {
+					allTransactions.push({
+						id: payment.id,
+						date: payment.created_at,
+						type: "payment",
+						amount: parseFloat(payment.amount.toString()),
+						description: `${payment.payment_type} - ${
+							(payment as any).reservations?.guest_name || "Unknown"
+						} (${(payment as any).reservations?.reservation_number || "N/A"})`,
+						currency: payment.currency,
+						note: payment.notes,
+					});
+					totalPayments += parseFloat(payment.amount.toString());
+				}
 
-			return {
-				id: account.id,
-				name: account.name,
-				currency: account.currency,
-				initial_balance: account.initial_balance,
-				current_balance: runningBalance,
-				total_expenses: totalExpenses,
-				total_payments: totalPayments,
-				transaction_count: transactions.length,
-				transactions: transactions.reverse(), // Show most recent first
-			};
-		} catch (error) {
-			console.error(`Error calculating balance for account ${account.name}:`, error);
-			return {
-				id: account.id,
-				name: account.name,
-				currency: account.currency,
-				initial_balance: account.initial_balance,
-				current_balance: account.initial_balance,
-				total_expenses: 0,
-				total_payments: 0,
-				transaction_count: 0,
-				transactions: [],
-			};
-		}
-	}, [tenant?.id, selectedLocation, dateFrom, dateTo]);
+				// Add transfer transactions
+				for (const transfer of transfersFromResult.data || []) {
+					allTransactions.push({
+						id: transfer.id,
+						date: transfer.created_at,
+						type: "transfer_out",
+						amount: parseFloat(transfer.amount.toString()),
+						description: `Transfer Out${transfer.note ? ` - ${transfer.note}` : ""}`,
+						currency: account.currency,
+						note: transfer.note,
+					});
+				}
+
+				for (const transfer of transfersToResult.data || []) {
+					const amount =
+						parseFloat(transfer.amount.toString()) *
+						parseFloat(transfer.conversion_rate.toString());
+					allTransactions.push({
+						id: transfer.id,
+						date: transfer.created_at,
+						type: "transfer_in",
+						amount: amount,
+						description: `Transfer In${transfer.note ? ` - ${transfer.note}` : ""}`,
+						currency: account.currency,
+						note: transfer.note,
+					});
+				}
+
+				// Sort by date and calculate running balances
+				allTransactions.sort(
+					(a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+				);
+
+				for (const txn of allTransactions) {
+					if (txn.type === "payment" || txn.type === "transfer_in") {
+						runningBalance += txn.amount;
+					} else {
+						runningBalance -= txn.amount;
+					}
+
+					transactions.push({
+						...txn,
+						running_balance: runningBalance,
+					});
+				}
+
+				return {
+					id: account.id,
+					name: account.name,
+					currency: account.currency,
+					initial_balance: account.initial_balance,
+					current_balance: runningBalance,
+					total_expenses: totalExpenses,
+					total_payments: totalPayments,
+					transaction_count: transactions.length,
+					transactions: transactions.reverse(), // Show most recent first
+				};
+			} catch (error) {
+				console.error(
+					`Error calculating balance for account ${account.name}:`,
+					error,
+				);
+				return {
+					id: account.id,
+					name: account.name,
+					currency: account.currency,
+					initial_balance: account.initial_balance,
+					current_balance: account.initial_balance,
+					total_expenses: 0,
+					total_payments: 0,
+					transaction_count: 0,
+					transactions: [],
+				};
+			}
+		},
+		[tenant?.id, selectedLocation, dateFrom, dateTo],
+	);
 
 	const fetchAccountsData = useCallback(async () => {
 		if (!tenant?.id) return;
@@ -326,12 +349,17 @@ export function AccountDetails({ baseCurrency, dateFrom, dateTo }: AccountDetail
 					<Building2 className="size-6" />
 					{t("reports.comprehensive.accounts.title")}
 				</CardTitle>
-				<CardDescription>{t("reports.comprehensive.accounts.subtitle")}</CardDescription>
+				<CardDescription>
+					{t("reports.comprehensive.accounts.subtitle")}
+				</CardDescription>
 			</CardHeader>
 			<CardContent className="px-2 sm:px-4">
 				<div className="space-y-4">
 					{accounts.map((account) => (
-						<Card key={account.id} className="px-0 border-l-2 sm:border-l-4 border-l-primary">
+						<Card
+							key={account.id}
+							className="px-0 border-l-2 sm:border-l-4 border-l-primary"
+						>
 							<Collapsible
 								open={expandedAccounts.has(account.id)}
 								onOpenChange={() => toggleAccountExpansion(account.id)}
@@ -360,16 +388,25 @@ export function AccountDetails({ baseCurrency, dateFrom, dateTo }: AccountDetail
 											</div>
 											<div className="text-left sm:text-right flex flex-col items-start sm:items-end">
 												<p className="text-lg sm:text-2xl font-bold">
-													{formatCurrency(account.current_balance, account.currency as any)}
+													{formatCurrency(
+														account.current_balance,
+														account.currency as any,
+													)}
 												</p>
 												<div className="flex pt-4 sm:pt-0 flex-col sm:flex-row gap-2 sm:gap-4 text-sm text-muted-foreground">
 													<span className="text-green-600">
 														{t("reports.comprehensive.accounts.income")}:{" "}
-														{formatCurrency(account.total_payments, account.currency as any)}
+														{formatCurrency(
+															account.total_payments,
+															account.currency as any,
+														)}
 													</span>
 													<span className="text-red-600">
 														{t("reports.comprehensive.accounts.expenses")}:{" "}
-														{formatCurrency(account.total_expenses, account.currency as any)}
+														{formatCurrency(
+															account.total_expenses,
+															account.currency as any,
+														)}
 													</span>
 												</div>
 											</div>
@@ -392,7 +429,9 @@ export function AccountDetails({ baseCurrency, dateFrom, dateTo }: AccountDetail
 														<div className="flex items-center gap-3">
 															{getTransactionIcon(txn.type)}
 															<div>
-																<div className="font-medium">{txn.description}</div>
+																<div className="font-medium">
+																	{txn.description}
+																</div>
 																<div className="text-sm text-muted-foreground">
 																	{new Date(txn.date).toLocaleDateString()}
 																	{txn.note && <span> • {txn.note}</span>}
@@ -402,19 +441,27 @@ export function AccountDetails({ baseCurrency, dateFrom, dateTo }: AccountDetail
 														<div className="text-left sm:text-right">
 															<p
 																className={`font-semibold ${
-																	txn.type === "payment" || txn.type === "transfer_in"
+																	txn.type === "payment" ||
+																	txn.type === "transfer_in"
 																		? "text-green-600"
 																		: "text-red-600"
 																}`}
 															>
-																{txn.type === "payment" || txn.type === "transfer_in"
+																{txn.type === "payment" ||
+																txn.type === "transfer_in"
 																	? "+"
 																	: "-"}
-																{formatCurrency(txn.amount, txn.currency as any)}
+																{formatCurrency(
+																	txn.amount,
+																	txn.currency as any,
+																)}
 															</p>
 															<div className="text-sm text-muted-foreground">
 																{t("reports.comprehensive.accounts.balance")}:{" "}
-																{formatCurrency(txn.running_balance, txn.currency as any)}
+																{formatCurrency(
+																	txn.running_balance,
+																	txn.currency as any,
+																)}
 															</div>
 														</div>
 													</div>

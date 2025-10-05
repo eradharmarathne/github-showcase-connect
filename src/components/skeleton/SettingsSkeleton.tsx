@@ -14,10 +14,18 @@ export function SettingsSkeleton() {
 			{/* Settings Tabs */}
 			<Tabs defaultValue="general" className="w-full">
 				<TabsList className="grid w-full grid-cols-4">
-					<TabsTrigger value="general"><Skeleton className="h-4 w-16" /></TabsTrigger>
-					<TabsTrigger value="notifications"><Skeleton className="h-4 w-20" /></TabsTrigger>
-					<TabsTrigger value="security"><Skeleton className="h-4 w-16" /></TabsTrigger>
-					<TabsTrigger value="billing"><Skeleton className="h-4 w-14" /></TabsTrigger>
+					<TabsTrigger value="general">
+						<Skeleton className="h-4 w-16" />
+					</TabsTrigger>
+					<TabsTrigger value="notifications">
+						<Skeleton className="h-4 w-20" />
+					</TabsTrigger>
+					<TabsTrigger value="security">
+						<Skeleton className="h-4 w-16" />
+					</TabsTrigger>
+					<TabsTrigger value="billing">
+						<Skeleton className="h-4 w-14" />
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="general" className="space-y-4">

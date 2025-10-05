@@ -2,13 +2,13 @@ import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { DashboardHeaderSkeleton } from "@/components/skeleton/DashboardHeaderSkeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { DashboardHeaderSkeleton } from "@/components/skeleton/DashboardHeaderSkeleton";
 
 type Location = Tables<"locations">;
 

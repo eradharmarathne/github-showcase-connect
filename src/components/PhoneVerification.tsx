@@ -215,10 +215,9 @@ export function PhoneVerification({
 							disabled={isLoading || (phone && phone.trim() !== "")}
 						/>
 						<p className="text-xs text-muted-foreground mt-1">
-							{phone && phone.trim() !== "" 
+							{phone && phone.trim() !== ""
 								? "This phone number needs verification to receive SMS notifications"
-								: "Enter your phone number to receive SMS notifications"
-							}
+								: "Enter your phone number to receive SMS notifications"}
 						</p>
 					</div>
 					<Button
@@ -261,9 +260,7 @@ export function PhoneVerification({
 							disabled={isVerifying || otpCode.length !== 6}
 							className={phone && phone.trim() !== "" ? "w-full" : "flex-1"}
 						>
-							{isVerifying && (
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							)}
+							{isVerifying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							Verify Code
 						</Button>
 						{/* Only show Change Number button if no existing phone number */}
@@ -307,9 +304,7 @@ export function PhoneVerification({
 						Phone Verification
 					</CardTitle>
 				</CardHeader>
-				<CardContent>
-					{verifiedContent}
-				</CardContent>
+				<CardContent>{verifiedContent}</CardContent>
 			</Card>
 		);
 	}
@@ -322,9 +317,7 @@ export function PhoneVerification({
 					Phone Verification
 				</CardTitle>
 			</CardHeader>
-			<CardContent>
-				{verificationContent}
-			</CardContent>
+			<CardContent>{verificationContent}</CardContent>
 		</Card>
 	);
 }

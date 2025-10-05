@@ -81,11 +81,21 @@ export function ExpenseSkeleton() {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-18" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
-								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-12" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-18" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-16" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-16" />
+								</TableHead>
+								<TableHead>
+									<Skeleton className="h-4 w-12" />
+								</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>

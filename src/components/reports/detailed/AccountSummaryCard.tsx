@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, type Currency } from "@/utils/currency";
+import { type Currency, formatCurrency } from "@/utils/currency";
 
 type AccountSummaryProps = {
 	totalInitialBalance: number;

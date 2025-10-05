@@ -153,7 +153,9 @@ export function BookingSourceChart({
 		return (
 			<Card className="bg-card border">
 				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="text-sm font-medium">{t("dashboard.bookingSources.title")}</CardTitle>
+					<CardTitle className="text-sm font-medium">
+						{t("dashboard.bookingSources.title")}
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="h-[400px] flex items-center justify-center">
@@ -168,7 +170,9 @@ export function BookingSourceChart({
 		return (
 			<Card className="bg-card border">
 				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="text-sm font-medium">{t("dashboard.bookingSources.title")}</CardTitle>
+					<CardTitle className="text-sm font-medium">
+						{t("dashboard.bookingSources.title")}
+					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="h-[400px] flex items-center justify-center text-muted-foreground">
@@ -182,7 +186,9 @@ export function BookingSourceChart({
 	return (
 		<Card className="bg-card border">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-				<CardTitle className="text-sm font-medium">{t("dashboard.bookingSources.title")}</CardTitle>
+				<CardTitle className="text-sm font-medium">
+					{t("dashboard.bookingSources.title")}
+				</CardTitle>
 				<span className="text-xs text-muted-foreground">
 					{totalBookings} {t("dashboard.bookingSources.totalBookings")}
 				</span>

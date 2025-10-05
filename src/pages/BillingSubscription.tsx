@@ -20,8 +20,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,7 +44,7 @@ interface Invoice {
 	id: string;
 	amount: number;
 	currency: string;
-	status: 'paid' | 'open' | 'failed' | 'draft';
+	status: "paid" | "open" | "failed" | "draft";
 	created: string;
 	due_date?: string;
 	invoice_pdf?: string;
@@ -53,7 +53,7 @@ interface Invoice {
 
 interface PaymentMethod {
 	id: string;
-	type: 'card' | 'bank_account';
+	type: "card" | "bank_account";
 	last4: string;
 	brand?: string;
 	exp_month?: number;
@@ -88,6 +88,94 @@ export default function BillingSubscription() {
 	const [activeTab, setActiveTab] = useState("overview");
 	const [loadingInvoices, setLoadingInvoices] = useState(false);
 	const [loadingPaymentMethods, setLoadingPaymentMethods] = useState(false);
+	const [syncing, setSyncing] = useState(false);
+
+	// Fetch invoice history
+	const fetchInvoiceHistory = useCallback(async () => {
+		if (!tenant) return;
+
+		setLoadingInvoices(true);
+		try {
+			// Mock invoice data for now - replace with actual Creem API call
+			const currentPlan = plans.find(
+				(p) => p.id === currentSubscription?.plan_id,
+			);
+			const mockInvoices: Invoice[] = [
+				{
+					id: "inv_1",
+					amount: currentPlan ? currentPlan.price_cents / 100 : 19.0,
+					currency: "USD",
+					status: "paid",
+					created: new Date(
+						Date.now() - 30 * 24 * 60 * 60 * 1000,
+					).toISOString(),
+					description: `${currentPlan?.name || "Subscription"} - Monthly`,
+				},
+			];
+			setInvoices(mockInvoices);
+		} catch (error) {
+			console.error("Error fetching invoices:", error);
+		} finally {
+			setLoadingInvoices(false);
+		}
+	}, [tenant, currentSubscription, plans]);
+
+	// Fetch payment methods
+	const fetchPaymentMethods = useCallback(async () => {
+		if (!tenant) return;
+
+		setLoadingPaymentMethods(true);
+		try {
+			// Mock payment methods - replace with actual Creem API call
+			const mockPaymentMethods: PaymentMethod[] = [
+				{
+					id: "pm_1",
+					type: "card",
+					last4: "4242",
+					brand: "visa",
+					exp_month: 12,
+					exp_year: 2025,
+					is_default: true,
+				},
+			];
+			setPaymentMethods(mockPaymentMethods);
+		} catch (error) {
+			console.error("Error fetching payment methods:", error);
+		} finally {
+			setLoadingPaymentMethods(false);
+		}
+	}, [tenant]);
+
+	// Fetch usage data
+	const fetchUsageData = useCallback(async () => {
+		if (!tenant) return;
+
+		try {
+			// Mock usage data - replace with actual usage tracking
+			const currentPlan = plans.find(
+				(p) => p.id === currentSubscription?.plan_id,
+			);
+			if (currentPlan) {
+				const mockUsageData: UsageData[] = [
+					{
+						period: "October 2025",
+						usage: 15,
+						limit: currentPlan.max_locations || undefined,
+						unit: "locations",
+					},
+					{
+						period: "October 2025",
+						usage: 45,
+						limit: currentPlan.max_rooms || undefined,
+						unit: "rooms",
+					},
+				];
+				setUsageData(mockUsageData);
+			}
+		} catch (error) {
+			console.error("Error fetching usage data:", error);
+		}
+	}, [tenant, plans, currentSubscription]);
 
 	useEffect(() => {
 		if (tenant) {
@@ -153,100 +241,20 @@ export default function BillingSubscription() {
 				}
 			};
 
-				fetchPlansAndSubscription();
-				fetchInvoiceHistory();
-				fetchPaymentMethods();
-				fetchUsageData();
+			fetchPlansAndSubscription();
 		}
 	}, [tenant, subscription, toast]);
 
-	// Fetch invoice history
-	const fetchInvoiceHistory = async () => {
-		if (!tenant) return;
-		
-		setLoadingInvoices(true);
-		try {
-			// Mock invoice data for now - replace with actual Creem API call
-			const mockInvoices: Invoice[] = [
-				{
-					id: 'in_1',
-					amount: currentSubscription ? plans.find(p => p.id === currentSubscription.plan_id)?.price_cents || 0 : 0,
-					currency: 'USD',
-					status: 'paid',
-					created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-					description: 'Monthly subscription'
-				},
-				{
-					id: 'in_2',
-					amount: currentSubscription ? plans.find(p => p.id === currentSubscription.plan_id)?.price_cents || 0 : 0,
-					currency: 'USD',
-					status: 'paid',
-					created: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-					description: 'Monthly subscription'
-				}
-			];
-			setInvoices(mockInvoices);
-		} catch (error) {
-			console.error('Error fetching invoices:', error);
-		} finally {
-			setLoadingInvoices(false);
+	// Additional useEffect for fetch functions
+	useEffect(() => {
+		if (tenant) {
+			fetchInvoiceHistory();
+			fetchPaymentMethods();
+			fetchUsageData();
 		}
-	};
+	}, [tenant, fetchInvoiceHistory, fetchPaymentMethods, fetchUsageData]);
 
-	// Fetch payment methods
-	const fetchPaymentMethods = async () => {
-		if (!tenant) return;
-		
-		setLoadingPaymentMethods(true);
-		try {
-			// Mock payment method data - replace with actual Creem API call
-			const mockPaymentMethods: PaymentMethod[] = [
-				{
-					id: 'pm_1',
-					type: 'card',
-					last4: '4242',
-					brand: 'visa',
-					exp_month: 12,
-					exp_year: 2025,
-					is_default: true
-				}
-			];
-			setPaymentMethods(mockPaymentMethods);
-		} catch (error) {
-			console.error('Error fetching payment methods:', error);
-		} finally {
-			setLoadingPaymentMethods(false);
-		}
-	};
-
-	// Fetch usage data
-	const fetchUsageData = async () => {
-		if (!tenant) return;
-		
-		try {
-			// Mock usage data - replace with actual usage tracking
-			const currentPlan = plans.find(p => p.id === currentSubscription?.plan_id);
-			if (currentPlan) {
-				const mockUsage: UsageData[] = [
-					{
-						period: 'Current Month',
-						usage: Math.floor(Math.random() * (currentPlan.max_locations || 10)),
-						limit: currentPlan.max_locations || undefined,
-						unit: 'locations'
-					},
-					{
-						period: 'Current Month',
-						usage: Math.floor(Math.random() * (currentPlan.max_rooms || 100)),
-						limit: currentPlan.max_rooms || undefined,
-						unit: 'rooms'
-					}
-				];
-				setUsageData(mockUsage);
-			}
-		} catch (error) {
-			console.error('Error fetching usage data:', error);
-		}
-	};	useEffect(() => {
+	useEffect(() => {
 		// Calculate trial days remaining
 		if (currentSubscription?.trial_end) {
 			const trialEnd = new Date(currentSubscription.trial_end);
@@ -342,7 +350,62 @@ export default function BillingSubscription() {
 		}
 	};
 
-	// Remove the simulation function - this was making it feel like a dummy
+	// Handle manual subscription sync/refresh
+	const handleSyncSubscription = async () => {
+		if (!tenant || !currentSubscription) return;
+
+		setSyncing(true);
+		try {
+			// For now, we'll just refresh the subscription data from our database
+			// In a real implementation, you'd fetch from Creem API to get the latest status
+			const { data: subscriptionData, error: subscriptionError } =
+				await supabase
+					.from("subscriptions")
+					.select(`
+					*,
+					plans (*)
+				`)
+					.eq("tenant_id", tenant.id)
+					.single();
+
+			if (subscriptionError) {
+				console.error("Subscription fetch error:", subscriptionError);
+				throw new Error("Failed to fetch subscription data");
+			}
+
+			setCurrentSubscription(subscriptionData);
+
+			// Also refresh tenant data
+			const { data: tenantData, error: tenantError } = await supabase
+				.from("tenants")
+				.select("*")
+				.eq("id", tenant.id)
+				.single();
+
+			if (!tenantError && tenantData) {
+				// This would update the auth context if needed
+				console.log("Updated tenant data:", tenantData);
+			}
+
+			toast({
+				title: "Success",
+				description: "Subscription status refreshed",
+			});
+
+			// Force a page reload to ensure all components are updated
+			window.location.reload();
+		} catch (error) {
+			console.error("Sync error:", error);
+			toast({
+				title: "Error",
+				description:
+					"Failed to sync subscription status. If you just made a payment, please contact support.",
+				variant: "destructive",
+			});
+		} finally {
+			setSyncing(false);
+		}
+	};
 
 	const handleCancelSubscription = async () => {
 		if (!currentSubscription?.creem_subscription_id) {
@@ -460,9 +523,21 @@ export default function BillingSubscription() {
 						Manage your subscription and billing settings
 					</p>
 				</div>
-				<Button variant="outline" onClick={() => navigate("/settings")}>
-					Back to Settings
-				</Button>
+				<div className="flex gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleSyncSubscription}
+						disabled={syncing}
+						className="flex items-center gap-2"
+					>
+						<RefreshCw className={`size-4 ${syncing ? "animate-spin" : ""}`} />
+						{syncing ? "Syncing..." : "Refresh Status"}
+					</Button>
+					<Button variant="outline" onClick={() => navigate("/settings")}>
+						Back to Settings
+					</Button>
+				</div>
 			</div>
 
 			{/* Trial Status Alert */}

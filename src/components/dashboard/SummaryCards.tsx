@@ -1,11 +1,11 @@
 import { ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { SummaryCardsSkeleton } from "@/components/skeleton/SummaryCardsSkeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { SummaryCardsSkeleton } from "@/components/skeleton/SummaryCardsSkeleton";
 
 type Location = Tables<"locations">;
 

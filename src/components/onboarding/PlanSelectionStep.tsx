@@ -1,7 +1,20 @@
-import { ArrowRight, BadgeCheck, Calendar, CreditCard, Crown } from "lucide-react";
+import {
+	ArrowRight,
+	BadgeCheck,
+	Calendar,
+	CreditCard,
+	Crown,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { PlanSelectionStepProps } from "./types";
 
@@ -29,14 +42,14 @@ export function PlanSelectionStep({
 					plans.map((plan) => {
 						const isPopular = plan.name === "Professional";
 						const isSelected = selectedPlanId === plan.id;
-						
+
 						return (
 							<Card
 								key={plan.id}
 								className={cn(
-									'relative w-full text-left cursor-pointer transition-all hover:shadow-lg',
-									isPopular && 'ring-2 ring-primary',
-									isSelected && 'ring-2 ring-primary border-primary shadow-lg'
+									"relative w-full text-left cursor-pointer transition-all hover:shadow-lg",
+									isPopular && "ring-2 ring-primary",
+									isSelected && "ring-2 ring-primary border-primary shadow-lg",
 								)}
 								onClick={() => setSelectedPlanId(plan.id)}
 							>
@@ -45,29 +58,28 @@ export function PlanSelectionStep({
 										Most Popular
 									</Badge>
 								)}
-								
+
 								<CardHeader className="pb-4">
 									<div className="flex items-center gap-2 mb-2">
-										{isPopular && (
-											<Crown className="h-5 w-5 text-primary" />
-										)}
+										{isPopular && <Crown className="h-5 w-5 text-primary" />}
 										<CardTitle className="font-medium text-xl">
 											{plan.name}
 										</CardTitle>
 									</div>
 									<CardDescription>
 										<p className="text-sm text-muted-foreground mb-3">
-											{plan.description || `Perfect for ${plan.name.toLowerCase()} needs`}
+											{plan.description ||
+												`Perfect for ${plan.name.toLowerCase()} needs`}
 										</p>
 										<div className="text-3xl font-bold text-foreground">
 											${(plan.price_cents / 100).toFixed(0)}
 											<span className="text-sm font-normal text-muted-foreground">
-												/month, billed {plan.billing_interval || 'monthly'}.
+												/month, billed {plan.billing_interval || "monthly"}.
 											</span>
 										</div>
 									</CardDescription>
 								</CardHeader>
-								
+
 								<CardContent className="grid gap-3 pb-6">
 									{/* Plan Limits */}
 									{(plan.max_locations || plan.max_rooms) && (
@@ -75,30 +87,36 @@ export function PlanSelectionStep({
 											{plan.max_locations && (
 												<div className="flex items-center gap-2 text-sm text-muted-foreground">
 													<BadgeCheck className="h-4 w-4" />
-													{plan.max_locations === -1 ? 'Unlimited locations' : `Up to ${plan.max_locations} locations`}
+													{plan.max_locations === -1
+														? "Unlimited locations"
+														: `Up to ${plan.max_locations} locations`}
 												</div>
 											)}
 											{plan.max_rooms && (
 												<div className="flex items-center gap-2 text-sm text-muted-foreground">
 													<BadgeCheck className="h-4 w-4" />
-													{plan.max_rooms === -1 ? 'Unlimited rooms' : `Up to ${plan.max_rooms} rooms`}
+													{plan.max_rooms === -1
+														? "Unlimited rooms"
+														: `Up to ${plan.max_rooms} rooms`}
 												</div>
 											)}
 										</div>
 									)}
-									
+
 									{/* Features */}
-									{plan.feature_list && Array.isArray(plan.feature_list) && plan.feature_list.map((feature: string, index: number) => (
-										<div
-											className="flex items-center gap-2 text-muted-foreground text-sm"
-											key={index}
-										>
-											<BadgeCheck className="h-4 w-4 text-primary" />
-											{feature}
-										</div>
-									))}
+									{plan.feature_list &&
+										Array.isArray(plan.feature_list) &&
+										plan.feature_list.map((feature: string, index: number) => (
+											<div
+												className="flex items-center gap-2 text-muted-foreground text-sm"
+												key={index}
+											>
+												<BadgeCheck className="h-4 w-4 text-primary" />
+												{feature}
+											</div>
+										))}
 								</CardContent>
-								
+
 								<CardFooter className="pt-0">
 									<div className="w-full space-y-2">
 										{isSelected && (
@@ -108,10 +126,16 @@ export function PlanSelectionStep({
 										)}
 										<Button
 											className="w-full"
-											variant={isSelected ? 'default' : isPopular ? 'default' : 'secondary'}
+											variant={
+												isSelected
+													? "default"
+													: isPopular
+														? "default"
+														: "secondary"
+											}
 											size="lg"
 										>
-											{isSelected ? 'Selected' : 'Choose Plan'}
+											{isSelected ? "Selected" : "Choose Plan"}
 											{!isSelected && <ArrowRight className="ml-2 h-4 w-4" />}
 										</Button>
 									</div>
@@ -129,12 +153,14 @@ export function PlanSelectionStep({
 			{selectedPlanId && (
 				<div className="bg-muted/50 rounded-lg p-6 space-y-4">
 					<div className="text-center">
-						<h3 className="text-lg font-semibold mb-2">Ready to get started?</h3>
+						<h3 className="text-lg font-semibold mb-2">
+							Ready to get started?
+						</h3>
 						<p className="text-sm text-muted-foreground">
 							Choose how you'd like to begin with your selected plan
 						</p>
 					</div>
-					
+
 					<div className="flex flex-col sm:flex-row gap-3 justify-center">
 						<Button
 							size="lg"
@@ -143,7 +169,9 @@ export function PlanSelectionStep({
 							disabled={processingPayment}
 							className="flex items-center gap-2 flex-1 sm:flex-none"
 						>
-							{processingPayment ? "Starting Trial..." : "Start 7-Day Free Trial"}
+							{processingPayment
+								? "Starting Trial..."
+								: "Start 7-Day Free Trial"}
 							<Calendar className="h-4 w-4" />
 						</Button>
 						<Button
@@ -156,15 +184,26 @@ export function PlanSelectionStep({
 							<CreditCard className="h-4 w-4" />
 						</Button>
 					</div>
-					
+
 					<div className="text-center text-xs text-muted-foreground">
-						<p>✨ 7-day free trial • Cancel anytime • No hidden fees • Secure payment</p>
+						<p>
+							✨ 7-day free trial • Cancel anytime • No hidden fees • Secure
+							payment
+						</p>
 					</div>
 				</div>
 			)}
 
 			<div className="text-center text-sm text-muted-foreground mt-4">
-				<p>Need help choosing? <a href="mailto:checkingcheckout@netronk.com" className="text-primary cursor-pointer hover:underline">Contact our sales team</a></p>
+				<p>
+					Need help choosing?{" "}
+					<a
+						href="mailto:checkingcheckout@netronk.com"
+						className="text-primary cursor-pointer hover:underline"
+					>
+						Contact our sales team
+					</a>
+				</p>
 			</div>
 		</div>
 	);

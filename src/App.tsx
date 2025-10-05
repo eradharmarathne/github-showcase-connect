@@ -19,7 +19,6 @@ import Accounts from "./pages/Accounts";
 import Auth from "./pages/Auth";
 import BillingError from "./pages/BillingError";
 import BillingSubscription from "./pages/BillingSubscription";
-import BillingSubscriptionEnhanced from "./pages/BillingSubscriptionEnhanced";
 import BillingSuccess from "./pages/BillingSuccess";
 import Dashboard from "./pages/Dashboard";
 import EnhancedCalendar from "./pages/EnhancedCalendar";
@@ -304,7 +303,7 @@ const App = () => (
 										</ProtectedRoute>
 									}
 								>
-									<Route index element={<BillingSubscriptionEnhanced />} />
+									<Route index element={<BillingSubscription />} />
 								</Route>
 								<Route
 									path="/billing/success"

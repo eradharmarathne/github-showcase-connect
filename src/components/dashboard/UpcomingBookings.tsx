@@ -2,13 +2,13 @@ import { Calendar, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { UpcomingBookingsSkeleton } from "@/components/skeleton/UpcomingBookingsSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { UpcomingBookingsSkeleton } from "@/components/skeleton/UpcomingBookingsSkeleton";
 
 type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations">;

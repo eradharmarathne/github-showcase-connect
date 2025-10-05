@@ -1,7 +1,7 @@
 import { useCallback } from "react";
+import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { type Currency, convertCurrency } from "@/utils/currency";
 import type { AccountDetail } from "./AccountDetailsList";
@@ -17,9 +17,9 @@ export function useAccountData(baseCurrency: Currency) {
 
 		try {
 			// Fetch all accounts for the tenant and location with explicit query
-			const accountsRes = await supabase.rpc('get_accounts_by_location', {
+			const accountsRes = await supabase.rpc("get_accounts_by_location", {
 				tenant_id_param: tenant.id,
-				location_id_param: selectedLocation
+				location_id_param: selectedLocation,
 			});
 
 			// If RPC doesn't exist, fallback to direct query with type assertion
@@ -27,7 +27,9 @@ export function useAccountData(baseCurrency: Currency) {
 			if (accountsRes.error) {
 				const { data } = await supabase
 					.from("accounts")
-					.select("id, name, currency, initial_balance, tenant_id, location_id, created_at")
+					.select(
+						"id, name, currency, initial_balance, tenant_id, location_id, created_at",
+					)
 					.eq("tenant_id", tenant.id)
 					.eq("location_id", selectedLocation)
 					.order("name");
@@ -159,7 +161,8 @@ export function useAccountData(baseCurrency: Currency) {
 				// Process transfers in
 				if (transfersToData) {
 					for (const transfer of transfersToData) {
-						const amount = Number(transfer.amount) * Number(transfer.conversion_rate);
+						const amount =
+							Number(transfer.amount) * Number(transfer.conversion_rate);
 						allTransactions.push({
 							id: transfer.id,
 							date: transfer.created_at,

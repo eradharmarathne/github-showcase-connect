@@ -37,7 +37,9 @@ export function EnhancedCalendarSkeleton() {
 					<div className="min-w-full">
 						{/* Calendar Header */}
 						<div className="grid grid-cols-[150px_1fr] border-b bg-gray-50">
-							<div className="p-3 font-semibold border-r text-sm"><Skeleton className="h-4 w-12" /></div>
+							<div className="p-3 font-semibold border-r text-sm">
+								<Skeleton className="h-4 w-12" />
+							</div>
 							<div
 								className="grid gap-0"
 								style={{ gridTemplateColumns: "repeat(31, minmax(40px, 1fr))" }}

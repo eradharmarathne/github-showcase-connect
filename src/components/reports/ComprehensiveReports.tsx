@@ -2,11 +2,11 @@ import { Download } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ComprehensiveReportsSkeleton } from "@/components/reports";
+import { AccountDetails } from "@/components/reports/comprehensive/AccountDetails";
 import { FinancialSummaryCards } from "@/components/reports/comprehensive/FinancialSummaryCards";
 import { ReportFilters } from "@/components/reports/comprehensive/ReportFilters";
-import { AccountDetails } from "@/components/reports/comprehensive/AccountDetails";
-import { useTenant } from "@/hooks/useTenant";
 import { useLocationContext } from "@/context/LocationContext";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/currency";
 
@@ -34,7 +34,7 @@ export default function ComprehensiveReports() {
 			const csvContent = [
 				[
 					"Account",
-					"Currency", 
+					"Currency",
 					"Initial Balance",
 					"Current Balance",
 					"Total Expenses",

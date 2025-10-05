@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AccountsSkeleton } from "@/components/skeleton/AccountsSkeleton";
 import {
 	AccountForm,
 	AccountGrid,
@@ -10,6 +9,7 @@ import {
 	AccountTransferForm,
 	RecentTransactions,
 } from "@/components/accounts";
+import { AccountsSkeleton } from "@/components/skeleton/AccountsSkeleton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";

@@ -20,20 +20,16 @@ function getSupabaseClient() {
 			supabaseInstance = (window as any).__supabaseClient;
 			return supabaseInstance;
 		}
-		
-		supabaseInstance = createClient<Database>(
-			SUPABASE_URL,
-			SUPABASE_ANON_KEY,
-			{
-				auth: {
-					storage: localStorage,
-					persistSession: true,
-					autoRefreshToken: true,
-					storageKey: 'cco-supabase-auth', // Unique storage key
-				},
+
+		supabaseInstance = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+			auth: {
+				storage: localStorage,
+				persistSession: true,
+				autoRefreshToken: true,
+				storageKey: "cco-supabase-auth", // Unique storage key
 			},
-		);
-		
+		});
+
 		// Store globally in development for HMR
 		if (import.meta.env.DEV) {
 			(window as any).__supabaseClient = supabaseInstance;
@@ -45,7 +41,8 @@ function getSupabaseClient() {
 export const supabase = getSupabaseClient();
 
 // Service role client for admin operations - use singleton pattern
-let supabaseAdminInstance: ReturnType<typeof createClient<Database>> | null = null;
+let supabaseAdminInstance: ReturnType<typeof createClient<Database>> | null =
+	null;
 
 function getSupabaseAdminClient() {
 	if (!supabaseAdminInstance) {
@@ -54,7 +51,7 @@ function getSupabaseAdminClient() {
 			supabaseAdminInstance = (window as any).__supabaseAdminClient;
 			return supabaseAdminInstance;
 		}
-		
+
 		supabaseAdminInstance = createClient<Database>(
 			SUPABASE_URL,
 			SUPABASE_SERVICE_ROLE_KEY,
@@ -62,11 +59,11 @@ function getSupabaseAdminClient() {
 				auth: {
 					autoRefreshToken: false,
 					persistSession: false,
-					storageKey: 'cco-supabase-admin-auth', // Unique storage key for admin
+					storageKey: "cco-supabase-admin-auth", // Unique storage key for admin
 				},
 			},
 		);
-		
+
 		// Store globally in development for HMR
 		if (import.meta.env.DEV) {
 			(window as any).__supabaseAdminClient = supabaseAdminInstance;

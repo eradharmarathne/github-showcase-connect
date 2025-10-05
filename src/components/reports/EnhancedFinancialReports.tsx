@@ -35,9 +35,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
-import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
 	convertCurrency,
@@ -116,10 +116,7 @@ export default function EnhancedFinancialReports() {
 	useEffect(() => {
 		if (tenant?.id) {
 			const loadInitialData = async () => {
-				await Promise.all([
-					fetchAvailableCurrencies(),
-					fetchData(),
-				]);
+				await Promise.all([fetchAvailableCurrencies(), fetchData()]);
 			};
 			loadInitialData();
 		}
@@ -184,11 +181,14 @@ export default function EnhancedFinancialReports() {
 				.select("amount, currency, reservations!inner(tenant_id, location_id)")
 				.eq("reservations.tenant_id", tenant.id);
 
-			// Apply location filters  
+			// Apply location filters
 			if (selectedLocation) {
 				incomeQuery = incomeQuery.eq("location_id", selectedLocation);
 				expenseQuery = expenseQuery.eq("location_id", selectedLocation);
-				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
+				paymentsQuery = paymentsQuery.eq(
+					"reservations.location_id",
+					selectedLocation,
+				);
 			}
 
 			// Apply date filters
@@ -270,14 +270,18 @@ export default function EnhancedFinancialReports() {
           reservations!inner(guest_name, reservation_number, location_id, tenant_id)
         `;
 
-			let paymentsQuery = supabase.from("payments")
+			let paymentsQuery = supabase
+				.from("payments")
 				.select(basePaymentsSelect)
 				.eq("reservations.tenant_id", tenant.id);
 
 			// Apply location filters
 			if (selectedLocation) {
 				incomeQuery = incomeQuery.eq("location_id", selectedLocation);
-				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
+				paymentsQuery = paymentsQuery.eq(
+					"reservations.location_id",
+					selectedLocation,
+				);
 			}
 
 			// Apply date filters

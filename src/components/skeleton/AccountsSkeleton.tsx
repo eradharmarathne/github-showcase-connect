@@ -45,8 +45,12 @@ export function AccountsSkeleton() {
 			{/* Accounts Tabs */}
 			<Tabs defaultValue="accounts" className="w-full">
 				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="accounts"><Skeleton className="h-4 w-16" /></TabsTrigger>
-					<TabsTrigger value="transactions"><Skeleton className="h-4 w-28" /></TabsTrigger>
+					<TabsTrigger value="accounts">
+						<Skeleton className="h-4 w-16" />
+					</TabsTrigger>
+					<TabsTrigger value="transactions">
+						<Skeleton className="h-4 w-28" />
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="accounts" className="space-y-4">

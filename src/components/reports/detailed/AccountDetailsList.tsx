@@ -1,6 +1,11 @@
 import { Badge } from "@/components/ui/badge";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, type Currency } from "@/utils/currency";
+import {
+	Card,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { type Currency, formatCurrency } from "@/utils/currency";
 
 export type AccountDetail = {
 	id: string;
