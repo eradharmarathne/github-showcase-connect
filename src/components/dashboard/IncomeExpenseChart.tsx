@@ -32,11 +32,11 @@ interface IncomeExpenseChartProps {
 const chartConfig = {
 	income: {
 		label: "Income",
-		color: "hsl(var(--chart-1))",
+		color: "hsl(var(--primary))",
 	},
 	expenses: {
 		label: "Expenses", 
-		color: "hsl(var(--chart-2))",
+		color: "hsl(var(--destructive))",
 	},
 	net: {
 		label: "Net",
@@ -294,6 +294,7 @@ export function IncomeExpenseChart({
 								top: 12,
 								bottom: 12,
 							}}
+							barCategoryGap="10%"
 						>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -340,12 +341,14 @@ export function IncomeExpenseChart({
 								fill="var(--color-income)" 
 								radius={[4, 4, 0, 0]}
 								name="Income"
+								maxBarSize={60}
 							/>
 							<Bar 
 								dataKey="expenses" 
 								fill="var(--color-expenses)" 
 								radius={[0, 0, 4, 4]}
 								name="Expenses"
+								maxBarSize={60}
 							/>
 						</BarChart>
 					</ChartContainer>
