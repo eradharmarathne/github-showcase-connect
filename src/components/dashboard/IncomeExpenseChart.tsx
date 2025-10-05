@@ -304,10 +304,10 @@ export function IncomeExpenseChart({
 						<BarChart
 							data={chartData}
 							margin={{
-								left: 12,
-								right: 12,
-								top: 12,
-								bottom: 12,
+								left: 0,
+								right: 0,
+								top: 0,
+								bottom: 0,
 							}}
 							barCategoryGap={0}
 						>
@@ -316,7 +316,7 @@ export function IncomeExpenseChart({
 								dataKey="date"
 								tickLine={false}
 								axisLine={false}
-								tickMargin={8}
+								tickMargin={0}
 								minTickGap={32}
 								tickFormatter={(value) => {
 									const date = new Date(value);
