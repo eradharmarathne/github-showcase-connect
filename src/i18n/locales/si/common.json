@@ -605,7 +605,21 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
-    "rememberMe": "Remember Me"
+    "rememberMe": "Remember Me",
+    "transaction": {
+      "count": "ගනුදෙනු",
+      "details": "ගනුදෙනු විස්තර",
+      "type": "වර්ගය",
+      "amount": "මුදල",
+      "date": "දිනය",
+      "description": "විස්තරය",
+      "notes": "සටහන්",
+      "paymentType": "ගෙවීම් ක්‍රමය",
+      "account": "ගිණුම",
+      "guest": "අමුත්තා",
+      "total": "මුළු එකතුව",
+      "moreTransactions": "වැඩි ගනුදෙනු"
+    }
   },
   "theme": {
     "light": "Light",

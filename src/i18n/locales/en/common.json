@@ -605,7 +605,21 @@
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
-    "rememberMe": "Remember Me"
+    "rememberMe": "Remember Me",
+    "transaction": {
+      "count": "transactions",
+      "details": "Transaction Details",
+      "type": "Type",
+      "amount": "Amount",
+      "date": "Date",
+      "description": "Description",
+      "notes": "Notes",
+      "paymentType": "Payment Type",
+      "account": "Account",
+      "guest": "Guest",
+      "total": "Total",
+      "moreTransactions": "more transactions"
+    }
   },
   "theme": {
     "light": "Light",

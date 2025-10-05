@@ -674,7 +674,7 @@ export default function EnhancedFinancialReports() {
 											))}
 											{category.transactions.length > 10 && (
 												<p className="text-sm text-muted-foreground text-center py-2">
-													+{category.transactions.length - 10} more transactions
+													+{category.transactions.length - 10} {t("common.transaction.moreTransactions")}
 												</p>
 											)}
 										</div>
@@ -754,7 +754,7 @@ export default function EnhancedFinancialReports() {
 											))}
 											{category.transactions.length > 10 && (
 												<p className="text-sm text-muted-foreground text-center py-2">
-													+{category.transactions.length - 10} more transactions
+													+{category.transactions.length - 10} {t("common.transaction.moreTransactions")}
 												</p>
 											)}
 										</div>
