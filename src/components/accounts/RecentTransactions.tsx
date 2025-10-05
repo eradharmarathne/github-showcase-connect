@@ -1,6 +1,8 @@
 import { ArrowRightLeft, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocationContext } from "@/context/LocationContext";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -12,36 +14,69 @@ interface RecentTransactionsProps {
 
 export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 	const { t } = useTranslation("common");
+	const { selectedLocation } = useLocationContext();
+	const { tenant } = useTenant();
 	const [transactions, setTransactions] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	const fetchTransactions = useCallback(async () => {
+		// Don't fetch if no tenant or selected location
+		if (!tenant?.id || !selectedLocation) {
+			setTransactions([]);
+			setLoading(false);
+			return;
+		}
+
 		try {
 			const [transfersResponse, incomeResponse, expensesResponse] =
 				await Promise.all([
+					// Account transfers - filter by tenant through accounts
 					supabase
 						.from("account_transfers")
 						.select(
-							"*, from_account:accounts!from_account_id(name, currency), to_account:accounts!to_account_id(name, currency)",
+							"*, from_account:accounts!from_account_id(name, currency, tenant_id, location_access), to_account:accounts!to_account_id(name, currency, tenant_id, location_access)",
+						)
+						.or(
+							`from_account.tenant_id.eq.${tenant.id},to_account.tenant_id.eq.${tenant.id}`,
 						)
 						.order("created_at", { ascending: false })
 						.limit(10),
+					// Income - filter by tenant and location
 					supabase
 						.from("income")
 						.select("*, account:accounts(name, currency)")
+						.eq("tenant_id", tenant.id)
+						.eq("location_id", selectedLocation)
 						.not("account_id", "is", null)
 						.order("created_at", { ascending: false })
 						.limit(10),
+					// Expenses - filter by location and tenant through accounts
 					supabase
 						.from("expenses")
-						.select("*, account:accounts(name, currency)")
+						.select("*, account:accounts(name, currency, tenant_id)")
+						.eq("location_id", selectedLocation)
+						.eq("account.tenant_id", tenant.id)
 						.order("created_at", { ascending: false })
 						.limit(10),
 				]);
 
+			// Filter account transfers to only include those where at least one account
+			// has access to the selected location
+			const filteredTransfers = (transfersResponse.data || []).filter(
+				(transfer) => {
+					const fromAccountAccess =
+						transfer.from_account?.location_access || [];
+					const toAccountAccess = transfer.to_account?.location_access || [];
+					return (
+						fromAccountAccess.includes(selectedLocation) ||
+						toAccountAccess.includes(selectedLocation)
+					);
+				},
+			);
+
 			// Combine and format all transactions
 			const allTransactions = [
-				...(transfersResponse.data || []).map((transfer) => ({
+				...filteredTransfers.map((transfer) => ({
 					...transfer,
 					type: "transfer",
 					display_amount: transfer.amount,
@@ -76,7 +111,7 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 		} finally {
 			setLoading(false);
 		}
-	}, [t]);
+	}, [t, tenant?.id, selectedLocation]);
 
 	useEffect(() => {
 		fetchTransactions();
