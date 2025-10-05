@@ -19,7 +19,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { convertCurrency } from "@/utils/currency";
+import { convertCurrency, getDisplayCurrency, getCurrencySymbol, formatAmountWithSymbol } from "@/utils/currency";
 
 type Location = Tables<"locations">;
 
@@ -64,6 +64,7 @@ export function IncomeExpenseChart({
 	const [profitMargin, setProfitMargin] = useState(0);
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
+	const displayCurrency = getDisplayCurrency(); // Get the display currency
 
 	useEffect(() => {
 		const fetchFinancialData = async () => {
@@ -149,7 +150,7 @@ export function IncomeExpenseChart({
 							const convertedAmount = await convertCurrency(
 								income.amount,
 								income.currency || "LKR",
-								"LKR",
+								displayCurrency,
 							);
 							totalIncome += convertedAmount;
 						}
@@ -158,7 +159,7 @@ export function IncomeExpenseChart({
 							const convertedAmount = await convertCurrency(
 								expense.amount,
 								expense.currency || "LKR",
-								"LKR",
+								displayCurrency,
 							);
 							totalExpenses += convertedAmount;
 						}
@@ -204,7 +205,7 @@ export function IncomeExpenseChart({
 		};
 
 		fetchFinancialData();
-	}, [selectedLocation, selectedMonth, tenant?.id]);
+	}, [selectedLocation, selectedMonth, tenant?.id, displayCurrency]);
 
 	if (loading) {
 		return (
@@ -250,7 +251,7 @@ export function IncomeExpenseChart({
 					</CardHeader>
 					<CardContent>
 						<div className="text-xl lg:text-2xl font-bold text-success">
-							Rs. {todayIncome.toLocaleString()}
+							{formatAmountWithSymbol(todayIncome, displayCurrency)}
 						</div>
 						<p className="text-xs text-muted-foreground">{locationName}</p>
 					</CardContent>
@@ -265,7 +266,7 @@ export function IncomeExpenseChart({
 					</CardHeader>
 					<CardContent>
 						<div className="text-xl lg:text-2xl font-bold text-destructive">
-							Rs. {todayExpenses.toLocaleString()}
+							{formatAmountWithSymbol(todayExpenses, displayCurrency)}
 						</div>
 						<p className="text-xs text-muted-foreground">{locationName}</p>
 					</CardContent>
@@ -280,7 +281,7 @@ export function IncomeExpenseChart({
 					</CardHeader>
 					<CardContent>
 						<div className="text-xl lg:text-2xl font-bold text-primary">
-							Rs. {weeklyProfit.toLocaleString()}
+							{formatAmountWithSymbol(weeklyProfit, displayCurrency)}
 						</div>
 						<p className="text-xs text-muted-foreground">
 							{profitMargin.toFixed(1)}% {t("dashboard.summaryCards.margin")}
@@ -311,24 +312,20 @@ export function IncomeExpenseChart({
 							}}
 							barCategoryGap={0}
 						>
-							<CartesianGrid vertical={true} />
+							<CartesianGrid vertical={false} />
 							<XAxis
 								dataKey="date"
 								tickLine={false}
-								axisLine={true}
+								axisLine={false}
 								tickMargin={0}
 								minTickGap={20}
 								interval={1}
-								tickFormatter={(value, index) => {
-									// Show every other day to reduce crowding
-									if (index % 2 === 0) {
-										const date = new Date(value);
+								tickFormatter={(value) => {
+									const date = new Date(value);
 										return date.toLocaleDateString("en-US", {
 											month: "short",
 											day: "numeric",
 										});
-									}
-									return "";
 								}}
 							/>
 							<YAxis
@@ -336,7 +333,7 @@ export function IncomeExpenseChart({
 								axisLine={false}
 								tickMargin={0}
 								tickFormatter={(value) =>
-									`Rs. ${Math.abs(value).toLocaleString()}`
+									`${getCurrencySymbol(displayCurrency)} ${Math.abs(value).toLocaleString()}`
 								}
 							/>
 							<ReferenceLine
@@ -356,7 +353,7 @@ export function IncomeExpenseChart({
 											});
 										}}
 										formatter={(value, name) => [
-											`Rs. ${Math.abs(Number(value)).toLocaleString()}`,
+											`${getCurrencySymbol(displayCurrency)} ${Math.abs(Number(value)).toLocaleString()}`,
 											name === "expenses"
 												? "Expenses"
 												: name === "income"

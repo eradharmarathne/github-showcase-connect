@@ -239,6 +239,7 @@ export function getCurrencySymbol(currency: string): string {
 		USD: "$", // US Dollar
 		EUR: "€", // Euro
 		GBP: "£", // British Pound
+		LKR: "Rs.", // Sri Lankan Rupee
 		INR: "₹", // Indian Rupee
 		JPY: "¥", // Japanese Yen
 		CNY: "¥", // Chinese Yuan
@@ -258,6 +259,17 @@ export function getCurrencySymbol(currency: string): string {
 	};
 
 	return symbols[currency.toUpperCase()] ?? currency;
+}
+
+// Get the display currency for a tenant (defaults to LKR for now, can be enhanced to read from tenant preferences)
+export function getDisplayCurrency(): string {
+	return "LKR"; // Default to Sri Lankan Rupee, can be made configurable later
+}
+
+// Format amount with currency symbol
+export function formatAmountWithSymbol(amount: number, currency: string = "LKR"): string {
+	const symbol = getCurrencySymbol(currency);
+	return `${symbol} ${amount.toLocaleString()}`;
 }
 
 // Update a currency rate
