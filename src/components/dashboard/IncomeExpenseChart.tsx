@@ -294,7 +294,7 @@ export function IncomeExpenseChart({
 								top: 12,
 								bottom: 12,
 							}}
-							barCategoryGap="5%"
+							barCategoryGap={0}
 						>
 							<CartesianGrid vertical={false} />
 							<XAxis
@@ -338,13 +338,13 @@ export function IncomeExpenseChart({
 							/>
 							<Bar 
 								dataKey="income" 
-								fill="var(--color-income)" 
+								fill="hsl(var(--primary))" 
 								radius={[4, 4, 0, 0]}
 								name="Income"
 							/>
 							<Bar 
 								dataKey="expenses" 
-								fill="var(--color-expenses)" 
+								fill="hsl(var(--destructive))" 
 								radius={[0, 0, 4, 4]}
 								name="Expenses"
 							/>
