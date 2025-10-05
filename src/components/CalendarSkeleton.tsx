@@ -62,7 +62,7 @@ export function CalendarSkeleton() {
 			{/* Legend */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Legend</CardTitle>
+					<CardTitle><Skeleton className="h-5 w-16" /></CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-wrap gap-4">

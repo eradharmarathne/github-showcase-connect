@@ -34,18 +34,18 @@ export function ReportsSkeleton() {
 			{/* Reports Tabs */}
 			<Tabs defaultValue="comprehensive" className="w-full">
 				<TabsList className="grid w-full grid-cols-5">
-					<TabsTrigger value="comprehensive">Comprehensive</TabsTrigger>
-					<TabsTrigger value="financial">Financial</TabsTrigger>
-					<TabsTrigger value="accounts">Accounts</TabsTrigger>
-					<TabsTrigger value="commissions">Commissions</TabsTrigger>
-					<TabsTrigger value="balance">Balance Sheet</TabsTrigger>
+					<TabsTrigger value="comprehensive"><Skeleton className="h-4 w-24" /></TabsTrigger>
+					<TabsTrigger value="financial"><Skeleton className="h-4 w-18" /></TabsTrigger>
+					<TabsTrigger value="accounts"><Skeleton className="h-4 w-16" /></TabsTrigger>
+					<TabsTrigger value="commissions"><Skeleton className="h-4 w-20" /></TabsTrigger>
+					<TabsTrigger value="balance"><Skeleton className="h-4 w-24" /></TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="comprehensive" className="space-y-4">
 					{/* Filters */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Report Filters</CardTitle>
+							<Skeleton className="h-6 w-28" />
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -72,7 +72,7 @@ export function ReportsSkeleton() {
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 						<Card>
 							<CardHeader>
-								<CardTitle>Revenue Chart</CardTitle>
+								<Skeleton className="h-6 w-28" />
 							</CardHeader>
 							<CardContent>
 								<Skeleton className="h-64 w-full" />
@@ -80,7 +80,7 @@ export function ReportsSkeleton() {
 						</Card>
 						<Card>
 							<CardHeader>
-								<CardTitle>Summary Data</CardTitle>
+								<Skeleton className="h-6 w-28" />
 							</CardHeader>
 							<CardContent className="space-y-3">
 								{Array.from({ length: 6 }).map((_, index) => (
@@ -99,7 +99,7 @@ export function ReportsSkeleton() {
 					{/* Data Table */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Detailed Report Data</CardTitle>
+							<Skeleton className="h-6 w-36" />
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-3">

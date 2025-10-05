@@ -45,8 +45,8 @@ export function AccountsSkeleton() {
 			{/* Accounts Tabs */}
 			<Tabs defaultValue="accounts" className="w-full">
 				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="accounts">Accounts</TabsTrigger>
-					<TabsTrigger value="transactions">Recent Transactions</TabsTrigger>
+					<TabsTrigger value="accounts"><Skeleton className="h-4 w-16" /></TabsTrigger>
+					<TabsTrigger value="transactions"><Skeleton className="h-4 w-28" /></TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="accounts" className="space-y-4">
@@ -79,7 +79,7 @@ export function AccountsSkeleton() {
 				<TabsContent value="transactions" className="space-y-4">
 					<Card>
 						<CardHeader>
-							<CardTitle>Recent Transactions</CardTitle>
+							<Skeleton className="h-6 w-40" />
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-3">

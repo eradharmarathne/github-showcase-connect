@@ -11,18 +11,18 @@ export function MasterFilesSkeleton() {
 			{/* Master Files Tabs */}
 			<Tabs defaultValue="locations" className="w-full">
 				<TabsList className="grid w-full grid-cols-5">
-					<TabsTrigger value="locations">Locations</TabsTrigger>
-					<TabsTrigger value="rooms">Rooms</TabsTrigger>
-					<TabsTrigger value="agents">Agents</TabsTrigger>
-					<TabsTrigger value="guides">Guides</TabsTrigger>
-					<TabsTrigger value="commissions">Commissions</TabsTrigger>
+					<TabsTrigger value="locations"><Skeleton className="h-4 w-16" /></TabsTrigger>
+					<TabsTrigger value="rooms"><Skeleton className="h-4 w-12" /></TabsTrigger>
+					<TabsTrigger value="agents"><Skeleton className="h-4 w-14" /></TabsTrigger>
+					<TabsTrigger value="guides"><Skeleton className="h-4 w-14" /></TabsTrigger>
+					<TabsTrigger value="commissions"><Skeleton className="h-4 w-20" /></TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="locations" className="space-y-4">
 					<Card>
 						<CardHeader>
 							<div className="flex justify-between items-center">
-								<CardTitle>Locations</CardTitle>
+								<Skeleton className="h-6 w-20" />
 								<Skeleton className="h-10 w-32" />
 							</div>
 						</CardHeader>

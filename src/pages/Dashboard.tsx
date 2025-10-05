@@ -19,7 +19,7 @@ export default function Dashboard() {
 	const { hasAnyPermission } = usePermissions();
 
 	return (
-		<div className="space-y-4 w-full pb-8 lg:space-y-6 animate-fade-in p-4">
+		<div className="space-y-4 w-full pb-20 sm:pb-8 lg:space-y-6 animate-fade-in p-4">
 			{/* Header with Filters */}
 			<DashboardHeader
 				selectedLocation={selectedLocation}

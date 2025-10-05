@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function NavProjectsSkeleton() {
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel>Quick Actions</SidebarGroupLabel>
+			<SidebarGroupLabel><Skeleton className="h-4 w-24" /></SidebarGroupLabel>
 			<SidebarMenu>
 				{/* Generate 3 quick action skeletons */}
 				{Array.from({ length: 3 }).map((_, index) => (

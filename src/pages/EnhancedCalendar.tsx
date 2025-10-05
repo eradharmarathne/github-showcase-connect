@@ -28,7 +28,6 @@ type Reservation = Database["public"]["Tables"]["reservations"]["Row"] & {
 };
 
 export default function EnhancedCalendar() {
-	const navigate = useNavigate();
 	const { t } = useTranslation("common");
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [searchTerm, setSearchTerm] = useState("");
@@ -107,7 +106,7 @@ export default function EnhancedCalendar() {
 
 	return (
 		<PermissionRoute permission={["access_calendar"]}>
-			<div className="space-y-6">
+			<div className="space-y-6 pb-20 sm:pb-6 px-4">
 				{/* Filters */}
 				<div className="flex pt-3 flex-col sm:flex-row gap-4 items-start sm:items-center">
 					<div className="relative flex-1 max-w-sm">

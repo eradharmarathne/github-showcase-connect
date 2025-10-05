@@ -21,18 +21,18 @@ export function UsersSkeleton() {
 			{/* Users Table */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Team Members</CardTitle>
+					<Skeleton className="h-6 w-28" />
 				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>User</TableHead>
-								<TableHead>Email</TableHead>
-								<TableHead>Role</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead>Last Active</TableHead>
-								<TableHead>Actions</TableHead>
+								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-14" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-20" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -76,7 +76,7 @@ export function UsersSkeleton() {
 			{/* Permissions Matrix */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Permission Matrix</CardTitle>
+					<Skeleton className="h-6 w-32" />
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">

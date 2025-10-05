@@ -14,17 +14,17 @@ export function SettingsSkeleton() {
 			{/* Settings Tabs */}
 			<Tabs defaultValue="general" className="w-full">
 				<TabsList className="grid w-full grid-cols-4">
-					<TabsTrigger value="general">General</TabsTrigger>
-					<TabsTrigger value="notifications">Notifications</TabsTrigger>
-					<TabsTrigger value="security">Security</TabsTrigger>
-					<TabsTrigger value="billing">Billing</TabsTrigger>
+					<TabsTrigger value="general"><Skeleton className="h-4 w-16" /></TabsTrigger>
+					<TabsTrigger value="notifications"><Skeleton className="h-4 w-20" /></TabsTrigger>
+					<TabsTrigger value="security"><Skeleton className="h-4 w-16" /></TabsTrigger>
+					<TabsTrigger value="billing"><Skeleton className="h-4 w-14" /></TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="general" className="space-y-4">
 					{/* Company Information */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Company Information</CardTitle>
+							<Skeleton className="h-6 w-36" />
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -56,7 +56,7 @@ export function SettingsSkeleton() {
 					{/* Preferences */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Preferences</CardTitle>
+							<Skeleton className="h-6 w-24" />
 						</CardHeader>
 						<CardContent className="space-y-4">
 							<div className="flex items-center justify-between">

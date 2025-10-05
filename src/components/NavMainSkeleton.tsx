@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function NavMainSkeleton() {
 	return (
 		<SidebarGroup>
-			<SidebarGroupLabel>Platform</SidebarGroupLabel>
+			<SidebarGroupLabel><Skeleton className="h-4 w-20" /></SidebarGroupLabel>
 			<SidebarMenu>
 				{/* Generate 6 nav item skeletons */}
 				{Array.from({ length: 12 }).map((_, index) => (

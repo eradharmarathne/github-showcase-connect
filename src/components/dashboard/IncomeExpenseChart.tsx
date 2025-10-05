@@ -20,6 +20,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency, getDisplayCurrency, getCurrencySymbol, formatAmountWithSymbol } from "@/utils/currency";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Location = Tables<"locations">;
 
@@ -65,6 +66,7 @@ export function IncomeExpenseChart({
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
 	const displayCurrency = getDisplayCurrency(); // Get the display currency
+	const isMobile = useIsMobile();
 
 	useEffect(() => {
 		const fetchFinancialData = async () => {
@@ -318,8 +320,8 @@ export function IncomeExpenseChart({
 								tickLine={false}
 								axisLine={false}
 								tickMargin={0}
-								minTickGap={20}
-								interval={1}
+								minTickGap={0}
+								interval={isMobile ? 5 : 1}
 								tickFormatter={(value) => {
 									const date = new Date(value);
 										return date.toLocaleDateString("en-US", {
@@ -331,7 +333,7 @@ export function IncomeExpenseChart({
 							<YAxis
 								tickLine={false}
 								axisLine={false}
-								tickMargin={0}
+								tickMargin={20}
 								tickFormatter={(value) =>
 									`${getCurrencySymbol(displayCurrency)} ${Math.abs(value).toLocaleString()}`
 								}

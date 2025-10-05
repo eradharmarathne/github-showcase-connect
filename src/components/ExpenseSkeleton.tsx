@@ -18,7 +18,7 @@ export function ExpenseSkeleton() {
 			{/* Expense Form Card */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Add New Expense</CardTitle>
+					<Skeleton className="h-6 w-32" />
 				</CardHeader>
 				<CardContent className="space-y-4">
 					{/* Form Grid */}
@@ -61,7 +61,7 @@ export function ExpenseSkeleton() {
 			{/* Expense Shortcuts */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Quick Expense Shortcuts</CardTitle>
+					<Skeleton className="h-6 w-40" />
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -75,17 +75,17 @@ export function ExpenseSkeleton() {
 			{/* Recent Expenses */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Recent Expenses</CardTitle>
+					<Skeleton className="h-6 w-32" />
 				</CardHeader>
 				<CardContent>
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Date</TableHead>
-								<TableHead>Category</TableHead>
-								<TableHead>Amount</TableHead>
-								<TableHead>Account</TableHead>
-								<TableHead>Note</TableHead>
+								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-18" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-16" /></TableHead>
+								<TableHead><Skeleton className="h-4 w-12" /></TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
