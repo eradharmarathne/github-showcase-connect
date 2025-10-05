@@ -70,10 +70,15 @@ export default function Auth() {
 
 		// Handle magic link verification first
 		handleTokenHash();
-
-		// Navigation is handled by SmartRedirect component when user is authenticated
-		// No need for manual navigation logic here
 	}, [navigate, toast, searchParams]);
+
+	// Handle redirect after successful authentication
+	useEffect(() => {
+		if (user && !submitting) {
+			// User is authenticated, redirect to smart redirect for proper routing
+			navigate("/", { replace: true });
+		}
+	}, [user, navigate, submitting]);
 
 	const handleAuth = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -97,7 +102,7 @@ export default function Auth() {
 						title: "Login Successful",
 						description: "Welcome back!",
 					});
-					// Navigation is handled by useAuth hook
+					// Navigation will be handled by useEffect when user state updates
 				}
 			} else {
 				if (!name.trim()) {
