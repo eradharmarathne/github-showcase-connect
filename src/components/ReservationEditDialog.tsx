@@ -58,6 +58,7 @@ interface Reservation {
 	guide_id?: string;
 	agent_commission?: number;
 	guide_commission?: number;
+	booking_source?: string;
 }
 
 interface ReservationEditDialogProps {
@@ -244,6 +245,34 @@ export function ReservationEditDialog({
 								setFormData({ ...formData, guest_address: e.target.value })
 							}
 						/>
+					</div>
+
+					<div>
+						<Label>Booking Source</Label>
+						<Select
+							value={formData.booking_source || ""}
+							onValueChange={(value) =>
+								setFormData({ ...formData, booking_source: value })
+							}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder="Select booking source" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="direct">Direct</SelectItem>
+								<SelectItem value="airbnb">Airbnb</SelectItem>
+								<SelectItem value="booking_com">Booking.com</SelectItem>
+								<SelectItem value="expedia">Expedia</SelectItem>
+								<SelectItem value="agoda">Agoda</SelectItem>
+								<SelectItem value="beds24">Beds24</SelectItem>
+								<SelectItem value="manual">Manual</SelectItem>
+								<SelectItem value="online">Online</SelectItem>
+								<SelectItem value="phone">Phone</SelectItem>
+								<SelectItem value="email">Email</SelectItem>
+								<SelectItem value="walk_in">Walk-in</SelectItem>
+								<SelectItem value="ical">iCal</SelectItem>
+							</SelectContent>
+						</Select>
 					</div>
 
 					<div className="grid grid-cols-3 gap-4">

@@ -16,6 +16,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +68,7 @@ export function NewReservationDialog({
 		guest_passport_number: "",
 		guest_id_number: "",
 		special_requests: "",
+		booking_source: "direct",
 	});
 
 	const [paymentData, setPaymentData] = useState({
@@ -295,7 +303,7 @@ export function NewReservationDialog({
 					status: "tentative" as const,
 					arrival_time: selection.arrival_time || null,
 					special_requests: guestData.special_requests || null,
-					booking_source: "direct",
+					booking_source: guestData.booking_source,
 					created_by: profile.id,
 					tenant_id: tenant.id,
 				};
@@ -329,6 +337,7 @@ export function NewReservationDialog({
 				guest_passport_number: "",
 				guest_id_number: "",
 				special_requests: "",
+				booking_source: "direct",
 			});
 			setPaymentData({
 				advance_amount: 0,
@@ -472,6 +481,37 @@ export function NewReservationDialog({
 							)}
 						</div>
 					</div>
+
+					{/* Booking Source */}
+					{fieldPreferences?.show_booking_source !== false && (
+						<div className="space-y-2">
+							<Label htmlFor="booking_source">Booking Source</Label>
+							<Select
+								value={guestData.booking_source}
+								onValueChange={(value) =>
+									handleGuestDataChange("booking_source", value)
+								}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select booking source" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="direct">Direct</SelectItem>
+									<SelectItem value="airbnb">Airbnb</SelectItem>
+									<SelectItem value="booking_com">Booking.com</SelectItem>
+									<SelectItem value="expedia">Expedia</SelectItem>
+									<SelectItem value="agoda">Agoda</SelectItem>
+									<SelectItem value="beds24">Beds24</SelectItem>
+									<SelectItem value="manual">Manual</SelectItem>
+									<SelectItem value="online">Online</SelectItem>
+									<SelectItem value="phone">Phone</SelectItem>
+									<SelectItem value="email">Email</SelectItem>
+									<SelectItem value="walk_in">Walk-in</SelectItem>
+									<SelectItem value="ical">iCal</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+					)}
 
 					{/* Room Selections */}
 					<MultiRoomSelector

@@ -254,7 +254,7 @@ export default function PaymentForm() {
 				type: "booking" as const,
 				amount: formData.amount,
 				payment_method: formData.payment_method,
-				booking_source: "direct",
+				booking_source: reservation.booking_source || "direct",
 				check_in_date: reservation.check_in_date,
 				check_out_date: reservation.check_out_date,
 				note: formData.notes || null,

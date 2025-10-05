@@ -314,7 +314,7 @@ export function IncomeExpenseChart({
 							<YAxis
 								tickLine={false}
 								axisLine={false}
-								tickMargin={8}
+								tickMargin={0}
 								tickFormatter={(value) => `Rs. ${Math.abs(value).toLocaleString()}`}
 							/>
 							<ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
@@ -338,14 +338,12 @@ export function IncomeExpenseChart({
 							/>
 							<Bar 
 								dataKey="income" 
-								fill="hsl(var(--primary))" 
-								radius={4}
+								fill="var(--primary)"
 								name="Income"
 							/>
 							<Bar 
 								dataKey="expenses" 
-								fill="hsl(var(--destructive))" 
-								radius={4}
+								fill="var(--destructive)"
 								name="Expenses"
 							/>
 						</BarChart>

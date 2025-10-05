@@ -42,7 +42,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
-import { n } from "node_modules/react-router/dist/development/index-react-server-client-2EDmGlsZ.d.mts";
 
 type Guide = {
 	id: string;
