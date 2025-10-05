@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
 	AccountBalances,
 	DashboardHeader,
-	SummaryCards,
+	IncomeExpenseChart,
 	UpcomingBookings,
 } from "@/components/dashboard";
 import { useLocationContext } from "@/context/LocationContext";
@@ -29,8 +29,8 @@ export default function Dashboard() {
 				onLocationsLoad={setLocations}
 			/>
 
-			{/* Summary Cards */}
-			<SummaryCards
+			{/* Income & Expense Chart with Summary Cards */}
+			<IncomeExpenseChart
 				selectedLocation={selectedLocation}
 				selectedMonth={selectedMonth}
 				locations={locations}

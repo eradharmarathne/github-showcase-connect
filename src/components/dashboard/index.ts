@@ -3,6 +3,7 @@ export { AccountBalancesSkeleton } from "./AccountBalancesSkeleton";
 export { DashboardHeader } from "./DashboardHeader";
 export { DashboardHeaderSkeleton } from "./DashboardHeaderSkeleton";
 export { DashboardSkeleton } from "./DashboardSkeleton";
+export { IncomeExpenseChart } from "./IncomeExpenseChart";
 export { SummaryCards } from "./SummaryCards";
 export { SummaryCardsSkeleton } from "./SummaryCardsSkeleton";
 export { UpcomingBookings } from "./UpcomingBookings";
