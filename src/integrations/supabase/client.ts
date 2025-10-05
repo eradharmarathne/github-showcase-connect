@@ -15,6 +15,12 @@ let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
 
 function getSupabaseClient() {
 	if (!supabaseInstance) {
+		// In development, check if there's already a global instance to prevent HMR issues
+		if (import.meta.env.DEV && (window as any).__supabaseClient) {
+			supabaseInstance = (window as any).__supabaseClient;
+			return supabaseInstance;
+		}
+		
 		supabaseInstance = createClient<Database>(
 			SUPABASE_URL,
 			SUPABASE_ANON_KEY,
@@ -23,24 +29,50 @@ function getSupabaseClient() {
 					storage: localStorage,
 					persistSession: true,
 					autoRefreshToken: true,
-					storageKey: 'supabase.auth.token', // Unique storage key
+					storageKey: 'cco-supabase-auth', // Unique storage key
 				},
 			},
 		);
+		
+		// Store globally in development for HMR
+		if (import.meta.env.DEV) {
+			(window as any).__supabaseClient = supabaseInstance;
+		}
 	}
 	return supabaseInstance;
 }
 
 export const supabase = getSupabaseClient();
 
-// Service role client for admin operations
-export const supabaseAdmin = createClient<Database>(
-	SUPABASE_URL,
-	SUPABASE_SERVICE_ROLE_KEY,
-	{
-		auth: {
-			autoRefreshToken: false,
-			persistSession: false,
-		},
-	},
-);
+// Service role client for admin operations - use singleton pattern
+let supabaseAdminInstance: ReturnType<typeof createClient<Database>> | null = null;
+
+function getSupabaseAdminClient() {
+	if (!supabaseAdminInstance) {
+		// In development, check if there's already a global instance to prevent HMR issues
+		if (import.meta.env.DEV && (window as any).__supabaseAdminClient) {
+			supabaseAdminInstance = (window as any).__supabaseAdminClient;
+			return supabaseAdminInstance;
+		}
+		
+		supabaseAdminInstance = createClient<Database>(
+			SUPABASE_URL,
+			SUPABASE_SERVICE_ROLE_KEY,
+			{
+				auth: {
+					autoRefreshToken: false,
+					persistSession: false,
+					storageKey: 'cco-supabase-admin-auth', // Unique storage key for admin
+				},
+			},
+		);
+		
+		// Store globally in development for HMR
+		if (import.meta.env.DEV) {
+			(window as any).__supabaseAdminClient = supabaseAdminInstance;
+		}
+	}
+	return supabaseAdminInstance;
+}
+
+export const supabaseAdmin = getSupabaseAdminClient();
