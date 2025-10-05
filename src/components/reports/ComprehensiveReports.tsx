@@ -13,8 +13,7 @@ import { formatCurrency } from "@/utils/currency";
 export default function ComprehensiveReports() {
 	const { t } = useTranslation();
 	const { tenant } = useTenant();
-	const { selectedLocation: contextSelectedLocation } = useLocationContext();
-	const [selectedLocation, setSelectedLocation] = useState("");
+	const { selectedLocation } = useLocationContext();
 	const [dateFrom, setDateFrom] = useState("");
 	const [dateTo, setDateTo] = useState("");
 	const [baseCurrency, setBaseCurrency] = useState<string>("LKR");
@@ -80,8 +79,6 @@ export default function ComprehensiveReports() {
 		<div className="space-y-6 px-0 sm:px-4">
 			{/* Filters */}
 			<ReportFilters
-				selectedLocation={selectedLocation}
-				setSelectedLocation={setSelectedLocation}
 				dateFrom={dateFrom}
 				setDateFrom={setDateFrom}
 				dateTo={dateTo}

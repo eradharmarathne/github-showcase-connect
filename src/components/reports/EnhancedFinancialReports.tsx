@@ -37,6 +37,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
 	convertCurrency,
@@ -103,47 +104,33 @@ export default function EnhancedFinancialReports() {
 	const [expandedExpenses, setExpandedExpenses] = useState<Set<string>>(
 		new Set(),
 	);
-	const [locations, setLocations] = useState<any[]>([]);
-	const [selectedLocation, setSelectedLocation] = useState("all");
 	const [dateFrom, setDateFrom] = useState("");
 	const [dateTo, setDateTo] = useState("");
 	const [baseCurrency, setBaseCurrency] = useState<string>("LKR");
 	const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
 	const { toast } = useToast();
 	const { tenant } = useTenant();
+	const { selectedLocation } = useLocationContext();
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: fetchData and fetchAvailableCurrencies are stable functions
 	useEffect(() => {
-		const loadInitialData = async () => {
-			await Promise.all([
-				fetchLocations(),
-				fetchAvailableCurrencies(),
-				fetchData(),
-			]);
-		};
 		if (tenant?.id) {
+			const loadInitialData = async () => {
+				await Promise.all([
+					fetchAvailableCurrencies(),
+					fetchData(),
+				]);
+			};
 			loadInitialData();
 		}
 	}, [tenant?.id]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: fetchData is a stable function
 	useEffect(() => {
-		if (tenant?.id) {
+		if (tenant?.id && selectedLocation) {
 			fetchData();
 		}
-	}, [selectedLocation, dateFrom, dateTo, baseCurrency, tenant?.id]);
-
-	const fetchLocations = async () => {
-		try {
-			const { data, error } = await supabase
-				.from("locations")
-				.select("*")
-				.eq("is_active", true);
-
-			if (error) throw error;
-			setLocations(data || []);
-		} catch (error) {
-			console.error("Error fetching locations:", error);
-		}
-	};
+	}, [selectedLocation, tenant?.id]);
 
 	const fetchAvailableCurrencies = async () => {
 		try {
@@ -197,8 +184,8 @@ export default function EnhancedFinancialReports() {
 				.select("amount, currency, reservations!inner(tenant_id, location_id)")
 				.eq("reservations.tenant_id", tenant.id);
 
-			// Apply location filters
-			if (selectedLocation !== "all") {
+			// Apply location filters  
+			if (selectedLocation) {
 				incomeQuery = incomeQuery.eq("location_id", selectedLocation);
 				expenseQuery = expenseQuery.eq("location_id", selectedLocation);
 				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
@@ -288,7 +275,7 @@ export default function EnhancedFinancialReports() {
 				.eq("reservations.tenant_id", tenant.id);
 
 			// Apply location filters
-			if (selectedLocation !== "all") {
+			if (selectedLocation) {
 				incomeQuery = incomeQuery.eq("location_id", selectedLocation);
 				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
 			}
@@ -375,7 +362,7 @@ export default function EnhancedFinancialReports() {
 			query = query.eq("accounts.tenant_id", tenant.id);
 
 			// Apply filters
-			if (selectedLocation !== "all") {
+			if (selectedLocation) {
 				query = query.eq("location_id", selectedLocation);
 			}
 			if (dateFrom) {
@@ -474,29 +461,7 @@ export default function EnhancedFinancialReports() {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-						<div>
-							<Label htmlFor="location">
-								{t("reports.enhanced.filters.location")}
-							</Label>
-							<Select
-								value={selectedLocation}
-								onValueChange={setSelectedLocation}
-							>
-								<SelectTrigger>
-									<SelectValue
-										placeholder={t("reports.enhanced.filters.location")}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									{locations.map((location) => (
-										<SelectItem key={location.id} value={location.id}>
-											{location.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
+					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 						<div>
 							<Label htmlFor="currency">
 								{t("reports.enhanced.filters.baseCurrency")}

@@ -12,13 +12,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useLocationContext } from "@/context/LocationContext";
 import { useTenant } from "@/hooks/useTenant";
-import { supabase } from "@/integrations/supabase/client";
 import { getAvailableCurrencies } from "@/utils/currency";
 
 interface ReportFiltersProps {
-	selectedLocation: string;
-	setSelectedLocation: (location: string) => void;
 	dateFrom: string;
 	setDateFrom: (date: string) => void;
 	dateTo: string;
@@ -30,8 +28,6 @@ interface ReportFiltersProps {
 }
 
 export function ReportFilters({
-	selectedLocation,
-	setSelectedLocation,
 	dateFrom,
 	setDateFrom,
 	dateTo,
@@ -43,30 +39,8 @@ export function ReportFilters({
 }: ReportFiltersProps) {
 	const { t } = useTranslation();
 	const { tenant } = useTenant();
-	const [locations, setLocations] = useState<any[]>([]);
+	const { selectedLocation } = useLocationContext();
 	const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
-
-	const fetchLocations = useCallback(async () => {
-		if (!tenant?.id) return;
-
-		try {
-			const { data, error } = await supabase
-				.from("locations")
-				.select("*")
-				.eq("tenant_id", tenant.id)
-				.eq("is_active", true);
-
-			if (error) throw error;
-			setLocations(data || []);
-
-			// Auto-select first location if none selected
-			if (data && data.length > 0 && !selectedLocation) {
-				setSelectedLocation(data[0].id);
-			}
-		} catch (error) {
-			console.error("Error fetching locations:", error);
-		}
-	}, [tenant?.id, selectedLocation, setSelectedLocation]);
 
 	const fetchAvailableCurrencies = useCallback(async () => {
 		try {
@@ -83,9 +57,8 @@ export function ReportFilters({
 	}, [baseCurrency, setBaseCurrency]);
 
 	useEffect(() => {
-		fetchLocations();
 		fetchAvailableCurrencies();
-	}, [fetchLocations, fetchAvailableCurrencies]);
+	}, [fetchAvailableCurrencies]);
 
 	return (
 		<Card className="px-4">
@@ -96,27 +69,7 @@ export function ReportFilters({
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="px-0 sm:px-2">
-				<div className="grid grid-cols-1 md:grid-cols-5 gap-2">
-					<div>
-						<Label htmlFor="location">
-							{t("reports.comprehensive.filters.location")}
-						</Label>
-						<Select value={selectedLocation} onValueChange={setSelectedLocation}>
-							<SelectTrigger>
-								<SelectValue
-									placeholder={t("reports.comprehensive.filters.selectLocation")}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="all">All Locations</SelectItem>
-								{locations.map((location) => (
-									<SelectItem key={location.id} value={location.id}>
-										{location.name}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
+				<div className="grid grid-cols-1 md:grid-cols-4 gap-2">
 					<div>
 						<Label htmlFor="currency">
 							{t("reports.comprehensive.filters.currency")}

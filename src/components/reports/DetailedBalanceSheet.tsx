@@ -19,6 +19,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
 	type Currency,
@@ -68,14 +70,20 @@ export default function DetailedBalanceSheet() {
 		totalExpenses: 0,
 	});
 	const { toast } = useToast();
+	const { tenant } = useTenant();
+	const { selectedLocation } = useLocationContext();
 
 	const fetchAccountDetails = useCallback(async () => {
+		if (!tenant?.id || !selectedLocation) return;
+		
 		setLoading(true);
 		try {
-			// Fetch all accounts
+			// Fetch all accounts for the tenant and location
 			const { data: accountsData, error: accountsError } = await supabase
 				.from("accounts")
 				.select("*")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
 				.order("name");
 
 			if (accountsError) throw accountsError;
@@ -97,21 +105,27 @@ export default function DetailedBalanceSheet() {
 							.from("income")
 							.select("id, date, amount, type, note, currency")
 							.eq("account_id", account.id)
+							.eq("tenant_id", tenant.id)
+							.eq("location_id", selectedLocation)
 							.order("date", { ascending: true }),
 						supabase
 							.from("expenses")
 							.select("id, date, amount, main_type, sub_type, note, currency")
 							.eq("account_id", account.id)
+							.eq("tenant_id", tenant.id)
+							.eq("location_id", selectedLocation)
 							.order("date", { ascending: true }),
 						supabase
 							.from("account_transfers")
 							.select("id, created_at, amount, note")
 							.eq("from_account_id", account.id)
+							.eq("tenant_id", tenant.id)
 							.order("created_at", { ascending: true }),
 						supabase
 							.from("account_transfers")
 							.select("id, created_at, amount, conversion_rate, note")
 							.eq("to_account_id", account.id)
+							.eq("tenant_id", tenant.id)
 							.order("created_at", { ascending: true }),
 					]);
 
@@ -280,7 +294,7 @@ export default function DetailedBalanceSheet() {
 		} finally {
 			setLoading(false);
 		}
-	}, [baseCurrency, toast]);
+	}, [baseCurrency, toast, tenant?.id, selectedLocation]);
 
 	useEffect(() => {
 		fetchAccountDetails();
