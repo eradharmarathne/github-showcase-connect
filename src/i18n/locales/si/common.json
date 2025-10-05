@@ -961,7 +961,8 @@
         "balance": "ශේෂය",
         "transactions": "ගනුදෙනු",
         "income": "ආදායම",
-        "expenses": "වියදම්"
+        "expenses": "වියදම්",
+        "noTransactions": "තෝරන ලද කාල සීමාව සඳහා ගනුදෙනු හමු නොවීය"
       },
       "incomeCategories": {
         "title": "ආදායම් වර්ග",

@@ -959,9 +959,10 @@
         "subtitle": "Running balances for all accounts with complete transaction history",
         "account": "Account",
         "balance": "Balance",
-        "transactions": "Transactions",
+        "transactions": "transactions",
         "income": "Income",
-        "expenses": "Expenses"
+        "expenses": "Expenses",
+        "noTransactions": "No transactions found for selected period"
       },
       "incomeCategories": {
         "title": "Income Categories",

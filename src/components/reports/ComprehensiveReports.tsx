@@ -635,10 +635,10 @@ export default function ComprehensiveReports() {
 				<CardHeader className="px-2 sm:px-4">
 					<CardTitle className="flex items-center gap-2 text-md sm:text-lg">
 						<Building2 className="size-6" />
-						Account Balances & Transaction History
+						{t("reports.comprehensive.accounts.title")}
 					</CardTitle>
 					<CardDescription>
-						Running balances for all accounts with complete transaction history
+						{t("reports.comprehensive.accounts.subtitle")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="px-2 sm:px-4">
@@ -665,7 +665,7 @@ export default function ComprehensiveReports() {
 																{account.currency}
 															</Badge>
 															<span>
-																{account.transaction_count} transactions
+																{account.transaction_count} {t("reports.comprehensive.accounts.transactions")}
 															</span>
 														</CardDescription>
 													</div>
@@ -684,14 +684,14 @@ export default function ComprehensiveReports() {
 													</p>
 													<div className="flex pt-4 sm:pt-0 flex-col sm:flex-row gap-2 sm:gap-4 text-sm text-muted-foreground">
 														<span className="text-green-600">
-															Income:{" "}
+															{t("reports.comprehensive.accounts.income")}:{" "}
 															{formatCurrency(
 																account.total_payments,
 																account.currency as any,
 															)}
 														</span>
 														<span className="text-red-600">
-															Expenses:{" "}
+															{t("reports.comprehensive.accounts.expenses")}:{" "}
 															{formatCurrency(
 																account.total_expenses,
 																account.currency as any,
@@ -707,7 +707,7 @@ export default function ComprehensiveReports() {
 											<div className="space-y-2 max-h-96 overflow-y-auto">
 												{account.transactions.length === 0 ? (
 													<p className="text-start sm:text-center text-muted-foreground py-8">
-														No transactions found for selected period
+														{t("reports.comprehensive.accounts.noTransactions")}
 													</p>
 												) : (
 													account.transactions.map((txn, index) => (
@@ -746,7 +746,7 @@ export default function ComprehensiveReports() {
 																	)}
 																</p>
 																<div className="text-sm text-muted-foreground">
-																	Balance:{" "}
+																	{t("reports.comprehensive.accounts.balance")}:{" "}
 																	{formatCurrency(
 																		txn.running_balance,
 																		txn.currency as any,
