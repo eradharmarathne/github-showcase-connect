@@ -1,5 +1,4 @@
 import { AlertCircle } from "lucide-react";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { ExpenseSkeleton } from "@/components/ExpenseSkeleton";
@@ -18,9 +17,6 @@ export default function Expense() {
 	const { t } = useTranslation();
 	const { hasAnyPermission } = usePermissions();
 	const { selectedLocation } = useLocationContext();
-	const [selectedLocationId, setSelectedLocationId] = useState<string>(
-		selectedLocation || "",
-	);
 
 	// Use the custom hook for data fetching
 	const {
@@ -79,14 +75,14 @@ export default function Expense() {
 				locations={locations}
 				accounts={accounts}
 				expenseTypes={expenseTypes}
+				selectedLocation={selectedLocation}
 				onSuccess={refetch}
-				onLocationChange={setSelectedLocationId}
 			/>
 
 			{/* Expense Shortcuts */}
-			{selectedLocationId && (
+			{selectedLocation && (
 				<ExpenseShortcutsSection
-					locationId={selectedLocationId}
+					locationId={selectedLocation}
 					accounts={accounts}
 					onQuickFill={handleQuickFill}
 				/>

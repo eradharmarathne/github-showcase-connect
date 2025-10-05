@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Calendar, Minus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +27,7 @@ interface ExpenseFormProps {
 	locations: Location[];
 	accounts: Account[];
 	expenseTypes: ExpenseType[];
+	selectedLocation?: string;
 	onSuccess: () => void;
 	onLocationChange?: (locationId: string) => void;
 }
@@ -35,6 +36,7 @@ export function ExpenseForm({
 	locations,
 	accounts,
 	expenseTypes,
+	selectedLocation,
 	onSuccess,
 	onLocationChange,
 }: ExpenseFormProps) {
@@ -47,10 +49,17 @@ export function ExpenseForm({
 		subCategory: "",
 		amount: "",
 		accountId: "",
-		locationId: "",
+		locationId: selectedLocation || "",
 		date: format(new Date(), "yyyy-MM-dd"),
 		note: "",
 	});
+
+	// Update form location when selectedLocation prop changes
+	useEffect(() => {
+		if (selectedLocation) {
+			setFormData(prev => ({ ...prev, locationId: selectedLocation }));
+		}
+	}, [selectedLocation]);
 
 	const selectedAccount = accounts.find((a) => a.id === formData.accountId);
 	const currencySymbol = selectedAccount?.currency
@@ -99,11 +108,16 @@ export function ExpenseForm({
 		setIsSubmitting(true);
 
 		try {
+			const accountForCurrency = accounts.find(
+				(acc) => acc.id === formData.accountId,
+			);
+			
 			const { error } = await supabase.from("expenses").insert([
 				{
 					main_type: formData.mainCategory,
 					sub_type: formData.subCategory,
 					amount: parseFloat(formData.amount),
+					currency: accountForCurrency?.currency || 'LKR',
 					account_id: formData.accountId,
 					location_id: formData.locationId,
 					date: formData.date,
@@ -256,6 +270,7 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 									setFormData({ ...formData, locationId: value });
 									onLocationChange?.(value);
 								}}
+								disabled={!!selectedLocation}
 							>
 								<SelectTrigger>
 									<SelectValue
