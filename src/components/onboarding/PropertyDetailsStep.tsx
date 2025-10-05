@@ -33,8 +33,10 @@ export function PropertyDetailsStep({ formData, setFormData }: OnboardingStepPro
           {PROPERTY_TYPES.map((type) => (
             <Button
               key={type.id}
-              variant={formData.propertyType === type.id ? "default" : "outline"}
-              className="h-auto p-4 flex flex-col items-center gap-3 text-left"
+              variant="outline"
+              className={`h-auto p-4 flex flex-col items-center gap-3 text-left ${
+                formData.propertyType === type.id ? "bg-primary/10 border-2 border-primary" : ""
+              }`}
               onClick={() =>
                 setFormData((prev) => ({ ...prev, propertyType: type.id }))
               }
