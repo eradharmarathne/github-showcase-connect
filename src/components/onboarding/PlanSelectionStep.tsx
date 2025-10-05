@@ -164,7 +164,7 @@ export function PlanSelectionStep({
 			)}
 
 			<div className="text-center text-sm text-muted-foreground mt-4">
-				<p>Need help choosing? <span className="text-primary cursor-pointer hover:underline">Contact our sales team</span></p>
+				<p>Need help choosing? <a href="mailto:checkingcheckout@netronk.com" className="text-primary cursor-pointer hover:underline">Contact our sales team</a></p>
 			</div>
 		</div>
 	);
