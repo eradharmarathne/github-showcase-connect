@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
 	AccountBalances,
+	BookingSourceChart,
 	DashboardHeader,
 	IncomeExpenseChart,
 	UpcomingBookings,
@@ -29,12 +30,22 @@ export default function Dashboard() {
 				onLocationsLoad={setLocations}
 			/>
 
-			{/* Income & Expense Chart with Summary Cards */}
-			<IncomeExpenseChart
-				selectedLocation={selectedLocation}
-				selectedMonth={selectedMonth}
-				locations={locations}
-			/>
+			{/* Income & Expense Chart with Booking Sources */}
+			<div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+				<div className="lg:col-span-3">
+					<IncomeExpenseChart
+						selectedLocation={selectedLocation}
+						selectedMonth={selectedMonth}
+						locations={locations}
+					/>
+				</div>
+				<div className="lg:col-span-1">
+					<BookingSourceChart
+						selectedLocation={selectedLocation}
+						selectedMonth={selectedMonth}
+					/>
+				</div>
+			</div>
 
 			{/* Account Balances */}
 			<AccountBalances selectedLocation={selectedLocation} />

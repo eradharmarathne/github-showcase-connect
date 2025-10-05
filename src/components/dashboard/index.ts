@@ -1,5 +1,6 @@
 export { AccountBalances } from "./AccountBalances";
 export { AccountBalancesSkeleton } from "./AccountBalancesSkeleton";
+export { BookingSourceChart } from "./BookingSourceChart";
 export { DashboardHeader } from "./DashboardHeader";
 export { DashboardHeaderSkeleton } from "./DashboardHeaderSkeleton";
 export { DashboardSkeleton } from "./DashboardSkeleton";
