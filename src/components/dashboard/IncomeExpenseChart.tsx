@@ -339,13 +339,13 @@ export function IncomeExpenseChart({
 							<Bar 
 								dataKey="income" 
 								fill="hsl(var(--primary))" 
-								radius={[4, 4, 0, 0]}
+								radius={4}
 								name="Income"
 							/>
 							<Bar 
 								dataKey="expenses" 
 								fill="hsl(var(--destructive))" 
-								radius={[0, 0, 4, 4]}
+								radius={4}
 								name="Expenses"
 							/>
 						</BarChart>
