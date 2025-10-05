@@ -212,10 +212,13 @@ export function PhoneVerification({
 							placeholder="+94XXXXXXXXX"
 							value={phoneNumber}
 							onChange={(e) => setPhoneNumber(e.target.value)}
-							disabled={isLoading}
+							disabled={isLoading || (phone && phone.trim() !== "")}
 						/>
 						<p className="text-xs text-muted-foreground mt-1">
-							Enter your phone number to receive SMS notifications
+							{phone && phone.trim() !== "" 
+								? "This phone number needs verification to receive SMS notifications"
+								: "Enter your phone number to receive SMS notifications"
+							}
 						</p>
 					</div>
 					<Button
@@ -256,20 +259,23 @@ export function PhoneVerification({
 						<Button
 							onClick={verifyOTP}
 							disabled={isVerifying || otpCode.length !== 6}
-							className="flex-1"
+							className={phone && phone.trim() !== "" ? "w-full" : "flex-1"}
 						>
 							{isVerifying && (
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 							)}
 							Verify Code
 						</Button>
-						<Button
-							variant="outline"
-							onClick={resetVerification}
-							disabled={isVerifying}
-						>
-							Change Number
-						</Button>
+						{/* Only show Change Number button if no existing phone number */}
+						{(!phone || phone.trim() === "") && (
+							<Button
+								variant="outline"
+								onClick={resetVerification}
+								disabled={isVerifying}
+							>
+								Change Number
+							</Button>
+						)}
 					</div>
 
 					<Button
