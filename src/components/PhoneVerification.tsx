@@ -13,12 +13,14 @@ interface PhoneVerificationProps {
 	phone?: string | null;
 	isVerified?: boolean;
 	onVerificationSuccess?: () => void;
+	showAsCard?: boolean; // New prop to control Card wrapper
 }
 
 export function PhoneVerification({
 	phone,
 	isVerified = false,
 	onVerificationSuccess,
+	showAsCard = true,
 }: PhoneVerificationProps) {
 	const [phoneNumber, setPhoneNumber] = useState(phone || "");
 	const [otpCode, setOtpCode] = useState("");
@@ -176,6 +178,120 @@ export function PhoneVerification({
 		setPhoneNumber(phone || "");
 	};
 
+	const verifiedContent = (
+		<div className="space-y-4">
+			<div className="flex items-center justify-between">
+				<div>
+					<Label>Phone Number</Label>
+					<p className="text-sm text-muted-foreground mt-1">{phone}</p>
+				</div>
+				<Badge
+					variant="default"
+					className="bg-green-100 text-green-800 border-green-200"
+				>
+					<Shield className="h-3 w-3 mr-1" />
+					Verified
+				</Badge>
+			</div>
+			<p className="text-xs text-muted-foreground">
+				Your phone number has been verified and can be used for SMS
+				notifications.
+			</p>
+		</div>
+	);
+
+	const verificationContent = (
+		<div className="space-y-4">
+			{!otpSent ? (
+				<div className="space-y-4">
+					<div>
+						<Label htmlFor="phone">Phone Number</Label>
+						<Input
+							id="phone"
+							type="tel"
+							placeholder="+94XXXXXXXXX"
+							value={phoneNumber}
+							onChange={(e) => setPhoneNumber(e.target.value)}
+							disabled={isLoading}
+						/>
+						<p className="text-xs text-muted-foreground mt-1">
+							Enter your phone number to receive SMS notifications
+						</p>
+					</div>
+					<Button
+						onClick={sendOTP}
+						disabled={isLoading || !phoneNumber.trim()}
+						className="w-full"
+					>
+						{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+						Send Verification Code
+					</Button>
+				</div>
+			) : (
+				<div className="space-y-4">
+					<div>
+						<Label>Phone Number</Label>
+						<p className="text-sm text-muted-foreground">{phoneNumber}</p>
+					</div>
+
+					<div>
+						<Label htmlFor="otp">Verification Code</Label>
+						<Input
+							id="otp"
+							type="text"
+							placeholder="Enter 6-digit code"
+							value={otpCode}
+							onChange={(e) =>
+								setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+							}
+							disabled={isVerifying}
+							maxLength={6}
+						/>
+						<p className="text-xs text-muted-foreground mt-1">
+							Enter the 6-digit code sent to your phone
+						</p>
+					</div>
+
+					<div className="flex gap-2">
+						<Button
+							onClick={verifyOTP}
+							disabled={isVerifying || otpCode.length !== 6}
+							className="flex-1"
+						>
+							{isVerifying && (
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							)}
+							Verify Code
+						</Button>
+						<Button
+							variant="outline"
+							onClick={resetVerification}
+							disabled={isVerifying}
+						>
+							Change Number
+						</Button>
+					</div>
+
+					<Button
+						variant="ghost"
+						onClick={sendOTP}
+						disabled={isLoading}
+						className="w-full text-sm"
+					>
+						{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+						Resend Code
+					</Button>
+				</div>
+			)}
+		</div>
+	);
+
+	if (!showAsCard) {
+		// Return content without Card wrapper for dialog usage
+		return isVerified ? verifiedContent : verificationContent;
+	}
+
+	// Return with Card wrapper for standalone usage
 	if (isVerified) {
 		return (
 			<Card>
@@ -185,24 +301,8 @@ export function PhoneVerification({
 						Phone Verification
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="flex items-center justify-between">
-						<div>
-							<Label>Phone Number</Label>
-							<p className="text-sm text-muted-foreground mt-1">{phone}</p>
-						</div>
-						<Badge
-							variant="default"
-							className="bg-green-100 text-green-800 border-green-200"
-						>
-							<Shield className="h-3 w-3 mr-1" />
-							Verified
-						</Badge>
-					</div>
-					<p className="text-xs text-muted-foreground">
-						Your phone number has been verified and can be used for SMS
-						notifications.
-					</p>
+				<CardContent>
+					{verifiedContent}
 				</CardContent>
 			</Card>
 		);
@@ -216,88 +316,8 @@ export function PhoneVerification({
 					Phone Verification
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="space-y-4">
-				{!otpSent ? (
-					<div className="space-y-4">
-						<div>
-							<Label htmlFor="phone">Phone Number</Label>
-							<Input
-								id="phone"
-								type="tel"
-								placeholder="+94XXXXXXXXX"
-								value={phoneNumber}
-								onChange={(e) => setPhoneNumber(e.target.value)}
-								disabled={isLoading}
-							/>
-							<p className="text-xs text-muted-foreground mt-1">
-								Enter your phone number to receive SMS notifications
-							</p>
-						</div>
-						<Button
-							onClick={sendOTP}
-							disabled={isLoading || !phoneNumber.trim()}
-							className="w-full"
-						>
-							{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							Send Verification Code
-						</Button>
-					</div>
-				) : (
-					<div className="space-y-4">
-						<div>
-							<Label>Phone Number</Label>
-							<p className="text-sm text-muted-foreground">{phoneNumber}</p>
-						</div>
-
-						<div>
-							<Label htmlFor="otp">Verification Code</Label>
-							<Input
-								id="otp"
-								type="text"
-								placeholder="Enter 6-digit code"
-								value={otpCode}
-								onChange={(e) =>
-									setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-								}
-								disabled={isVerifying}
-								maxLength={6}
-							/>
-							<p className="text-xs text-muted-foreground mt-1">
-								Enter the 6-digit code sent to your phone
-							</p>
-						</div>
-
-						<div className="flex gap-2">
-							<Button
-								onClick={verifyOTP}
-								disabled={isVerifying || otpCode.length !== 6}
-								className="flex-1"
-							>
-								{isVerifying && (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								)}
-								Verify Code
-							</Button>
-							<Button
-								variant="outline"
-								onClick={resetVerification}
-								disabled={isVerifying}
-							>
-								Change Number
-							</Button>
-						</div>
-
-						<Button
-							variant="ghost"
-							onClick={sendOTP}
-							disabled={isLoading}
-							className="w-full text-sm"
-						>
-							{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-							Resend Code
-						</Button>
-					</div>
-				)}
+			<CardContent>
+				{verificationContent}
 			</CardContent>
 		</Card>
 	);

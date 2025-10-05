@@ -4,6 +4,12 @@ import { useTranslation } from "react-i18next";
 import { PhoneVerification } from "@/components/PhoneVerification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
@@ -248,27 +254,22 @@ export function ProfileSettings() {
 			)}
 
 			{/* Phone Verification Dialog */}
-			{showPhoneVerification && (
-				<div className="fixed inset-0 bg-background bg-opacity-50 flex items-center justify-center z-50">
-					<div className="rounded-lg p-6 max-w-md w-full mx-4">
-						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-lg font-semibold">Verify Phone Number</h2>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => setShowPhoneVerification(false)}
-							>
-								<XCircle className="h-4 w-4" />
-							</Button>
-						</div>
-						<PhoneVerification
-							phone={profile?.phone}
-							isVerified={profile?.is_phone_verified || false}
-							onVerificationSuccess={handlePhoneVerificationSuccess}
-						/>
-					</div>
-				</div>
-			)}
+			<Dialog open={showPhoneVerification} onOpenChange={setShowPhoneVerification}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle className="flex items-center gap-2">
+							<Phone className="h-5 w-5" />
+							Verify Phone Number
+						</DialogTitle>
+					</DialogHeader>
+					<PhoneVerification
+						phone={profile?.phone}
+						isVerified={profile?.is_phone_verified || false}
+						onVerificationSuccess={handlePhoneVerificationSuccess}
+						showAsCard={false}
+					/>
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 }
