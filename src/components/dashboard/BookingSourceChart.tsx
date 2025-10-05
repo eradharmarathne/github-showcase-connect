@@ -56,24 +56,22 @@ export function BookingSourceChart({
 	selectedLocation,
 	selectedMonth,
 }: BookingSourceChartProps) {
-	const { user } = useAuth();
+	const { tenant } = useAuth();
 	const [sourceData, setSourceData] = useState<BookingSourceData[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [totalBookings, setTotalBookings] = useState(0);
 
 	useEffect(() => {
 		const fetchBookingSourceData = async () => {
-			if (!user?.user_metadata?.tenant_id) return;
+			if (!tenant?.id) return;
 
 			setLoading(true);
 			try {
-				let query = supabase
-					.from("reservations")
-					.select("booking_source")
-					.eq("tenant_id", user.user_metadata.tenant_id)
-					.not("booking_source", "is", null);
-
-				// Filter by location if selected
+			let query = supabase
+				.from("reservations")
+				.select("booking_source")
+				.eq("tenant_id", tenant.id)
+				.not("booking_source", "is", null);				// Filter by location if selected
 				if (selectedLocation) {
 					query = query.eq("location_id", selectedLocation);
 				}
@@ -129,7 +127,7 @@ export function BookingSourceChart({
 		};
 
 		fetchBookingSourceData();
-	}, [selectedLocation, selectedMonth, user?.user_metadata?.tenant_id]);
+	}, [selectedLocation, selectedMonth, tenant?.id]);
 
 	if (loading) {
 		return (
