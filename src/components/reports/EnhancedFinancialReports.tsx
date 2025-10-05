@@ -9,6 +9,7 @@ import {
 	TrendingUp,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,6 +82,7 @@ type ExpenseCategory = {
 };
 
 export default function EnhancedFinancialReports() {
+	const { t } = useTranslation();
 	const [loading, setLoading] = useState(true);
 	const [summary, setSummary] = useState<FinancialSummary>({
 		totalIncome: 0,
@@ -163,8 +165,8 @@ export default function EnhancedFinancialReports() {
 			]);
 		} catch (error) {
 			toast({
-				title: "Error",
-				description: "Failed to fetch financial data",
+				title: t("reports.common.error"),
+				description: t("reports.common.loading"),
 				variant: "destructive",
 			});
 		} finally {
@@ -461,21 +463,21 @@ export default function EnhancedFinancialReports() {
 			{/* Filters */}
 			<Card className="">
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
+					<CardTitle className="text-lg sm:text-xl flex items-center gap-2">
 						<Calendar className="size-5" />
-						Report Filters
+						{t("reports.enhanced.filters.title")}
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 						<div>
-							<Label htmlFor="location">Location</Label>
+							<Label htmlFor="location">{t("reports.enhanced.filters.location")}</Label>
 							<Select
 								value={selectedLocation}
 								onValueChange={setSelectedLocation}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select Locations" />
+									<SelectValue placeholder={t("reports.enhanced.filters.location")} />
 								</SelectTrigger>
 								<SelectContent>
 									{locations.map((location) => (
@@ -487,7 +489,7 @@ export default function EnhancedFinancialReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="currency">Base Currency</Label>
+							<Label htmlFor="currency">{t("reports.enhanced.filters.baseCurrency")}</Label>
 							<Select
 								value={baseCurrency}
 								onValueChange={(value: string) => setBaseCurrency(value)}
@@ -505,7 +507,7 @@ export default function EnhancedFinancialReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="date_from">Start Date</Label>
+							<Label htmlFor="date_from">{t("reports.enhanced.filters.fromDate")}</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -514,7 +516,7 @@ export default function EnhancedFinancialReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">End Date</Label>
+							<Label htmlFor="date_to">{t("reports.enhanced.filters.toDate")}</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -525,7 +527,7 @@ export default function EnhancedFinancialReports() {
 						<div className="flex items-end">
 							<Button onClick={fetchData} className="w-full">
 								<RefreshCw className="size-4 mr-2" />
-								Refresh
+								{t("common.buttons.refresh")}
 							</Button>
 						</div>
 					</div>
@@ -539,16 +541,16 @@ export default function EnhancedFinancialReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-sm font-medium text-green-600">
-									Total Income
+									{t("reports.enhanced.summary.totalIncome")}
 								</p>
-								<p className="tex-lg sm:text-3xl font-bold text-green-900">
+								<p className="text-xl sm:text-3xl font-bold text-green-900">
 									{formatCurrency(summary.totalIncome, baseCurrency)}
 								</p>
 								<p className="text-sm text-green-600">
-									{summary.incomeTransactions} transactions
+									{summary.incomeTransactions} {t("reports.enhanced.summary.incomeTransactions")}
 								</p>
 							</div>
-							<TrendingUp className="size-5 text-green-600" />
+							<TrendingUp className="size-8 text-green-600" />
 						</div>
 					</CardContent>
 				</Card>
@@ -558,16 +560,16 @@ export default function EnhancedFinancialReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-sm font-medium text-red-600">
-									Total Expenses
+									{t("reports.enhanced.summary.totalExpenses")}
 								</p>
-								<p className="tex-lg sm:text-3xl font-bold text-red-900">
+								<p className="text-xl sm:text-3xl font-bold text-red-900">
 									{formatCurrency(summary.totalExpenses, baseCurrency)}
 								</p>
 								<p className="text-sm text-red-600">
-									{summary.expenseTransactions} transactions
+									{summary.expenseTransactions} {t("reports.enhanced.summary.expenseTransactions")}
 								</p>
 							</div>
-							<TrendingDown className="size-5 text-red-600" />
+							<TrendingDown className="size-8 text-red-600" />
 						</div>
 					</CardContent>
 				</Card>
@@ -581,21 +583,21 @@ export default function EnhancedFinancialReports() {
 								<p
 									className={`text-sm font-medium ${summary.netProfit >= 0 ? "text-blue-600" : "text-red-600"}`}
 								>
-									Net Profit
+									{t("reports.enhanced.summary.netProfit")}
 								</p>
 								<p
-									className={`tex-lg sm:text-3xl font-bold ${summary.netProfit >= 0 ? "text-blue-900" : "text-red-900"}`}
+									className={`text-xl sm:text-3xl font-bold ${summary.netProfit >= 0 ? "text-blue-900" : "text-red-900"}`}
 								>
 									{formatCurrency(summary.netProfit, baseCurrency)}
 								</p>
 								<p
 									className={`text-sm ${summary.netProfit >= 0 ? "text-blue-600" : "text-red-600"}`}
 								>
-									{summary.profitMargin.toFixed(1)}% margin
+									{summary.profitMargin.toFixed(1)}% {t("reports.enhanced.summary.profitMargin")}
 								</p>
 							</div>
 							<DollarSign
-								className={`size-5 ${summary.netProfit >= 0 ? "text-blue-600" : "text-red-600"}`}
+								className={`size-8 ${summary.netProfit >= 0 ? "text-blue-600" : "text-red-600"}`}
 							/>
 						</div>
 					</CardContent>
@@ -606,9 +608,9 @@ export default function EnhancedFinancialReports() {
 				{/* Income Summary */}
 				<Card className="px-0 sm:px-4">
 					<CardHeader className="px-2 pb-3">
-						<CardTitle className="flex items-start sm:items-center gap-2 text-green-600 text-md sm:text-xl">
+						<CardTitle className="flex items-start sm:items-center gap-2 text-green-600 text-lg sm:text-xl">
 							<TrendingUp className="size-6" />
-							<p>Income Summary</p>
+							<p>{t("reports.enhanced.breakdown.incomeBreakdown")}</p>
 							<span className="font-bold">
 								{formatCurrency(summary.totalIncome, baseCurrency)}
 							</span>
@@ -617,7 +619,7 @@ export default function EnhancedFinancialReports() {
 					<CardContent className="px-2 space-y-3">
 						{incomeCategories.length === 0 ? (
 							<p className="text-center text-muted-foreground py-8">
-								No income data for selected period
+								{t("reports.common.noData")}
 							</p>
 						) : (
 							incomeCategories.map((category) => (
@@ -686,9 +688,9 @@ export default function EnhancedFinancialReports() {
 				{/* Expense Summary */}
 				<Card className="px-0 sm:px-4">
 					<CardHeader className="px-2 pb-3">
-						<CardTitle className="flex items-center gap-2 text-red-600 text-md sm:text-xl">
+						<CardTitle className="flex items-center gap-2 text-red-600 text-lg sm:text-xl">
 							<TrendingDown className="size-6" />
-							Expense Summary
+							{t("reports.enhanced.breakdown.expenseBreakdown")}
 							<span className="ml-auto font-bold">
 								{formatCurrency(summary.totalExpenses, baseCurrency)}
 							</span>
@@ -697,7 +699,7 @@ export default function EnhancedFinancialReports() {
 					<CardContent className="px-2 space-y-3">
 						{expenseCategories.length === 0 ? (
 							<p className="text-center text-muted-foreground py-8">
-								No expense data for selected period
+								{t("reports.common.noData")}
 							</p>
 						) : (
 							expenseCategories.map((category) => (
