@@ -95,7 +95,7 @@ export function AccountDetails({ baseCurrency, dateFrom, dateTo }: AccountDetail
 				.eq("from_accounts.tenant_id", tenant.id);
 
 			// Apply location filters
-			if (selectedLocation !== "all") {
+			if (selectedLocation) {
 				expenseQuery = expenseQuery.eq("location_id", selectedLocation);
 				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
 			}

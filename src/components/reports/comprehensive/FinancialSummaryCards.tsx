@@ -62,7 +62,7 @@ export function FinancialSummaryCards({
 					.select("amount, currency")
 					.eq("account_id", account.id);
 
-				if (selectedLocation !== "all") {
+				if (selectedLocation) {
 					expensesQuery = expensesQuery.eq("location_id", selectedLocation);
 				}
 				if (dateFrom) {
@@ -79,7 +79,7 @@ export function FinancialSummaryCards({
 					.eq("account_id", account.id)
 					.eq("reservations.tenant_id", tenant.id);
 
-				if (selectedLocation !== "all") {
+				if (selectedLocation) {
 					paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
 				}
 				if (dateFrom) {
