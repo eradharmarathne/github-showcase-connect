@@ -1006,32 +1006,60 @@
         "amount": "Amount",
         "percentage": "Percentage",
         "transactions": "Transactions",
-        "viewDetails": "View Details"
+        "viewDetails": "View Details",
+        "incomeBreakdown": "Income Breakdown",
+        "expenseBreakdown": "Expense Breakdown"
       }
     },
     "accounts": {
-      "title": "Account Statements",
+      "title": "Accounts Reports",
+      "subtitle": "Account balances, transactions, and financial overview",
+      "exportCsv": "Export CSV",
+      "refreshData": "Refresh Data",
       "filters": {
-        "title": "Account Statement Filters",
-        "location": "Location",
+        "title": "Filters",
         "account": "Account",
+        "allAccounts": "All Accounts",
         "fromDate": "From Date",
         "toDate": "To Date"
       },
-      "summary": {
-        "openingBalance": "Opening Balance",
+      "tabs": {
+        "balances": "Account Balances",
+        "transactions": "Transaction History"
+      },
+      "balances": {
+        "title": "Account Balances Overview",
+        "subtitle": "Current balances and activity summary for all accounts",
+        "accountName": "Account Name",
+        "currency": "Currency",
+        "initialBalance": "Initial Balance",
         "totalIncome": "Total Income",
         "totalExpenses": "Total Expenses",
-        "closingBalance": "Closing Balance"
+        "netTransfers": "Net Transfers",
+        "currentBalance": "Current Balance",
+        "transactions": "Transactions"
       },
       "transactions": {
         "title": "Transaction History",
+        "subtitle": "Detailed transaction history across all accounts",
         "date": "Date",
+        "account": "Account",
         "type": "Type",
         "description": "Description",
-        "debit": "Debit",
-        "credit": "Credit",
-        "balance": "Balance"
+        "amount": "Amount",
+        "note": "Note",
+        "showingFirst": "Showing first 50 transactions. Use filters to narrow down results.",
+        "types": {
+          "income": "income",
+          "expense": "expense",
+          "transfer_in": "transfer in",
+          "transfer_out": "transfer out"
+        }
+      },
+      "errors": {
+        "fetchAccounts": "Failed to fetch accounts data",
+        "fetchBalances": "Error fetching account balances",
+        "fetchTransactions": "Error fetching transactions"
       }
     },
     "commission": {

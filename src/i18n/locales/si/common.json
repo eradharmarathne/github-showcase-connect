@@ -1006,32 +1006,60 @@
         "amount": "මුදල",
         "percentage": "ප්‍රතිශතය",
         "transactions": "ගනුදෙනු",
-        "viewDetails": "විස්තර බලන්න"
+        "viewDetails": "විස්තර බලන්න",
+        "incomeBreakdown": "ආදායම් බෙදීම",
+        "expenseBreakdown": "වියදම් බෙදීම"
       }
     },
     "accounts": {
-      "title": "ගිණුම් ප්‍රකාශන",
+      "title": "ගිණුම් වාර්තා",
+      "subtitle": "ගිණුම් ශේෂයන්, ගනුදෙනු සහ මූල්‍ය සමීක්ෂණය",
+      "exportCsv": "CSV නිර්යාත කරන්න",
+      "refreshData": "දත්ත නැවුම් කරන්න",
       "filters": {
-        "title": "ගිණුම් ප්‍රකාශන පෙරහන්",
-        "location": "ස්ථානය",
+        "title": "පෙරහන්",
         "account": "ගිණුම",
+        "allAccounts": "සියලුම ගිණුම්",
         "fromDate": "ආරම්භක දිනය",
         "toDate": "අවසාන දිනය"
       },
-      "summary": {
-        "openingBalance": "ආරම්භක ශේෂය",
+      "tabs": {
+        "balances": "ගිණුම් ශේෂයන්",
+        "transactions": "ගනුදෙනු ඉතිහාසය"
+      },
+      "balances": {
+        "title": "ගිණුම් ශේෂ සමීක්ෂණය",
+        "subtitle": "සියලුම ගිණුම් සඳහා වර්තමාන ශේෂයන් සහ ක්‍රියාකාරකම් සාරාංශය",
+        "accountName": "ගිණුමේ නම",
+        "currency": "මුදල් වර්ගය",
+        "initialBalance": "ආරම්භක ශේෂය",
         "totalIncome": "මුළු ආදායම",
         "totalExpenses": "මුළු වියදම්",
-        "closingBalance": "අවසාන ශේෂය"
+        "netTransfers": "ශුද්ධ මාරුකිරීම්",
+        "currentBalance": "වර්තමාන ශේෂය",
+        "transactions": "ගනුදෙනු"
       },
       "transactions": {
         "title": "ගනුදෙනු ඉතිහාසය",
+        "subtitle": "සියලුම ගිණුම් හරහා විස්තරාත්මක ගනුදෙනු ඉතිහාසය",
         "date": "දිනය",
+        "account": "ගිණුම",
         "type": "වර්ගය",
         "description": "විස්තරය",
-        "debit": "හර",
-        "credit": "බර",
-        "balance": "ශේෂය"
+        "amount": "මුදල",
+        "note": "සටහන",
+        "showingFirst": "පළමු ගනුදෙනු 50 පෙන්වයි. ප්‍රතිඵල සීමා කිරීමට පෙරහන් භාවිතා කරන්න.",
+        "types": {
+          "income": "ආදායම",
+          "expense": "වියදම",
+          "transfer_in": "ඇතුළට මාරුව",
+          "transfer_out": "පිටතට මාරුව"
+        }
+      },
+      "errors": {
+        "fetchAccounts": "ගිණුම් දත්ත ලබා ගැනීමට අසමත් විය",
+        "fetchBalances": "ගිණුම් ශේෂයන් ලබා ගැනීමේ දෝෂය",
+        "fetchTransactions": "ගනුදෙනු ලබා ගැනීමේ දෝෂය"
       }
     },
     "commission": {

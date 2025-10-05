@@ -6,6 +6,7 @@ import {
 	Download,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -66,6 +67,7 @@ type Transaction = {
 };
 
 export default function AccountsReports() {
+	const { t } = useTranslation();
 	const [accounts, setAccounts] = useState<Account[]>([]);
 	const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -98,8 +100,8 @@ export default function AccountsReports() {
 			setAccounts(accountsData || []);
 		} catch (error) {
 			toast({
-				title: "Error",
-				description: "Failed to fetch accounts data",
+				title: t("common.error"),
+				description: t("reports.accounts.errors.fetchAccounts"),
 				variant: "destructive",
 			});
 		} finally {
@@ -342,36 +344,36 @@ export default function AccountsReports() {
 				<div>
 					<h2 className="text-md sm:text-2xl font-bold text-foreground flex items-center gap-2">
 						<CreditCard className="size-6" />
-						Accounts Reports
+						{t("reports.accounts.title")}
 					</h2>
 					<p className="text-muted-foreground">
-						Account balances, transactions, and financial overview
+						{t("reports.accounts.subtitle")}
 					</p>
 				</div>
 				<Button onClick={exportData} variant="outline">
 					<Download className="size-4 mr-2" />
-					Export CSV
+					{t("reports.accounts.exportCsv")}
 				</Button>
 			</div>
 
 			{/* Filters */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Filters</CardTitle>
+					<CardTitle>{t("reports.accounts.filters.title")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 						<div>
-							<Label htmlFor="account_filter">Account</Label>
+							<Label htmlFor="account_filter">{t("reports.accounts.filters.account")}</Label>
 							<Select
 								value={selectedAccount}
 								onValueChange={setSelectedAccount}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="All Accounts" />
+									<SelectValue placeholder={t("reports.accounts.filters.allAccounts")} />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="all">All Accounts</SelectItem>
+									<SelectItem value="all">{t("reports.accounts.filters.allAccounts")}</SelectItem>
 									{accounts.map((account) => (
 										<SelectItem key={account.id} value={account.id}>
 											{account.name} ({account.currency})
@@ -381,7 +383,7 @@ export default function AccountsReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="date_from">From Date</Label>
+							<Label htmlFor="date_from">{t("reports.accounts.filters.fromDate")}</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -390,7 +392,7 @@ export default function AccountsReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">To Date</Label>
+							<Label htmlFor="date_to">{t("reports.accounts.filters.toDate")}</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -400,7 +402,7 @@ export default function AccountsReports() {
 						</div>
 						<div className="flex items-end">
 							<Button onClick={fetchData} className="w-full">
-								Refresh Data
+								{t("reports.accounts.refreshData")}
 							</Button>
 						</div>
 					</div>
@@ -409,16 +411,16 @@ export default function AccountsReports() {
 
 			<Tabs defaultValue="balances" className="w-full">
 				<TabsList>
-					<TabsTrigger value="balances">Account Balances</TabsTrigger>
-					<TabsTrigger value="transactions">Transaction History</TabsTrigger>
+					<TabsTrigger value="balances">{t("reports.accounts.tabs.balances")}</TabsTrigger>
+					<TabsTrigger value="transactions">{t("reports.accounts.tabs.transactions")}</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="balances">
 					<Card>
 						<CardHeader>
-							<CardTitle>Account Balances Overview</CardTitle>
+							<CardTitle>{t("reports.accounts.balances.title")}</CardTitle>
 							<CardDescription>
-								Current balances and activity summary for all accounts
+								{t("reports.accounts.balances.subtitle")}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -427,22 +429,22 @@ export default function AccountsReports() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Account Name</TableHead>
-											<TableHead>Currency</TableHead>
+											<TableHead>{t("reports.accounts.balances.accountName")}</TableHead>
+											<TableHead>{t("reports.accounts.balances.currency")}</TableHead>
 											<TableHead className="text-right">
-												Initial Balance
+												{t("reports.accounts.balances.initialBalance")}
 											</TableHead>
-											<TableHead className="text-right">Total Income</TableHead>
+											<TableHead className="text-right">{t("reports.accounts.balances.totalIncome")}</TableHead>
 											<TableHead className="text-right">
-												Total Expenses
-											</TableHead>
-											<TableHead className="text-right">
-												Net Transfers
+												{t("reports.accounts.balances.totalExpenses")}
 											</TableHead>
 											<TableHead className="text-right">
-												Current Balance
+												{t("reports.accounts.balances.netTransfers")}
 											</TableHead>
-											<TableHead className="text-right">Transactions</TableHead>
+											<TableHead className="text-right">
+												{t("reports.accounts.balances.currentBalance")}
+											</TableHead>
+											<TableHead className="text-right">{t("reports.accounts.balances.transactions")}</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -561,9 +563,9 @@ export default function AccountsReports() {
 				<TabsContent value="transactions">
 					<Card>
 						<CardHeader>
-							<CardTitle>Transaction History</CardTitle>
+							<CardTitle>{t("reports.accounts.transactions.title")}</CardTitle>
 							<CardDescription>
-								Detailed transaction history across all accounts
+								{t("reports.accounts.transactions.subtitle")}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -572,12 +574,12 @@ export default function AccountsReports() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Date</TableHead>
-											<TableHead>Account</TableHead>
-											<TableHead>Type</TableHead>
-											<TableHead>Description</TableHead>
-											<TableHead className="text-right">Amount</TableHead>
-											<TableHead>Note</TableHead>
+											<TableHead>{t("reports.accounts.transactions.date")}</TableHead>
+											<TableHead>{t("reports.accounts.transactions.account")}</TableHead>
+											<TableHead>{t("reports.accounts.transactions.type")}</TableHead>
+											<TableHead>{t("reports.accounts.transactions.description")}</TableHead>
+											<TableHead className="text-right">{t("reports.accounts.transactions.amount")}</TableHead>
+											<TableHead>{t("reports.accounts.transactions.note")}</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -606,7 +608,7 @@ export default function AccountsReports() {
 																		: "secondary"
 															}
 														>
-															{transaction.type}
+															{t(`reports.accounts.transactions.types.${transaction.type}`)}
 														</Badge>
 													</div>
 												</TableCell>
@@ -673,7 +675,7 @@ export default function AccountsReports() {
 																: "secondary"
 													}
 												>
-													{transaction.type}
+													{t(`reports.accounts.transactions.types.${transaction.type}`)}
 												</Badge>
 											</div>
 											<div className="text-xs text-muted-foreground truncate max-w-[60%]">
@@ -684,8 +686,7 @@ export default function AccountsReports() {
 								))}
 								{transactions.length > 50 && (
 									<div className="text-center text-muted-foreground text-xs">
-										Showing first 50 transactions. Use filters to narrow down
-										results.
+										{t("reports.accounts.transactions.showingFirst")}
 									</div>
 								)}
 							</div>
