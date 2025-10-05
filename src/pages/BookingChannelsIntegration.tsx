@@ -17,7 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { BookingChannelsSkeleton } from "@/components/BookingChannelsSkeleton";
+import { BookingChannelsSkeleton } from "@/components/skeleton/BookingChannelsSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

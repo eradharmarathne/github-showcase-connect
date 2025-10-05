@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { SummaryCardsSkeleton } from "./SummaryCardsSkeleton";
+import { SummaryCardsSkeleton } from "@/components/skeleton/SummaryCardsSkeleton";
 
 type Location = Tables<"locations">;
 

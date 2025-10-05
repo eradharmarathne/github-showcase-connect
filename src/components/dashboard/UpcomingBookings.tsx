@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { UpcomingBookingsSkeleton } from "./UpcomingBookingsSkeleton";
+import { UpcomingBookingsSkeleton } from "@/components/skeleton/UpcomingBookingsSkeleton";
 
 type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations">;

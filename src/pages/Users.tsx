@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { UsersSkeleton } from "@/components/UsersSkeleton";
+import { UsersSkeleton } from "@/components/skeleton/UsersSkeleton";
 import { Button } from "@/components/ui/button";
 import {
 	EditUserDialog,

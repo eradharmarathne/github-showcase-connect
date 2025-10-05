@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { DashboardHeaderSkeleton } from "./DashboardHeaderSkeleton";
+import { DashboardHeaderSkeleton } from "@/components/skeleton/DashboardHeaderSkeleton";
 
 type Location = Tables<"locations">;
 

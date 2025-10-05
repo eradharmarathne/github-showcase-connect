@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { ExpenseSkeleton } from "@/components/ExpenseSkeleton";
+import { ExpenseSkeleton } from "@/components/skeleton/ExpenseSkeleton";
 import {
 	ExpenseForm,
 	ExpenseHistoryTable,

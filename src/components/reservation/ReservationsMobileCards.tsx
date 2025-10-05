@@ -1,7 +1,7 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
+import { ReservationsListSkeleton } from "@/components/skeleton/ReservationsListSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";

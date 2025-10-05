@@ -1,8 +1,8 @@
 import * as React from "react";
-import { LocationSwitcherSkeleton } from "@/components/LocationSwitcherSkeleton";
-import { NavMainSkeleton } from "@/components/NavMainSkeleton";
-import { NavProjectsSkeleton } from "@/components/NavProjectsSkeleton";
-import { NavUserSkeleton } from "@/components/NavUserSkeleton";
+import { LocationSwitcherSkeleton } from "@/components/skeleton/LocationSwitcherSkeleton";
+import { NavMainSkeleton } from "@/components/skeleton/NavMainSkeleton";
+import { NavProjectsSkeleton } from "@/components/skeleton/NavProjectsSkeleton";
+import { NavUserSkeleton } from "@/components/skeleton/NavUserSkeleton";
 import {
 	Sidebar,
 	SidebarContent,

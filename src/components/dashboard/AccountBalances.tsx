@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { getCurrencySymbol } from "@/utils/currency";
-import { AccountBalancesSkeleton } from "./AccountBalancesSkeleton";
+import { AccountBalancesSkeleton } from "@/components/skeleton/AccountBalancesSkeleton";
 
 type Account = Tables<"accounts">;
 

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { ReservationsListSkeleton } from "@/components/ReservationsListSkeleton";
+import { ReservationsListSkeleton } from "@/components/skeleton/ReservationsListSkeleton";
 import {
 	Table,
 	TableBody,
