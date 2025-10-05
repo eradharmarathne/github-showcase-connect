@@ -20,13 +20,24 @@ interface BookingSourceChartProps {
 	selectedMonth: string;
 }
 
-// Color palette for different booking sources
-const COLORS = [
-	"hsl(var(--primary))",
-	"hsl(var(--destructive))", 
-	"hsl(var(--chart-3))",
-	"hsl(var(--chart-4))",
-	"hsl(var(--chart-5))",
+// Color mapping for specific booking sources
+const SOURCE_COLORS: Record<string, string> = {
+	direct: "hsl(220, 70%, 50%)", // Blue - Primary booking channel
+	airbnb: "hsl(0, 82%, 60%)", // Airbnb red
+	booking_com: "hsl(220, 100%, 40%)", // Booking.com blue
+	expedia: "hsl(45, 100%, 50%)", // Expedia yellow
+	agoda: "hsl(340, 82%, 52%)", // Agoda pink/magenta
+	beds24: "hsl(120, 60%, 45%)", // Green
+	manual: "hsl(270, 60%, 55%)", // Purple
+	online: "hsl(190, 70%, 50%)", // Cyan
+	phone: "hsl(30, 80%, 55%)", // Orange
+	email: "hsl(280, 60%, 60%)", // Violet
+	walk_in: "hsl(160, 60%, 45%)", // Teal
+	ical: "hsl(25, 70%, 55%)", // Brown/orange
+};
+
+// Fallback colors for any unmapped sources
+const FALLBACK_COLORS = [
 	"hsl(210, 40%, 70%)",
 	"hsl(160, 40%, 70%)",
 	"hsl(30, 40%, 70%)",
@@ -187,7 +198,7 @@ export function BookingSourceChart({
 									{sourceData.map((entry, index) => (
 										<Cell
 											key={`cell-${index}`}
-											fill={COLORS[index % COLORS.length]}
+											fill={SOURCE_COLORS[entry.source] || FALLBACK_COLORS[index % FALLBACK_COLORS.length]}
 										/>
 									))}
 								</Pie>
@@ -213,7 +224,7 @@ export function BookingSourceChart({
 								<div key={entry.source} className="flex items-center gap-2">
 									<div
 										className="w-2 h-2 rounded-full flex-shrink-0"
-										style={{ backgroundColor: COLORS[index % COLORS.length] }}
+										style={{ backgroundColor: SOURCE_COLORS[entry.source] || FALLBACK_COLORS[index % FALLBACK_COLORS.length] }}
 									/>
 									<span className="truncate text-xs">
 										{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}%)
