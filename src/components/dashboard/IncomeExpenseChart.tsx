@@ -333,7 +333,6 @@ export function IncomeExpenseChart({
 							<YAxis
 								tickLine={false}
 								axisLine={false}
-								tickMargin={20}
 								tickFormatter={(value) =>
 									`${getCurrencySymbol(displayCurrency)} ${Math.abs(value).toLocaleString()}`
 								}
