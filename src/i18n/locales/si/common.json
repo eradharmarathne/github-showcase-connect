@@ -920,21 +920,34 @@
       "filters": {
         "title": "මූල්‍ය වාර්තා පෙරහන්",
         "location": "ස්ථානය",
+        "selectLocation": "ස්ථානය තෝරන්න",
         "currency": "මුදල් ඒකකය",
+        "baseCurrency": "මූලික මුදල් ඒකකය",
         "fromDate": "ආරම්භක දිනය",
-        "toDate": "අවසාන දිනය"
+        "startDate": "ආරම්භක දිනය",
+        "toDate": "අවසාන දිනය",
+        "endDate": "අවසාන දිනය"
+      },
+      "buttons": {
+        "filter": "පෙරහන්",
+        "export": "නිර්යාත",
+        "refresh": "නැවුම්"
       },
       "summary": {
         "totalIncome": "මුළු ආදායම",
         "reservationPayments": "වෙන්කරවීම් ගෙවීම්",
         "totalExpenses": "මුළු වියදම්",
-        "netProfit": "ශුද්ධ ලාභය"
+        "netProfit": "ශුද්ධ ලාභය",
+        "margin": "ලාභ ප්‍රතිශතය"
       },
       "accounts": {
-        "title": "ගිණුම් ශේෂයන්",
+        "title": "ගිණුම් ශේෂයන් සහ ගනුදෙනු ඉතිහාසය",
+        "subtitle": "සියලුම ගිණුම් සඳහා ක්‍රියාත්මක ශේෂයන් සහ සම්පූර්ණ ගනුදෙනු ඉතිහාසය",
         "account": "ගිණුම",
         "balance": "ශේෂය",
-        "transactions": "ගනුදෙනු"
+        "transactions": "ගනුදෙනු",
+        "income": "ආදායම",
+        "expenses": "වියදම්"
       },
       "incomeCategories": {
         "title": "ආදායම් වර්ග",

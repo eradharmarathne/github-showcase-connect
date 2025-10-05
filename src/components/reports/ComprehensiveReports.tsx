@@ -502,7 +502,7 @@ export default function ComprehensiveReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="currency">{t("reports.comprehensive.filters.baseCurrency")}</Label>
+							<Label htmlFor="currency">{t("reports.comprehensive.filters.currency")}</Label>
 							<Select
 								value={baseCurrency}
 								onValueChange={(value: string) => setBaseCurrency(value)}
@@ -520,7 +520,7 @@ export default function ComprehensiveReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="date_from">{t("reports.comprehensive.filters.startDate")}</Label>
+							<Label htmlFor="date_from">{t("reports.comprehensive.filters.fromDate")}</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -529,7 +529,7 @@ export default function ComprehensiveReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">{t("reports.comprehensive.filters.endDate")}</Label>
+							<Label htmlFor="date_to">{t("reports.comprehensive.filters.toDate")}</Label>
 							<Input
 								id="date_to"
 								type="date"

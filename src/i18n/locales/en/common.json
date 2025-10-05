@@ -920,21 +920,34 @@
       "filters": {
         "title": "Financial Report Filters",
         "location": "Location",
+        "selectLocation": "Select Location",
         "currency": "Currency",
+        "baseCurrency": "Base Currency",
         "fromDate": "From Date",
-        "toDate": "To Date"
+        "startDate": "Start Date",
+        "toDate": "To Date",
+        "endDate": "End Date"
+      },
+      "buttons": {
+        "filter": "Filter",
+        "export": "Export",
+        "refresh": "Refresh"
       },
       "summary": {
         "totalIncome": "Total Income",
         "reservationPayments": "Reservation Payments",
         "totalExpenses": "Total Expenses",
-        "netProfit": "Net Profit"
+        "netProfit": "Net Profit",
+        "margin": "margin"
       },
       "accounts": {
-        "title": "Account Balances",
+        "title": "Account Balances & Transaction History",
+        "subtitle": "Running balances for all accounts with complete transaction history",
         "account": "Account",
         "balance": "Balance",
-        "transactions": "Transactions"
+        "transactions": "Transactions",
+        "income": "Income",
+        "expenses": "Expenses"
       },
       "incomeCategories": {
         "title": "Income Categories",
