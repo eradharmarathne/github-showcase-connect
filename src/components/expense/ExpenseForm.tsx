@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Calendar, Minus } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,11 +14,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { getCurrencySymbol } from "@/utils/currency";
-import { useLocationContext } from "@/context/LocationContext";
 
 type Account = Tables<"accounts">;
 type ExpenseType = Tables<"expense_types">;
@@ -108,13 +108,13 @@ export function ExpenseForm({
 			const accountForCurrency = accounts.find(
 				(acc) => acc.id === formData.accountId,
 			);
-			
+
 			const { error } = await supabase.from("expenses").insert([
 				{
 					main_type: formData.mainCategory,
 					sub_type: formData.subCategory,
 					amount: parseFloat(formData.amount),
-					currency: accountForCurrency?.currency || 'LKR',
+					currency: accountForCurrency?.currency || "LKR",
 					account_id: formData.accountId,
 					location_id: selectedLocation,
 					date: formData.date,
@@ -342,7 +342,9 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 										.filter(
 											(account) =>
 												account.location_access.length === 0 ||
-												account.location_access.includes(selectedLocation || ""),
+												account.location_access.includes(
+													selectedLocation || "",
+												),
 										)
 										.map((account) => (
 											<SelectItem key={account.id} value={account.id}>

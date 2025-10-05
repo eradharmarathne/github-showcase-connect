@@ -78,11 +78,11 @@ export function BookingSourceChart({
 
 			setLoading(true);
 			try {
-			let query = supabase
-				.from("reservations")
-				.select("booking_source")
-				.eq("tenant_id", tenant.id)
-				.not("booking_source", "is", null);				// Filter by location if selected
+				let query = supabase
+					.from("reservations")
+					.select("booking_source")
+					.eq("tenant_id", tenant.id)
+					.not("booking_source", "is", null); // Filter by location if selected
 				if (selectedLocation) {
 					query = query.eq("location_id", selectedLocation);
 				}
@@ -93,7 +93,9 @@ export function BookingSourceChart({
 					const year = parseInt(selectedMonth.split("-")[0]);
 					const month = parseInt(selectedMonth.split("-")[1]);
 					const endDate = new Date(year, month, 0).toISOString().split("T")[0];
-					query = query.gte("check_in_date", startDate).lte("check_in_date", endDate);
+					query = query
+						.gte("check_in_date", startDate)
+						.lte("check_in_date", endDate);
 				} else {
 					// Default to current month if no month selected
 					const now = new Date();
@@ -103,7 +105,9 @@ export function BookingSourceChart({
 					const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 						.toISOString()
 						.split("T")[0];
-					query = query.gte("check_in_date", startDate).lte("check_in_date", endDate);
+					query = query
+						.gte("check_in_date", startDate)
+						.lte("check_in_date", endDate);
 				}
 
 				const { data: reservations, error } = await query;
@@ -117,7 +121,10 @@ export function BookingSourceChart({
 					sourceCounts[source] = (sourceCounts[source] || 0) + 1;
 				});
 
-				const total = Object.values(sourceCounts).reduce((sum, count) => sum + count, 0);
+				const total = Object.values(sourceCounts).reduce(
+					(sum, count) => sum + count,
+					0,
+				);
 				setTotalBookings(total);
 
 				// Convert to chart data format
@@ -198,7 +205,10 @@ export function BookingSourceChart({
 									{sourceData.map((entry, index) => (
 										<Cell
 											key={`cell-${index}`}
-											fill={SOURCE_COLORS[entry.source] || FALLBACK_COLORS[index % FALLBACK_COLORS.length]}
+											fill={
+												SOURCE_COLORS[entry.source] ||
+												FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+											}
 										/>
 									))}
 								</Pie>
@@ -216,7 +226,7 @@ export function BookingSourceChart({
 							</PieChart>
 						</ResponsiveContainer>
 					</ChartContainer>
-					
+
 					{/* Legend */}
 					<div className="mt-2 flex-1 overflow-y-auto">
 						<div className="grid grid-cols-1 gap-1 text-xs">
@@ -224,10 +234,15 @@ export function BookingSourceChart({
 								<div key={entry.source} className="flex items-center gap-2">
 									<div
 										className="w-2 h-2 rounded-full flex-shrink-0"
-										style={{ backgroundColor: SOURCE_COLORS[entry.source] || FALLBACK_COLORS[index % FALLBACK_COLORS.length] }}
+										style={{
+											backgroundColor:
+												SOURCE_COLORS[entry.source] ||
+												FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+										}}
 									/>
 									<span className="truncate text-xs">
-										{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}%)
+										{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}
+										%)
 									</span>
 								</div>
 							))}

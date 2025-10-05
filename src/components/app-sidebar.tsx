@@ -184,7 +184,11 @@ export function AppSidebar({
 	};
 
 	return (
-		<Sidebar collapsible="icon" {...props} className="z-20 bg-background text-foreground">
+		<Sidebar
+			collapsible="icon"
+			{...props}
+			className="z-20 bg-background text-foreground"
+		>
 			<SidebarHeader>
 				<LocationSwitcher
 					locations={locations}

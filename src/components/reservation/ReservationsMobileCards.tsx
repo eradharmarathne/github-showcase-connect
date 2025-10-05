@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useReservationPrint } from "@/hooks/useReservationPrint";
-import {
-	useReservationsData,
-} from "@/hooks/useReservationsData";
+import { useReservationsData } from "@/hooks/useReservationsData";
 import type { Database } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 import { ReservationActions } from "./ReservationActions";

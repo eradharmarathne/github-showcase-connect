@@ -484,9 +484,7 @@ export default function LocationsTab() {
 										onClick={() => handleDelete(location.id)}
 										disabled={deletingLocationId === location.id}
 									>
-										{deletingLocationId === location.id ? (
-											null
-										) : (
+										{deletingLocationId === location.id ? null : (
 											<Trash2 className="size-4" />
 										)}
 									</Button>

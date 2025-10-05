@@ -25,7 +25,9 @@ export function UpcomingBookings({
 	hasCalendarPermission,
 }: UpcomingBookingsProps) {
 	const [loading, setLoading] = useState(true);
-	const [upcomingReservations, setUpcomingReservations] = useState<Reservation[]>([]);
+	const [upcomingReservations, setUpcomingReservations] = useState<
+		Reservation[]
+	>([]);
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
 
@@ -57,7 +59,7 @@ export function UpcomingBookings({
 					.select("*, locations(*), rooms(*)")
 					.in("location_id", tenantLocationIds)
 					.match(!selectedLocation ? {} : { location_id: selectedLocation })
-					.gte("check_in_date", new Date().toISOString().split('T')[0]) // Only future/today check-ins
+					.gte("check_in_date", new Date().toISOString().split("T")[0]) // Only future/today check-ins
 					.neq("status", "cancelled") // Exclude cancelled reservations
 					.order("check_in_date", { ascending: true })
 					.limit(5);
@@ -110,16 +112,21 @@ export function UpcomingBookings({
 										<p className="text-sm text-muted-foreground">
 											{new Date(reservation.check_in_date).toLocaleDateString()}{" "}
 											{t("dashboard.upcomingBookings.to")}{" "}
-											{new Date(reservation.check_out_date).toLocaleDateString()}
+											{new Date(
+												reservation.check_out_date,
+											).toLocaleDateString()}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											{reservation.locations?.name} • Room {reservation.rooms?.room_number}
+											{reservation.locations?.name} • Room{" "}
+											{reservation.rooms?.room_number}
 										</p>
 									</div>
 									<div className="flex flex-wrap items-center gap-2">
 										<Badge
 											variant={
-												reservation.status === "confirmed" ? "default" : "secondary"
+												reservation.status === "confirmed"
+													? "default"
+													: "secondary"
 											}
 											className="capitalize text-xs"
 										>
@@ -137,7 +144,8 @@ export function UpcomingBookings({
 										{reservation.reservation_number}
 									</span>
 									<span className="font-bold text-success">
-										{reservation.currency} {reservation.total_amount.toLocaleString()}
+										{reservation.currency}{" "}
+										{reservation.total_amount.toLocaleString()}
 									</span>
 								</div>
 							</div>

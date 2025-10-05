@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { EnhancedFinancialReportsSkeleton } from "@/components/reports";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,8 +36,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
-import { EnhancedFinancialReportsSkeleton } from "@/components/reports";
 import {
 	convertCurrency,
 	formatCurrency,
@@ -109,8 +110,8 @@ export default function EnhancedFinancialReports() {
 	const [baseCurrency, setBaseCurrency] = useState<string>("LKR");
 	const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
 	const { toast } = useToast();
+	const { tenant } = useTenant();
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
 		const loadInitialData = async () => {
 			await Promise.all([
@@ -119,13 +120,16 @@ export default function EnhancedFinancialReports() {
 				fetchData(),
 			]);
 		};
-		loadInitialData();
-	}, []);
+		if (tenant?.id) {
+			loadInitialData();
+		}
+	}, [tenant?.id]);
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
-		fetchData();
-	}, [selectedLocation, dateFrom, dateTo, baseCurrency]);
+		if (tenant?.id) {
+			fetchData();
+		}
+	}, [selectedLocation, dateFrom, dateTo, baseCurrency, tenant?.id]);
 
 	const fetchLocations = async () => {
 		try {
@@ -175,6 +179,8 @@ export default function EnhancedFinancialReports() {
 	};
 
 	const fetchFinancialSummary = async () => {
+		if (!tenant?.id) return;
+
 		try {
 			// Build queries with filters
 			let incomeQuery = supabase.from("income").select("amount, currency");
@@ -183,19 +189,19 @@ export default function EnhancedFinancialReports() {
 				.select("amount, currency, accounts(currency)");
 			let paymentsQuery = supabase.from("payments").select("amount, currency");
 
+			// Apply tenant filters first
+			incomeQuery = incomeQuery.eq("tenant_id", tenant.id);
+			expenseQuery = expenseQuery.eq("accounts.tenant_id", tenant.id);
+			paymentsQuery = supabase
+				.from("payments")
+				.select("amount, currency, reservations!inner(tenant_id, location_id)")
+				.eq("reservations.tenant_id", tenant.id);
+
 			// Apply location filters
 			if (selectedLocation !== "all") {
 				incomeQuery = incomeQuery.eq("location_id", selectedLocation);
 				expenseQuery = expenseQuery.eq("location_id", selectedLocation);
-				// For payments, we need to join with reservations to get location
-				paymentsQuery = supabase
-					.from("payments")
-					.select("amount, currency, reservations!inner(location_id)")
-					.eq("reservations.location_id", selectedLocation);
-			} else {
-				paymentsQuery = supabase
-					.from("payments")
-					.select("amount, currency, reservations(location_id)");
+				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
 			}
 
 			// Apply date filters
@@ -261,36 +267,30 @@ export default function EnhancedFinancialReports() {
 	};
 
 	const fetchIncomeBreakdown = async () => {
+		if (!tenant?.id) return;
+
 		try {
 			// Fetch direct income
 			let incomeQuery = supabase
 				.from("income")
-				.select(`id, date, amount, type, note, currency, accounts(name)`);
+				.select(`id, date, amount, type, note, currency, accounts(name)`)
+				.eq("tenant_id", tenant.id);
 
-			// Fetch reservation payments
-			let paymentsQuery = supabase.from("payments").select(`
+			// Base payments query with tenant filtering
+			const basePaymentsSelect = `
           id, created_at, amount, currency, payment_type, notes,
           accounts(name),
-          reservations(guest_name, reservation_number, location_id)
-        `);
+          reservations!inner(guest_name, reservation_number, location_id, tenant_id)
+        `;
+
+			let paymentsQuery = supabase.from("payments")
+				.select(basePaymentsSelect)
+				.eq("reservations.tenant_id", tenant.id);
 
 			// Apply location filters
 			if (selectedLocation !== "all") {
 				incomeQuery = incomeQuery.eq("location_id", selectedLocation);
-				paymentsQuery = supabase
-					.from("payments")
-					.select(`
-            id, created_at, amount, currency, payment_type, notes,
-            accounts(name),
-            reservations!inner(guest_name, reservation_number, location_id)
-          `)
-					.eq("reservations.location_id", selectedLocation);
-			} else {
-				paymentsQuery = supabase.from("payments").select(`
-            id, created_at, amount, currency, payment_type, notes,
-            accounts(name),
-            reservations(guest_name, reservation_number, location_id)
-          `);
+				paymentsQuery = paymentsQuery.eq("reservations.location_id", selectedLocation);
 			}
 
 			// Apply date filters
@@ -363,11 +363,16 @@ export default function EnhancedFinancialReports() {
 	};
 
 	const fetchExpenseBreakdown = async () => {
+		if (!tenant?.id) return;
+
 		try {
 			let query = supabase.from("expenses").select(`
           id, date, amount, main_type, sub_type, note, currency,
-          accounts(name, currency)
+          accounts!inner(name, currency, tenant_id)
         `);
+
+			// Apply tenant filter first
+			query = query.eq("accounts.tenant_id", tenant.id);
 
 			// Apply filters
 			if (selectedLocation !== "all") {
@@ -471,13 +476,17 @@ export default function EnhancedFinancialReports() {
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 						<div>
-							<Label htmlFor="location">{t("reports.enhanced.filters.location")}</Label>
+							<Label htmlFor="location">
+								{t("reports.enhanced.filters.location")}
+							</Label>
 							<Select
 								value={selectedLocation}
 								onValueChange={setSelectedLocation}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder={t("reports.enhanced.filters.location")} />
+									<SelectValue
+										placeholder={t("reports.enhanced.filters.location")}
+									/>
 								</SelectTrigger>
 								<SelectContent>
 									{locations.map((location) => (
@@ -489,7 +498,9 @@ export default function EnhancedFinancialReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="currency">{t("reports.enhanced.filters.baseCurrency")}</Label>
+							<Label htmlFor="currency">
+								{t("reports.enhanced.filters.baseCurrency")}
+							</Label>
 							<Select
 								value={baseCurrency}
 								onValueChange={(value: string) => setBaseCurrency(value)}
@@ -507,7 +518,9 @@ export default function EnhancedFinancialReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="date_from">{t("reports.enhanced.filters.fromDate")}</Label>
+							<Label htmlFor="date_from">
+								{t("reports.enhanced.filters.fromDate")}
+							</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -516,7 +529,9 @@ export default function EnhancedFinancialReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">{t("reports.enhanced.filters.toDate")}</Label>
+							<Label htmlFor="date_to">
+								{t("reports.enhanced.filters.toDate")}
+							</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -547,7 +562,8 @@ export default function EnhancedFinancialReports() {
 									{formatCurrency(summary.totalIncome, baseCurrency)}
 								</p>
 								<p className="text-sm text-green-600">
-									{summary.incomeTransactions} {t("reports.enhanced.summary.incomeTransactions")}
+									{summary.incomeTransactions}{" "}
+									{t("reports.enhanced.summary.incomeTransactions")}
 								</p>
 							</div>
 							<TrendingUp className="size-8 text-green-600" />
@@ -566,7 +582,8 @@ export default function EnhancedFinancialReports() {
 									{formatCurrency(summary.totalExpenses, baseCurrency)}
 								</p>
 								<p className="text-sm text-red-600">
-									{summary.expenseTransactions} {t("reports.enhanced.summary.expenseTransactions")}
+									{summary.expenseTransactions}{" "}
+									{t("reports.enhanced.summary.expenseTransactions")}
 								</p>
 							</div>
 							<TrendingDown className="size-8 text-red-600" />
@@ -593,7 +610,8 @@ export default function EnhancedFinancialReports() {
 								<p
 									className={`text-sm ${summary.netProfit >= 0 ? "text-blue-600" : "text-red-600"}`}
 								>
-									{summary.profitMargin.toFixed(1)}% {t("reports.enhanced.summary.profitMargin")}
+									{summary.profitMargin.toFixed(1)}%{" "}
+									{t("reports.enhanced.summary.profitMargin")}
 								</p>
 							</div>
 							<DollarSign
@@ -674,7 +692,8 @@ export default function EnhancedFinancialReports() {
 											))}
 											{category.transactions.length > 10 && (
 												<p className="text-sm text-muted-foreground text-center py-2">
-													+{category.transactions.length - 10} {t("common.transaction.moreTransactions")}
+													+{category.transactions.length - 10}{" "}
+													{t("common.transaction.moreTransactions")}
 												</p>
 											)}
 										</div>
@@ -754,7 +773,8 @@ export default function EnhancedFinancialReports() {
 											))}
 											{category.transactions.length > 10 && (
 												<p className="text-sm text-muted-foreground text-center py-2">
-													+{category.transactions.length - 10} {t("common.transaction.moreTransactions")}
+													+{category.transactions.length - 10}{" "}
+													{t("common.transaction.moreTransactions")}
 												</p>
 											)}
 										</div>

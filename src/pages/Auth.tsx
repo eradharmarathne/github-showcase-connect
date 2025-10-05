@@ -18,7 +18,8 @@ export default function Auth() {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 	const { toast } = useToast();
-	const { user, profile, loading, profileLoading, tenant, tenantLoading } = useAuth();
+	const { user, profile, loading, profileLoading, tenant, tenantLoading } =
+		useAuth();
 
 	useEffect(() => {
 		// Handle magic link token hash verification
@@ -85,7 +86,17 @@ export default function Auth() {
 				navigate("/onboarding");
 			}
 		}
-	}, [user, profile, tenant, loading, profileLoading, tenantLoading, navigate, toast, searchParams]);
+	}, [
+		user,
+		profile,
+		tenant,
+		loading,
+		profileLoading,
+		tenantLoading,
+		navigate,
+		toast,
+		searchParams,
+	]);
 
 	const handleAuth = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -282,17 +293,16 @@ export default function Auth() {
 
 					{/* Demo Account Section - Only show on login */}
 					{isLogin && (
-								<Button
-									type="button"
-									variant="outline"
-									size="sm"
-									onClick={fillDemoCredentials}
-									disabled={submitting}
-									className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
-								>
-									Try Demo Account
-								</Button>
-
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={fillDemoCredentials}
+							disabled={submitting}
+							className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
+						>
+							Try Demo Account
+						</Button>
 					)}
 
 					{/* Forgot Password Link - Only show on login */}

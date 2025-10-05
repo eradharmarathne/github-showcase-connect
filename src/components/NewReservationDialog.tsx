@@ -81,7 +81,7 @@ export function NewReservationDialog({
 		if (roomSelections.length > 0 && roomSelections[0].currency) {
 			const newCurrency = roomSelections[0].currency;
 			if (newCurrency !== paymentData.currency) {
-				setPaymentData(prev => ({ ...prev, currency: newCurrency }));
+				setPaymentData((prev) => ({ ...prev, currency: newCurrency }));
 			}
 		}
 	}, [roomSelections, paymentData.currency]);
@@ -97,11 +97,11 @@ export function NewReservationDialog({
 					const convertedAmount = await convertCurrency(
 						selection.total_amount,
 						selection.currency,
-						paymentData.currency
+						paymentData.currency,
 					);
 					total += convertedAmount;
 				} catch (error) {
-					console.error('Currency conversion error:', error);
+					console.error("Currency conversion error:", error);
 					total += selection.total_amount; // Fallback to original amount
 				}
 			}

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { DetailedBalanceSheetSkeleton } from "@/components/reports";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +37,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { DetailedBalanceSheetSkeleton } from "@/components/reports";
 import { formatCurrency } from "@/utils/currency";
 
 type Account = {
@@ -364,16 +364,22 @@ export default function AccountsReports() {
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 						<div>
-							<Label htmlFor="account_filter">{t("reports.accounts.filters.account")}</Label>
+							<Label htmlFor="account_filter">
+								{t("reports.accounts.filters.account")}
+							</Label>
 							<Select
 								value={selectedAccount}
 								onValueChange={setSelectedAccount}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder={t("reports.accounts.filters.allAccounts")} />
+									<SelectValue
+										placeholder={t("reports.accounts.filters.allAccounts")}
+									/>
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="all">{t("reports.accounts.filters.allAccounts")}</SelectItem>
+									<SelectItem value="all">
+										{t("reports.accounts.filters.allAccounts")}
+									</SelectItem>
 									{accounts.map((account) => (
 										<SelectItem key={account.id} value={account.id}>
 											{account.name} ({account.currency})
@@ -383,7 +389,9 @@ export default function AccountsReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="date_from">{t("reports.accounts.filters.fromDate")}</Label>
+							<Label htmlFor="date_from">
+								{t("reports.accounts.filters.fromDate")}
+							</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -392,7 +400,9 @@ export default function AccountsReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">{t("reports.accounts.filters.toDate")}</Label>
+							<Label htmlFor="date_to">
+								{t("reports.accounts.filters.toDate")}
+							</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -411,8 +421,12 @@ export default function AccountsReports() {
 
 			<Tabs defaultValue="balances" className="w-full">
 				<TabsList>
-					<TabsTrigger value="balances">{t("reports.accounts.tabs.balances")}</TabsTrigger>
-					<TabsTrigger value="transactions">{t("reports.accounts.tabs.transactions")}</TabsTrigger>
+					<TabsTrigger value="balances">
+						{t("reports.accounts.tabs.balances")}
+					</TabsTrigger>
+					<TabsTrigger value="transactions">
+						{t("reports.accounts.tabs.transactions")}
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="balances">
@@ -429,12 +443,18 @@ export default function AccountsReports() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>{t("reports.accounts.balances.accountName")}</TableHead>
-											<TableHead>{t("reports.accounts.balances.currency")}</TableHead>
+											<TableHead>
+												{t("reports.accounts.balances.accountName")}
+											</TableHead>
+											<TableHead>
+												{t("reports.accounts.balances.currency")}
+											</TableHead>
 											<TableHead className="text-right">
 												{t("reports.accounts.balances.initialBalance")}
 											</TableHead>
-											<TableHead className="text-right">{t("reports.accounts.balances.totalIncome")}</TableHead>
+											<TableHead className="text-right">
+												{t("reports.accounts.balances.totalIncome")}
+											</TableHead>
 											<TableHead className="text-right">
 												{t("reports.accounts.balances.totalExpenses")}
 											</TableHead>
@@ -444,7 +464,9 @@ export default function AccountsReports() {
 											<TableHead className="text-right">
 												{t("reports.accounts.balances.currentBalance")}
 											</TableHead>
-											<TableHead className="text-right">{t("reports.accounts.balances.transactions")}</TableHead>
+											<TableHead className="text-right">
+												{t("reports.accounts.balances.transactions")}
+											</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -574,12 +596,24 @@ export default function AccountsReports() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>{t("reports.accounts.transactions.date")}</TableHead>
-											<TableHead>{t("reports.accounts.transactions.account")}</TableHead>
-											<TableHead>{t("reports.accounts.transactions.type")}</TableHead>
-											<TableHead>{t("reports.accounts.transactions.description")}</TableHead>
-											<TableHead className="text-right">{t("reports.accounts.transactions.amount")}</TableHead>
-											<TableHead>{t("reports.accounts.transactions.note")}</TableHead>
+											<TableHead>
+												{t("reports.accounts.transactions.date")}
+											</TableHead>
+											<TableHead>
+												{t("reports.accounts.transactions.account")}
+											</TableHead>
+											<TableHead>
+												{t("reports.accounts.transactions.type")}
+											</TableHead>
+											<TableHead>
+												{t("reports.accounts.transactions.description")}
+											</TableHead>
+											<TableHead className="text-right">
+												{t("reports.accounts.transactions.amount")}
+											</TableHead>
+											<TableHead>
+												{t("reports.accounts.transactions.note")}
+											</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -608,7 +642,9 @@ export default function AccountsReports() {
 																		: "secondary"
 															}
 														>
-															{t(`reports.accounts.transactions.types.${transaction.type}`)}
+															{t(
+																`reports.accounts.transactions.types.${transaction.type}`,
+															)}
 														</Badge>
 													</div>
 												</TableCell>
@@ -675,7 +711,9 @@ export default function AccountsReports() {
 																: "secondary"
 													}
 												>
-													{t(`reports.accounts.transactions.types.${transaction.type}`)}
+													{t(
+														`reports.accounts.transactions.types.${transaction.type}`,
+													)}
 												</Badge>
 											</div>
 											<div className="text-xs text-muted-foreground truncate max-w-[60%]">

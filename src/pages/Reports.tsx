@@ -51,7 +51,9 @@ export default function Reports() {
 								className="flex-1 sm:flex-none"
 							>
 								<Filter className="size-4 mr-2" />
-								<span className="hidden sm:inline">{t("reports.buttons.filter")}</span>
+								<span className="hidden sm:inline">
+									{t("reports.buttons.filter")}
+								</span>
 							</Button>
 							<Button
 								variant="outline"
@@ -59,7 +61,9 @@ export default function Reports() {
 								className="flex-1 sm:flex-none"
 							>
 								<Download className="size-4 mr-2" />
-								<span className="hidden sm:inline">{t("reports.buttons.export")}</span>
+								<span className="hidden sm:inline">
+									{t("reports.buttons.export")}
+								</span>
 							</Button>
 							<Button
 								variant="outline"
@@ -67,7 +71,9 @@ export default function Reports() {
 								className="flex-1 sm:flex-none"
 							>
 								<RefreshCw className="size-4 mr-2" />
-								<span className="hidden sm:inline">{t("reports.buttons.refresh")}</span>
+								<span className="hidden sm:inline">
+									{t("reports.buttons.refresh")}
+								</span>
 							</Button>
 						</div>
 					</div>
@@ -87,14 +93,18 @@ export default function Reports() {
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<BarChart3 className="size-4" />
-									<span className="text-xs">{t("reports.tabs.mobile.overview")}</span>
+									<span className="text-xs">
+										{t("reports.tabs.mobile.overview")}
+									</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="detailed"
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<TrendingUp className="size-4" />
-									<span className="text-xs">{t("reports.tabs.mobile.detailed")}</span>
+									<span className="text-xs">
+										{t("reports.tabs.mobile.detailed")}
+									</span>
 								</TabsTrigger>
 							</TabsList>
 
@@ -104,14 +114,18 @@ export default function Reports() {
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<CreditCard className="size-4" />
-									<span className="text-xs">{t("reports.tabs.mobile.accounts")}</span>
+									<span className="text-xs">
+										{t("reports.tabs.mobile.accounts")}
+									</span>
 								</TabsTrigger>
 								<TabsTrigger
 									value="commission"
 									className="flex flex-col items-center gap-1 p-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
 								>
 									<Percent className="size-4" />
-									<span className="text-xs">{t("reports.tabs.mobile.commission")}</span>
+									<span className="text-xs">
+										{t("reports.tabs.mobile.commission")}
+									</span>
 								</TabsTrigger>
 							</TabsList>
 						</div>
@@ -173,4 +187,3 @@ export default function Reports() {
 		</div>
 	);
 }
-

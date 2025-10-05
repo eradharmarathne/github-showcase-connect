@@ -1,22 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import {
+	CompanyInfoStep,
+	CompletionStep,
+	FeaturesStep,
+	type OnboardingFormData,
+	OnboardingNavigation,
+	OnboardingProgress,
+	type Plan,
+	PlanSelectionStep,
+	PropertyDetailsStep,
+	STEPS,
+} from "@/components/onboarding";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "@/lib/creem";
-import {
-	OnboardingProgress,
-	OnboardingNavigation,
-	CompanyInfoStep,
-	PropertyDetailsStep,
-	FeaturesStep,
-	PlanSelectionStep,
-	CompletionStep,
-	STEPS,
-	type OnboardingFormData,
-	type Plan,
-} from "@/components/onboarding";
 
 export default function Onboarding() {
 	const [currentStep, setCurrentStep] = useState(1);
@@ -389,7 +389,11 @@ export default function Onboarding() {
 	const validateStep = (): boolean => {
 		switch (currentStep) {
 			case 1:
-				return !!(formData.companyName && formData.contactName && formData.email);
+				return !!(
+					formData.companyName &&
+					formData.contactName &&
+					formData.email
+				);
 			case 2:
 				return !!(formData.propertyType && formData.propertyCount);
 			case 3:

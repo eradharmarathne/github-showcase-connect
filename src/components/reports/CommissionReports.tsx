@@ -1,5 +1,7 @@
 import { Calendar, Download, Percent, UserCheck, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { CommissionReportsSkeleton } from "@/components/reports";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +30,6 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { CommissionReportsSkeleton } from "@/components/reports";
-import { useTranslation } from "react-i18next";
 
 type CommissionData = {
 	reservation_id: string;
@@ -310,7 +310,9 @@ export default function CommissionReports() {
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 						<div>
-							<Label htmlFor="date_from">{t("reports.commission.filters.fromDate")}</Label>
+							<Label htmlFor="date_from">
+								{t("reports.commission.filters.fromDate")}
+							</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -319,7 +321,9 @@ export default function CommissionReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">{t("reports.commission.filters.toDate")}</Label>
+							<Label htmlFor="date_to">
+								{t("reports.commission.filters.toDate")}
+							</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -328,7 +332,9 @@ export default function CommissionReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="filter_type">{t("reports.commission.filters.type")}</Label>
+							<Label htmlFor="filter_type">
+								{t("reports.commission.filters.type")}
+							</Label>
 							<Select
 								value={filterType}
 								onValueChange={(value) => {
@@ -340,9 +346,15 @@ export default function CommissionReports() {
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="all">{t("reports.commission.filters.types.all")}</SelectItem>
-									<SelectItem value="guide">{t("reports.commission.filters.types.guide")}</SelectItem>
-									<SelectItem value="agent">{t("reports.commission.filters.types.agent")}</SelectItem>
+									<SelectItem value="all">
+										{t("reports.commission.filters.types.all")}
+									</SelectItem>
+									<SelectItem value="guide">
+										{t("reports.commission.filters.types.guide")}
+									</SelectItem>
+									<SelectItem value="agent">
+										{t("reports.commission.filters.types.agent")}
+									</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -400,7 +412,9 @@ export default function CommissionReports() {
 				<CardHeader>
 					<CardTitle>{t("reports.commission.table.title")}</CardTitle>
 					<CardDescription>
-						{t("reports.commission.table.subtitle", { count: filteredCommissions.length })}
+						{t("reports.commission.table.subtitle", {
+							count: filteredCommissions.length,
+						})}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -410,15 +424,33 @@ export default function CommissionReports() {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>{t("reports.commission.table.headers.reservation")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.guest")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.dates")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.totalAmount")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.guide")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.guideCommission")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.agent")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.agentCommission")}</TableHead>
-									<TableHead>{t("reports.commission.table.headers.status")}</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.reservation")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.guest")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.dates")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.totalAmount")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.guide")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.guideCommission")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.agent")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.agentCommission")}
+									</TableHead>
+									<TableHead>
+										{t("reports.commission.table.headers.status")}
+									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -488,11 +520,14 @@ export default function CommissionReports() {
 											{new Date(item.check_out_date).toLocaleDateString()}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											{t("reports.commission.table.mobile.res")} {item.reservation_number}
+											{t("reports.commission.table.mobile.res")}{" "}
+											{item.reservation_number}
 										</p>
 									</div>
 									<div className="text-right">
-										<p className="text-xs text-muted-foreground">{t("reports.commission.table.mobile.total")}</p>
+										<p className="text-xs text-muted-foreground">
+											{t("reports.commission.table.mobile.total")}
+										</p>
 										<p className="text-base font-semibold">
 											LKR {item.total_amount.toFixed(2)}
 										</p>
@@ -500,7 +535,9 @@ export default function CommissionReports() {
 								</div>
 								<div className="grid grid-cols-2 gap-2 mt-3 text-xs">
 									<div className="p-2 rounded bg-muted/40">
-										<p className="text-muted-foreground">{t("reports.commission.table.mobile.guide")}</p>
+										<p className="text-muted-foreground">
+											{t("reports.commission.table.mobile.guide")}
+										</p>
 										<p>{item.guide_name || "-"}</p>
 										<p className="font-medium">
 											{item.guide_commission > 0
@@ -509,7 +546,9 @@ export default function CommissionReports() {
 										</p>
 									</div>
 									<div className="p-2 rounded bg-muted/40">
-										<p className="text-muted-foreground">{t("reports.commission.table.mobile.agent")}</p>
+										<p className="text-muted-foreground">
+											{t("reports.commission.table.mobile.agent")}
+										</p>
 										<p>{item.agent_name || "-"}</p>
 										<p className="font-medium">
 											{item.agent_commission > 0

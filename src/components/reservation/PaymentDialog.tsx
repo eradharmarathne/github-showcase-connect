@@ -175,7 +175,7 @@ export function PaymentDialog({
 			amount: initialAmount,
 			currency: initialCurrency as any,
 		}));
-		
+
 		// Update display amounts to match the currency shown in reservation list
 		setDisplayAmounts({
 			balanceAmount: initialAmount,
@@ -193,14 +193,14 @@ export function PaymentDialog({
 					const convertedTotal = await convertCurrency(
 						reservation.total_amount,
 						reservation.currency,
-						initialCurrency
+						initialCurrency,
 					);
 					const convertedPaid = await convertCurrency(
 						reservation.paid_amount || 0,
 						reservation.currency,
-						initialCurrency
+						initialCurrency,
 					);
-					
+
 					setDisplayAmounts({
 						totalAmount: Math.round(convertedTotal * 100) / 100,
 						paidAmount: Math.round(convertedPaid * 100) / 100,
@@ -208,10 +208,10 @@ export function PaymentDialog({
 						currency: initialCurrency,
 					});
 				} catch (error) {
-					console.error('Error converting currency for display:', error);
+					console.error("Error converting currency for display:", error);
 				}
 			};
-			
+
 			convertAmounts();
 		}
 	}, [reservation, initialCurrency, initialAmount]);

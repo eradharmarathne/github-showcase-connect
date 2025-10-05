@@ -1,7 +1,14 @@
 import { ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ReferenceLine } from "recharts";
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	ReferenceLine,
+	XAxis,
+	YAxis,
+} from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	ChartConfig,
@@ -35,7 +42,7 @@ const chartConfig = {
 		color: "hsl(var(--primary))",
 	},
 	expenses: {
-		label: "Expenses", 
+		label: "Expenses",
 		color: "hsl(var(--destructive))",
 	},
 	net: {
@@ -87,7 +94,7 @@ export function IncomeExpenseChart({
 
 				// Set date range based on selected month or last 30 days
 				const endDate = new Date();
-				const startDate = selectedMonth 
+				const startDate = selectedMonth
 					? new Date(selectedMonth + "-01")
 					: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
@@ -123,14 +130,16 @@ export function IncomeExpenseChart({
 						.gte("date", startDate.toISOString().split("T")[0])
 						.lte("date", endDate.toISOString().split("T")[0])
 						.in("location_id", tenantLocationIds)
-						.match(locationFilter)
+						.match(locationFilter),
 				]);
 
 				// Process data for chart
 				const processedData: ChartData[] = await Promise.all(
 					dateRange.map(async (date) => {
-						const dayIncome = incomeData.data?.filter(item => item.date === date) || [];
-						const dayExpenses = expensesData.data?.filter(item => item.date === date) || [];
+						const dayIncome =
+							incomeData.data?.filter((item) => item.date === date) || [];
+						const dayExpenses =
+							expensesData.data?.filter((item) => item.date === date) || [];
 
 						// Convert currencies and sum amounts
 						let totalIncome = 0;
@@ -140,7 +149,7 @@ export function IncomeExpenseChart({
 							const convertedAmount = await convertCurrency(
 								income.amount,
 								income.currency || "LKR",
-								"LKR"
+								"LKR",
 							);
 							totalIncome += convertedAmount;
 						}
@@ -149,7 +158,7 @@ export function IncomeExpenseChart({
 							const convertedAmount = await convertCurrency(
 								expense.amount,
 								expense.currency || "LKR",
-								"LKR"
+								"LKR",
 							);
 							totalExpenses += convertedAmount;
 						}
@@ -160,27 +169,33 @@ export function IncomeExpenseChart({
 							expenses: -totalExpenses, // Negative for chart display
 							net: totalIncome - totalExpenses,
 						};
-					})
+					}),
 				);
 
 				setChartData(processedData);
 
 				// Calculate today's data
 				const today = new Date().toISOString().split("T")[0];
-				const todayData = processedData.find(item => item.date === today);
+				const todayData = processedData.find((item) => item.date === today);
 				setTodayIncome(todayData?.income || 0);
 				setTodayExpenses(Math.abs(todayData?.expenses || 0));
 
 				// Calculate weekly profit (last 7 days)
 				const last7Days = processedData.slice(-7);
-				const weeklyIncomeTotal = last7Days.reduce((sum, day) => sum + day.income, 0);
-				const weeklyExpensesTotal = last7Days.reduce((sum, day) => sum + Math.abs(day.expenses), 0);
+				const weeklyIncomeTotal = last7Days.reduce(
+					(sum, day) => sum + day.income,
+					0,
+				);
+				const weeklyExpensesTotal = last7Days.reduce(
+					(sum, day) => sum + Math.abs(day.expenses),
+					0,
+				);
 				const profit = weeklyIncomeTotal - weeklyExpensesTotal;
-				const margin = weeklyIncomeTotal > 0 ? (profit / weeklyIncomeTotal) * 100 : 0;
+				const margin =
+					weeklyIncomeTotal > 0 ? (profit / weeklyIncomeTotal) * 100 : 0;
 
 				setWeeklyProfit(profit);
 				setProfitMargin(margin);
-
 			} catch (error) {
 				console.error("Error fetching financial data:", error);
 			} finally {
@@ -218,7 +233,7 @@ export function IncomeExpenseChart({
 		);
 	}
 
-	const locationName = selectedLocation 
+	const locationName = selectedLocation
 		? locations.find((l) => l.id === selectedLocation)?.name || "All Locations"
 		: "All Locations";
 
@@ -315,9 +330,15 @@ export function IncomeExpenseChart({
 								tickLine={false}
 								axisLine={false}
 								tickMargin={0}
-								tickFormatter={(value) => `Rs. ${Math.abs(value).toLocaleString()}`}
+								tickFormatter={(value) =>
+									`Rs. ${Math.abs(value).toLocaleString()}`
+								}
 							/>
-							<ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+							<ReferenceLine
+								y={0}
+								stroke="hsl(var(--border))"
+								strokeDasharray="3 3"
+							/>
 							<ChartTooltip
 								content={
 									<ChartTooltipContent
@@ -331,18 +352,18 @@ export function IncomeExpenseChart({
 										}}
 										formatter={(value, name) => [
 											`Rs. ${Math.abs(Number(value)).toLocaleString()}`,
-											name === "expenses" ? "Expenses" : name === "income" ? "Income" : "Net"
+											name === "expenses"
+												? "Expenses"
+												: name === "income"
+													? "Income"
+													: "Net",
 										]}
 									/>
 								}
 							/>
-							<Bar 
-								dataKey="income" 
-								fill="var(--primary)"
-								name="Income"
-							/>
-							<Bar 
-								dataKey="expenses" 
+							<Bar dataKey="income" fill="var(--primary)" name="Income" />
+							<Bar
+								dataKey="expenses"
 								fill="var(--destructive)"
 								name="Expenses"
 							/>

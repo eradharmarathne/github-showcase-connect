@@ -214,9 +214,7 @@ export default function AgentsTab() {
 	};
 
 	if (loading) {
-		return (
-			null
-		);
+		return null;
 	}
 
 	return (

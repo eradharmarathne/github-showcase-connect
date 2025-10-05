@@ -128,7 +128,7 @@ export function ViewReservationDialog({
 						const convertedAmount = await convertCurrency(
 							Number(income.amount),
 							income.currency,
-							reservation.currency
+							reservation.currency,
 						);
 
 						totalExpenses += convertedAmount;
@@ -146,7 +146,7 @@ export function ViewReservationDialog({
 						paidExpenses: Math.round(paidExpenses * 100) / 100,
 					});
 				} catch (error) {
-					console.error('Error converting income amounts:', error);
+					console.error("Error converting income amounts:", error);
 				}
 			};
 
@@ -218,9 +218,7 @@ export function ViewReservationDialog({
 	};
 
 	if (loading) {
-		return (
-			null
-		);
+		return null;
 	}
 
 	if (!reservation) {
