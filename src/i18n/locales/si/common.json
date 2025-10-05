@@ -31,6 +31,11 @@
       "viewAll": "සියල්ල බලන්න",
       "to": "සිට",
       "noBookings": "එළඹෙන වෙන්කරණ නැත"
+    },
+    "bookingSources": {
+      "title": "වෙන්කරණ මූලාශ්‍ර",
+      "totalBookings": "මුළු වෙන්කරණ",
+      "noData": "වෙන්කරණ දත්ත නොමැත"
     }
   },
   "calendar": {

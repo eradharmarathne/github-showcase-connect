@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Cell, Pie, PieChart } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -68,6 +69,7 @@ export function BookingSourceChart({
 	selectedMonth,
 }: BookingSourceChartProps) {
 	const { tenant } = useAuth();
+	const { t } = useTranslation();
 	const [sourceData, setSourceData] = useState<BookingSourceData[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [totalBookings, setTotalBookings] = useState(0);
@@ -151,7 +153,7 @@ export function BookingSourceChart({
 		return (
 			<Card className="bg-card border">
 				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="text-sm font-medium">Booking Sources</CardTitle>
+					<CardTitle className="text-sm font-medium">{t("dashboard.bookingSources.title")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="h-[400px] flex items-center justify-center">
@@ -166,11 +168,11 @@ export function BookingSourceChart({
 		return (
 			<Card className="bg-card border">
 				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="text-sm font-medium">Booking Sources</CardTitle>
+					<CardTitle className="text-sm font-medium">{t("dashboard.bookingSources.title")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="h-[400px] flex items-center justify-center text-muted-foreground">
-						No booking data available
+						{t("dashboard.bookingSources.noData")}
 					</div>
 				</CardContent>
 			</Card>
@@ -180,9 +182,9 @@ export function BookingSourceChart({
 	return (
 		<Card className="bg-card border">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-				<CardTitle className="text-sm font-medium">Booking Sources</CardTitle>
+				<CardTitle className="text-sm font-medium">{t("dashboard.bookingSources.title")}</CardTitle>
 				<span className="text-xs text-muted-foreground">
-					{totalBookings} total bookings
+					{totalBookings} {t("dashboard.bookingSources.totalBookings")}
 				</span>
 			</CardHeader>
 			<CardContent>

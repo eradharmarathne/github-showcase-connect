@@ -311,19 +311,24 @@ export function IncomeExpenseChart({
 							}}
 							barCategoryGap={0}
 						>
-							<CartesianGrid vertical={false} />
+							<CartesianGrid vertical={true} />
 							<XAxis
 								dataKey="date"
 								tickLine={false}
-								axisLine={false}
+								axisLine={true}
 								tickMargin={0}
-								minTickGap={32}
-								tickFormatter={(value) => {
-									const date = new Date(value);
-									return date.toLocaleDateString("en-US", {
-										month: "short",
-										day: "numeric",
-									});
+								minTickGap={20}
+								interval={1}
+								tickFormatter={(value, index) => {
+									// Show every other day to reduce crowding
+									if (index % 2 === 0) {
+										const date = new Date(value);
+										return date.toLocaleDateString("en-US", {
+											month: "short",
+											day: "numeric",
+										});
+									}
+									return "";
 								}}
 							/>
 							<YAxis
