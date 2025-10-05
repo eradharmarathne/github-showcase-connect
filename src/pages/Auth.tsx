@@ -156,6 +156,12 @@ export default function Auth() {
 		}
 	};
 
+	const fillDemoCredentials = () => {
+		setEmail("demo@checkingcheckout.com");
+		setPassword("Netronk@123");
+		setIsLogin(true);
+	};
+
 	return (
 		<div className="min-h-screen fixed overflow-hidden flex items-center justify-center bg-background">
 			<aside
@@ -272,6 +278,34 @@ export default function Auth() {
 							)}
 						</Button>
 					</form>
+
+					{/* Demo Account Section - Only show on login */}
+					{isLogin && (
+						<div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+							<div className="text-center space-y-2">
+								<h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
+									Try our Demo Account
+								</h3>
+								<p className="text-xs text-blue-700 dark:text-blue-300">
+									Test all features with our sample hotel data
+								</p>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={fillDemoCredentials}
+									disabled={submitting}
+									className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
+								>
+									Use Demo Account
+								</Button>
+								<div className="text-xs text-muted-foreground">
+									<p>Email: demo@checkingcheckout.com</p>
+									<p>Password: Netronk@123</p>
+								</div>
+							</div>
+						</div>
+					)}
 
 					{/* Forgot Password Link - Only show on login */}
 					{isLogin && (
