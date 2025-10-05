@@ -26,15 +26,6 @@ export function FeaturesStep({ formData, setFormData }: OnboardingStepProps) {
 
 	return (
 		<div className="space-y-6">
-			<div className="text-center mb-8">
-				<Zap className="h-12 w-12 text-primary mx-auto mb-4" />
-				<h2 className="text-lg sm:text-2xl font-bold mb-2">
-					Choose Your Features
-				</h2>
-				<p className="text-muted-foreground">
-					Select the features you need to get started
-				</p>
-			</div>
 
 			<div className="grid gap-4">
 				{FEATURES.map((feature) => (

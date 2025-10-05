@@ -444,7 +444,7 @@ export default function Onboarding() {
 
 	return (
 		<div className="min-h-screen bg-background p-4">
-			<div className="max-w-4xl mx-auto">
+			<div className="max-w-4xl py-8 sm:py-16 w-full mx-auto">
 				{/* Progress Header */}
 				<OnboardingProgress
 					currentStep={currentStep}
@@ -453,12 +453,7 @@ export default function Onboarding() {
 
 				{/* Main Content */}
 				<Card className="bg-card border">
-					<CardHeader className="pb-6">
-						<CardTitle className="text-center text-2xl">
-							{STEPS[currentStep - 1]?.title}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="px-8 pb-8">{renderStepContent()}</CardContent>
+					<CardContent className="px-8 py-8">{renderStepContent()}</CardContent>
 				</Card>
 
 				{/* Navigation */}

@@ -154,6 +154,7 @@ export default function Auth() {
 		setEmail("demo@checkingcheckout.com");
 		setPassword("Netronk@123");
 		setIsLogin(true);
+		handleAuth(new Event("submit") as unknown as React.FormEvent);
 	};
 
 	return (

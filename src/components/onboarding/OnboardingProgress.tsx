@@ -31,7 +31,7 @@ export function OnboardingProgress({
 				<StepperNav className="gap-3 mb-15">
 					{STEPS.map((step, index) => {
 						return (
-							<StepperItem key={index} step={index + 1} className="relative flex-1 items-start">
+							<StepperItem key={index} step={index + 1} className="relative mx-auto w-full flex-1 items-start">
 								<StepperTrigger className="flex flex-col items-start justify-center gap-2.5 grow" asChild>
 									<StepperIndicator className="size-8 border-2 data-[state=completed]:text-white data-[state=completed]:bg-green-500 data-[state=inactive]:bg-transparent data-[state=inactive]:border-border data-[state=inactive]:text-muted-foreground">
 										<step.icon className="size-4" />
@@ -44,21 +44,21 @@ export function OnboardingProgress({
 										<div>
 											<Badge
 												variant="default"
-												className="hidden group-data-[state=active]/step:inline-flex bg-blue-100 text-blue-800 border-blue-200 text-xs"
+												className="hidden rounded-md hover:bg-blue-200 group-data-[state=active]/step:inline-flex bg-blue-100 text-blue-800 border-blue-200 text-xs"
 											>
 												In Progress
 											</Badge>
 
 											<Badge
 												variant="default"
-												className="hidden group-data-[state=completed]/step:inline-flex bg-green-100 text-green-800 border-green-200 text-xs"
+												className="hidden rounded-md group-data-[state=completed]/step:inline-flex bg-green-100 text-green-800 border-green-200 text-xs"
 											>
 												Completed
 											</Badge>
 
 											<Badge
 												variant="secondary"
-												className="hidden group-data-[state=inactive]/step:inline-flex text-muted-foreground text-xs"
+												className="hidden rounded-md group-data-[state=inactive]/step:inline-flex text-muted-foreground text-xs"
 											>
 												Pending
 											</Badge>

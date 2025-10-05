@@ -19,16 +19,6 @@ export function CompanyInfoStep({
 }: OnboardingStepProps) {
 	return (
 		<div className="space-y-6">
-			<div className="text-center mb-8">
-				<Building2 className="h-12 w-12 text-primary mx-auto mb-4" />
-				<h2 className="text-lg sm:text-2xl font-bold mb-2">
-					Tell us about your business
-				</h2>
-				<p className="text-muted-foreground">
-					We'll use this information to customize your experience
-				</p>
-			</div>
-
 			<div className="grid md:grid-cols-2 gap-4">
 				<div>
 					<Label htmlFor="companyName">Company/Hotel Name *</Label>

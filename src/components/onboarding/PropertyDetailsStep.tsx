@@ -22,16 +22,6 @@ export function PropertyDetailsStep({
 }: OnboardingStepProps) {
 	return (
 		<div className="space-y-6">
-			<div className="text-center mb-8">
-				<Hotel className="h-12 w-12 text-primary mx-auto mb-4" />
-				<h2 className="text-lg sm:text-2xl font-bold mb-2">
-					Property Information
-				</h2>
-				<p className="text-muted-foreground">
-					Help us understand your property setup
-				</p>
-			</div>
-
 			<div>
 				<Label className="text-base font-medium mb-4 block">
 					What type of property do you manage? *
