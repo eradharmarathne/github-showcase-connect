@@ -4,12 +4,12 @@ import { useLocationContext } from "@/context/LocationContext";
 import { usePermissions } from "@/hooks/usePermissions";
 
 export const SmartRedirect = () => {
-	const { tenant, tenantLoading, profile } = useAuth();
+	const { tenant, tenantLoading, profile, profileLoading } = useAuth();
 	const { hasAnyPermission, loading } = usePermissions();
 	const { locations, loading: locationsLoading } = useLocationContext();
 
 	// Wait for all loading states to complete
-	if (loading || locationsLoading || tenantLoading) {
+	if (loading || locationsLoading || tenantLoading || profileLoading) {
 		return null;
 	}
 
@@ -20,11 +20,6 @@ export const SmartRedirect = () => {
 
 	// If tenant hasn't completed onboarding, redirect to onboarding
 	if (!tenant.onboarding_completed) {
-		return <Navigate to="/onboarding" replace />;
-	}
-
-	// If user has no locations after onboarding, this should not happen but fallback to onboarding
-	if (locations.length === 0) {
 		return <Navigate to="/onboarding" replace />;
 	}
 
