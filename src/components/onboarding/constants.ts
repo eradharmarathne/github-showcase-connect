@@ -2,6 +2,8 @@ import {
 	BarChart3,
 	Building2,
 	Calendar,
+	CheckCircle,
+	CreditCard,
 	DollarSign,
 	Home,
 	Hotel,
@@ -11,11 +13,11 @@ import {
 } from "lucide-react";
 
 export const STEPS = [
-	{ id: 1, title: "Company Info", description: "Tell us about your business" },
-	{ id: 2, title: "Property Details", description: "Describe your properties" },
-	{ id: 3, title: "Features", description: "Choose your features" },
-	{ id: 4, title: "Select Plan", description: "Choose your subscription plan" },
-	{ id: 5, title: "Complete", description: "You're all set!" },
+	{ id: 1, title: "Company Info", description: "Tell us about your business", icon: Users },
+	{ id: 2, title: "Property Details", description: "Describe your properties", icon: Building2 },
+	{ id: 3, title: "Features", description: "Choose your features", icon: Zap },
+	{ id: 4, title: "Select Plan", description: "Choose your subscription plan", icon: CreditCard },
+	{ id: 5, title: "Complete", description: "You're all set!", icon: CheckCircle },
 ];
 
 export const PROPERTY_TYPES = [

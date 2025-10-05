@@ -1,4 +1,16 @@
-import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+	Stepper,
+	StepperContent,
+	StepperIndicator,
+	StepperItem,
+	StepperNav,
+	StepperPanel,
+	StepperSeparator,
+	StepperTitle,
+	StepperTrigger,
+} from "@/components/ui/stepper";
+import { Check, LoaderCircleIcon } from "lucide-react";
 import { STEPS } from "./constants";
 import { OnboardingProgressProps } from "./types";
 
@@ -7,40 +19,68 @@ export function OnboardingProgress({
 	totalSteps,
 }: OnboardingProgressProps) {
 	return (
-		<div className="text-center mb-8 pt-8">
-			<div className="flex items-center justify-center gap-4 mb-4">
-				{STEPS.map((step) => (
-					<div key={step.id} className="flex items-center">
-						<div
-							className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 ${
-								currentStep >= step.id
-									? "bg-primary text-primary-foreground border-primary"
-									: "bg-background text-muted-foreground border-muted-foreground/30"
-							}`}
-						>
-							{step.id}
-						</div>
-						{step.id < STEPS.length && (
-							<div
-								className={`w-12 h-0.5 mx-2 ${
-									currentStep > step.id
-										? "bg-primary"
-										: "bg-muted-foreground/30"
-								}`}
-							/>
-						)}
-					</div>
-				))}
-			</div>
+		<div className="mb-8 pt-8">
+			<Stepper
+				value={currentStep}
+				indicators={{
+					completed: <Check className="size-4" />,
+					loading: <LoaderCircleIcon className="size-4 animate-spin" />,
+				}}
+				className="space-y-8"
+			>
+				<StepperNav className="gap-3 mb-15">
+					{STEPS.map((step, index) => {
+						return (
+							<StepperItem key={index} step={index + 1} className="relative flex-1 items-start">
+								<StepperTrigger className="flex flex-col items-start justify-center gap-2.5 grow" asChild>
+									<StepperIndicator className="size-8 border-2 data-[state=completed]:text-white data-[state=completed]:bg-green-500 data-[state=inactive]:bg-transparent data-[state=inactive]:border-border data-[state=inactive]:text-muted-foreground">
+										<step.icon className="size-4" />
+									</StepperIndicator>
+									<div className="flex flex-col items-start gap-1">
+										<div className="text-[10px] font-semibold uppercase text-muted-foreground">Step {index + 1}</div>
+										<StepperTitle className="text-start text-base font-semibold group-data-[state=inactive]/step:text-muted-foreground">
+											{step.title}
+										</StepperTitle>
+										<div>
+											<Badge
+												variant="default"
+												className="hidden group-data-[state=active]/step:inline-flex bg-blue-100 text-blue-800 border-blue-200 text-xs"
+											>
+												In Progress
+											</Badge>
 
-			<Progress
-				value={(currentStep / totalSteps) * 100}
-				className="w-full max-w-md mx-auto mb-2"
-			/>
-			<p className="text-sm text-muted-foreground">
-				Step {currentStep} of {totalSteps}:{" "}
-				{STEPS[currentStep - 1]?.description}
-			</p>
+											<Badge
+												variant="default"
+												className="hidden group-data-[state=completed]/step:inline-flex bg-green-100 text-green-800 border-green-200 text-xs"
+											>
+												Completed
+											</Badge>
+
+											<Badge
+												variant="secondary"
+												className="hidden group-data-[state=inactive]/step:inline-flex text-muted-foreground text-xs"
+											>
+												Pending
+											</Badge>
+										</div>
+									</div>
+								</StepperTrigger>
+
+								{STEPS.length > index + 1 && (
+									<StepperSeparator className="absolute top-4 inset-x-0 start-9 m-0 group-data-[orientation=horizontal]/stepper-nav:w-[calc(100%-2rem)] group-data-[orientation=horizontal]/stepper-nav:flex-none group-data-[state=completed]/step:bg-green-500" />
+								)}
+							</StepperItem>
+						);
+					})}
+				</StepperNav>
+
+				<StepperPanel className="hidden">
+					{/* We don't need the panel content as we handle it in the main component */}
+					{STEPS.map((step, index) => (
+						<StepperContent key={index} value={index + 1} />
+					))}
+				</StepperPanel>
+			</Stepper>
 		</div>
 	);
 }
