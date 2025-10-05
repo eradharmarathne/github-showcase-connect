@@ -47,14 +47,21 @@ export default function Dashboard() {
 				</div>
 			</div>
 
-			{/* Account Balances */}
-			<AccountBalances selectedLocation={selectedLocation} />
+			{/* Account Balances and Upcoming Bookings - Responsive Layout */}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+				{/* Account Balances */}
+				<div className="w-full">
+					<AccountBalances selectedLocation={selectedLocation} />
+				</div>
 
-			{/* Upcoming Bookings */}
-			<UpcomingBookings
-				selectedLocation={selectedLocation}
-				hasCalendarPermission={hasAnyPermission(["access_calendar"])}
-			/>
+				{/* Upcoming Bookings */}
+				<div className="w-full">
+					<UpcomingBookings
+						selectedLocation={selectedLocation}
+						hasCalendarPermission={hasAnyPermission(["access_calendar"])}
+					/>
+				</div>
+			</div>
 		</div>
 	);
 }
