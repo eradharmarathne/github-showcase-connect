@@ -18,7 +18,7 @@ export default function Auth() {
 	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 	const { toast } = useToast();
-	const { user, profile, loading, profileLoading } = useAuth();
+	const { user, profile, loading, profileLoading, tenant, tenantLoading } = useAuth();
 
 	useEffect(() => {
 		// Handle magic link token hash verification
@@ -72,19 +72,20 @@ export default function Auth() {
 		handleTokenHash();
 
 		// Only check for navigation if not loading
-		if (!loading && !profileLoading && user) {
+		if (!loading && !profileLoading && !tenantLoading && user) {
 			if (profile?.tenant_id) {
-				// Check if this is the user's first login
-				if (!profile.first_login_completed) {
-					navigate("/onboarding");
-				} else {
+				// Check if tenant has completed onboarding
+				if (tenant && tenant.onboarding_completed) {
 					navigate("/dashboard");
+				} else {
+					navigate("/onboarding");
 				}
 			} else {
+				// User doesn't have tenant_id, needs to complete onboarding
 				navigate("/onboarding");
 			}
 		}
-	}, [user, profile, loading, profileLoading, navigate, toast, searchParams]);
+	}, [user, profile, tenant, loading, profileLoading, tenantLoading, navigate, toast, searchParams]);
 
 	const handleAuth = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -191,7 +192,7 @@ export default function Auth() {
 			</aside>
 
 			<div className="flex-1 flex items-center justify-center h-screen">
-				<div className="w-full max-w-md space-y-8 px-4 bg-card text-foreground sm:px-0">
+				<div className="w-full max-w-md space-y-8 px-4 text-foreground sm:px-0">
 					<div className="space-y-1">
 						<h2 className="text-xl font-semibold tracking-tight text-foreground">
 							{isLogin ? "Get started now" : "Create your account"}
@@ -281,14 +282,6 @@ export default function Auth() {
 
 					{/* Demo Account Section - Only show on login */}
 					{isLogin && (
-						<div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-							<div className="text-center space-y-2">
-								<h3 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-									Try our Demo Account
-								</h3>
-								<p className="text-xs text-blue-700 dark:text-blue-300">
-									Test all features with our sample hotel data
-								</p>
 								<Button
 									type="button"
 									variant="outline"
@@ -297,14 +290,9 @@ export default function Auth() {
 									disabled={submitting}
 									className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
 								>
-									Use Demo Account
+									Try Demo Account
 								</Button>
-								<div className="text-xs text-muted-foreground">
-									<p>Email: demo@checkingcheckout.com</p>
-									<p>Password: Netronk@123</p>
-								</div>
-							</div>
-						</div>
+
 					)}
 
 					{/* Forgot Password Link - Only show on login */}
