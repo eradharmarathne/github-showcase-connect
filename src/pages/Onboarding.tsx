@@ -132,42 +132,11 @@ export default function Onboarding() {
 		try {
 			setProcessingPayment(true);
 
-			// First complete the tenant setup without payment
+			// First complete the tenant setup (this creates location and permissions)
 			await completeOnboarding();
 
-			// Start 7-day trial
-			const selectedPlan = plans.find((p) => p.id === selectedPlanId);
-			if (selectedPlan && user?.email) {
-				const { data: subscription, error } = await supabase
-					.from("subscriptions")
-					.insert({
-						tenant_id: formData.companyName
-							.toLowerCase()
-							.replace(/[^a-z0-9]/g, "-"),
-						plan_id: selectedPlanId,
-						status: "trialing",
-						trial_start_date: new Date().toISOString(),
-						trial_end_date: new Date(
-							Date.now() + 7 * 24 * 60 * 60 * 1000,
-						).toISOString(), // 7 days
-						current_period_start: new Date().toISOString(),
-						current_period_end: new Date(
-							Date.now() + 7 * 24 * 60 * 60 * 1000,
-						).toISOString(),
-					})
-					.select()
-					.single();
-
-				if (error) throw error;
-
-				toast({
-					title: "Trial Started!",
-					description: "You now have 7 days to explore all features for free.",
-				});
-
-				// Navigate to next step
-				handleNext();
-			}
+			// Navigate to next step (completion)
+			handleNext();
 		} catch (error) {
 			console.error("Error starting trial:", error);
 			toast({
@@ -185,6 +154,9 @@ export default function Onboarding() {
 
 		try {
 			setProcessingPayment(true);
+
+			// First complete the tenant setup (this creates tenant, location, and permissions)
+			await completeOnboarding();
 
 			const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 			if (!selectedPlan?.product_id) {
@@ -349,12 +321,12 @@ export default function Onboarding() {
 				]);
 			if (permissionsError) throw permissionsError;
 
-			// Create trial subscription
+			// Create trial subscription with selected plan
 			const { error: subscriptionError } = await supabase
 				.from("subscriptions")
 				.insert({
 					tenant_id: tenant.id,
-					plan_id: "professional", // Default to professional plan for trial
+					plan_id: selectedPlanId || "professional", // Use selected plan or default
 					status: "trialing",
 					current_period_start: new Date().toISOString(),
 					current_period_end: new Date(
@@ -372,8 +344,7 @@ export default function Onboarding() {
 				description: `Your ${formData.companyName} account has been set up successfully. You're on a 7-day free trial!`,
 			});
 
-			// Redirect to main app
-			navigate("/dashboard");
+			// Don't redirect here - let the calling function handle the next step
 		} catch (error: any) {
 			console.error("Onboarding error:", error);
 			toast({
@@ -391,15 +362,18 @@ export default function Onboarding() {
 		try {
 			setLoading(true);
 
-			// Complete onboarding without payment setup - user already went through trial/payment
+			// At this point, tenant, location, and permissions should already be created
+			// Just show success message and redirect to dashboard
 			toast({
 				title: "Welcome aboard! 🎉",
 				description:
 					"Your account has been set up successfully. Let's get started!",
 			});
 
-			// Redirect to main app
-			navigate("/dashboard");
+			// Small delay to show the toast, then redirect
+			setTimeout(() => {
+				navigate("/dashboard");
+			}, 1000);
 		} catch (error: any) {
 			console.error("Final completion error:", error);
 			toast({
