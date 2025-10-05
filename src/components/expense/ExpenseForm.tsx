@@ -18,30 +18,25 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { getCurrencySymbol } from "@/utils/currency";
+import { useLocationContext } from "@/context/LocationContext";
 
-type Location = Tables<"locations">;
 type Account = Tables<"accounts">;
 type ExpenseType = Tables<"expense_types">;
 
 interface ExpenseFormProps {
-	locations: Location[];
 	accounts: Account[];
 	expenseTypes: ExpenseType[];
-	selectedLocation?: string;
 	onSuccess: () => void;
-	onLocationChange?: (locationId: string) => void;
 }
 
 export function ExpenseForm({
-	locations,
 	accounts,
 	expenseTypes,
-	selectedLocation,
 	onSuccess,
-	onLocationChange,
 }: ExpenseFormProps) {
 	const { t } = useTranslation();
 	const { toast } = useToast();
+	const { selectedLocation } = useLocationContext();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const [formData, setFormData] = useState({
@@ -49,17 +44,9 @@ export function ExpenseForm({
 		subCategory: "",
 		amount: "",
 		accountId: "",
-		locationId: selectedLocation || "",
 		date: format(new Date(), "yyyy-MM-dd"),
 		note: "",
 	});
-
-	// Update form location when selectedLocation prop changes
-	useEffect(() => {
-		if (selectedLocation) {
-			setFormData(prev => ({ ...prev, locationId: selectedLocation }));
-		}
-	}, [selectedLocation]);
 
 	const selectedAccount = accounts.find((a) => a.id === formData.accountId);
 	const currencySymbol = selectedAccount?.currency
@@ -107,6 +94,16 @@ export function ExpenseForm({
 		if (isSubmitting) return;
 		setIsSubmitting(true);
 
+		if (!selectedLocation) {
+			toast({
+				title: t("expense.form.messages.error"),
+				description: "Please select a location first",
+				variant: "destructive",
+			});
+			setIsSubmitting(false);
+			return;
+		}
+
 		try {
 			const accountForCurrency = accounts.find(
 				(acc) => acc.id === formData.accountId,
@@ -119,7 +116,7 @@ export function ExpenseForm({
 					amount: parseFloat(formData.amount),
 					currency: accountForCurrency?.currency || 'LKR',
 					account_id: formData.accountId,
-					location_id: formData.locationId,
+					location_id: selectedLocation,
 					date: formData.date,
 					note: formData.note || null,
 				},
@@ -192,10 +189,6 @@ export function ExpenseForm({
 
 				// Send SMS notification for expense
 				try {
-					const locationData = locations.find(
-						(l) => l.id === formData.locationId,
-					);
-
 					await supabase.functions.invoke("send-sms-notification", {
 						body: {
 							type: "expense",
@@ -203,9 +196,7 @@ export function ExpenseForm({
 							currency: selectedAccount.currency,
 							category: `${formData.mainCategory} - ${formData.subCategory}`,
 							account: selectedAccount.name,
-							location: locationData?.name || "N/A",
-							locationId: formData.locationId,
-							locationPhone: locationData?.phone,
+							locationId: selectedLocation,
 							date: format(new Date(formData.date), "MMM dd, yyyy"),
 							note: formData.note,
 							accountBalance: currentBalance,
@@ -227,13 +218,12 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 				});
 			}
 
-			// Reset form but keep locationId
+			// Reset form
 			setFormData({
 				mainCategory: "",
 				subCategory: "",
 				amount: "",
 				accountId: "",
-				locationId: formData.locationId,
 				date: format(new Date(), "yyyy-MM-dd"),
 				note: "",
 			});
@@ -260,33 +250,6 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 				<form onSubmit={handleSubmit} className="space-y-4">
 					{/* Form Grid */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-						<div className="space-y-2">
-							<Label htmlFor="locationId">
-								{t("expense.form.fields.location")}
-							</Label>
-							<Select
-								value={formData.locationId}
-								onValueChange={(value) => {
-									setFormData({ ...formData, locationId: value });
-									onLocationChange?.(value);
-								}}
-								disabled={!!selectedLocation}
-							>
-								<SelectTrigger>
-									<SelectValue
-										placeholder={t("expense.form.placeholders.location")}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									{locations.map((location) => (
-										<SelectItem key={location.id} value={location.id}>
-											{location.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
 						<div className="space-y-2">
 							<Label htmlFor="mainCategory">
 								{t("expense.form.fields.mainCategory")}
@@ -379,7 +342,7 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 										.filter(
 											(account) =>
 												account.location_access.length === 0 ||
-												account.location_access.includes(formData.locationId),
+												account.location_access.includes(selectedLocation || ""),
 										)
 										.map((account) => (
 											<SelectItem key={account.id} value={account.id}>
@@ -423,7 +386,7 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 					</div>
 
 					{/* Submit button */}
-					<Button type="submit" disabled={!formData.locationId || isSubmitting}>
+					<Button type="submit" disabled={!selectedLocation || isSubmitting}>
 						<Minus className="size-4 mr-2" />
 						{isSubmitting
 							? t("expense.form.buttons.adding")

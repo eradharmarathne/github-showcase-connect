@@ -72,10 +72,8 @@ export default function Expense() {
 
 			{/* Expense Form */}
 			<ExpenseForm
-				locations={locations}
 				accounts={accounts}
 				expenseTypes={expenseTypes}
-				selectedLocation={selectedLocation}
 				onSuccess={refetch}
 			/>
 
