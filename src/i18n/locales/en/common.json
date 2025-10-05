@@ -1064,18 +1064,57 @@
     },
     "commission": {
       "title": "Commission Reports",
+      "subtitle": "Track guide and agent commission earnings",
+      "exportCsv": "Export CSV",
+      "refreshData": "Refresh Data",
       "filters": {
-        "title": "Commission Report Filters",
+        "title": "Filters",
         "location": "Location",
         "agent": "Agent",
+        "guide": "Guide",
+        "person": "Person",
+        "type": "Type",
         "fromDate": "From Date",
-        "toDate": "To Date"
+        "toDate": "To Date",
+        "selectGuide": "Select guide",
+        "selectAgent": "Select agent",
+        "selectPerson": "Select person",
+        "types": {
+          "all": "All",
+          "guide": "Guides Only",
+          "agent": "Agents Only"
+        }
       },
       "summary": {
+        "guideCommissions": "Guide Commissions",
+        "agentCommissions": "Agent Commissions",
         "totalCommissions": "Total Commissions",
+        "reservationValue": "Reservation Value",
         "paidCommissions": "Paid Commissions",
         "pendingCommissions": "Pending Commissions",
         "commissionRate": "Average Commission Rate"
+      },
+      "table": {
+        "title": "Commission Details",
+        "subtitle": "Showing {{count}} records",
+        "headers": {
+          "reservation": "Reservation",
+          "guest": "Guest",
+          "dates": "Dates",
+          "totalAmount": "Total Amount",
+          "guide": "Guide",
+          "guideCommission": "Guide Commission",
+          "agent": "Agent",
+          "agentCommission": "Agent Commission",
+          "status": "Status"
+        },
+        "mobile": {
+          "total": "Total",
+          "guide": "Guide",
+          "agent": "Agent",
+          "res": "Res #"
+        },
+        "to": "to"
       },
       "details": {
         "title": "Commission Details",
@@ -1088,6 +1127,9 @@
         "status": "Status",
         "paid": "Paid",
         "pending": "Pending"
+      },
+      "errors": {
+        "fetchCommissions": "Failed to fetch commission data"
       }
     },
     "common": {

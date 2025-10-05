@@ -29,6 +29,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CommissionReportsSkeleton } from "@/components/reports";
+import { useTranslation } from "react-i18next";
 
 type CommissionData = {
 	reservation_id: string;
@@ -47,6 +48,7 @@ type CommissionData = {
 };
 
 export default function CommissionReports() {
+	const { t } = useTranslation();
 	const [commissions, setCommissions] = useState<CommissionData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [dateFrom, setDateFrom] = useState("");
@@ -185,16 +187,16 @@ export default function CommissionReports() {
 	const exportData = () => {
 		const csvContent = [
 			[
-				"Reservation Number",
-				"Guest Name",
-				"Check-in",
-				"Check-out",
-				"Total Amount",
-				"Guide",
-				"Guide Commission",
-				"Agent",
-				"Agent Commission",
-				"Status",
+				t("reports.commission.table.headers.reservation"),
+				t("reports.commission.table.headers.guest"),
+				t("reports.commission.details.checkIn"),
+				t("reports.commission.details.checkOut"),
+				t("reports.commission.table.headers.totalAmount"),
+				t("reports.commission.table.headers.guide"),
+				t("reports.commission.table.headers.guideCommission"),
+				t("reports.commission.table.headers.agent"),
+				t("reports.commission.table.headers.agentCommission"),
+				t("reports.commission.table.headers.status"),
 			],
 			...filteredCommissions.map((item) => [
 				item.reservation_number,
@@ -231,15 +233,15 @@ export default function CommissionReports() {
 				<div>
 					<h2 className="text-md sm:text-2xl font-bold text-foreground flex items-center gap-2">
 						<Percent className="size-6" />
-						Commission Reports
+						{t("reports.commission.title")}
 					</h2>
 					<p className="text-muted-foreground">
-						Track guide and agent commission earnings
+						{t("reports.commission.subtitle")}
 					</p>
 				</div>
 				<Button onClick={exportData} variant="outline">
 					<Download className="size-4 mr-2" />
-					Export CSV
+					{t("reports.common.export.csv")}
 				</Button>
 			</div>
 
@@ -249,7 +251,7 @@ export default function CommissionReports() {
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium flex items-center gap-2">
 							<UserCheck className="size-4" />
-							Guide Commissions
+							{t("reports.commission.summary.guideCommissions")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -262,7 +264,7 @@ export default function CommissionReports() {
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium flex items-center gap-2">
 							<Users className="size-4" />
-							Agent Commissions
+							{t("reports.commission.summary.agentCommissions")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -274,7 +276,7 @@ export default function CommissionReports() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium">
-							Total Commissions
+							{t("reports.commission.summary.totalCommissions")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -289,7 +291,7 @@ export default function CommissionReports() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-sm font-medium">
-							Reservation Value
+							{t("reports.commission.summary.reservationValue")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -303,12 +305,12 @@ export default function CommissionReports() {
 			{/* Filters */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Filters</CardTitle>
+					<CardTitle>{t("reports.commission.filters.title")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
 						<div>
-							<Label htmlFor="date_from">From Date</Label>
+							<Label htmlFor="date_from">{t("reports.commission.filters.fromDate")}</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -317,7 +319,7 @@ export default function CommissionReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">To Date</Label>
+							<Label htmlFor="date_to">{t("reports.commission.filters.toDate")}</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -326,7 +328,7 @@ export default function CommissionReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="filter_type">Type</Label>
+							<Label htmlFor="filter_type">{t("reports.commission.filters.type")}</Label>
 							<Select
 								value={filterType}
 								onValueChange={(value) => {
@@ -338,19 +340,19 @@ export default function CommissionReports() {
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="all">All</SelectItem>
-									<SelectItem value="guide">Guides Only</SelectItem>
-									<SelectItem value="agent">Agents Only</SelectItem>
+									<SelectItem value="all">{t("reports.commission.filters.types.all")}</SelectItem>
+									<SelectItem value="guide">{t("reports.commission.filters.types.guide")}</SelectItem>
+									<SelectItem value="agent">{t("reports.commission.filters.types.agent")}</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
 						<div>
 							<Label htmlFor="selected_person">
 								{filterType === "guide"
-									? "Guide"
+									? t("reports.commission.filters.guide")
 									: filterType === "agent"
-										? "Agent"
-										: "Person"}
+										? t("reports.commission.filters.agent")
+										: t("reports.commission.filters.person")}
 							</Label>
 							<Select
 								value={selectedPerson}
@@ -361,10 +363,10 @@ export default function CommissionReports() {
 									<SelectValue
 										placeholder={
 											filterType === "guide"
-												? "Select guide"
+												? t("reports.commission.filters.selectGuide")
 												: filterType === "agent"
-													? "Select agent"
-													: "Select person"
+													? t("reports.commission.filters.selectAgent")
+													: t("reports.commission.filters.selectPerson")
 										}
 									/>
 								</SelectTrigger>
@@ -396,9 +398,9 @@ export default function CommissionReports() {
 			{/* Commission Table */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Commission Details</CardTitle>
+					<CardTitle>{t("reports.commission.table.title")}</CardTitle>
 					<CardDescription>
-						Showing {filteredCommissions.length} records
+						{t("reports.commission.table.subtitle", { count: filteredCommissions.length })}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -408,15 +410,15 @@ export default function CommissionReports() {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Reservation</TableHead>
-									<TableHead>Guest</TableHead>
-									<TableHead>Dates</TableHead>
-									<TableHead>Total Amount</TableHead>
-									<TableHead>Guide</TableHead>
-									<TableHead>Guide Commission</TableHead>
-									<TableHead>Agent</TableHead>
-									<TableHead>Agent Commission</TableHead>
-									<TableHead>Status</TableHead>
+									<TableHead>{t("reports.commission.table.headers.reservation")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.guest")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.dates")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.totalAmount")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.guide")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.guideCommission")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.agent")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.agentCommission")}</TableHead>
+									<TableHead>{t("reports.commission.table.headers.status")}</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -432,7 +434,7 @@ export default function CommissionReports() {
 													{new Date(item.check_in_date).toLocaleDateString()}
 												</div>
 												<div className="text-muted-foreground">
-													to{" "}
+													{t("reports.commission.table.to")}{" "}
 													{new Date(item.check_out_date).toLocaleDateString()}
 												</div>
 											</div>
@@ -486,11 +488,11 @@ export default function CommissionReports() {
 											{new Date(item.check_out_date).toLocaleDateString()}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											Res #{item.reservation_number}
+											{t("reports.commission.table.mobile.res")} {item.reservation_number}
 										</p>
 									</div>
 									<div className="text-right">
-										<p className="text-xs text-muted-foreground">Total</p>
+										<p className="text-xs text-muted-foreground">{t("reports.commission.table.mobile.total")}</p>
 										<p className="text-base font-semibold">
 											LKR {item.total_amount.toFixed(2)}
 										</p>
@@ -498,7 +500,7 @@ export default function CommissionReports() {
 								</div>
 								<div className="grid grid-cols-2 gap-2 mt-3 text-xs">
 									<div className="p-2 rounded bg-muted/40">
-										<p className="text-muted-foreground">Guide</p>
+										<p className="text-muted-foreground">{t("reports.commission.table.mobile.guide")}</p>
 										<p>{item.guide_name || "-"}</p>
 										<p className="font-medium">
 											{item.guide_commission > 0
@@ -507,7 +509,7 @@ export default function CommissionReports() {
 										</p>
 									</div>
 									<div className="p-2 rounded bg-muted/40">
-										<p className="text-muted-foreground">Agent</p>
+										<p className="text-muted-foreground">{t("reports.commission.table.mobile.agent")}</p>
 										<p>{item.agent_name || "-"}</p>
 										<p className="font-medium">
 											{item.agent_commission > 0

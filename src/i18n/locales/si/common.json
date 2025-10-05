@@ -1064,30 +1064,73 @@
     },
     "commission": {
       "title": "කොමිස් වාර්තා",
+      "subtitle": "මාර්ගදර්ශක සහ නියෝජිත කොමිස් ආදායම් නිරීක්ෂණය කරන්න",
+      "exportCsv": "CSV ලෙස නිර්යාත කරන්න",
+      "refreshData": "දත්ත නැවුම් කරන්න",
       "filters": {
         "title": "කොමිස් වාර්තා පෙරහන්",
         "location": "ස්ථානය",
         "agent": "නියෝජිතයා",
+        "guide": "මාර්ගදර්ශක",
+        "person": "පුද්ගලයා",
+        "type": "වර්ගය",
         "fromDate": "ආරම්භක දිනය",
-        "toDate": "අවසාන දිනය"
+        "toDate": "අවසාන දිනය",
+        "selectGuide": "මාර්ගදර්ශකයා තෝරන්න",
+        "selectAgent": "නියෝජිතයා තෝරන්න",
+        "selectPerson": "පුද්ගලයා තෝරන්න",
+        "types": {
+          "all": "සියල්ල",
+          "guide": "මාර්ගදර්ශකයන් පමණක්",
+          "agent": "නියෝජිතයන් පමණක්"
+        }
       },
       "summary": {
+        "guideCommissions": "මාර්ගදර්ශක කොමිස්",
+        "agentCommissions": "නියෝජිත කොමිස්",
         "totalCommissions": "මුළු කොමිස්",
+        "reservationValue": "වෙන්කරවීමේ වටිනාකම",
         "paidCommissions": "ගෙවන ලද කොමිස්",
         "pendingCommissions": "ගෙවීමට ඇති කොමිස්",
         "commissionRate": "සාමාන්‍ය කොමිස් ප්‍රතිශතය"
+      },
+      "table": {
+        "title": "කොමිස් විස්තර",
+        "subtitle": "වාර්තා {{count}} පෙන්වයි",
+        "headers": {
+          "reservation": "වෙන්කරවීම",
+          "guest": "අමුත්තා",
+          "dates": "දිනයන්",
+          "totalAmount": "මුළු මුදල",
+          "guide": "මාර්ගදර්ශක",
+          "guideCommission": "මාර්ගදර්ශක කොමිස්",
+          "agent": "නියෝජිතයා",
+          "agentCommission": "නියෝජිත කොමිස්",
+          "status": "තත්ත්වය"
+        },
+        "mobile": {
+          "total": "මුළු මුදල",
+          "guide": "මාර්ගදර්ශක",
+          "agent": "නියෝජිතයා",
+          "res": "වෙන්කරවීම #"
+        },
+        "to": "සිට"
       },
       "details": {
         "title": "කොමිස් විස්තර",
         "agent": "නියෝජිතයා",
         "reservation": "වෙන්කරවීම",
         "checkIn": "පැමිණීම",
+        "checkOut": "පිටව යාම",
         "amount": "මුදල",
         "rate": "ප්‍රතිශතය",
         "commission": "කොමිස්",
         "status": "තත්ත්වය",
         "paid": "ගෙවන ලද",
         "pending": "ගෙවීමට ඇති"
+      },
+      "errors": {
+        "fetchCommissions": "කොමිස් දත්ත ලබා ගැනීමට අසමත් විය"
       }
     },
     "common": {
