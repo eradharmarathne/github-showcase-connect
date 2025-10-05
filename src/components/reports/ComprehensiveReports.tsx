@@ -13,6 +13,7 @@ import {
 	TrendingUp,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,6 +87,7 @@ type FinancialSummary = {
 };
 
 export default function ComprehensiveReports() {
+	const { t } = useTranslation();
 	const [loading, setLoading] = useState(true);
 	const [accounts, setAccounts] = useState<AccountBalance[]>([]);
 	const [summary, setSummary] = useState<FinancialSummary>({
@@ -474,21 +476,21 @@ export default function ComprehensiveReports() {
 			{/* Filters */}
 			<Card className="px-4">
 				<CardHeader className="px-0 sm:px-2">
-					<CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+					<CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
 						<Calendar className="size-5" />
-						Financial Report Filters
+						{t("reports.comprehensive.filters.title")}
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="px-0 sm:px-2">
 					<div className="grid grid-cols-1 md:grid-cols-5 gap-2">
 						<div>
-							<Label htmlFor="location">Location</Label>
+							<Label htmlFor="location">{t("reports.comprehensive.filters.location")}</Label>
 							<Select
 								value={selectedLocation}
 								onValueChange={setSelectedLocation}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select Locations" />
+									<SelectValue placeholder={t("reports.comprehensive.filters.selectLocation")} />
 								</SelectTrigger>
 								<SelectContent>
 									{locations.map((location) => (
@@ -500,7 +502,7 @@ export default function ComprehensiveReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="currency">Base Currency</Label>
+							<Label htmlFor="currency">{t("reports.comprehensive.filters.baseCurrency")}</Label>
 							<Select
 								value={baseCurrency}
 								onValueChange={(value: string) => setBaseCurrency(value)}
@@ -518,7 +520,7 @@ export default function ComprehensiveReports() {
 							</Select>
 						</div>
 						<div>
-							<Label htmlFor="date_from">Start Date</Label>
+							<Label htmlFor="date_from">{t("reports.comprehensive.filters.startDate")}</Label>
 							<Input
 								id="date_from"
 								type="date"
@@ -527,7 +529,7 @@ export default function ComprehensiveReports() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="date_to">End Date</Label>
+							<Label htmlFor="date_to">{t("reports.comprehensive.filters.endDate")}</Label>
 							<Input
 								id="date_to"
 								type="date"
@@ -538,7 +540,7 @@ export default function ComprehensiveReports() {
 						<div className="flex items-end gap-2">
 							<Button onClick={fetchComprehensiveData} className="flex-1">
 								<RefreshCw className="size-4 mr-2" />
-								Refresh
+								{t("reports.comprehensive.buttons.refresh")}
 							</Button>
 							<Button onClick={exportToCSV} variant="outline">
 								<Download className="size-4" />
@@ -555,13 +557,13 @@ export default function ComprehensiveReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-sm font-medium text-green-600">
-									Total Income
+									{t("reports.comprehensive.summary.totalIncome")}
 								</p>
-								<p className="text-lg sm:text-2xl font-bold text-green-900">
+								<p className="text-xl sm:text-2xl font-bold text-green-900">
 									{formatCurrency(summary.totalPayments, baseCurrency)}
 								</p>
 							</div>
-							<TrendingUp className="size-4 text-green-600" />
+							<TrendingUp className="size-8 text-green-600" />
 						</div>
 					</CardContent>
 				</Card>
@@ -571,13 +573,13 @@ export default function ComprehensiveReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-sm font-medium text-blue-600">
-									Reservation Payments
+									{t("reports.comprehensive.summary.reservationPayments")}
 								</p>
-								<p className="text-lg sm:text-2xl  font-bold text-blue-900">
+								<p className="text-xl sm:text-2xl font-bold text-blue-900">
 									{formatCurrency(summary.totalPayments, baseCurrency)}
 								</p>
 							</div>
-							<CreditCard className="size-4 text-blue-600" />
+							<CreditCard className="size-8 text-blue-600" />
 						</div>
 					</CardContent>
 				</Card>
@@ -587,13 +589,13 @@ export default function ComprehensiveReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-sm font-medium text-red-600">
-									Total Expenses
+									{t("reports.comprehensive.summary.totalExpenses")}
 								</p>
-								<p className="text-lg sm:text-2xl font-bold text-red-900">
+								<p className="text-xl sm:text-2xl font-bold text-red-900">
 									{formatCurrency(summary.totalExpenses, baseCurrency)}
 								</p>
 							</div>
-							<TrendingDown className="size-4 text-red-600" />
+							<TrendingDown className="size-8 text-red-600" />
 						</div>
 					</CardContent>
 				</Card>
@@ -607,10 +609,10 @@ export default function ComprehensiveReports() {
 								<p
 									className={`text-sm font-medium ${summary.netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
 								>
-									Net Profit
+									{t("reports.comprehensive.summary.netProfit")}
 								</p>
 								<p
-									className={`text-lg sm:text-2xl font-bold ${summary.netProfit >= 0 ? "text-emerald-900" : "text-red-900"}`}
+									className={`text-xl sm:text-2xl font-bold ${summary.netProfit >= 0 ? "text-emerald-900" : "text-red-900"}`}
 								>
 									{formatCurrency(summary.netProfit, baseCurrency)}
 								</p>
@@ -630,7 +632,7 @@ export default function ComprehensiveReports() {
 
 			{/* Account Details */}
 			<Card>
-				<CardHeader className="px-2">
+				<CardHeader className="px-2 sm:px-4">
 					<CardTitle className="flex items-center gap-2 text-md sm:text-lg">
 						<Building2 className="size-6" />
 						Account Balances & Transaction History
@@ -639,7 +641,7 @@ export default function ComprehensiveReports() {
 						Running balances for all accounts with complete transaction history
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="px-2">
+				<CardContent className="px-2 sm:px-4">
 					<div className="space-y-4">
 						{accounts.map((account) => (
 							<Card

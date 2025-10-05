@@ -895,25 +895,164 @@
     }
   },
   "reports": {
-    "title": "වාර්තා පුවරුව",
-    "subtitle": "සවිස්තරාත්මක මූල්‍ය වාර්තා සහ විශ්ලේෂණ වෙත ප්‍රවේශය",
+    "title": "වාර්තා පැනලය",
+    "subtitle": "විස්තරාත්මක මූල්‍ය වාර්තා සහ විශ්ලේෂණ වෙත ප්‍රවේශය",
     "buttons": {
-      "filter": "පෙරහන",
+      "filter": "පෙරහන්",
       "export": "නිර්යාත",
-      "refresh": "නැවුම් කරන්න"
+      "refresh": "නැවුම්"
     },
     "tabs": {
       "mobile": {
-        "overview": "සාරාංශය",
-        "detailed": "සවිස්තරාත්මක",
+        "overview": "දළ විශ්ලේෂණ",
+        "detailed": "විස්තරාත්මක",
         "accounts": "ගිණුම්",
         "commission": "කොමිස්"
       },
       "desktop": {
-        "financialOverview": "මූල්‍ය සාරාංශය",
-        "detailedReports": "සවිස්තරාත්මක වාර්තා",
+        "financialOverview": "මූල්‍ය දළ විශ්ලේෂණය",
+        "detailedReports": "විස්තරාත්මක වාර්තා",
         "accountStatements": "ගිණුම් ප්‍රකාශන",
-        "commissions": "කොමිස් වාර්තා"
+        "commissions": "කොමිස් සේවා"
+      }
+    },
+    "comprehensive": {
+      "filters": {
+        "title": "මූල්‍ය වාර්තා පෙරහන්",
+        "location": "ස්ථානය",
+        "currency": "මුදල් ඒකකය",
+        "fromDate": "ආරම්භක දිනය",
+        "toDate": "අවසාන දිනය"
+      },
+      "summary": {
+        "totalIncome": "මුළු ආදායම",
+        "reservationPayments": "වෙන්කරවීම් ගෙවීම්",
+        "totalExpenses": "මුළු වියදම්",
+        "netProfit": "ශුද්ධ ලාභය"
+      },
+      "accounts": {
+        "title": "ගිණුම් ශේෂයන්",
+        "account": "ගිණුම",
+        "balance": "ශේෂය",
+        "transactions": "ගනුදෙනු"
+      },
+      "incomeCategories": {
+        "title": "ආදායම් වර්ග",
+        "category": "වර්ගය",
+        "amount": "මුදල",
+        "percentage": "ප්‍රතිශතය",
+        "transactions": "ගනුදෙනු"
+      },
+      "expenseCategories": {
+        "title": "වියදම් වර්ග"
+      },
+      "transactionDetails": {
+        "date": "දිනය",
+        "description": "විස්තරය",
+        "account": "ගිණුම",
+        "amount": "මුදල"
+      }
+    },
+    "enhanced": {
+      "filters": {
+        "title": "මූල්‍ය වාර්තා පෙරහන්",
+        "location": "ස්ථානය",
+        "baseCurrency": "මූලික මුදල් ඒකකය",
+        "fromDate": "ආරම්භක දිනය",
+        "toDate": "අවසාන දිනය"
+      },
+      "summary": {
+        "totalIncome": "මුළු ආදායම",
+        "totalExpenses": "මුළු වියදම්",
+        "netProfit": "ශුද්ධ ලාභය",
+        "profitMargin": "ලාභ ප්‍රතිශතය",
+        "incomeTransactions": "ආදායම් ගනුදෙනු",
+        "expenseTransactions": "වියදම් ගනුදෙනු"
+      },
+      "tabs": {
+        "overview": "දළ විශ්ලේෂණය",
+        "incomeBreakdown": "ආදායම් බෙදීම",
+        "expenseBreakdown": "වියදම් බෙදීම"
+      },
+      "breakdown": {
+        "category": "වර්ගය",
+        "amount": "මුදල",
+        "percentage": "ප්‍රතිශතය",
+        "transactions": "ගනුදෙනු",
+        "viewDetails": "විස්තර බලන්න"
+      }
+    },
+    "accounts": {
+      "title": "ගිණුම් ප්‍රකාශන",
+      "filters": {
+        "title": "ගිණුම් ප්‍රකාශන පෙරහන්",
+        "location": "ස්ථානය",
+        "account": "ගිණුම",
+        "fromDate": "ආරම්භක දිනය",
+        "toDate": "අවසාන දිනය"
+      },
+      "summary": {
+        "openingBalance": "ආරම්භක ශේෂය",
+        "totalIncome": "මුළු ආදායම",
+        "totalExpenses": "මුළු වියදම්",
+        "closingBalance": "අවසාන ශේෂය"
+      },
+      "transactions": {
+        "title": "ගනුදෙනු ඉතිහාසය",
+        "date": "දිනය",
+        "type": "වර්ගය",
+        "description": "විස්තරය",
+        "debit": "හර",
+        "credit": "බර",
+        "balance": "ශේෂය"
+      }
+    },
+    "commission": {
+      "title": "කොමිස් වාර්තා",
+      "filters": {
+        "title": "කොමිස් වාර්තා පෙරහන්",
+        "location": "ස්ථානය",
+        "agent": "නියෝජිතයා",
+        "fromDate": "ආරම්භක දිනය",
+        "toDate": "අවසාන දිනය"
+      },
+      "summary": {
+        "totalCommissions": "මුළු කොමිස්",
+        "paidCommissions": "ගෙවන ලද කොමිස්",
+        "pendingCommissions": "ගෙවීමට ඇති කොමිස්",
+        "commissionRate": "සාමාන්‍ය කොමිස් ප්‍රතිශතය"
+      },
+      "details": {
+        "title": "කොමිස් විස්තර",
+        "agent": "නියෝජිතයා",
+        "reservation": "වෙන්කරවීම",
+        "checkIn": "පැමිණීම",
+        "amount": "මුදල",
+        "rate": "ප්‍රතිශතය",
+        "commission": "කොමිස්",
+        "status": "තත්ත්වය",
+        "paid": "ගෙවන ලද",
+        "pending": "ගෙවීමට ඇති"
+      }
+    },
+    "common": {
+      "noData": "තෝරන ලද නිර්ණායක සඳහා දත්ත නොමැත",
+      "loading": "වාර්තා දත්ත පැටවෙමින්...",
+      "error": "වාර්තා දත්ත පැටවීමේ දෝෂයක්",
+      "export": {
+        "pdf": "PDF ලෙස නිර්යාත කරන්න",
+        "excel": "Excel ලෙස නිර්යාත කරන්න",
+        "csv": "CSV ලෙස නිර්යාත කරන්න"
+      },
+      "dateRange": {
+        "today": "අද",
+        "yesterday": "ඊයේ",
+        "thisWeek": "මෙම සතිය",
+        "lastWeek": "පසුගිය සතිය",
+        "thisMonth": "මෙම මාසය",
+        "lastMonth": "පසුගිය මාසය",
+        "thisYear": "මෙම වර්ෂය",
+        "custom": "අභිරුචි කාල පරාසය"
       }
     }
   }

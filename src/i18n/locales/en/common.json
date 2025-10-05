@@ -915,6 +915,145 @@
         "accountStatements": "Account Statements",
         "commissions": "Commissions"
       }
+    },
+    "comprehensive": {
+      "filters": {
+        "title": "Financial Report Filters",
+        "location": "Location",
+        "currency": "Currency",
+        "fromDate": "From Date",
+        "toDate": "To Date"
+      },
+      "summary": {
+        "totalIncome": "Total Income",
+        "reservationPayments": "Reservation Payments",
+        "totalExpenses": "Total Expenses",
+        "netProfit": "Net Profit"
+      },
+      "accounts": {
+        "title": "Account Balances",
+        "account": "Account",
+        "balance": "Balance",
+        "transactions": "Transactions"
+      },
+      "incomeCategories": {
+        "title": "Income Categories",
+        "category": "Category",
+        "amount": "Amount",
+        "percentage": "Percentage",
+        "transactions": "Transactions"
+      },
+      "expenseCategories": {
+        "title": "Expense Categories"
+      },
+      "transactionDetails": {
+        "date": "Date",
+        "description": "Description",
+        "account": "Account",
+        "amount": "Amount"
+      }
+    },
+    "enhanced": {
+      "filters": {
+        "title": "Financial Report Filters",
+        "location": "Location",
+        "baseCurrency": "Base Currency",
+        "fromDate": "Start Date",
+        "toDate": "End Date"
+      },
+      "summary": {
+        "totalIncome": "Total Income",
+        "totalExpenses": "Total Expenses",
+        "netProfit": "Net Profit",
+        "profitMargin": "Profit Margin",
+        "incomeTransactions": "Income Transactions",
+        "expenseTransactions": "Expense Transactions"
+      },
+      "tabs": {
+        "overview": "Overview",
+        "incomeBreakdown": "Income Breakdown",
+        "expenseBreakdown": "Expense Breakdown"
+      },
+      "breakdown": {
+        "category": "Category",
+        "amount": "Amount",
+        "percentage": "Percentage",
+        "transactions": "Transactions",
+        "viewDetails": "View Details"
+      }
+    },
+    "accounts": {
+      "title": "Account Statements",
+      "filters": {
+        "title": "Account Statement Filters",
+        "location": "Location",
+        "account": "Account",
+        "fromDate": "From Date",
+        "toDate": "To Date"
+      },
+      "summary": {
+        "openingBalance": "Opening Balance",
+        "totalIncome": "Total Income",
+        "totalExpenses": "Total Expenses",
+        "closingBalance": "Closing Balance"
+      },
+      "transactions": {
+        "title": "Transaction History",
+        "date": "Date",
+        "type": "Type",
+        "description": "Description",
+        "debit": "Debit",
+        "credit": "Credit",
+        "balance": "Balance"
+      }
+    },
+    "commission": {
+      "title": "Commission Reports",
+      "filters": {
+        "title": "Commission Report Filters",
+        "location": "Location",
+        "agent": "Agent",
+        "fromDate": "From Date",
+        "toDate": "To Date"
+      },
+      "summary": {
+        "totalCommissions": "Total Commissions",
+        "paidCommissions": "Paid Commissions",
+        "pendingCommissions": "Pending Commissions",
+        "commissionRate": "Average Commission Rate"
+      },
+      "details": {
+        "title": "Commission Details",
+        "agent": "Agent",
+        "reservation": "Reservation",
+        "checkIn": "Check-in",
+        "amount": "Amount",
+        "rate": "Rate",
+        "commission": "Commission",
+        "status": "Status",
+        "paid": "Paid",
+        "pending": "Pending"
+      }
+    },
+    "common": {
+      "noData": "No data available for the selected criteria",
+      "loading": "Loading report data...",
+      "error": "Error loading report data",
+      "export": {
+        "pdf": "Export as PDF",
+        "excel": "Export as Excel",
+        "csv": "Export as CSV"
+      },
+      "dateRange": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "thisWeek": "This Week",
+        "lastWeek": "Last Week",
+        "thisMonth": "This Month",
+        "lastMonth": "Last Month",
+        "thisYear": "This Year",
+        "custom": "Custom Range"
+      }
     }
   }
 }
