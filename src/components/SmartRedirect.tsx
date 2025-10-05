@@ -1,16 +1,29 @@
 import { Navigate } from "react-router";
+import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { usePermissions } from "@/hooks/usePermissions";
 
 export const SmartRedirect = () => {
+	const { tenant, tenantLoading, profile } = useAuth();
 	const { hasAnyPermission, loading } = usePermissions();
 	const { locations, loading: locationsLoading } = useLocationContext();
 
-	if (loading || locationsLoading) {
+	// Wait for all loading states to complete
+	if (loading || locationsLoading || tenantLoading) {
 		return null;
 	}
 
-	// If user has no locations, redirect to onboarding to set up their first location
+	// If user doesn't have a tenant_id in their profile, they need to complete onboarding
+	if (!profile?.tenant_id || !tenant) {
+		return <Navigate to="/onboarding" replace />;
+	}
+
+	// If tenant hasn't completed onboarding, redirect to onboarding
+	if (!tenant.onboarding_completed) {
+		return <Navigate to="/onboarding" replace />;
+	}
+
+	// If user has no locations after onboarding, this should not happen but fallback to onboarding
 	if (locations.length === 0) {
 		return <Navigate to="/onboarding" replace />;
 	}
