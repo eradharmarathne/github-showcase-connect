@@ -16,6 +16,12 @@
       "monthlyProfit": "Monthly Profit",
       "margin": "margin"
     },
+    "chart": {
+      "incomeVsExpenses": "Income vs Expenses",
+      "monthlyOverview": "Monthly financial overview",
+      "last30DaysOverview": "Last 30 days financial overview",
+      "allLocations": "All Locations"
+    },
     "accountBalances": {
       "title": "Account Balances",
       "account": "Account"

@@ -16,6 +16,12 @@
       "monthlyProfit": "මාසික ලාභය",
       "margin": "ආන්තිකය"
     },
+    "chart": {
+      "incomeVsExpenses": "ආදායම් vs වියදම්",
+      "monthlyOverview": "මාසික මූල්‍ය සමීක්ෂණය",
+      "last30DaysOverview": "පසුගිය දින 30 මූල්‍ය සමීක්ෂණය",
+      "allLocations": "සියළුම ස්ථාන"
+    },
     "accountBalances": {
       "title": "ගිණුම් ශේෂ",
       "account": "ගිණුම"
