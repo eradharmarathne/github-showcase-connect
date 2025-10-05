@@ -10,8 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { UpcomingBookingsSkeleton } from "./UpcomingBookingsSkeleton";
 
-type Booking = Tables<"bookings"> & {
+type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations">;
+	rooms: Tables<"rooms">;
 };
 
 interface UpcomingBookingsProps {
@@ -24,12 +25,12 @@ export function UpcomingBookings({
 	hasCalendarPermission,
 }: UpcomingBookingsProps) {
 	const [loading, setLoading] = useState(true);
-	const [upcomingBookings, setUpcomingBookings] = useState<Booking[]>([]);
+	const [upcomingReservations, setUpcomingReservations] = useState<Reservation[]>([]);
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
 
 	useEffect(() => {
-		const fetchBookingsData = async () => {
+		const fetchReservationsData = async () => {
 			if (!tenant?.id) {
 				setLoading(false);
 				return;
@@ -46,28 +47,30 @@ export function UpcomingBookings({
 				const tenantLocationIds = tenantLocations?.map((loc) => loc.id) || [];
 
 				if (tenantLocationIds.length === 0) {
-					setUpcomingBookings([]);
+					setUpcomingReservations([]);
 					setLoading(false);
 					return;
 				}
 
-				const { data: bookingsData } = await supabase
-					.from("bookings")
-					.select("*, locations(*)")
+				const { data: reservationsData } = await supabase
+					.from("reservations")
+					.select("*, locations(*), rooms(*)")
 					.in("location_id", tenantLocationIds)
 					.match(!selectedLocation ? {} : { location_id: selectedLocation })
-					.order("check_in")
+					.gte("check_in_date", new Date().toISOString().split('T')[0]) // Only future/today check-ins
+					.neq("status", "cancelled") // Exclude cancelled reservations
+					.order("check_in_date", { ascending: true })
 					.limit(5);
 
-				setUpcomingBookings(bookingsData || []);
+				setUpcomingReservations(reservationsData || []);
 			} catch (error) {
-				console.error("Error fetching bookings data:", error);
+				console.error("Error fetching reservations data:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		fetchBookingsData();
+		fetchReservationsData();
 	}, [selectedLocation, tenant?.id]);
 
 	if (loading) {
@@ -92,44 +95,49 @@ export function UpcomingBookings({
 				)}
 			</CardHeader>
 			<CardContent className="space-y-3 lg:space-y-4">
-				{upcomingBookings.length > 0 ? (
-					upcomingBookings.map((booking) => (
+				{upcomingReservations.length > 0 ? (
+					upcomingReservations.map((reservation) => (
 						<div
-							key={booking.id}
+							key={reservation.id}
 							className="p-3 lg:p-4 rounded-lg bg-background/50 border border-border/50"
 						>
 							<div className="flex flex-col space-y-2">
 								<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
 									<div className="min-w-0 flex-1">
 										<p className="font-medium text-foreground truncate">
-											{booking.guest_name}
+											{reservation.guest_name}
 										</p>
 										<p className="text-sm text-muted-foreground">
-											{new Date(booking.check_in).toLocaleDateString()}{" "}
+											{new Date(reservation.check_in_date).toLocaleDateString()}{" "}
 											{t("dashboard.upcomingBookings.to")}{" "}
-											{new Date(booking.check_out).toLocaleDateString()}
+											{new Date(reservation.check_out_date).toLocaleDateString()}
 										</p>
 										<p className="text-xs text-muted-foreground">
-											{booking.locations?.name}
+											{reservation.locations?.name} • Room {reservation.rooms?.room_number}
 										</p>
 									</div>
 									<div className="flex flex-wrap items-center gap-2">
 										<Badge
 											variant={
-												booking.status === "confirmed" ? "default" : "secondary"
+												reservation.status === "confirmed" ? "default" : "secondary"
 											}
 											className="capitalize text-xs"
 										>
-											{booking.status}
+											{reservation.status}
 										</Badge>
-										<Badge variant="outline" className="text-xs">
-											{booking.source.replace("_", ".")}
-										</Badge>
+										{reservation.booking_source && (
+											<Badge variant="outline" className="text-xs">
+												{reservation.booking_source.replace("_", ".")}
+											</Badge>
+										)}
 									</div>
 								</div>
-								<div className="flex justify-end">
+								<div className="flex justify-between items-center">
+									<span className="text-xs text-muted-foreground">
+										{reservation.reservation_number}
+									</span>
 									<span className="font-bold text-success">
-										Rs. {booking.total_amount.toLocaleString()}
+										{reservation.currency} {reservation.total_amount.toLocaleString()}
 									</span>
 								</div>
 							</div>

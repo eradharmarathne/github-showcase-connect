@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { convertCurrency } from "@/utils/currency";
 
 type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations"> | null;
@@ -56,6 +57,11 @@ export function ViewReservationDialog({
 	const [reservation, setReservation] = useState<Reservation | null>(null);
 	const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [convertedAmounts, setConvertedAmounts] = useState({
+		totalExpenses: 0,
+		pendingExpenses: 0,
+		paidExpenses: 0,
+	});
 
 	const fetchReservation = useCallback(async () => {
 		if (!reservationId) return;
@@ -109,14 +115,55 @@ export function ViewReservationDialog({
 		}
 	}, [isOpen, reservationId, fetchReservation]);
 
+	// Convert income amounts to reservation currency when data loads
+	useEffect(() => {
+		if (reservation && incomeRecords.length >= 0) {
+			const convertAmounts = async () => {
+				try {
+					let totalExpenses = 0;
+					let pendingExpenses = 0;
+					let paidExpenses = 0;
+
+					for (const income of incomeRecords) {
+						const convertedAmount = await convertCurrency(
+							Number(income.amount),
+							income.currency,
+							reservation.currency
+						);
+
+						totalExpenses += convertedAmount;
+
+						if (income.payment_method === "pending" || !income.payment_method) {
+							pendingExpenses += convertedAmount;
+						} else {
+							paidExpenses += convertedAmount;
+						}
+					}
+
+					setConvertedAmounts({
+						totalExpenses: Math.round(totalExpenses * 100) / 100,
+						pendingExpenses: Math.round(pendingExpenses * 100) / 100,
+						paidExpenses: Math.round(paidExpenses * 100) / 100,
+					});
+				} catch (error) {
+					console.error('Error converting income amounts:', error);
+				}
+			};
+
+			convertAmounts();
+		}
+	}, [reservation, incomeRecords]);
+
 	const getPendingExpenses = () => {
-		return incomeRecords
-			.filter((inc) => inc.payment_method === "pending")
-			.reduce((sum, inc) => sum + Number(inc.amount), 0);
+		return convertedAmounts.pendingExpenses;
 	};
 
 	const getTotalExpenses = () => {
-		return incomeRecords.reduce((sum, inc) => sum + Number(inc.amount), 0);
+		return convertedAmounts.totalExpenses;
+	};
+
+	const getPaidExpenses = () => {
+		return convertedAmounts.paidExpenses;
 	};
 
 	const getStatusText = (status: string) => {
@@ -137,6 +184,9 @@ export function ViewReservationDialog({
 	};
 
 	const getTotalBalance = () => {
+		// Balance = Room balance + Pending expenses
+		// Room balance already accounts for paid room amount and paid additional services
+		// We only need to add pending expenses that haven't been paid yet
 		const roomBalance = reservation?.balance_amount || 0;
 		const pendingExpenses = getPendingExpenses();
 		return roomBalance + pendingExpenses;
@@ -476,14 +526,25 @@ export function ViewReservationDialog({
 										{(reservation.paid_amount || 0).toLocaleString()}
 									</p>
 								</div>
-								{getTotalExpenses() > 0 && (
+								{getPaidExpenses() > 0 && (
 									<div className="flex justify-between items-center">
 										<label className="text-xs font-medium text-muted-foreground">
-											Additional Expenses
+											Paid Additional Services
+										</label>
+										<p className="text-sm text-emerald-600">
+											{getCurrencySymbol(reservation.currency)}{" "}
+											{getPaidExpenses().toLocaleString()}
+										</p>
+									</div>
+								)}
+								{getPendingExpenses() > 0 && (
+									<div className="flex justify-between items-center">
+										<label className="text-xs font-medium text-muted-foreground">
+											Pending Additional Services
 										</label>
 										<p className="text-sm text-orange-600">
 											{getCurrencySymbol(reservation.currency)}{" "}
-											{getTotalExpenses().toLocaleString()}
+											{getPendingExpenses().toLocaleString()}
 										</p>
 									</div>
 								)}
