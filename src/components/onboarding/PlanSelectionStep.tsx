@@ -62,7 +62,7 @@ export function PlanSelectionStep({
                 </div>
 
                 <div className="space-y-2 text-sm">
-                  {plan.features && (
+                  {plan.features && Array.isArray(plan.features) && (
                     <ul className="space-y-1">
                       {plan.features.map((feature: string, index: number) => (
                         <li key={index} className="flex items-center gap-2">
