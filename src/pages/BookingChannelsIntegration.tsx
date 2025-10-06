@@ -631,7 +631,7 @@ export default function BookingChannelsIntegration() {
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
 							{t("bookingChannels.stats.totalBookings")}
 						</CardTitle>
 						<Calendar className="size-4 text-muted-foreground" />
@@ -648,7 +648,7 @@ export default function BookingChannelsIntegration() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
 							{t("bookingChannels.stats.lastSync")}
 						</CardTitle>
 						<Clock className="size-4 text-muted-foreground" />
@@ -669,7 +669,7 @@ export default function BookingChannelsIntegration() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
 							{t("bookingChannels.stats.revenue")}
 						</CardTitle>
 						<DollarSign className="size-4 text-muted-foreground" />
@@ -689,7 +689,7 @@ export default function BookingChannelsIntegration() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
 							{t("bookingChannels.stats.activeSources")}
 						</CardTitle>
 						<Wifi className="size-4 text-muted-foreground" />
@@ -1195,7 +1195,7 @@ export default function BookingChannelsIntegration() {
 										>
 											<CardHeader className="pb-3">
 												<div className="flex items-center justify-between">
-													<CardTitle className="text-lg">
+																																<CardTitle className="text-base md:text-lg lg:text-xl">
 														{location.name}
 													</CardTitle>
 													<Badge variant={mapping ? "default" : "secondary"}>

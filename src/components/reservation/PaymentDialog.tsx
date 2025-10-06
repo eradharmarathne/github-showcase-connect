@@ -309,7 +309,7 @@ export function PaymentDialog({
 						{/* Reservation Details */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg">Reservation Details</CardTitle>
+								<CardTitle className="text-base md:text-lg lg:text-xl">Reservation Details</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
 								<div className="grid grid-cols-2 gap-4 text-sm">
@@ -359,7 +359,7 @@ export function PaymentDialog({
 						{/* Payment Form */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg">Payment Information</CardTitle>
+								<CardTitle className="text-base md:text-lg lg:text-xl">Payment Information</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div>

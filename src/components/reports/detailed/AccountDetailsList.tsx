@@ -43,7 +43,7 @@ export function AccountDetailsList({
 						<CardHeader className="pb-3">
 							<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
 								<div>
-									<CardTitle className="text-md sm:text-lg font-bold">
+									<CardTitle className="text-base md:text-lg lg:text-xl font-bold">
 										{account.name}
 									</CardTitle>
 									<CardDescription>

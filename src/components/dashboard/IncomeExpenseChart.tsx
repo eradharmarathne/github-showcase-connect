@@ -252,7 +252,7 @@ export function IncomeExpenseChart({
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				<Card className="bg-card border">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 							{selectedMonth
 								? t("dashboard.summaryCards.monthlyIncome")
 								: t("dashboard.summaryCards.todayIncome")}
@@ -269,7 +269,7 @@ export function IncomeExpenseChart({
 
 				<Card className="bg-card border">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 							{selectedMonth
 								? t("dashboard.summaryCards.monthlyExpenses")
 								: t("dashboard.summaryCards.todayExpenses")}
@@ -286,7 +286,7 @@ export function IncomeExpenseChart({
 
 				<Card className="bg-card border">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 							{t("dashboard.summaryCards.weeklyProfit")}
 						</CardTitle>
 						<TrendingUp className="size-4 text-primary" />
@@ -305,7 +305,7 @@ export function IncomeExpenseChart({
 			{/* Chart */}
 			<Card className="bg-card border">
 				<CardHeader>
-					<CardTitle className="text-lg font-semibold">
+					<CardTitle className="text-base md:text-lg lg:text-xl font-semibold">
 						{t("dashboard.chart.incomeVsExpenses")}
 					</CardTitle>
 					<p className="text-sm text-muted-foreground">

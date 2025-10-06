@@ -226,7 +226,7 @@ export const IDPhotoUpload = ({
 		<>
 			<Card className={cn("w-full", className)}>
 				<CardHeader className="pb-4">
-					<CardTitle className="text-lg flex items-center gap-2">
+					<CardTitle className="text-base md:text-lg lg:text-xl flex items-center gap-2">
 						<FileImage className="size-5" />
 						{title}
 					</CardTitle>

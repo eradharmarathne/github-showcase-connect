@@ -83,7 +83,7 @@ export default function MasterFiles() {
 		<div className="p-2 sm:p-4 md:p-6">
 			<Card className="h-full">
 				<CardHeader className="p-4 sm:p-6">
-					<CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
+					<CardTitle className="text-lg md:text-xl lg:text-2xl font-bold flex items-center gap-2 sm:gap-3">
 						<Building2 className="size-5 sm:size-7 text-primary" />
 						{t("masterFiles.title")}
 					</CardTitle>

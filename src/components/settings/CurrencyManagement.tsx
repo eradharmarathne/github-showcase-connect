@@ -177,7 +177,7 @@ export function CurrencyManagement() {
 						{/* Add New Currency */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg">Add Custom Currency</CardTitle>
+								<CardTitle className="text-base md:text-lg lg:text-xl">Add Custom Currency</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -250,7 +250,7 @@ export function CurrencyManagement() {
 						{/* Current Currencies */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg">Current Currencies</CardTitle>
+								<CardTitle className="text-base md:text-lg lg:text-xl">Current Currencies</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-4">

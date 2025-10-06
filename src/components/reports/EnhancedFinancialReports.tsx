@@ -459,7 +459,7 @@ export default function EnhancedFinancialReports() {
 			{/* Filters */}
 			<Card className="">
 				<CardHeader>
-					<CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+					<CardTitle className="text-base md:text-lg lg:text-xl flex items-center gap-2">
 						<Calendar className="size-5" />
 						{t("reports.enhanced.filters.title")}
 					</CardTitle>

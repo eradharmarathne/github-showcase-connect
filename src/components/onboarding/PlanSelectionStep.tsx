@@ -62,7 +62,7 @@ export function PlanSelectionStep({
 								<CardHeader className="pb-4">
 									<div className="flex items-center gap-2 mb-2">
 										{isPopular && <Crown className="h-5 w-5 text-primary" />}
-										<CardTitle className="font-medium text-xl">
+										<CardTitle className="font-medium text-lg md:text-xl lg:text-2xl">
 											{plan.name}
 										</CardTitle>
 									</div>

@@ -181,7 +181,7 @@ export function ExpenseShortcuts({
 	return (
 		<Card className="border-border">
 			<CardHeader className="pb-3">
-				<CardTitle className="text-orange-800 flex items-center gap-2 text-base">
+				<CardTitle className="text-orange-800 flex items-center gap-2 text-sm md:text-base lg:text-lg">
 					<Zap className="size-4" />
 					Today's Expense Shortcuts
 				</CardTitle>

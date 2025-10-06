@@ -25,7 +25,7 @@ export function TransactionHistoryCard({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="text-md sm:text-lg">
+				<CardTitle className="text-base md:text-lg lg:text-xl">
 					Transaction History (Sorted by Date)
 				</CardTitle>
 			</CardHeader>

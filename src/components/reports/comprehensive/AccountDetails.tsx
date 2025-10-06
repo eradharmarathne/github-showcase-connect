@@ -345,7 +345,7 @@ export function AccountDetails({
 	return (
 		<Card>
 			<CardHeader className="px-2 sm:px-4">
-				<CardTitle className="flex items-center gap-2 text-md sm:text-lg">
+				<CardTitle className="flex items-center gap-2 text-base sm:text-lg md:text-xl">
 					<Building2 className="size-6" />
 					{t("reports.comprehensive.accounts.title")}
 				</CardTitle>
@@ -369,7 +369,7 @@ export function AccountDetails({
 										<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
 											<div className="flex items-start sm:items-center gap-3">
 												<div className="flex flex-col">
-													<CardTitle className="text-md sm:text-lg">
+																																<CardTitle className="text-base md:text-lg lg:text-xl">
 														{account.name}
 													</CardTitle>
 													<CardDescription className="flex items-center gap-2">

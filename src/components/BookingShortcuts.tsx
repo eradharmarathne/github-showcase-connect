@@ -207,7 +207,7 @@ export function BookingShortcuts({
 	return (
 		<Card className="border-blue-200 bg-blue-50">
 			<CardHeader className="pb-3">
-				<CardTitle className="text-blue-800 flex items-center gap-2 text-base">
+				<CardTitle className="text-blue-800 flex items-center gap-2 text-sm md:text-base lg:text-lg">
 					<Zap className="size-4" />
 					Today's Booking Shortcuts
 				</CardTitle>

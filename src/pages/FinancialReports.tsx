@@ -261,7 +261,7 @@ export default function FinancialReports() {
 			{/* Report Filters */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="flex text-base items-center gap-2">
+					<CardTitle className="flex text-base md:text-lg lg:text-xl items-center gap-2">
 						<BarChart3 className="size-5 text-primary" />
 						Report Filters
 					</CardTitle>

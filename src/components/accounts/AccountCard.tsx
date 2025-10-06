@@ -24,7 +24,7 @@ export function AccountCard({
 		<Card>
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-lg">{account.name}</CardTitle>
+					<CardTitle className="text-base md:text-lg lg:text-xl">{account.name}</CardTitle>
 					<div className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
 						{account.currency}
 					</div>

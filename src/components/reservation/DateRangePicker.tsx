@@ -151,7 +151,7 @@ export function DateRangePicker({
 	return (
 		<Card className={cn("w-full max-w-md", className)}>
 			<CardHeader className="pb-4">
-				<CardTitle className="flex items-center gap-2 text-lg">
+				<CardTitle className="text-base md:text-lg lg:text-xl flex items-center gap-2">
 					<CalendarIcon className="h-5 w-5" />
 					Select Dates
 				</CardTitle>

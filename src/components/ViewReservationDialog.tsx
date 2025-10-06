@@ -270,7 +270,7 @@ export function ViewReservationDialog({
 						{/* Guest Information */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-base">
+								<CardTitle className="flex items-center gap-2 text-sm md:text-base lg:text-lg">
 									<User className="size-4" />
 									{t("reservations.viewDialog.guestInformation")}
 								</CardTitle>
@@ -358,7 +358,7 @@ export function ViewReservationDialog({
 						{/* Stay Details */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-base">
+								<CardTitle className="flex items-center gap-2 text-sm md:text-base lg:text-lg">
 									<Calendar className="size-4" />
 									{t("reservations.viewDialog.stayDetails")}
 								</CardTitle>
@@ -423,7 +423,7 @@ export function ViewReservationDialog({
 						{/* Room Information */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-base">
+								<CardTitle className="flex items-center gap-2 text-sm md:text-base lg:text-lg">
 									<BedDouble className="size-4" />
 									{t("reservations.viewDialog.roomInformation")}
 								</CardTitle>
@@ -484,7 +484,7 @@ export function ViewReservationDialog({
 						{/* Pricing & Payment */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-base">
+								<CardTitle className="flex items-center gap-2 text-sm md:text-base lg:text-lg">
 									<DollarSign className="size-4" />
 									{t("reservations.viewDialog.financialDetails")}
 								</CardTitle>
@@ -564,7 +564,7 @@ export function ViewReservationDialog({
 					{(reservation.guides || reservation.agents) && (
 						<Card>
 							<CardHeader>
-								<CardTitle className="flex items-center gap-2 text-base">
+								<CardTitle className="flex items-center gap-2 text-sm md:text-base lg:text-lg">
 									<CreditCard className="size-4" />
 									{t("reservations.viewDialog.commissionDetails")}
 								</CardTitle>

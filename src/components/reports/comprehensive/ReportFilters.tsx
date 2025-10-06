@@ -63,7 +63,7 @@ export function ReportFilters({
 	return (
 		<Card className="px-4">
 			<CardHeader className="px-0 sm:px-2">
-				<CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-semibold">
+				<CardTitle className="text-base md:text-lg lg:text-xl flex items-center gap-2 font-semibold">
 					<Calendar className="size-5" />
 					{t("reports.comprehensive.filters.title")}
 				</CardTitle>

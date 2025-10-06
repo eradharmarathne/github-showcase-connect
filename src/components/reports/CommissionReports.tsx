@@ -249,7 +249,7 @@ export default function CommissionReports() {
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium flex items-center gap-2">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium flex items-center gap-2">
 							<UserCheck className="size-4" />
 							{t("reports.commission.summary.guideCommissions")}
 						</CardTitle>
@@ -262,7 +262,7 @@ export default function CommissionReports() {
 				</Card>
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium flex items-center gap-2">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium flex items-center gap-2">
 							<Users className="size-4" />
 							{t("reports.commission.summary.agentCommissions")}
 						</CardTitle>
@@ -275,7 +275,7 @@ export default function CommissionReports() {
 				</Card>
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
 							{t("reports.commission.summary.totalCommissions")}
 						</CardTitle>
 					</CardHeader>
@@ -290,7 +290,7 @@ export default function CommissionReports() {
 				</Card>
 				<Card>
 					<CardHeader className="pb-2">
-						<CardTitle className="text-sm font-medium">
+						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
 							{t("reports.commission.summary.reservationValue")}
 						</CardTitle>
 					</CardHeader>

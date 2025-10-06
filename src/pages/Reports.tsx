@@ -37,7 +37,7 @@ export default function Reports() {
 				<CardHeader className="pb-3">
 					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 						<div>
-							<CardTitle className="text-base font-semibold">
+							<CardTitle className="text-base md:text-lg lg:text-xl font-semibold">
 								{t("reports.title")}
 							</CardTitle>
 							<CardDescription className="text-xs lg:text-sm">
