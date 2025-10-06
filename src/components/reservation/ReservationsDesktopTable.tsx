@@ -6,6 +6,7 @@ import {
 	Edit,
 	Eye,
 	MapPin,
+	Printer,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -89,6 +90,7 @@ interface ReservationsDesktopTableProps {
 	onEditReservation: (reservation: any) => void;
 	onPayment: (reservationId: string, amount: number, currency: string) => void;
 	onAddIncome: (reservation: any) => void;
+	onPrint: (reservation: any) => void;
 }
 
 export function ReservationsDesktopTable({
@@ -99,6 +101,7 @@ export function ReservationsDesktopTable({
 	onEditReservation,
 	onPayment,
 	onAddIncome,
+	onPrint,
 }: ReservationsDesktopTableProps) {
 	const { t } = useTranslation();
 	const { data: reservations, isLoading, error } = useReservationFinancials();
@@ -391,6 +394,14 @@ export function ReservationsDesktopTable({
 												className="h-8 w-8 p-0"
 											>
 												<Edit className="h-4 w-4" />
+											</Button>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => onPrint(reservation)}
+												className="h-8 w-8 p-0"
+											>
+												<Printer className="h-4 w-4" />
 											</Button>
 											<Button
 												variant="ghost"

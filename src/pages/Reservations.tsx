@@ -17,6 +17,7 @@ import { ViewReservationDialog } from "@/components/ViewReservationDialog";
 import { useLocationContext } from "@/context/LocationContext";
 import { useIncomeData } from "@/hooks/useIncomeData";
 import { useReservationFinancials } from "@/hooks/useReservationFinancials";
+import { useReservationPrint } from "@/hooks/useReservationPrint";
 import { useReservationsData } from "@/hooks/useReservationsData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -28,6 +29,7 @@ export default function Reservations() {
 	const { refetch } = useReservationsData();
 	const { refetch: refetchFinancials } = useReservationFinancials();
 	const { accounts } = useIncomeData();
+	const { printReservation } = useReservationPrint();
 	const navigate = useNavigate();
 
 	// State management
@@ -95,6 +97,10 @@ export default function Reservations() {
 	const handleAddIncome = (reservation: any) => {
 		setSelectedReservation(reservation);
 		setIsIncomeDialogOpen(true);
+	};
+
+	const handlePrint = (reservation: any) => {
+		printReservation(reservation);
 	};
 
 	const handleIncomeSuccess = () => {
@@ -166,6 +172,7 @@ export default function Reservations() {
 							onEditReservation={handleEditReservation}
 							onPayment={handlePayment}
 							onAddIncome={handleAddIncome}
+							onPrint={handlePrint}
 						/>
 					</TabsContent>
 
