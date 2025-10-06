@@ -1,4 +1,4 @@
-import { ArrowRightLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowRightLeft } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocationContext } from "@/context/LocationContext";
@@ -29,37 +29,17 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 		}
 
 		try {
-			const [transfersResponse, incomeResponse, expensesResponse] =
-				await Promise.all([
-					// Account transfers - filter by tenant through accounts
-					supabase
-						.from("account_transfers")
-						.select(
-							"*, from_account:accounts!from_account_id(name, currency, tenant_id, location_access), to_account:accounts!to_account_id(name, currency, tenant_id, location_access)",
-						)
-						.or(
-							`from_account.tenant_id.eq.${tenant.id},to_account.tenant_id.eq.${tenant.id}`,
-						)
-						.order("created_at", { ascending: false })
-						.limit(10),
-					// Income - filter by tenant and location
-					supabase
-						.from("income")
-						.select("*, account:accounts(name, currency)")
-						.eq("tenant_id", tenant.id)
-						.eq("location_id", selectedLocation)
-						.not("account_id", "is", null)
-						.order("created_at", { ascending: false })
-						.limit(10),
-					// Expenses - filter by location and tenant through accounts
-					supabase
-						.from("expenses")
-						.select("*, account:accounts(name, currency, tenant_id)")
-						.eq("location_id", selectedLocation)
-						.eq("account.tenant_id", tenant.id)
-						.order("created_at", { ascending: false })
-						.limit(10),
-				]);
+			// Only fetch account transfers (account-to-account transactions)
+			const transfersResponse = await supabase
+				.from("account_transfers")
+				.select(
+					"*, from_account:accounts!from_account_id(name, currency, tenant_id, location_access), to_account:accounts!to_account_id(name, currency, tenant_id, location_access)",
+				)
+				.or(
+					`from_account.tenant_id.eq.${tenant.id},to_account.tenant_id.eq.${tenant.id}`,
+				)
+				.order("created_at", { ascending: false })
+				.limit(20);
 
 			// Filter account transfers to only include those where at least one account
 			// has access to the selected location
@@ -75,38 +55,16 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 				},
 			);
 
-			// Combine and format all transactions
-			const allTransactions = [
-				...filteredTransfers.map((transfer) => ({
-					...transfer,
-					type: "transfer",
-					display_amount: transfer.amount,
-					currency: transfer.from_account?.currency || "LKR",
-					description: `${t("accounts.transactions.transfer")} from ${transfer.from_account?.name || "Unknown"} to ${transfer.to_account?.name || "Unknown"}`,
-				})),
-				...(incomeResponse.data || []).map((income) => ({
-					...income,
-					type: "income",
-					display_amount: income.amount,
-					currency: income.account?.currency || "LKR",
-					description: `Income to ${income.account?.name || "Unknown"}`,
-				})),
-				...(expensesResponse.data || []).map((expense) => ({
-					...expense,
-					type: "expense",
-					display_amount: expense.amount,
-					currency: expense.account?.currency || "LKR",
-					description: `Expense from ${expense.account?.name || "Unknown"}`,
-				})),
-			];
+			// Format account transfer transactions
+			const formattedTransactions = filteredTransfers.map((transfer) => ({
+				...transfer,
+				type: "transfer",
+				display_amount: transfer.amount,
+				currency: transfer.from_account?.currency || "LKR",
+				description: `${t("accounts.transactions.transfer")} from ${transfer.from_account?.name || "Unknown"} to ${transfer.to_account?.name || "Unknown"}`,
+			}));
 
-			// Sort by created_at descending
-			allTransactions.sort(
-				(a, b) =>
-					new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-			);
-
-			setTransactions(allTransactions.slice(0, 20)); // Show latest 20 transactions
+			setTransactions(formattedTransactions);
 		} catch (error) {
 			console.error("Error fetching transactions:", error);
 		} finally {
@@ -119,29 +77,11 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 	}, [fetchTransactions]);
 
 	const getTransactionIcon = (type: string) => {
-		switch (type) {
-			case "transfer":
-				return <ArrowRightLeft className="size-4 text-blue-500" />;
-			case "income":
-				return <Plus className="size-4 text-green-500" />;
-			case "expense":
-				return <Trash2 className="size-4 text-red-500" />;
-			default:
-				return <ArrowRightLeft className="size-4 text-muted-foreground" />;
-		}
+		return <ArrowRightLeft className="size-4 text-blue-500" />;
 	};
 
 	const getTransactionColor = (type: string) => {
-		switch (type) {
-			case "income":
-				return "text-green-600";
-			case "expense":
-				return "text-red-600";
-			case "transfer":
-				return "text-blue-600";
-			default:
-				return "text-muted-foreground";
-		}
+		return "text-blue-600";
 	};
 
 	if (loading) {
@@ -195,16 +135,14 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 								<div
 									className={`font-medium ${getTransactionColor(transaction.type)}`}
 								>
-									{transaction.type === "expense" ? "-" : "+"}
 									{transaction.currency === "LKR" ? "Rs." : "$"}
 									{transaction.display_amount.toLocaleString()}
 								</div>
-								{transaction.type === "transfer" &&
-									transaction.conversion_rate !== 1 && (
-										<div className="text-sm text-muted-foreground">
-											Rate: {transaction.conversion_rate}
-										</div>
-									)}
+								{transaction.conversion_rate !== 1 && (
+									<div className="text-sm text-muted-foreground">
+										Rate: {transaction.conversion_rate}
+									</div>
+								)}
 							</div>
 						</div>
 						<div className="flex items-center justify-between text-sm text-muted-foreground">
