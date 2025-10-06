@@ -1,6 +1,5 @@
 import {
 	Calendar,
-	CheckCircle,
 	CreditCard,
 	DollarSign,
 	Edit,
@@ -324,57 +323,41 @@ export function ReservationsDesktopTable({
 									</TableCell>
 									<TableCell>
 										<div className="flex gap-1">
-											{reservation.status === "confirmed" ? (
-												// Show non-clickable "Reservation Completed" button for confirmed reservations
-												<Button
-													variant="outline"
-													size="sm"
-													disabled
-													className="text-green-600 cursor-not-allowed"
-												>
-													<CheckCircle className="size-4 mr-1" />
-													{t("reservations.table.actions.reservationCompleted")}
-												</Button>
-											) : (
-												// Show Add Income and Pay Now buttons for other statuses
-												<>
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={() => onAddIncome(reservation)}
+												className="text-blue-600 hover:text-blue-700 cursor-pointer"
+												disabled={reservation.status === "checked_out"}
+												title={
+													reservation.status === "checked_out"
+														? t(
+																"reservations.table.actions.reservationCompleted",
+															)
+														: ""
+												}
+											>
+												<DollarSign className="size-4 mr-1" />
+												{t("reservations.table.actions.addIncome")}
+											</Button>
+											{canShowPaymentButton(reservation) &&
+												reservation.status !== "checked_out" && (
 													<Button
 														variant="outline"
 														size="sm"
-														onClick={() => onAddIncome(reservation)}
-														className="text-blue-600 hover:text-blue-700 cursor-pointer"
-														disabled={reservation.status === "checked_out"}
-														title={
-															reservation.status === "checked_out"
-																? t(
-																		"reservations.table.actions.reservationCompleted",
-																	)
-																: ""
+														onClick={() =>
+															onPayment(
+																reservation.id,
+																reservation.needs_to_pay_usd,
+																"USD", // Always USD for simplified calculations
+															)
 														}
+														className="text-green-600 hover:text-green-700 cursor-pointer"
 													>
-														<DollarSign className="size-4 mr-1" />
-														{t("reservations.table.actions.addIncome")}
+														<CreditCard className="size-4 mr-1" />
+														{t("reservations.table.actions.payNow")}
 													</Button>
-													{canShowPaymentButton(reservation) &&
-														reservation.status !== "checked_out" && (
-															<Button
-																variant="outline"
-																size="sm"
-																onClick={() =>
-																	onPayment(
-																		reservation.id,
-																		reservation.needs_to_pay_usd,
-																		"USD", // Always USD for simplified calculations
-																	)
-																}
-																className="text-green-600 hover:text-green-700 cursor-pointer"
-															>
-																<CreditCard className="size-4 mr-1" />
-																{t("reservations.table.actions.payNow")}
-															</Button>
-														)}
-												</>
-											)}
+												)}
 										</div>
 									</TableCell>
 									<TableCell className="text-right">
