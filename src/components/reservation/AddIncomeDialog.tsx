@@ -60,7 +60,6 @@ export function AddIncomeDialog({
 		note: "",
 		account_id: "",
 		income_type_id: "",
-		payment_type: "direct" as "direct" | "deferred", // direct = paid now, deferred = add to bill
 		currency: "LKR", // Default currency
 	});
 	// Store the base amount and currency for conversion reference
@@ -93,105 +92,88 @@ export function AddIncomeDialog({
 		if (selectedReservation) {
 			const reservationCurrency = selectedReservation.currency || "LKR";
 			const reservationAmount = selectedReservation.total_amount || 0;
+			const paidAmount = selectedReservation.paid_amount || 0;
+			const remainingBalance = reservationAmount - paidAmount;
 
 			// Set the base amount and currency from the reservation
 			setBaseAmount(reservationAmount);
 			setBaseCurrency(reservationCurrency);
 			setDisplayedReservationAmount(reservationAmount);
 
-			setIncomeForm({
-				amount: 0, // Start with empty amount for additional services
-				note:
-					t("income.addDialog.reservationInfo.reservation") +
-					` ${selectedReservation.reservation_number}`,
-				account_id: "",
-				income_type_id: "",
-				payment_type: "direct",
-				currency: reservationCurrency, // Use reservation currency
-			});
+			// Set form currency to match reservation and amount to remaining balance
+			setIncomeForm(prev => ({
+				...prev,
+				currency: reservationCurrency,
+				amount: Math.max(0, remainingBalance), // Ensure non-negative
+				note: t("income.addDialog.reservationInfo.reservation") + ` ${selectedReservation.reservation_number}`,
+			}));
 		}
 	}, [selectedReservation, t]);
 
 	const handleIncomeSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// Allow income creation with or without a reservation
 
-		try {
-			const incomeData = {
-				note:
-					incomeForm.note ||
-					(selectedReservation
-						? t("income.addDialog.reservationInfo.reservation") +
-							` ${selectedReservation.reservation_number}`
-						: "General income entry"),
-				amount: incomeForm.amount,
-				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP", // Cast to correct enum type
-				// For direct payments: require account_id, for deferred: set to null
-				account_id:
-					incomeForm.payment_type === "direct" ? incomeForm.account_id : null,
-				income_type_id: incomeForm.income_type_id || null,
-				type: "booking" as const,
-				payment_method:
-					incomeForm.payment_type === "direct" ? "cash" : "pending",
-				location_id: selectedLocation,
-				tenant_id: profile?.tenant_id,
-				// Only set booking_id if there's a valid reservation selected
-				booking_id: selectedReservation?.id || null,
-			}; // Start transaction-like operations
-			const { error: incomeError } = await supabase
-				.from("income")
-				.insert(incomeData);
-			if (incomeError) throw incomeError;
+		if (!selectedReservation) return;
 
-			// Only update reservation amounts if there's a selected reservation
-			if (selectedReservation) {
-				// Convert income amount to reservation currency for updating reservation totals
-				const convertedAmount = await convertCurrency(
-					incomeForm.amount,
-					incomeForm.currency,
-					selectedReservation.currency,
-				);
+		// Calculate remaining balance
+		const totalAmount = selectedReservation.total_amount || 0;
+		const paidAmount = selectedReservation.paid_amount || 0;
+		const remainingBalance = totalAmount - paidAmount;
 
-				// If deferred payment, update reservation total amount
-				if (incomeForm.payment_type === "deferred") {
-					const newTotal = selectedReservation.total_amount + convertedAmount;
-					const { error: reservationError } = await supabase
-						.from("reservations")
-						.update({
-							total_amount: newTotal,
-							updated_at: new Date().toISOString(),
-						})
-						.eq("id", selectedReservation.id);
-					if (reservationError) throw reservationError;
-				} else if (incomeForm.payment_type === "direct") {
-					// For direct payments, update paid_amount to reflect the payment received
-					const newPaidAmount =
-						(selectedReservation.paid_amount || 0) + convertedAmount;
-					const { error: reservationError } = await supabase
-						.from("reservations")
-						.update({
-							paid_amount: newPaidAmount,
-							updated_at: new Date().toISOString(),
-						})
-						.eq("id", selectedReservation.id);
-					if (reservationError) throw reservationError;
-				}
-			}
-
-			const successMessage =
-				incomeForm.payment_type === "direct"
-					? t("income.addDialog.messages.directSuccess")
-					: t("income.addDialog.messages.deferredSuccess");
-
-			toast({ title: "Success", description: successMessage });
-			onClose();
-			resetIncomeForm();
-			onSuccess();
-		} catch (error) {
-			console.error("Income error:", error);
+		// Prevent overpayment
+		if (incomeForm.amount > remainingBalance) {
 			toast({
 				title: "Error",
-				description: t("income.addDialog.messages.error"),
+				description: `Payment amount (${incomeForm.currency} ${incomeForm.amount}) exceeds remaining balance (${selectedReservation.currency} ${remainingBalance}). Maximum allowed: ${selectedReservation.currency} ${remainingBalance}`,
+				variant: "destructive",
+			});
+			return;
+		}
+
+		try {
+			// Create income record - always direct payment now
+			const { error: incomeError } = await supabase.from("income").insert({
+				booking_id: selectedReservation.id,
+				amount: incomeForm.amount,
+				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
+				note: incomeForm.note || `Payment for reservation ${selectedReservation.reservation_number}`,
+				income_type_id: incomeForm.income_type_id,
+				tenant_id: profile?.tenant_id,
+				location_id: selectedLocation,
+				account_id: incomeForm.account_id, // Always require account
+				payment_method: "cash", // Always cash since we removed deferred
+				type: "booking",
+			});
+
+			if (incomeError) throw incomeError;
+
+			// Update reservation with new paid amount
+			const newPaidAmount = paidAmount + incomeForm.amount;
+			const newBalanceAmount = totalAmount - newPaidAmount;
+
+			// Update reservation amounts only - status changes handled elsewhere
+			const { error: reservationError } = await supabase
+				.from("reservations")
+				.update({
+					paid_amount: newPaidAmount,
+					balance_amount: newBalanceAmount,
+				})
+				.eq("id", selectedReservation.id);
+
+			if (reservationError) throw reservationError;
+
+			toast({
+				title: "Success",
+				description: "Payment recorded successfully",
+			});
+
+			onSuccess();
+			handleClose();
+		} catch (error) {
+			console.error("Error recording income:", error);
+			toast({
+				title: "Error",
+				description: "Failed to record payment. Please try again.",
 				variant: "destructive",
 			});
 		}
@@ -203,7 +185,6 @@ export function AddIncomeDialog({
 			note: "",
 			account_id: "",
 			income_type_id: "",
-			payment_type: "direct",
 			currency: "LKR", // Reset to default currency
 		});
 	};
@@ -232,11 +213,11 @@ export function AddIncomeDialog({
 				newCurrency,
 			);
 
-			setIncomeForm({
-				...incomeForm,
+			setIncomeForm(prev => ({
+				...prev,
 				currency: newCurrency,
 				amount: Number(convertedAmount.toFixed(2)), // Round to 2 decimal places
-			});
+			}));
 
 			setDisplayedReservationAmount(
 				Number(convertedReservationAmount.toFixed(2)),
@@ -244,10 +225,10 @@ export function AddIncomeDialog({
 		} catch (error) {
 			console.error("Error converting currency:", error);
 			// If conversion fails, just change the currency without converting amount
-			setIncomeForm({
-				...incomeForm,
+			setIncomeForm(prev => ({
+				...prev,
 				currency: newCurrency,
-			});
+			}));
 			toast({
 				title: "Warning",
 				description: "Could not convert amount. Please verify the value.",
@@ -346,75 +327,33 @@ export function AddIncomeDialog({
 						</Select>
 					</div>
 					<div>
-						<Label htmlFor="payment_type">
-							{t("income.addDialog.form.paymentType")}
+						<Label htmlFor="account_id">
+							{t("income.addDialog.form.accountRequired")}
 						</Label>
 						<Select
-							value={incomeForm.payment_type}
+							value={incomeForm.account_id}
 							onValueChange={(value) =>
-								setIncomeForm({
-									...incomeForm,
-									payment_type: value as "direct" | "deferred",
-								})
+								setIncomeForm(prev => ({ ...prev, account_id: value }))
 							}
+							required
 						>
 							<SelectTrigger>
-								<SelectValue />
+								<SelectValue
+									placeholder={t("income.addDialog.form.accountPlaceholder")}
+								/>
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="direct">
-									{t("income.addDialog.paymentTypes.direct")}
-								</SelectItem>
-								<SelectItem value="deferred">
-									{t("income.addDialog.paymentTypes.deferred")}
-								</SelectItem>
+								{accounts.map((account) => (
+									<SelectItem key={account.id} value={account.id}>
+										{account.name} ({account.currency})
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<p className="text-sm text-gray-600 mt-1">
-							{incomeForm.payment_type === "direct"
-								? t("income.addDialog.paymentTypes.directDescription")
-								: t("income.addDialog.paymentTypes.deferredDescription")}
+							{t("income.addDialog.form.accountDescription")}
 						</p>
 					</div>
-					{incomeForm.payment_type === "direct" && (
-						<div>
-							<Label htmlFor="account_id">
-								{t("income.addDialog.form.accountRequired")}
-							</Label>
-							<Select
-								value={incomeForm.account_id}
-								onValueChange={(value) =>
-									setIncomeForm({ ...incomeForm, account_id: value })
-								}
-								required
-							>
-								<SelectTrigger>
-									<SelectValue
-										placeholder={t("income.addDialog.form.accountPlaceholder")}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									{accounts.map((account) => (
-										<SelectItem key={account.id} value={account.id}>
-											{account.name} ({account.currency})
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<p className="text-sm text-gray-600 mt-1">
-								{t("income.addDialog.form.accountDescription")}
-							</p>
-						</div>
-					)}
-					{incomeForm.payment_type === "deferred" && (
-						<div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-							<p className="text-sm text-blue-800">
-								<strong>
-									{t("income.addDialog.paymentTypes.deferredInfo")}
-								</strong>
-							</p>
-						</div>
-					)}
 					<div className="flex gap-2 justify-end">
 						<Button type="button" variant="outline" onClick={handleClose}>
 							{t("income.addDialog.buttons.cancel")}
@@ -422,8 +361,7 @@ export function AddIncomeDialog({
 						<Button
 							type="submit"
 							disabled={
-								!incomeForm.amount ||
-								(incomeForm.payment_type === "direct" && !incomeForm.account_id)
+								!incomeForm.amount || !incomeForm.account_id
 							}
 						>
 							{t("income.addDialog.buttons.record")}
