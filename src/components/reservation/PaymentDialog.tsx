@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CurrencySelector } from "@/components/CurrencySelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -72,6 +73,7 @@ export function PaymentDialog({
 		notes: "",
 		currency: initialCurrency as any,
 		reference_number: "",
+		markAsComplete: false,
 	});
 
 	// State for display amounts (converted for consistency with reservation list)
@@ -245,6 +247,35 @@ export function PaymentDialog({
 		e.preventDefault();
 		if (!reservation || !tenant?.id) return;
 
+		// Prevent overpayment - check remaining balance
+		const totalAmount = reservation.total_amount || 0;
+		const paidAmount = reservation.paid_amount || 0;
+		const remainingBalance = totalAmount - paidAmount;
+
+		// Convert payment amount to reservation currency for comparison
+		let paymentAmountInReservationCurrency = formData.amount;
+		if (formData.currency !== reservation.currency) {
+			try {
+				paymentAmountInReservationCurrency = await convertCurrency(
+					formData.amount,
+					formData.currency,
+					reservation.currency,
+				);
+			} catch (error) {
+				console.error("Error converting currency for validation:", error);
+			}
+		}
+
+		if (paymentAmountInReservationCurrency > remainingBalance) {
+			toast({
+				title: "Payment Amount Exceeds Balance",
+				description: `Payment amount (${formData.currency} ${formData.amount}) exceeds remaining balance (${reservation.currency} ${remainingBalance.toFixed(2)}). Please adjust the amount.`,
+				variant: "destructive",
+			});
+			setSubmitting(false);
+			return;
+		}
+
 		setSubmitting(true);
 		try {
 			// Convert amount to the account currency if needed
@@ -274,11 +305,24 @@ export function PaymentDialog({
 
 			if (paymentError) throw paymentError;
 
-			// No need to manually update reservation - database trigger handles this automatically
+			// If marked as complete, update reservation status to checked_out
+			if (formData.markAsComplete) {
+				const { error: statusError } = await supabase
+					.from("reservations")
+					.update({ status: "checked_out" })
+					.eq("id", reservation.id);
+
+				if (statusError) {
+					console.error("Error updating reservation status:", statusError);
+					// Don't throw error - payment was successful, just status update failed
+				}
+			}
 
 			toast({
 				title: "Payment Recorded",
-				description: `Payment of ${formData.currency} ${formData.amount} has been recorded successfully.`,
+				description: formData.markAsComplete 
+					? `Payment recorded and reservation marked as completed!`
+					: `Payment of ${formData.currency} ${formData.amount} has been recorded successfully.`,
 			});
 
 			onSuccess();
@@ -304,6 +348,7 @@ export function PaymentDialog({
 			notes: "",
 			currency: initialCurrency as any,
 			reference_number: "",
+			markAsComplete: false,
 		});
 	};
 
@@ -520,6 +565,25 @@ export function PaymentDialog({
 										rows={3}
 									/>
 								</div>
+
+								<div className="flex items-center space-x-2 pt-4 border-t">
+									<Checkbox
+										id="mark-complete"
+										checked={formData.markAsComplete}
+										onCheckedChange={(checked) =>
+											setFormData(prev => ({ ...prev, markAsComplete: checked === true }))
+										}
+									/>
+									<Label
+										htmlFor="mark-complete"
+										className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+									>
+										Mark reservation as completed (check out)
+									</Label>
+								</div>
+								<p className="text-xs text-gray-600 pl-6">
+									Check this if the guest is checking out and the reservation should be marked as completed
+								</p>
 							</CardContent>
 						</Card>
 
