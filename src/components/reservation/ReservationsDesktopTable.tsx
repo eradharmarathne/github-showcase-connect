@@ -381,11 +381,13 @@ export function ReservationsDesktopTable({
 											<Button
 												variant="ghost"
 												size="sm"
-												onClick={() => onPrint({
-													...reservation,
-													convertedAmounts: convertedAmounts[reservation.id],
-													selectedCurrency: selectedCurrency
-												})}
+												onClick={() =>
+													onPrint({
+														...reservation,
+														convertedAmounts: convertedAmounts[reservation.id],
+														selectedCurrency: selectedCurrency,
+													})
+												}
 												className="h-8 w-8 p-0"
 											>
 												<Printer className="h-4 w-4" />

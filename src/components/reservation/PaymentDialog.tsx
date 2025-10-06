@@ -320,7 +320,7 @@ export function PaymentDialog({
 
 			toast({
 				title: "Payment Recorded",
-				description: formData.markAsComplete 
+				description: formData.markAsComplete
 					? `Payment recorded and reservation marked as completed!`
 					: `Payment of ${formData.currency} ${formData.amount} has been recorded successfully.`,
 			});
@@ -571,7 +571,10 @@ export function PaymentDialog({
 										id="mark-complete"
 										checked={formData.markAsComplete}
 										onCheckedChange={(checked) =>
-											setFormData(prev => ({ ...prev, markAsComplete: checked === true }))
+											setFormData((prev) => ({
+												...prev,
+												markAsComplete: checked === true,
+											}))
 										}
 									/>
 									<Label
@@ -582,7 +585,8 @@ export function PaymentDialog({
 									</Label>
 								</div>
 								<p className="text-xs text-gray-600 pl-6">
-									Check this if the guest is checking out and the reservation should be marked as completed
+									Check this if the guest is checking out and the reservation
+									should be marked as completed
 								</p>
 							</CardContent>
 						</Card>

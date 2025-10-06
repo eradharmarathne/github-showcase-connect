@@ -15,8 +15,8 @@ import {
 	XCircle,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -531,9 +531,7 @@ export default function BillingSubscription() {
 					<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
 						{t("billing.title")}
 					</h1>
-					<p className="text-muted-foreground">
-						{t("billing.subtitle")}
-					</p>
+					<p className="text-muted-foreground">{t("billing.subtitle")}</p>
 				</div>
 			</div>
 
@@ -600,7 +598,9 @@ export default function BillingSubscription() {
 									onClick={handleCancelSubscription}
 									disabled={cancelling}
 								>
-									{cancelling ? t("billing.currentSubscription.cancelling") : t("billing.currentSubscription.cancelSubscription")}
+									{cancelling
+										? t("billing.currentSubscription.cancelling")
+										: t("billing.currentSubscription.cancelSubscription")}
 								</Button>
 							)}
 						</div>

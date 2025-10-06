@@ -4,6 +4,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
@@ -174,11 +175,13 @@ export function ReservationEditDialog({
 							checkOut: formData.check_out_date || reservation.check_out_date,
 							amount: formData.total_amount || reservation.total_amount,
 							currency: formData.currency || reservation.currency,
-							status: "UPDATED"
-						}
+							status: "UPDATED",
+						},
 					});
-					
-					console.log("SMS notification sent successfully for reservation update");
+
+					console.log(
+						"SMS notification sent successfully for reservation update",
+					);
 				} catch (smsError) {
 					console.error("Error sending SMS notification:", smsError);
 					// Don't show error to user as the main operation succeeded
@@ -219,6 +222,9 @@ export function ReservationEditDialog({
 					<DialogTitle>
 						Edit Reservation - {reservation.reservation_number}
 					</DialogTitle>
+					<DialogDescription>
+						Modify reservation details and update guest information
+					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-6">
@@ -507,12 +513,12 @@ export function ReservationEditDialog({
 						<div>
 							<Label>Agent</Label>
 							<Select
-								value={formData.agent_id || ""}
+								value={formData.agent_id || "none"}
 								onValueChange={(value) => {
 									const selectedAgent = agents.find((a) => a.id === value);
 									setFormData({
 										...formData,
-										agent_id: value,
+										agent_id: value === "none" ? undefined : value,
 										agent_commission: selectedAgent?.commission_rate || 0,
 									});
 								}}
@@ -521,7 +527,7 @@ export function ReservationEditDialog({
 									<SelectValue placeholder="Select agent (optional)" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">No Agent</SelectItem>
+									<SelectItem value="none">No Agent</SelectItem>
 									{agents.map((agent) => (
 										<SelectItem key={agent.id} value={agent.id}>
 											{agent.name} ({agent.commission_rate}%)
@@ -533,12 +539,12 @@ export function ReservationEditDialog({
 						<div>
 							<Label>Guide</Label>
 							<Select
-								value={formData.guide_id || ""}
+								value={formData.guide_id || "none"}
 								onValueChange={(value) => {
 									const selectedGuide = guides.find((g) => g.id === value);
 									setFormData({
 										...formData,
-										guide_id: value,
+										guide_id: value === "none" ? undefined : value,
 										guide_commission: selectedGuide?.commission_rate || 0,
 									});
 								}}
@@ -547,7 +553,7 @@ export function ReservationEditDialog({
 									<SelectValue placeholder="Select guide (optional)" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="">No Guide</SelectItem>
+									<SelectItem value="none">No Guide</SelectItem>
 									{guides.map((guide) => (
 										<SelectItem key={guide.id} value={guide.id}>
 											{guide.name} ({guide.commission_rate}%)

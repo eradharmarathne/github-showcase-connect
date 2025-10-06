@@ -74,7 +74,8 @@ export function ExpenseForm({
 			accountId: data.accountId,
 			date: data.date,
 			note: data.note,
-			currency: (data.currency as "LKR" | "USD" | "EUR" | "GBP") || formData.currency,
+			currency:
+				(data.currency as "LKR" | "USD" | "EUR" | "GBP") || formData.currency,
 		});
 	};
 
@@ -320,7 +321,9 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="currency">{t("expense.form.fields.currency")}</Label>
+							<Label htmlFor="currency">
+								{t("expense.form.fields.currency")}
+							</Label>
 							<Select
 								value={formData.currency}
 								onValueChange={(value: "LKR" | "USD" | "EUR" | "GBP") =>

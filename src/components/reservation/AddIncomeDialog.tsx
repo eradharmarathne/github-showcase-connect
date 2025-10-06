@@ -101,11 +101,13 @@ export function AddIncomeDialog({
 			setDisplayedReservationAmount(reservationAmount);
 
 			// Set form currency to match reservation and amount to remaining balance
-			setIncomeForm(prev => ({
+			setIncomeForm((prev) => ({
 				...prev,
 				currency: reservationCurrency,
 				amount: Math.max(0, remainingBalance), // Ensure non-negative
-				note: t("income.addDialog.reservationInfo.reservation") + ` ${selectedReservation.reservation_number}`,
+				note:
+					t("income.addDialog.reservationInfo.reservation") +
+					` ${selectedReservation.reservation_number}`,
 			}));
 		}
 	}, [selectedReservation, t]);
@@ -146,7 +148,9 @@ export function AddIncomeDialog({
 				booking_id: selectedReservation.id,
 				amount: incomeForm.amount,
 				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
-				note: incomeForm.note || `Payment for reservation ${selectedReservation.reservation_number}`,
+				note:
+					incomeForm.note ||
+					`Payment for reservation ${selectedReservation.reservation_number}`,
 				income_type_id: incomeForm.income_type_id || null, // Convert empty string to null
 				tenant_id: profile?.tenant_id,
 				location_id: selectedLocation,
@@ -223,7 +227,7 @@ export function AddIncomeDialog({
 				newCurrency,
 			);
 
-			setIncomeForm(prev => ({
+			setIncomeForm((prev) => ({
 				...prev,
 				currency: newCurrency,
 				amount: Number(convertedAmount.toFixed(2)), // Round to 2 decimal places
@@ -235,7 +239,7 @@ export function AddIncomeDialog({
 		} catch (error) {
 			console.error("Error converting currency:", error);
 			// If conversion fails, just change the currency without converting amount
-			setIncomeForm(prev => ({
+			setIncomeForm((prev) => ({
 				...prev,
 				currency: newCurrency,
 			}));
@@ -343,7 +347,7 @@ export function AddIncomeDialog({
 						<Select
 							value={incomeForm.account_id}
 							onValueChange={(value) =>
-								setIncomeForm(prev => ({ ...prev, account_id: value }))
+								setIncomeForm((prev) => ({ ...prev, account_id: value }))
 							}
 							required
 						>
@@ -370,9 +374,7 @@ export function AddIncomeDialog({
 						</Button>
 						<Button
 							type="submit"
-							disabled={
-								!incomeForm.amount || !incomeForm.account_id
-							}
+							disabled={!incomeForm.amount || !incomeForm.account_id}
 						>
 							{t("income.addDialog.buttons.record")}
 						</Button>
