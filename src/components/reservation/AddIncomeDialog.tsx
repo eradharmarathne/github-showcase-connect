@@ -218,6 +218,8 @@ export function AddIncomeDialog({
 				incomeForm.amount,
 				incomeForm.currency,
 				newCurrency,
+				profile?.tenant_id!,
+				selectedLocation!,
 			);
 
 			// Also convert the reservation total amount for display
@@ -225,6 +227,8 @@ export function AddIncomeDialog({
 				baseAmount,
 				baseCurrency,
 				newCurrency,
+				profile?.tenant_id!,
+				selectedLocation!,
 			);
 
 			setIncomeForm((prev) => ({

@@ -50,283 +50,283 @@ const App = () => (
 						<BrowserRouter>
 							<TourProvider>
 								<Routes>
-										<Route path="/" element={<AuthRedirect />} />
-										<Route path="/auth" element={<Auth />} />
+									<Route path="/" element={<AuthRedirect />} />
+									<Route path="/auth" element={<Auth />} />
+									<Route
+										path="/auth/forgot-password"
+										element={<ForgotPassword />}
+									/>
+									<Route
+										path="/auth/reset-password"
+										element={<ResetPassword />}
+									/>
+									<Route
+										path="/onboarding"
+										element={
+											<ProtectedRoute>
+												<Onboarding />
+											</ProtectedRoute>
+										}
+									/>
+									<Route
+										path="/smart-redirect"
+										element={
+											<ProtectedRoute>
+												<SmartRedirect />
+											</ProtectedRoute>
+										}
+									/>
+									<Route path="/access-denied" element={<AccessDenied />} />
+									<Route
+										path="/dashboard"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
 										<Route
-											path="/auth/forgot-password"
-											element={<ForgotPassword />}
-										/>
-										<Route
-											path="/auth/reset-password"
-											element={<ResetPassword />}
-										/>
-										<Route
-											path="/onboarding"
+											index
 											element={
-												<ProtectedRoute>
-													<Onboarding />
-												</ProtectedRoute>
+												<PermissionRoute permission={["access_dashboard"]}>
+													<Dashboard />
+												</PermissionRoute>
 											}
 										/>
+									</Route>
+									<Route
+										path="/calendar"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
 										<Route
-											path="/smart-redirect"
+											index
 											element={
-												<ProtectedRoute>
-													<SmartRedirect />
-												</ProtectedRoute>
+												<PermissionRoute permission={["access_calendar"]}>
+													<EnhancedCalendar />
+												</PermissionRoute>
 											}
 										/>
-										<Route path="/access-denied" element={<AccessDenied />} />
+									</Route>
+									<Route
+										path="/booking-channels"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
 										<Route
-											path="/dashboard"
+											index
 											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_dashboard"]}>
-														<Dashboard />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/calendar"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_calendar"]}>
-														<EnhancedCalendar />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/booking-channels"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute
-														permission={["access_booking_channels"]}
-													>
-														<BookingChannelsIntegration />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/master-files"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_master_files"]}>
-														<MasterFiles />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/payments/new"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_income"]}>
-														<PaymentForm />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/expense"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_expenses"]}>
-														<Expense />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/reservations"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_bookings"]}>
-														<Reservations />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/reservations/:id"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_bookings"]}>
-														<ReservationDetails />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/reports"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_reports"]}>
-														<Reports />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/financial-reports"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_reports"]}>
-														<FinancialReports />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/accounts"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_accounts"]}>
-														<Accounts />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/users"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_users"]}>
-														<Users />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/settings"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_settings"]}>
-														<Settings />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/billing"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route index element={<BillingSubscription />} />
-										</Route>
-										<Route
-											path="/billing/success"
-											element={
-												<ProtectedRoute>
-													<BillingSuccess />
-												</ProtectedRoute>
+												<PermissionRoute
+													permission={["access_booking_channels"]}
+												>
+													<BookingChannelsIntegration />
+												</PermissionRoute>
 											}
 										/>
+									</Route>
+									<Route
+										path="/master-files"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
 										<Route
-											path="/billing/error"
+											index
 											element={
-												<ProtectedRoute>
-													<BillingError />
-												</ProtectedRoute>
+												<PermissionRoute permission={["access_master_files"]}>
+													<MasterFiles />
+												</PermissionRoute>
 											}
 										/>
-																	<Route path="*" element={<NotFound />} />
+									</Route>
+									<Route
+										path="/payments/new"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_income"]}>
+													<PaymentForm />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/expense"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_expenses"]}>
+													<Expense />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/reservations"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_bookings"]}>
+													<Reservations />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/reservations/:id"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_bookings"]}>
+													<ReservationDetails />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/reports"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_reports"]}>
+													<Reports />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/financial-reports"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_reports"]}>
+													<FinancialReports />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/accounts"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_accounts"]}>
+													<Accounts />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/users"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_users"]}>
+													<Users />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/settings"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route
+											index
+											element={
+												<PermissionRoute permission={["access_settings"]}>
+													<Settings />
+												</PermissionRoute>
+											}
+										/>
+									</Route>
+									<Route
+										path="/billing"
+										element={
+											<ProtectedRoute>
+												<Layout />
+											</ProtectedRoute>
+										}
+									>
+										<Route index element={<BillingSubscription />} />
+									</Route>
+									<Route
+										path="/billing/success"
+										element={
+											<ProtectedRoute>
+												<BillingSuccess />
+											</ProtectedRoute>
+										}
+									/>
+									<Route
+										path="/billing/error"
+										element={
+											<ProtectedRoute>
+												<BillingError />
+											</ProtectedRoute>
+										}
+									/>
+									<Route path="*" element={<NotFound />} />
 								</Routes>
 							</TourProvider>
 						</BrowserRouter>

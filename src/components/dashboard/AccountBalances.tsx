@@ -20,8 +20,6 @@ interface AccountBalance {
 	location_access: string[];
 }
 
-
-
 interface AccountBalancesProps {
 	selectedLocation: string;
 }

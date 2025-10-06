@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { CustomTourOverlay } from "./CustomTourOverlay";
 import { useToast } from "@/hooks/use-toast";
+import { CustomTourOverlay } from "./CustomTourOverlay";
 
 export interface TourStep {
 	id: string;
@@ -92,26 +92,39 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 		if (!isActive || !currentTour || isNavigating) return;
 
 		const currentStep = currentTour.steps[currentStepIndex];
-		if (currentStep?.requiresNavigation && location.pathname !== currentStep.requiresNavigation) {
+		if (
+			currentStep?.requiresNavigation &&
+			location.pathname !== currentStep.requiresNavigation
+		) {
 			setIsNavigating(true);
 			navigate(currentStep.requiresNavigation);
-			
+
 			// Wait for navigation to complete
 			setTimeout(() => {
 				setIsNavigating(false);
 			}, 800);
 		}
-	}, [isActive, currentTour, currentStepIndex, location.pathname, navigate, isNavigating]);
+	}, [
+		isActive,
+		currentTour,
+		currentStepIndex,
+		location.pathname,
+		navigate,
+		isNavigating,
+	]);
 
 	const startTour = (tour: PageTour) => {
 		setCurrentTour(tour);
 		setCurrentStepIndex(0);
 		setIsActive(true);
 		setIsNavigating(false);
-		
+
 		// Navigate to first step if needed
 		const firstStep = tour.steps[0];
-		if (firstStep?.requiresNavigation && location.pathname !== firstStep.requiresNavigation) {
+		if (
+			firstStep?.requiresNavigation &&
+			location.pathname !== firstStep.requiresNavigation
+		) {
 			navigate(firstStep.requiresNavigation);
 		}
 	};
@@ -188,7 +201,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 			}}
 		>
 			{children}
-			
+
 			{/* Tour Overlay */}
 			<CustomTourOverlay
 				isOpen={isActive && !isNavigating}

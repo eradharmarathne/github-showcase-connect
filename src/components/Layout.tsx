@@ -19,12 +19,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useLocationContext } from "@/context/LocationContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { TourHelpButton } from "./CustomTourHelpButton";
 import LanguageDropdown from "./dropdown-language";
 import ProfileDropdown from "./dropdown-profile";
 import FullscreenToggle from "./FullscreenToggle";
 import ProfileAvatarButton from "./ProfileAvatarButton";
 import ThemeSwitcher from "./ThemeSwitcher";
-import { TourHelpButton } from "./CustomTourHelpButton";
 import { Button } from "./ui/button";
 
 export function Layout() {

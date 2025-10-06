@@ -21,10 +21,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useLocationContext } from "@/context/LocationContext";
 import {
 	type ReservationFinancial,
 	useReservationFinancials,
 } from "@/hooks/useReservationFinancials";
+import { useTenant } from "@/hooks/useTenant";
 import type { Database } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 
@@ -104,6 +106,8 @@ export function ReservationsDesktopTable({
 }: ReservationsDesktopTableProps) {
 	const { t } = useTranslation();
 	const { data: reservations, isLoading, error } = useReservationFinancials();
+	const { tenant } = useTenant();
+	const { selectedLocation } = useLocationContext();
 
 	// State for converted amounts
 	const [convertedAmounts, setConvertedAmounts] = useState<
@@ -133,21 +137,29 @@ export function ReservationsDesktopTable({
 								reservation.room_amount_usd,
 								"USD",
 								selectedCurrency,
+								tenant?.id!,
+								selectedLocation!,
 							),
 							convertCurrency(
 								reservation.expenses_usd,
 								"USD",
 								selectedCurrency,
+								tenant?.id!,
+								selectedLocation!,
 							),
 							convertCurrency(
 								reservation.user_paid_amount_usd,
 								"USD",
 								selectedCurrency,
+								tenant?.id!,
+								selectedLocation!,
 							),
 							convertCurrency(
 								reservation.needs_to_pay_usd,
 								"USD",
 								selectedCurrency,
+								tenant?.id!,
+								selectedLocation!,
 							),
 						]);
 
@@ -176,7 +188,7 @@ export function ReservationsDesktopTable({
 		};
 
 		convertAmounts();
-	}, [reservations, selectedCurrency]);
+	}, [reservations, selectedCurrency, tenant?.id, selectedLocation]);
 
 	// Filter reservations
 	const filteredReservations =

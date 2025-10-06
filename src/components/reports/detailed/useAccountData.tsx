@@ -106,6 +106,8 @@ export function useAccountData(baseCurrency: Currency) {
 							Number(income.amount),
 							income.currency as Currency,
 							baseCurrency,
+							tenant.id,
+							selectedLocation,
 						);
 						allTransactions.push({
 							id: income.id,
@@ -127,6 +129,8 @@ export function useAccountData(baseCurrency: Currency) {
 							Number(expense.amount),
 							expense.currency as Currency,
 							baseCurrency,
+							tenant.id,
+							selectedLocation,
 						);
 						allTransactions.push({
 							id: expense.id,
@@ -199,12 +203,16 @@ export function useAccountData(baseCurrency: Currency) {
 					account.initial_balance,
 					account.currency as Currency,
 					baseCurrency,
+					tenant.id,
+					selectedLocation,
 				);
 
 				const convertedCurrentBalance = await convertCurrency(
 					runningBalance,
 					account.currency as Currency,
 					baseCurrency,
+					tenant.id,
+					selectedLocation,
 				);
 
 				// Add to global transactions for overall summary

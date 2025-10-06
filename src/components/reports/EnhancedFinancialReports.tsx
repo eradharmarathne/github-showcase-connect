@@ -130,8 +130,13 @@ export default function EnhancedFinancialReports() {
 	}, [selectedLocation, tenant?.id]);
 
 	const fetchAvailableCurrencies = async () => {
+		if (!tenant?.id || !selectedLocation) return;
+
 		try {
-			const currencies = await getAvailableCurrencies();
+			const currencies = await getAvailableCurrencies(
+				tenant.id,
+				selectedLocation,
+			);
 			setAvailableCurrencies(currencies);
 			// Set default currency to LKR if available, otherwise use the first available currency
 			if (currencies.length > 0 && !currencies.includes(baseCurrency)) {
@@ -219,6 +224,8 @@ export default function EnhancedFinancialReports() {
 					parseFloat(payment.amount.toString()),
 					payment.currency as any,
 					baseCurrency,
+					tenant.id,
+					selectedLocation!,
 				);
 				totalIncome += convertedAmount;
 				totalTransactions++;
@@ -232,6 +239,8 @@ export default function EnhancedFinancialReports() {
 					parseFloat(expense.amount.toString()),
 					accountCurrency as any,
 					baseCurrency,
+					tenant.id,
+					selectedLocation!,
 				);
 				totalExpenses += convertedAmount;
 			}
@@ -311,6 +320,8 @@ export default function EnhancedFinancialReports() {
 					parseFloat(payment.amount.toString()),
 					payment.currency as any,
 					baseCurrency,
+					tenant.id,
+					selectedLocation!,
 				);
 				totalIncomeForPercentage += convertedAmount;
 
@@ -390,6 +401,8 @@ export default function EnhancedFinancialReports() {
 					parseFloat(expense.amount.toString()),
 					accountCurrency as any,
 					baseCurrency,
+					tenant.id,
+					selectedLocation!,
 				);
 				totalExpenseForPercentage += convertedAmount;
 
@@ -519,7 +532,10 @@ export default function EnhancedFinancialReports() {
 			</Card>
 
 			{/* Summary Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6" data-testid="financial-summary-cards">
+			<div
+				className="grid grid-cols-1 md:grid-cols-3 gap-6"
+				data-testid="financial-summary-cards"
+			>
 				<Card className="bg-green-50 border-green-200">
 					<CardContent className="p-4 sm:p-6">
 						<div className="flex items-center justify-between">

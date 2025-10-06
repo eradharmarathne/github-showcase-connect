@@ -158,6 +158,8 @@ export function IncomeExpenseChart({
 								income.amount,
 								income.currency || "LKR",
 								displayCurrency,
+								tenant.id,
+								selectedLocation,
 							);
 							totalIncome += convertedAmount;
 						}
@@ -167,6 +169,8 @@ export function IncomeExpenseChart({
 								expense.amount,
 								expense.currency || "LKR",
 								displayCurrency,
+								tenant.id,
+								selectedLocation,
 							);
 							totalExpenses += convertedAmount;
 						}

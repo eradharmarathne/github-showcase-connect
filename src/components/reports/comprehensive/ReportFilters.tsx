@@ -43,8 +43,13 @@ export function ReportFilters({
 	const [availableCurrencies, setAvailableCurrencies] = useState<string[]>([]);
 
 	const fetchAvailableCurrencies = useCallback(async () => {
+		if (!tenant?.id || !selectedLocation) return;
+
 		try {
-			const currencies = await getAvailableCurrencies();
+			const currencies = await getAvailableCurrencies(
+				tenant.id,
+				selectedLocation,
+			);
 			setAvailableCurrencies(currencies);
 			// Set default currency to LKR if available, otherwise use the first available currency
 			if (currencies.length > 0 && !currencies.includes(baseCurrency)) {
@@ -54,7 +59,7 @@ export function ReportFilters({
 			console.error("Error fetching available currencies:", error);
 			setAvailableCurrencies(["LKR", "USD"]); // Fallback currencies
 		}
-	}, [baseCurrency, setBaseCurrency]);
+	}, [baseCurrency, setBaseCurrency, tenant?.id, selectedLocation]);
 
 	useEffect(() => {
 		fetchAvailableCurrencies();

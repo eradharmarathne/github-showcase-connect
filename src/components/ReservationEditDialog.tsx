@@ -57,6 +57,7 @@ interface Reservation {
 	arrival_time?: string;
 	room_id: string;
 	location_id: string;
+	tenant_id?: string;
 	agent_id?: string;
 	guide_id?: string;
 	agent_commission?: number;
@@ -575,6 +576,8 @@ export function ReservationEditDialog({
 											selectedRoom.base_price,
 											selectedRoom.currency,
 											formData.currency || "USD",
+											reservation?.tenant_id || "",
+											selectedLocation || "",
 										)
 											.then((convertedPrice) => {
 												setFormData({

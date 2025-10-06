@@ -1,17 +1,17 @@
 import {
+	BarChart3,
 	BookOpen,
+	Building2,
 	Calendar,
 	CreditCard,
 	DollarSign,
+	FileText,
 	HelpCircle,
+	MinusCircle,
 	Play,
 	Settings,
 	Users,
 	Wifi,
-	BarChart3,
-	FileText,
-	Building2,
-	MinusCircle,
 } from "lucide-react";
 import React from "react";
 import { Button } from "@/components/ui/button";
@@ -26,17 +26,17 @@ import {
 import { usePermissions } from "@/hooks/usePermissions";
 import { useTour } from "./tour/TourProvider";
 import {
-	dashboardTour,
-	reservationsTour,
-	calendarTour,
-	reportsTour,
-	masterFilesTour,
-	settingsTour,
 	accountsTour,
-	expenseTour,
-	usersTour,
 	bookingChannelsTour,
+	calendarTour,
 	comprehensiveTour,
+	dashboardTour,
+	expenseTour,
+	masterFilesTour,
+	reportsTour,
+	reservationsTour,
+	settingsTour,
+	usersTour,
 } from "./tour/tours";
 
 export const TourHelpButton: React.FC = () => {

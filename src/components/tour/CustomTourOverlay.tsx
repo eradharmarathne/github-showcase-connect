@@ -2,7 +2,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from "@/components/ui/card";
 
 interface TourStep {
 	id: string;

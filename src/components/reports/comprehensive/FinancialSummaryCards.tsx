@@ -106,6 +106,8 @@ export function FinancialSummaryCards({
 						parseFloat(expense.amount.toString()),
 						expense.currency as any,
 						baseCurrency,
+						tenant.id,
+						selectedLocation!,
 					);
 					totalExpenses += convertedAmount;
 					totalTransactions++;
@@ -117,6 +119,8 @@ export function FinancialSummaryCards({
 						parseFloat(payment.amount.toString()),
 						payment.currency as any,
 						baseCurrency,
+						tenant.id,
+						selectedLocation!,
 					);
 					totalPayments += convertedAmount;
 					totalTransactions++;
@@ -162,7 +166,10 @@ export function FinancialSummaryCards({
 	}
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="financial-summary-cards">
+		<div
+			className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+			data-testid="financial-summary-cards"
+		>
 			<Card className="bg-green-50 border-green-200">
 				<CardContent className="p-1 sm:p-2 lg:p-4">
 					<div className="flex items-center justify-between">

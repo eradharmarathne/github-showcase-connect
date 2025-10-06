@@ -76,8 +76,6 @@ export default function FinancialReports() {
 	const [loading, setLoading] = useState(true);
 	const { toast } = useToast();
 
-
-
 	useEffect(() => {
 		fetchInitialData();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
