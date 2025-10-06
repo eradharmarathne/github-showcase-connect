@@ -157,12 +157,12 @@ export default function Auth() {
 	};
 
 	return (
-		<div className="min-h-screen fixed overflow-hidden flex items-center justify-center bg-background">
+		<div className="min-h-screen w-full fixed overflow-hidden flex flex-col sm:flex-row items-center justify-center bg-background">
 			<aside
-				className="hidden h-screen flex-1 overflow-hidden lg:flex"
+				className="h-full lg:h-screen flex-1 overflow-hidden"
 				aria-label="Product showcase"
 			>
-				<div className="flex size-full items-center justify-center bg-linear-to-br from-blue-400 to-blue-600 p-16 dark:from-blue-600 dark:to-blue-500">
+				<div className="flex size-full items-center justify-center bg-linear-to-br from-blue-400 to-blue-600 p-4 sm:p-8 lg:p-16 dark:from-blue-600 dark:to-blue-500">
 					<div>
 						<h2 className="max-w-lg text-lg md:text-xl lg:text-2xl font-semibold leading-9 text-white dark:text-white">
 							Welcome to Checking &amp; Checkout
@@ -184,7 +184,7 @@ export default function Auth() {
 				</div>
 			</aside>
 
-			<div className="flex-1 flex items-center justify-center h-screen">
+			<div className="flex-1 w-full flex items-center justify-center h-full sm:h-screen">
 				<div className="w-full max-w-md space-y-8 px-4 sm:px-6 md:px-8 text-foreground sm:px-0">
 					<div className="space-y-1">
 						<h2 className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground">

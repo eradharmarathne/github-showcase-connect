@@ -106,7 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 			if (error) {
 				console.error("Error fetching subscription:", error);
 				// Don't set subscription to null for 406 errors - they're expected when no subscription exists
-				if (!error.message?.includes("406") && !error.message?.includes("Not Acceptable")) {
+				if (
+					!error.message?.includes("406") &&
+					!error.message?.includes("Not Acceptable")
+				) {
 					setSubscription(null);
 				}
 				return null;

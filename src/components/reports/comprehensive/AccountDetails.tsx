@@ -369,7 +369,7 @@ export function AccountDetails({
 										<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
 											<div className="flex items-start sm:items-center gap-3">
 												<div className="flex flex-col">
-																																<CardTitle className="text-base md:text-lg lg:text-xl">
+													<CardTitle className="text-base md:text-lg lg:text-xl">
 														{account.name}
 													</CardTitle>
 													<CardDescription className="flex items-center gap-2">

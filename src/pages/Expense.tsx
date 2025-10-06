@@ -60,7 +60,9 @@ export default function Expense() {
 		<div className="p-6 space-y-6">
 			{/* Header with back button */}
 			<div className="flex items-center gap-4">
-				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">{t("expense.title")}</h1>
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
+					{t("expense.title")}
+				</h1>
 				{hasAnyPermission("access_reports") && (
 					<Button asChild variant="outline" className="ml-auto">
 						<Link to="/reports?tab=comprehensive&type=expense">

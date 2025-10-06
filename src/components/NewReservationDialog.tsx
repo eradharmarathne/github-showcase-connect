@@ -375,7 +375,9 @@ export function NewReservationDialog({
 				<form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto">
 					{/* Guest Information */}
 					<div className="space-y-4">
-						<h3 className="text-base md:text-lg lg:text-xl font-semibold">Guest Information</h3>
+						<h3 className="text-base md:text-lg lg:text-xl font-semibold">
+							Guest Information
+						</h3>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<div className="md:col-span-2 space-y-2">
 								<Label htmlFor="guest_name">Guest Name *</Label>
@@ -538,7 +540,9 @@ export function NewReservationDialog({
 
 					{/* Payment Information */}
 					<div className="space-y-4">
-						<h3 className="text-base md:text-lg lg:text-xl font-semibold">Payment Information</h3>
+						<h3 className="text-base md:text-lg lg:text-xl font-semibold">
+							Payment Information
+						</h3>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{fieldPreferences?.show_advance_amount !== false && (
 								<div className="space-y-2">

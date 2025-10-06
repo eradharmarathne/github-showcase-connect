@@ -120,7 +120,9 @@ export default function Accounts() {
 	return (
 		<div className="container mx-auto pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 py-6 space-y-6">
 			<div className="flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center">
-				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">{t("accounts.title")}</h1>
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
+					{t("accounts.title")}
+				</h1>
 				<div className="flex gap-2">
 					<Button
 						onClick={() => setShowTransferDialog(true)}

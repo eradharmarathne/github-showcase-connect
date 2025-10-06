@@ -377,11 +377,19 @@ export default function AgentsTab() {
 					<TableHeader>
 						<TableRow>
 							<TableHead className="min-w-[120px]">Name</TableHead>
-							<TableHead className="min-w-[120px] hidden sm:table-cell">Agency</TableHead>
-							<TableHead className="min-w-[100px] hidden md:table-cell">Phone</TableHead>
-							<TableHead className="min-w-[150px] hidden lg:table-cell">Email</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">
+								Agency
+							</TableHead>
+							<TableHead className="min-w-[100px] hidden md:table-cell">
+								Phone
+							</TableHead>
+							<TableHead className="min-w-[150px] hidden lg:table-cell">
+								Email
+							</TableHead>
 							<TableHead className="min-w-[100px]">Commission %</TableHead>
-							<TableHead className="min-w-[80px] hidden sm:table-cell">Status</TableHead>
+							<TableHead className="min-w-[80px] hidden sm:table-cell">
+								Status
+							</TableHead>
 							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -389,9 +397,15 @@ export default function AgentsTab() {
 						{agents.map((agent) => (
 							<TableRow key={agent.id}>
 								<TableCell className="font-medium">{agent.name}</TableCell>
-								<TableCell className="hidden sm:table-cell">{agent.agency_name || "-"}</TableCell>
-								<TableCell className="hidden md:table-cell">{agent.phone || "-"}</TableCell>
-								<TableCell className="hidden lg:table-cell">{agent.email || "-"}</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									{agent.agency_name || "-"}
+								</TableCell>
+								<TableCell className="hidden md:table-cell">
+									{agent.phone || "-"}
+								</TableCell>
+								<TableCell className="hidden lg:table-cell">
+									{agent.email || "-"}
+								</TableCell>
 								<TableCell>{agent.commission_rate}%</TableCell>
 								<TableCell className="hidden sm:table-cell">
 									<Badge variant={agent.is_active ? "default" : "secondary"}>

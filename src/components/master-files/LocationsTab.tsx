@@ -454,7 +454,9 @@ export default function LocationsTab() {
 						<TableRow>
 							<TableHead className="min-w-[150px]">Location Name</TableHead>
 							<TableHead className="min-w-[100px]">Status</TableHead>
-							<TableHead className="min-w-[120px] hidden sm:table-cell">Created Date</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">
+								Created Date
+							</TableHead>
 							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
 					</TableHeader>

@@ -87,7 +87,9 @@ export default function MasterFiles() {
 						<Building2 className="size-5 sm:size-7 text-primary" />
 						{t("masterFiles.title")}
 					</CardTitle>
-					<p className="text-sm sm:text-base text-muted-foreground">{t("masterFiles.subtitle")}</p>
+					<p className="text-sm sm:text-base text-muted-foreground">
+						{t("masterFiles.subtitle")}
+					</p>
 				</CardHeader>
 				<CardContent className="px-4 sm:px-6 md:px-8 py-4 sm:py-6">
 					<Tabs

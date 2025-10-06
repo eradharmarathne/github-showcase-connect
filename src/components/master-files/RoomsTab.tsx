@@ -555,20 +555,32 @@ export default function RoomsTab() {
 						<TableRow>
 							<TableHead className="min-w-[120px]">Room Number</TableHead>
 							<TableHead className="min-w-[100px]">Type</TableHead>
-							<TableHead className="min-w-[120px] hidden sm:table-cell">Location</TableHead>
-							<TableHead className="min-w-[100px] hidden md:table-cell">Occupancy</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">
+								Location
+							</TableHead>
+							<TableHead className="min-w-[100px] hidden md:table-cell">
+								Occupancy
+							</TableHead>
 							<TableHead className="min-w-[100px]">Base Price</TableHead>
-							<TableHead className="min-w-[80px] hidden lg:table-cell">Status</TableHead>
+							<TableHead className="min-w-[80px] hidden lg:table-cell">
+								Status
+							</TableHead>
 							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{rooms.map((room) => (
 							<TableRow key={room.id}>
-								<TableCell className="font-medium">{room.room_number}</TableCell>
+								<TableCell className="font-medium">
+									{room.room_number}
+								</TableCell>
 								<TableCell>{room.room_type}</TableCell>
-								<TableCell className="hidden sm:table-cell">{(room as any).locations?.name}</TableCell>
-								<TableCell className="hidden md:table-cell">{room.max_occupancy}</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									{(room as any).locations?.name}
+								</TableCell>
+								<TableCell className="hidden md:table-cell">
+									{room.max_occupancy}
+								</TableCell>
 								<TableCell>
 									{getCurrencySymbol(room.currency)}
 									{room.base_price}

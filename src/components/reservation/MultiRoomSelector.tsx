@@ -284,7 +284,9 @@ export function MultiRoomSelector({
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h3 className="text-base md:text-lg lg:text-xl font-semibold">Room Selections</h3>
+				<h3 className="text-base md:text-lg lg:text-xl font-semibold">
+					Room Selections
+				</h3>
 				<Button
 					type="button"
 					variant="outline"

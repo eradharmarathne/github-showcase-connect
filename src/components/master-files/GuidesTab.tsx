@@ -378,11 +378,19 @@ export default function GuidesTab() {
 					<TableHeader>
 						<TableRow>
 							<TableHead className="min-w-[120px]">Name</TableHead>
-							<TableHead className="min-w-[120px] hidden sm:table-cell">License</TableHead>
-							<TableHead className="min-w-[100px] hidden md:table-cell">Phone</TableHead>
-							<TableHead className="min-w-[150px] hidden lg:table-cell">Email</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">
+								License
+							</TableHead>
+							<TableHead className="min-w-[100px] hidden md:table-cell">
+								Phone
+							</TableHead>
+							<TableHead className="min-w-[150px] hidden lg:table-cell">
+								Email
+							</TableHead>
 							<TableHead className="min-w-[100px]">Commission %</TableHead>
-							<TableHead className="min-w-[80px] hidden sm:table-cell">Status</TableHead>
+							<TableHead className="min-w-[80px] hidden sm:table-cell">
+								Status
+							</TableHead>
 							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
 					</TableHeader>
@@ -390,9 +398,15 @@ export default function GuidesTab() {
 						{guides.map((guide) => (
 							<TableRow key={guide.id}>
 								<TableCell className="font-medium">{guide.name}</TableCell>
-								<TableCell className="hidden sm:table-cell">{guide.license_number || "-"}</TableCell>
-								<TableCell className="hidden md:table-cell">{guide.phone || "-"}</TableCell>
-								<TableCell className="hidden lg:table-cell">{guide.email || "-"}</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									{guide.license_number || "-"}
+								</TableCell>
+								<TableCell className="hidden md:table-cell">
+									{guide.phone || "-"}
+								</TableCell>
+								<TableCell className="hidden lg:table-cell">
+									{guide.email || "-"}
+								</TableCell>
 								<TableCell>{guide.commission_rate}%</TableCell>
 								<TableCell className="hidden sm:table-cell">
 									<Badge variant={guide.is_active ? "default" : "secondary"}>

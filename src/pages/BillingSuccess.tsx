@@ -60,17 +60,24 @@ export default function BillingSuccess() {
 						.single();
 
 					if (planError) {
-						console.error("Error finding plan for product_id:", productId, planError);
+						console.error(
+							"Error finding plan for product_id:",
+							productId,
+							planError,
+						);
 						// Fallback to starter plan if we can't find the plan
 						toast({
 							title: "Warning",
-							description: "Could not find matching plan. Using starter plan as fallback.",
+							description:
+								"Could not find matching plan. Using starter plan as fallback.",
 							variant: "destructive",
 						});
 					}
 
 					const correctPlanId = planData?.id || "starter";
-					console.log(`Mapping product_id ${productId} to plan_id ${correctPlanId}`);
+					console.log(
+						`Mapping product_id ${productId} to plan_id ${correctPlanId}`,
+					);
 
 					const subscriptionData = {
 						tenant_id: tenant.id,
@@ -86,11 +93,12 @@ export default function BillingSuccess() {
 					};
 
 					// Check if subscription already exists for this tenant
-					const { data: existingSubscription, error: fetchError } = await supabase
-						.from("subscriptions")
-						.select("*")
-						.eq("tenant_id", tenant.id)
-						.maybeSingle(); // Use maybeSingle to avoid error when no results
+					const { data: existingSubscription, error: fetchError } =
+						await supabase
+							.from("subscriptions")
+							.select("*")
+							.eq("tenant_id", tenant.id)
+							.maybeSingle(); // Use maybeSingle to avoid error when no results
 
 					if (fetchError) {
 						console.error("Error fetching existing subscription:", fetchError);
@@ -116,7 +124,10 @@ export default function BillingSuccess() {
 					}
 
 					if (subscriptionResult.error) {
-						console.error("Error updating/creating subscription:", subscriptionResult.error);
+						console.error(
+							"Error updating/creating subscription:",
+							subscriptionResult.error,
+						);
 						throw subscriptionResult.error;
 					}
 
@@ -225,7 +236,9 @@ export default function BillingSuccess() {
 					</div>
 
 					<div className="space-y-2">
-						<h3 className="text-base md:text-lg lg:text-xl font-semibold">Welcome to Your New Plan!</h3>
+						<h3 className="text-base md:text-lg lg:text-xl font-semibold">
+							Welcome to Your New Plan!
+						</h3>
 						<p className="text-muted-foreground">
 							Your subscription has been activated and you now have access to
 							all premium features.

@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from "@/integrations/supabase/client";
+import { createAdminClient, supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 
 export interface LocationPermissions extends Record<string, Json | undefined> {
@@ -59,7 +59,7 @@ export const addUserToLocation = async (
 		console.log("Adding user to location:", params);
 
 		// First check if user exists in profiles
-		const { data: existingProfile, error: profileError } = await supabaseAdmin
+		const { data: existingProfile, error: profileError } = await supabase
 			.from("profiles")
 			.select("id, email, tenant_id")
 			.eq("email", params.email)
@@ -88,7 +88,7 @@ export const addUserToLocation = async (
 				!existingProfile.tenant_id ||
 				existingProfile.tenant_id !== params.tenantId
 			) {
-				const { error: updateError } = await supabaseAdmin
+				const { error: updateError } = await supabase
 					.from("profiles")
 					.update({
 						tenant_id: params.tenantId,
@@ -107,8 +107,17 @@ export const addUserToLocation = async (
 			// User doesn't exist in profiles - check if auth user exists
 			console.log("No profile found, checking if auth user exists");
 
+			// Get admin client for auth operations
+			const adminClient = createAdminClient();
+			if (!adminClient) {
+				return {
+					success: false,
+					error: "Admin operations not available - service role key missing",
+				};
+			}
+
 			const { data: authUsers, error: authError } =
-				await supabaseAdmin.auth.admin.listUsers();
+				await adminClient.auth.admin.listUsers();
 
 			if (authError) {
 				console.error("Error checking auth users:", authError);
@@ -128,7 +137,7 @@ export const addUserToLocation = async (
 				userId = existingAuthUser.id;
 				userCreated = false;
 
-				const { error: profileCreateError } = await supabaseAdmin
+				const { error: profileCreateError } = await supabase
 					.from("profiles")
 					.insert({
 						id: userId,
@@ -155,7 +164,7 @@ export const addUserToLocation = async (
 
 				// Create auth user using admin client
 				const { data: authData, error: authCreateError } =
-					await supabaseAdmin.auth.admin.createUser({
+					await adminClient.auth.admin.createUser({
 						email: params.email,
 						password: password,
 						email_confirm: true,
@@ -177,7 +186,7 @@ export const addUserToLocation = async (
 				userCreated = true;
 
 				// Create profile for new user
-				const { error: profileCreateError } = await supabaseAdmin
+				const { error: profileCreateError } = await supabase
 					.from("profiles")
 					.insert({
 						id: userId,
@@ -197,7 +206,7 @@ export const addUserToLocation = async (
 		}
 
 		// Create or update user permissions for this location
-		const { data: existingPermissions, error: permError } = await supabaseAdmin
+		const { data: existingPermissions, error: permError } = await supabase
 			.from("user_permissions")
 			.select("id")
 			.eq("user_id", userId)
@@ -215,7 +224,7 @@ export const addUserToLocation = async (
 
 		if (!existingPermissions) {
 			// No existing permissions - create new
-			const { error: createPermError } = await supabaseAdmin
+			const { error: createPermError } = await supabase
 				.from("user_permissions")
 				.insert({
 					user_id: userId,
@@ -233,7 +242,7 @@ export const addUserToLocation = async (
 			}
 		} else {
 			// Update existing permissions
-			const { error: updatePermError } = await supabaseAdmin
+			const { error: updatePermError } = await supabase
 				.from("user_permissions")
 				.update({
 					...params.permissions,
@@ -254,7 +263,7 @@ export const addUserToLocation = async (
 			if (userCreated && password) {
 				// New user - send credentials
 				console.log("Sending credentials to new user");
-				const { error: emailError } = await supabaseAdmin.functions.invoke(
+				const { error: emailError } = await supabase.functions.invoke(
 					"send-user-credentials",
 					{
 						body: {
@@ -274,7 +283,7 @@ export const addUserToLocation = async (
 			} else {
 				// Existing user - send location access notification
 				console.log("Sending location access notification to existing user");
-				const { error: emailError } = await supabaseAdmin.functions.invoke(
+				const { error: emailError } = await supabase.functions.invoke(
 					"send-user-credentials",
 					{
 						body: {

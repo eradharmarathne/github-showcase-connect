@@ -35,7 +35,7 @@ function Digit({
 			className="relative w-[1ch] tabular-nums overflow-hidden"
 		>
 			{Array.from({ length: 10 }, (_, i) => (
-				<Number
+				<DigitalNumber
 					key={i}
 					mv={animatedValue}
 					number={i}
@@ -46,7 +46,7 @@ function Digit({
 	);
 }
 
-function Number({
+function DigitalNumber({
 	mv,
 	number,
 	digitHeight,

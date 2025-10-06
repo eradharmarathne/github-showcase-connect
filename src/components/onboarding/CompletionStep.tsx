@@ -10,7 +10,9 @@ export function CompletionStep({ loading, onComplete }: CompletionStepProps) {
 	return (
 		<div className="text-center space-y-6">
 			<CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-			<h2 className="text-lg md:text-xl lg:text-2xl font-bold">You're All Set! 🎉</h2>
+			<h2 className="text-lg md:text-xl lg:text-2xl font-bold">
+				You're All Set! 🎉
+			</h2>
 			<p className="text-lg text-muted-foreground max-w-md mx-auto">
 				Welcome to Check In_Check Out! Your account has been configured based on
 				your preferences.

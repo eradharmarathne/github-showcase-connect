@@ -73,7 +73,11 @@ export default function BillingSubscription() {
 	const navigate = useNavigate();
 	const { toast } = useToast();
 	const { tenant, user } = useAuth();
-	const { data: currentSubscription, isLoading: subscriptionLoading, error: subscriptionError } = useSubscription();
+	const {
+		data: currentSubscription,
+		isLoading: subscriptionLoading,
+		error: subscriptionError,
+	} = useSubscription();
 
 	const [loading, setLoading] = useState(true);
 	const [plans, setPlans] = useState<PlanWithCreemProduct[]>([]);
@@ -491,14 +495,20 @@ export default function BillingSubscription() {
 			<div className="flex items-center justify-center min-h-[400px]">
 				<div className="text-center space-y-4">
 					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
-					<p className="text-muted-foreground">Loading billing information...</p>
+					<p className="text-muted-foreground">
+						Loading billing information...
+					</p>
 				</div>
 			</div>
 		);
 	}
 
 	// Show subscription error if it's not a 406 error (which is expected when no subscription)
-	if (subscriptionError && !subscriptionError.message?.includes("406") && !subscriptionError.message?.includes("Not Acceptable")) {
+	if (
+		subscriptionError &&
+		!subscriptionError.message?.includes("406") &&
+		!subscriptionError.message?.includes("Not Acceptable")
+	) {
 		return (
 			<div className="container mx-auto px-4 sm:px-6 md:px-8">
 				<Alert variant="destructive">
@@ -608,7 +618,9 @@ export default function BillingSubscription() {
 
 			{/* Available Plans */}
 			<div className="space-y-4">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Available Plans</h2>
+				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold">
+					Available Plans
+				</h2>
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{plans.map((plan) => {
 						const isCurrentPlan = currentSubscription?.plan_id === plan.id;

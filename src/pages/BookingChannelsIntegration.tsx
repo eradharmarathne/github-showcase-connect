@@ -1195,7 +1195,7 @@ export default function BookingChannelsIntegration() {
 										>
 											<CardHeader className="pb-3">
 												<div className="flex items-center justify-between">
-																																<CardTitle className="text-base md:text-lg lg:text-xl">
+													<CardTitle className="text-base md:text-lg lg:text-xl">
 														{location.name}
 													</CardTitle>
 													<Badge variant={mapping ? "default" : "secondary"}>

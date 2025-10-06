@@ -226,7 +226,9 @@ export default function ReservationDetails() {
 
 			{/* Print Header - Only visible when printing */}
 			<div className="hidden print:block text-center mb-6">
-				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Reservation Details</h1>
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
+					Reservation Details
+				</h1>
 				<p className="text-lg">#{reservation.reservation_number}</p>
 				<p className="text-sm text-muted-foreground">
 					Generated on {new Date().toLocaleString()}

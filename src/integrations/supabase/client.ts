@@ -45,55 +45,26 @@ function getSupabaseClient() {
 	return supabaseInstance;
 }
 
+// Single client instance for all operations
 export const supabase = getSupabaseClient();
 
-// Service role client for admin operations - use singleton pattern
-let supabaseAdminInstance: ReturnType<typeof createClient<Database>> | null =
-	null;
-
-function getSupabaseAdminClient() {
-	if (!supabaseAdminInstance) {
-		// In development, check if there's already a global instance to prevent HMR issues
-		if (import.meta.env.DEV && (window as any).__supabaseAdminClient) {
-			supabaseAdminInstance = (window as any).__supabaseAdminClient;
-			return supabaseAdminInstance;
-		}
-
-		// Only create admin client if service role key is available
-		if (!SUPABASE_SERVICE_ROLE_KEY) {
-			console.warn("Service role key not available for admin client");
-			return getSupabaseClient(); // Fallback to regular client
-		}
-
-		// Prevent creating admin client in browser environment if not needed
-		if (typeof window !== 'undefined' && !import.meta.env.DEV) {
-			console.warn("Admin client should not be used in browser environment");
-			return getSupabaseClient(); // Fallback to regular client
-		}
-
-		supabaseAdminInstance = createClient<Database>(
-			SUPABASE_URL,
-			SUPABASE_SERVICE_ROLE_KEY,
-			{
-				auth: {
-					autoRefreshToken: false,
-					persistSession: false,
-					storageKey: "cco-supabase-admin-auth", // Unique storage key for admin
-				},
-				global: {
-					headers: {
-						"X-Client-Info": "checking-checkout-admin",
-					},
-				},
-			},
-		);
-
-		// Store globally in development for HMR
-		if (import.meta.env.DEV) {
-			(window as any).__supabaseAdminClient = supabaseAdminInstance;
-		}
+// For admin operations that truly need service role access, create a temporary client
+export const createAdminClient = () => {
+	// Only create admin client when absolutely necessary and in secure environment
+	if (!SUPABASE_SERVICE_ROLE_KEY) {
+		console.warn("Service role key not available for admin operations");
+		return null;
 	}
-	return supabaseAdminInstance;
-}
 
-export const supabaseAdmin = getSupabaseAdminClient();
+	return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+		auth: {
+			autoRefreshToken: false,
+			persistSession: false,
+		},
+		global: {
+			headers: {
+				"X-Client-Info": "checking-checkout-admin-temp",
+			},
+		},
+	});
+};
