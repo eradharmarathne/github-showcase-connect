@@ -126,57 +126,139 @@ export default function Reservations() {
 			amenities: reservation.rooms?.amenities || [],
 		};
 		
-		// Create a hidden div with printable content
+		// Create a professional receipt-style printable content
 		const printContent = `
-			<div style="font-family: Arial, sans-serif; padding: 20px;">
-				<div style="text-align: center; margin-bottom: 30px;">
-					<h1>${printableData.hotel_name || 'Hotel Reservation'}</h1>
-					<h2>Reservation Confirmation</h2>
-					<p><strong>Reservation Number:</strong> ${reservation.reservation_number}</p>
+			<div style="font-family: 'Courier New', monospace; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.4;">
+				<!-- Header -->
+				<div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
+					<h1 style="margin: 0; font-size: 24px; font-weight: bold;">${printableData.hotel_name || 'HOTEL RESERVATION'}</h1>
+					${printableData.hotel_address ? `<p style="margin: 5px 0; font-size: 12px;">${printableData.hotel_address}</p>` : ''}
+					${printableData.hotel_phone ? `<p style="margin: 2px 0; font-size: 12px;">Tel: ${printableData.hotel_phone}</p>` : ''}
+					${printableData.hotel_email ? `<p style="margin: 2px 0; font-size: 12px;">Email: ${printableData.hotel_email}</p>` : ''}
 				</div>
-				
-				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-					<div>
-						<h3>Guest Information</h3>
-						<p><strong>Name:</strong> ${reservation.guest_name}</p>
-						<p><strong>Email:</strong> ${reservation.guest_email || 'N/A'}</p>
-						<p><strong>Phone:</strong> ${reservation.guest_phone || 'N/A'}</p>
-						<p><strong>Nationality:</strong> ${reservation.guest_nationality || 'N/A'}</p>
-						<p><strong>Adults:</strong> ${reservation.adults}</p>
-						<p><strong>Children:</strong> ${reservation.children}</p>
-					</div>
-					
-					<div>
-						<h3>Booking Details</h3>
-						<p><strong>Check-in:</strong> ${new Date(reservation.check_in_date).toLocaleDateString()}</p>
-						<p><strong>Check-out:</strong> ${new Date(reservation.check_out_date).toLocaleDateString()}</p>
-						<p><strong>Nights:</strong> ${reservation.nights}</p>
-						<p><strong>Room:</strong> ${printableData.room_number} (${printableData.room_type})</p>
-						<p><strong>Status:</strong> ${reservation.status}</p>
-					</div>
+
+				<!-- Reservation Info -->
+				<div style="text-align: center; margin-bottom: 20px;">
+					<h2 style="margin: 0; font-size: 18px; font-weight: bold;">RESERVATION RECEIPT</h2>
+					<p style="margin: 10px 0; font-size: 14px; font-weight: bold;">Confirmation #: ${reservation.reservation_number}</p>
+					<p style="margin: 5px 0; font-size: 12px;">Date: ${new Date().toLocaleDateString()}</p>
 				</div>
-				
-				<div style="margin-bottom: 20px;">
-					<h3>Financial Summary</h3>
-					<p><strong>Room Rate:</strong> ${reservation.currency} ${reservation.room_rate}</p>
-					<p><strong>Total Amount:</strong> ${reservation.currency} ${reservation.total_amount}</p>
-					<p><strong>Paid Amount:</strong> ${reservation.currency} ${reservation.paid_amount || 0}</p>
-					<p><strong>Balance:</strong> ${reservation.currency} ${(reservation.total_amount - (reservation.paid_amount || 0)).toFixed(2)}</p>
-				</div>
-				
+
+				<!-- Guest Information Table -->
+				<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
+					<tr style="border-bottom: 1px solid #000;">
+						<td colspan="2" style="padding: 8px 0; font-weight: bold; text-align: center; background-color: #f0f0f0;">GUEST INFORMATION</td>
+					</tr>
+					<tr>
+						<td style="padding: 5px 0; width: 30%; font-weight: bold;">Guest Name:</td>
+						<td style="padding: 5px 0;">${reservation.guest_name}</td>
+					</tr>
+					<tr style="background-color: #f9f9f9;">
+						<td style="padding: 5px 0; font-weight: bold;">Email:</td>
+						<td style="padding: 5px 0;">${reservation.guest_email || 'N/A'}</td>
+					</tr>
+					<tr>
+						<td style="padding: 5px 0; font-weight: bold;">Phone:</td>
+						<td style="padding: 5px 0;">${reservation.guest_phone || 'N/A'}</td>
+					</tr>
+					<tr style="background-color: #f9f9f9;">
+						<td style="padding: 5px 0; font-weight: bold;">Nationality:</td>
+						<td style="padding: 5px 0;">${reservation.guest_nationality || 'N/A'}</td>
+					</tr>
+					<tr>
+						<td style="padding: 5px 0; font-weight: bold;">Guests:</td>
+						<td style="padding: 5px 0;">${reservation.adults} Adults${reservation.children > 0 ? `, ${reservation.children} Children` : ''}</td>
+					</tr>
+				</table>
+
+				<!-- Booking Details Table -->
+				<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
+					<tr style="border-bottom: 1px solid #000;">
+						<td colspan="2" style="padding: 8px 0; font-weight: bold; text-align: center; background-color: #f0f0f0;">BOOKING DETAILS</td>
+					</tr>
+					<tr>
+						<td style="padding: 5px 0; width: 30%; font-weight: bold;">Room:</td>
+						<td style="padding: 5px 0;">${printableData.room_number} - ${printableData.room_type}</td>
+					</tr>
+					<tr style="background-color: #f9f9f9;">
+						<td style="padding: 5px 0; font-weight: bold;">Check-in:</td>
+						<td style="padding: 5px 0;">${new Date(reservation.check_in_date).toLocaleDateString()}</td>
+					</tr>
+					<tr>
+						<td style="padding: 5px 0; font-weight: bold;">Check-out:</td>
+						<td style="padding: 5px 0;">${new Date(reservation.check_out_date).toLocaleDateString()}</td>
+					</tr>
+					<tr style="background-color: #f9f9f9;">
+						<td style="padding: 5px 0; font-weight: bold;">Duration:</td>
+						<td style="padding: 5px 0;">${reservation.nights} Night${reservation.nights !== 1 ? 's' : ''}</td>
+					</tr>
+					<tr>
+						<td style="padding: 5px 0; font-weight: bold;">Status:</td>
+						<td style="padding: 5px 0; text-transform: uppercase;">${reservation.status}</td>
+					</tr>
+				</table>
+
+				<!-- Financial Summary Table -->
+				<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
+					<tr style="border-bottom: 2px solid #000;">
+						<td colspan="3" style="padding: 8px 0; font-weight: bold; text-align: center; background-color: #f0f0f0;">FINANCIAL SUMMARY</td>
+					</tr>
+					<tr style="border-bottom: 1px solid #ccc;">
+						<td style="padding: 5px 0; width: 50%; font-weight: bold;">Description</td>
+						<td style="padding: 5px 0; width: 20%; text-align: center; font-weight: bold;">Rate</td>
+						<td style="padding: 5px 0; width: 30%; text-align: right; font-weight: bold;">Amount</td>
+					</tr>
+					<tr>
+						<td style="padding: 8px 0;">Room Charges (${reservation.nights} night${reservation.nights !== 1 ? 's' : ''})</td>
+						<td style="padding: 8px 0; text-align: center;">${reservation.selectedCurrency || reservation.currency} ${reservation.room_rate}</td>
+						<td style="padding: 8px 0; text-align: right; font-weight: bold;">${reservation.selectedCurrency || reservation.currency} ${reservation.convertedAmounts?.roomAmount?.toFixed(2) || reservation.total_amount || (reservation.room_rate * reservation.nights)}</td>
+					</tr>
+					${(reservation.convertedAmounts?.expensesAmount && reservation.convertedAmounts.expensesAmount > 0) ? `
+					<tr style="background-color: #f9f9f9;">
+						<td style="padding: 8px 0;">Additional Expenses & Services</td>
+						<td style="padding: 8px 0; text-align: center;">-</td>
+						<td style="padding: 8px 0; text-align: right; font-weight: bold;">${reservation.selectedCurrency || reservation.currency} ${reservation.convertedAmounts.expensesAmount.toFixed(2)}</td>
+					</tr>
+					` : ''}
+					<tr style="border-top: 1px solid #ccc;">
+						<td style="padding: 8px 0; font-weight: bold;">SUBTOTAL</td>
+						<td style="padding: 8px 0;"></td>
+						<td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 14px;">${reservation.selectedCurrency || reservation.currency} ${((reservation.convertedAmounts?.roomAmount || reservation.total_amount || (reservation.room_rate * reservation.nights)) + (reservation.convertedAmounts?.expensesAmount || 0)).toFixed(2)}</td>
+					</tr>
+					<tr style="background-color: #f9f9f9;">
+						<td style="padding: 8px 0; font-weight: bold;">Amount Paid</td>
+						<td style="padding: 8px 0;"></td>
+						<td style="padding: 8px 0; text-align: right; color: green; font-weight: bold;">-${reservation.selectedCurrency || reservation.currency} ${reservation.convertedAmounts?.paidAmount?.toFixed(2) || reservation.paid_amount || 0}</td>
+					</tr>
+					<tr style="border-top: 2px solid #000;">
+						<td style="padding: 8px 0; font-weight: bold; font-size: 14px;">BALANCE DUE</td>
+						<td style="padding: 8px 0;"></td>
+						<td style="padding: 8px 0; text-align: right; font-weight: bold; font-size: 14px; color: ${reservation.convertedAmounts?.balanceAmount ? (reservation.convertedAmounts.balanceAmount > 0 ? 'red' : 'green') : (((reservation.total_amount || (reservation.room_rate * reservation.nights)) + (reservation.expenses_usd || 0)) - (reservation.paid_amount || 0)) > 0 ? 'red' : 'green'};">${reservation.selectedCurrency || reservation.currency} ${reservation.convertedAmounts?.balanceAmount?.toFixed(2) || (((reservation.total_amount || (reservation.room_rate * reservation.nights)) + (reservation.expenses_usd || 0)) - (reservation.paid_amount || 0)).toFixed(2)}</td>
+					</tr>
+				</table>
+
 				${reservation.special_requests ? `
-				<div style="margin-bottom: 20px;">
-					<h3>Special Requests</h3>
-					<p>${reservation.special_requests}</p>
-				</div>
+				<!-- Special Requests -->
+				<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
+					<tr style="border-bottom: 1px solid #000;">
+						<td style="padding: 8px 0; font-weight: bold; text-align: center; background-color: #f0f0f0;">SPECIAL REQUESTS</td>
+					</tr>
+					<tr>
+						<td style="padding: 10px 0; line-height: 1.5;">${reservation.special_requests}</td>
+					</tr>
+				</table>
 				` : ''}
-				
-				<div style="margin-bottom: 20px;">
-					<h3>Hotel Information</h3>
-					<p><strong>Location:</strong> ${printableData.location_name}</p>
-					${printableData.hotel_address ? `<p><strong>Address:</strong> ${printableData.hotel_address}</p>` : ''}
-					${printableData.hotel_phone ? `<p><strong>Phone:</strong> ${printableData.hotel_phone}</p>` : ''}
-					${printableData.hotel_email ? `<p><strong>Email:</strong> ${printableData.hotel_email}</p>` : ''}
+
+				<!-- Footer -->
+				<div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; text-align: center; font-size: 10px;">
+					<p style="margin: 5px 0;">Thank you for choosing ${printableData.hotel_name || 'our hotel'}!</p>
+					<p style="margin: 5px 0;">For any inquiries, please contact us at ${printableData.hotel_phone || 'hotel reception'}.</p>
+					<p style="margin: 15px 0 0 0; font-style: italic;">This is an official reservation confirmation.</p>
+				</div>
+
+				<!-- Print Timestamp -->
+				<div style="margin-top: 20px; text-align: center; font-size: 8px; color: #666;">
+					Printed on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
 				</div>
 			</div>
 		`;
@@ -193,14 +275,29 @@ export default function Reservations() {
 				<!DOCTYPE html>
 				<html>
 				<head>
-					<title>Reservation ${reservation.reservation_number}</title>
+					<title>Reservation Receipt - ${reservation.reservation_number}</title>
 					<style>
 						@page {
 							size: A4;
-							margin: 1cm;
+							margin: 0.5cm;
 						}
 						@media print {
-							body { margin: 0; padding: 0; }
+							body { 
+								margin: 0; 
+								padding: 0; 
+								-webkit-print-color-adjust: exact;
+								color-adjust: exact;
+							}
+							table { 
+								page-break-inside: avoid; 
+							}
+						}
+						body {
+							font-family: 'Courier New', monospace;
+							line-height: 1.3;
+						}
+						table {
+							border-collapse: collapse;
 						}
 					</style>
 				</head>

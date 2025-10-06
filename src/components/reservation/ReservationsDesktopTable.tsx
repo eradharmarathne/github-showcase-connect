@@ -381,18 +381,14 @@ export function ReservationsDesktopTable({
 											<Button
 												variant="ghost"
 												size="sm"
-												onClick={() => onPrint(reservation)}
+												onClick={() => onPrint({
+													...reservation,
+													convertedAmounts: convertedAmounts[reservation.id],
+													selectedCurrency: selectedCurrency
+												})}
 												className="h-8 w-8 p-0"
 											>
 												<Printer className="h-4 w-4" />
-											</Button>
-											<Button
-												variant="ghost"
-												size="sm"
-												onClick={() => onViewReservation(reservation.id)}
-												className="h-8 w-8 p-0"
-											>
-												<Calendar className="h-4 w-4" />
 											</Button>
 										</div>
 									</TableCell>
