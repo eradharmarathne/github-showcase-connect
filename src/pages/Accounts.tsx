@@ -206,7 +206,7 @@ export default function Accounts() {
 			<AccountSummaryCards accounts={accountsWithBalances} />
 
 			<Tabs defaultValue="accounts" className="space-y-4">
-				<TabsList>
+				<TabsList className="w-full max-w-md border-b">
 					<TabsTrigger value="accounts">
 						{t("accounts.tabs.accounts")}
 					</TabsTrigger>
@@ -241,7 +241,9 @@ export default function Accounts() {
 			<AccountTransferForm
 				open={showTransferDialog}
 				onOpenChange={setShowTransferDialog}
-				accounts={accountsWithBalances}
+				accounts={accountsWithBalances.map(
+					({ currentBalance, ...account }) => account,
+				)}
 				onTransferCompleted={handleTransferCompleted}
 			/>
 		</div>

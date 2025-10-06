@@ -196,11 +196,15 @@ export function PaymentDialog({
 						reservation.total_amount,
 						reservation.currency,
 						initialCurrency,
+						tenant?.id!,
+						reservation.location_id,
 					);
 					const convertedPaid = await convertCurrency(
 						reservation.paid_amount || 0,
 						reservation.currency,
 						initialCurrency,
+						tenant?.id!,
+						reservation.location_id,
 					);
 
 					setDisplayAmounts({
@@ -216,7 +220,7 @@ export function PaymentDialog({
 
 			convertAmounts();
 		}
-	}, [reservation, initialCurrency, initialAmount]);
+	}, [reservation, initialCurrency, initialAmount, tenant?.id]);
 
 	// Handle currency change with automatic amount conversion
 	const handleCurrencyChange = async (newCurrency: string) => {
@@ -226,6 +230,8 @@ export function PaymentDialog({
 				formData.amount,
 				formData.currency,
 				newCurrency,
+				tenant?.id!,
+				reservation?.location_id!,
 			);
 
 			setFormData({
@@ -260,6 +266,8 @@ export function PaymentDialog({
 					formData.amount,
 					formData.currency,
 					reservation.currency,
+					tenant?.id!,
+					reservation.location_id,
 				);
 			} catch (error) {
 				console.error("Error converting currency for validation:", error);
@@ -287,6 +295,8 @@ export function PaymentDialog({
 				formData.amount,
 				formData.currency,
 				accountCurrency,
+				tenant?.id!,
+				reservation.location_id,
 			);
 
 			// Create payment record (database trigger will automatically update reservation)

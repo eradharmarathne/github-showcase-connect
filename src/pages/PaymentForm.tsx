@@ -146,6 +146,8 @@ export default function PaymentForm() {
 						totalAmount,
 						reservationRes.data.currency as any,
 						initialCurrency as any,
+						tenant.id,
+						reservationRes.data.location_id,
 					);
 					setFormData((prev) => ({ ...prev, amount: convertedAmount }));
 				} catch (error) {
@@ -188,6 +190,8 @@ export default function PaymentForm() {
 					formData.amount,
 					formData.currency as any,
 					newCurrency as any,
+					tenant?.id!,
+					reservation.location_id,
 				);
 			}
 
@@ -276,6 +280,8 @@ export default function PaymentForm() {
 					formData.amount,
 					formData.currency as any,
 					reservation.currency as any,
+					tenant?.id!,
+					reservation.location_id,
 				);
 			}
 

@@ -129,6 +129,8 @@ export function ViewReservationDialog({
 							Number(income.amount),
 							income.currency,
 							reservation.currency,
+							reservation.tenant_id!,
+							reservation.location_id,
 						);
 
 						totalExpenses += convertedAmount;

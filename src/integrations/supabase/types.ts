@@ -476,7 +476,9 @@ export type Database = {
 					from_currency: Database["public"]["Enums"]["currency_type"] | null;
 					id: string;
 					is_custom: boolean | null;
+					location_id: string;
 					rate: number | null;
+					tenant_id: string;
 					to_currency: Database["public"]["Enums"]["currency_type"] | null;
 					updated_at: string;
 					usd_rate: number | null;
@@ -487,7 +489,9 @@ export type Database = {
 					from_currency?: Database["public"]["Enums"]["currency_type"] | null;
 					id?: string;
 					is_custom?: boolean | null;
+					location_id: string;
 					rate?: number | null;
+					tenant_id: string;
 					to_currency?: Database["public"]["Enums"]["currency_type"] | null;
 					updated_at?: string;
 					usd_rate?: number | null;
@@ -498,12 +502,29 @@ export type Database = {
 					from_currency?: Database["public"]["Enums"]["currency_type"] | null;
 					id?: string;
 					is_custom?: boolean | null;
+					location_id?: string;
 					rate?: number | null;
+					tenant_id?: string;
 					to_currency?: Database["public"]["Enums"]["currency_type"] | null;
 					updated_at?: string;
 					usd_rate?: number | null;
 				};
-				Relationships: [];
+				Relationships: [
+					{
+						foreignKeyName: "fk_currency_rates_location";
+						columns: ["location_id"];
+						isOneToOne: false;
+						referencedRelation: "locations";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "fk_currency_rates_tenant";
+						columns: ["tenant_id"];
+						isOneToOne: false;
+						referencedRelation: "tenants";
+						referencedColumns: ["id"];
+					},
+				];
 			};
 			expense_types: {
 				Row: {

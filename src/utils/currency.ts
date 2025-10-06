@@ -1,16 +1,22 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Tables } from "@/integrations/supabase/types";
 
 // Updated type for dynamic currencies
 export type Currency = string; // Now supports any currency code
 
 export interface CurrencyRate {
 	id: string;
-	currency_code: string;
-	usd_rate: number;
-	is_custom: boolean;
+	currency_code: string | null;
+	usd_rate: number | null;
+	is_custom: boolean | null;
+	tenant_id: string;
+	location_id: string;
 	updated_at: string;
 	created_at: string;
 }
+
+// Use the database type for compatibility
+export type DatabaseCurrencyRate = Tables<"currency_rates">;
 
 // Type for currency rates object (currency_code -> usd_rate)
 export type CurrencyRates = Record<string, number>;
@@ -26,12 +32,17 @@ const getDefaultRates = (): CurrencyRates => {
 	};
 };
 
-// Get all available currencies from database
-export const getAvailableCurrencies = async (): Promise<string[]> => {
+// Get all available currencies from database for a specific tenant and location
+export const getAvailableCurrencies = async (
+	tenantId: string,
+	locationId: string,
+): Promise<string[]> => {
 	try {
 		const { data, error } = await supabase
 			.from("currency_rates")
 			.select("currency_code")
+			.eq("tenant_id", tenantId)
+			.eq("location_id", locationId)
 			.not("currency_code", "is", null)
 			.order("currency_code");
 
@@ -47,9 +58,15 @@ export const getAvailableCurrencies = async (): Promise<string[]> => {
 	}
 };
 
-export const getCurrencyRates = async (): Promise<CurrencyRates> => {
-	// Check cache first
+export const getCurrencyRates = async (
+	tenantId: string,
+	locationId: string,
+): Promise<CurrencyRates> => {
+	// Use tenant/location specific cache key
+	const cacheKey = `${tenantId}-${locationId}`;
 	const now = Date.now();
+
+	// Check cache first (you may want to implement a more sophisticated cache structure)
 	if (
 		Object.keys(currencyRatesCache).length > 0 &&
 		now - lastCacheUpdate < CACHE_DURATION
@@ -61,6 +78,8 @@ export const getCurrencyRates = async (): Promise<CurrencyRates> => {
 		const { data, error } = await supabase
 			.from("currency_rates")
 			.select("currency_code, usd_rate")
+			.eq("tenant_id", tenantId)
+			.eq("location_id", locationId)
 			.not("currency_code", "is", null)
 			.not("usd_rate", "is", null);
 
@@ -70,7 +89,7 @@ export const getCurrencyRates = async (): Promise<CurrencyRates> => {
 		}
 
 		if (!data || data.length === 0) {
-			console.warn("No currency rates found in database");
+			console.warn("No currency rates found in database for tenant/location");
 			return getDefaultRates();
 		}
 
@@ -95,13 +114,15 @@ export const convertCurrency = async (
 	amount: number,
 	fromCurrency: string,
 	toCurrency: string,
+	tenantId: string,
+	locationId: string,
 ): Promise<number> => {
 	if (fromCurrency === toCurrency) {
 		return amount;
 	}
 
 	try {
-		const rates = await getCurrencyRates();
+		const rates = await getCurrencyRates(tenantId, locationId);
 
 		// Convert from source currency to USD first
 		let usdAmount = amount;
@@ -136,6 +157,8 @@ export const convertCurrency = async (
 export const addCustomCurrency = async (
 	currencyCode: string,
 	usdRate: number,
+	tenantId: string,
+	locationId: string,
 ): Promise<{ success: boolean; error?: string }> => {
 	try {
 		// Validate currency code (3-5 uppercase letters)
@@ -156,9 +179,11 @@ export const addCustomCurrency = async (
 				currency_code: currencyCode,
 				usd_rate: usdRate,
 				is_custom: true,
+				tenant_id: tenantId,
+				location_id: locationId,
 			},
 			{
-				onConflict: "currency_code",
+				onConflict: "tenant_id,location_id,currency_code",
 			},
 		);
 
@@ -189,6 +214,8 @@ export const getCurrencyConversionSearchUrl = (
 // Remove a custom currency
 export async function removeCustomCurrency(
 	currencyCode: string,
+	tenantId: string,
+	locationId: string,
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		if (currencyCode === "USD") {
@@ -199,6 +226,8 @@ export async function removeCustomCurrency(
 			.from("currency_rates")
 			.delete()
 			.eq("currency_code", currencyCode)
+			.eq("tenant_id", tenantId)
+			.eq("location_id", locationId)
 			.eq("is_custom", true);
 
 		if (error) {
@@ -279,6 +308,8 @@ export function formatAmountWithSymbol(
 export async function updateCurrencyRate(
 	currencyCode: string,
 	usdRate: number,
+	tenantId: string,
+	locationId: string,
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		if (currencyCode === "USD") {
@@ -295,7 +326,9 @@ export async function updateCurrencyRate(
 				usd_rate: usdRate,
 				updated_at: new Date().toISOString(),
 			})
-			.eq("currency_code", currencyCode);
+			.eq("currency_code", currencyCode)
+			.eq("tenant_id", tenantId)
+			.eq("location_id", locationId);
 
 		if (error) {
 			console.error("Error updating currency rate:", error);
@@ -314,11 +347,16 @@ export async function updateCurrencyRate(
 }
 
 // Get currency details including custom flag
-export const getCurrencyDetails = async (): Promise<CurrencyRate[]> => {
+export const getCurrencyDetails = async (
+	tenantId: string,
+	locationId: string,
+): Promise<CurrencyRate[]> => {
 	try {
 		const { data, error } = await supabase
 			.from("currency_rates")
 			.select("*")
+			.eq("tenant_id", tenantId)
+			.eq("location_id", locationId)
 			.not("currency_code", "is", null)
 			.order("currency_code");
 
@@ -327,7 +365,7 @@ export const getCurrencyDetails = async (): Promise<CurrencyRate[]> => {
 			return [];
 		}
 
-		return data || [];
+		return (data as DatabaseCurrencyRate[]) || [];
 	} catch (error) {
 		console.error("Error in getCurrencyDetails:", error);
 		return [];

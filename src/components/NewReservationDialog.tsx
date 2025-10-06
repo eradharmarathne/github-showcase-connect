@@ -98,6 +98,8 @@ export function NewReservationDialog({
 						selection.total_amount,
 						selection.currency,
 						paymentData.currency,
+						tenant?.id!,
+						selectedLocation!,
 					);
 					total += convertedAmount;
 				} catch (error) {
@@ -107,7 +109,7 @@ export function NewReservationDialog({
 			}
 		}
 		return total;
-	}, [roomSelections, paymentData.currency]);
+	}, [roomSelections, paymentData.currency, tenant?.id, selectedLocation]);
 
 	// State to store converted total amount
 	const [convertedTotal, setConvertedTotal] = useState(0);
