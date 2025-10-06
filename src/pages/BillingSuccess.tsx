@@ -52,9 +52,30 @@ export default function BillingSuccess() {
 
 				// Update or create subscription record
 				if (subscriptionId && customerId && tenant) {
+					// First, get the correct plan_id by mapping from product_id
+					const { data: planData, error: planError } = await supabase
+						.from("plans")
+						.select("id, name, product_id")
+						.eq("product_id", productId)
+						.single();
+
+					if (planError) {
+						console.error("Error finding plan for product_id:", productId, planError);
+						// Fallback to starter plan if we can't find the plan
+						toast({
+							title: "Warning",
+							description: "Could not find matching plan. Using starter plan as fallback.",
+							variant: "destructive",
+						});
+					}
+
+					const correctPlanId = planData?.id || "starter";
+					console.log(`Mapping product_id ${productId} to plan_id ${correctPlanId}`);
+
 					const subscriptionData = {
 						tenant_id: tenant.id,
 						status: "active" as const,
+						plan_id: correctPlanId, // Use the correctly mapped plan_id
 						creem_customer_id: customerId,
 						creem_subscription_id: subscriptionId,
 						current_period_start: new Date().toISOString(),
@@ -86,14 +107,10 @@ export default function BillingSuccess() {
 							.select()
 							.single();
 					} else {
-						// Create new subscription - ensure we have plan_id
-						const subscriptionWithPlan = {
-							...subscriptionData,
-							plan_id: productId || "starter", // Default to starter if no product ID
-						};
+						// Create new subscription - plan_id is already in subscriptionData
 						subscriptionResult = await supabase
 							.from("subscriptions")
-							.insert(subscriptionWithPlan)
+							.insert(subscriptionData)
 							.select()
 							.single();
 					}

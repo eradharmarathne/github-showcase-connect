@@ -65,6 +65,12 @@ function getSupabaseAdminClient() {
 			return getSupabaseClient(); // Fallback to regular client
 		}
 
+		// Prevent creating admin client in browser environment if not needed
+		if (typeof window !== 'undefined' && !import.meta.env.DEV) {
+			console.warn("Admin client should not be used in browser environment");
+			return getSupabaseClient(); // Fallback to regular client
+		}
+
 		supabaseAdminInstance = createClient<Database>(
 			SUPABASE_URL,
 			SUPABASE_SERVICE_ROLE_KEY,
