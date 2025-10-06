@@ -53,8 +53,8 @@ export function ReservationsTable({
 	};
 
 	const isAddIncomeDisabled = (reservation: Reservation) => {
-		// Disable if status is confirmed (payment completed)
-		if (reservation.status === "confirmed") {
+		// Disable if balance is fully paid (balance <= 0.01 to handle rounding)
+		if ((reservation.balance_amount || 0) <= 0.01) {
 			return true;
 		}
 		// Disable if income already exists for this reservation
@@ -65,8 +65,8 @@ export function ReservationsTable({
 	};
 
 	const getDisabledReason = (reservation: Reservation) => {
-		if (reservation.status === "confirmed") {
-			return t("income.reservationsTable.disabledReasons.confirmed");
+		if ((reservation.balance_amount || 0) <= 0.01) {
+			return t("income.reservationsTable.disabledReasons.fullyPaid");
 		}
 		if (reservationIncomeMap[reservation.id]) {
 			return t("income.reservationsTable.disabledReasons.alreadyRecorded");

@@ -731,6 +731,7 @@
       "addIncomeButton": "Add Income",
       "disabledReasons": {
         "confirmed": "Income cannot be added - reservation is confirmed (payment completed)",
+        "fullyPaid": "Income cannot be added - reservation balance is fully paid",
         "alreadyRecorded": "Income already recorded for this reservation"
       },
       "statuses": {
