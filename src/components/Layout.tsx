@@ -116,8 +116,8 @@ export function Layout() {
 			<SidebarInset>
 				{/* Header */}
 				<header className="bg-card sticky w-full top-0 z-10 border-b">
-					<div className="mx-auto flex w-full items-center justify-between gap-6 px-4 py-2 sm:px-6">
-						<div className="flex items-center gap-2 px-0 sm:px-2">
+					<div className="mx-auto flex w-full items-center justify-between gap-6 px-4 sm:px-6 md:px-8 py-2 sm:py-3">
+						<div className="flex items-center gap-2 px-0 sm:px-2 md:px-4">
 							<SidebarTrigger className="-ml-1" />
 							<Separator orientation="vertical" className="mr-2 h-4" />
 							<Breadcrumb>
@@ -152,7 +152,7 @@ export function Layout() {
 				</header>
 
 				{/* Main Content */}
-				<div className="flex flex-1 flex-col gap-4 px-0 sm:px-4 pt-0">
+				<div className="flex flex-1 flex-col gap-4 px-0 sm:px-4 md:px-6 pt-0">
 					<Outlet />
 				</div>
 			</SidebarInset>

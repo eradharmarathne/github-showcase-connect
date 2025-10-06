@@ -58,7 +58,7 @@ export default function Users() {
 	}
 
 	return (
-		<div className="w-full pb-20 sm:pb-8 px-4 sm:px-6 mx-auto space-y-6 animate-fade-in">
+		<div className="w-full pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 mx-auto space-y-6 animate-fade-in">
 			{/* Header */}
 			<div className="flex justify-between items-center pt-8">
 				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Users</h1>

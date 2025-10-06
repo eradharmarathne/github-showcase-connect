@@ -186,13 +186,13 @@ export function ExpenseShortcuts({
 					Today's Expense Shortcuts
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="p-4 space-y-3">
+			<CardContent className="p-4 sm:p-6 space-y-3">
 				<div className="grid grid-cols-1 gap-3">
 					{shortcuts.map((shortcut) => (
 						<Button
 							key={shortcut.id}
 							variant="outline"
-							className="w-full p-4 h-auto flex flex-col items-start gap-2 hover:transition-all border-border bg-primary"
+							className="w-full p-4 sm:p-6 h-auto flex flex-col items-start gap-2 hover:transition-all border-border bg-primary"
 							onClick={() => handleQuickFill(shortcut)}
 						>
 							<div className="flex items-center justify-between w-full">

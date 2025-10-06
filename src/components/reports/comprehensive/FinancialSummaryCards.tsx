@@ -152,7 +152,7 @@ export function FinancialSummaryCards({
 			<div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 				{[...Array(4)].map((_, i) => (
 					<Card key={i} className="animate-pulse">
-						<CardContent className="p-3 sm:p-6">
+						<CardContent className="p-3 sm:p-4 md:p-6">
 							<div className="h-16 bg-gray-200 rounded"></div>
 						</CardContent>
 					</Card>

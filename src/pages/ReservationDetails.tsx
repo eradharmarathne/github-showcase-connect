@@ -158,7 +158,7 @@ export default function ReservationDetails() {
 
 	if (!reservation) {
 		return (
-			<div className="max-w-4xl mx-auto p-4 text-center">
+			<div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8 text-center">
 				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
 					Reservation Not Found
 				</h1>
@@ -170,9 +170,9 @@ export default function ReservationDetails() {
 	}
 
 	return (
-		<div className="w-full mx-auto px-0 sm:px-4 space-y-6 print-area">
+		<div className="w-full mx-auto px-4 sm:px-6 md:px-8 space-y-6 print-area">
 			{/* Header */}
-			<div className="flex flex-col sm:flex-row items-start px-4 sm:px-0 sm:items-center gap-4 no-print">
+			<div className="flex flex-col sm:flex-row items-start px-0 sm:items-center gap-4 no-print">
 				<div className="flex flex-1 items-center gap-4">
 					<div className="flex-1">
 						<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
@@ -233,7 +233,7 @@ export default function ReservationDetails() {
 				</p>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-4 pb-20 sm:px-0">
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 px-0 pb-20 sm:pb-8">
 				{/* Guest Information */}
 				<Card>
 					<CardHeader>

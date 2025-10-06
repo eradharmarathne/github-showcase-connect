@@ -41,7 +41,7 @@ export default function BillingError() {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center p-4">
+		<div className="min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-8">
 			<Card className="w-full max-w-md">
 				<CardHeader className="text-center">
 					<CardTitle className="flex items-center justify-center gap-2 text-red-600">

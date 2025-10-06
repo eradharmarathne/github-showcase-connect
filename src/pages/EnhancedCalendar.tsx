@@ -106,7 +106,7 @@ export default function EnhancedCalendar() {
 
 	return (
 		<PermissionRoute permission={["access_calendar"]}>
-			<div className="space-y-6 pb-20 sm:pb-6 px-4">
+			<div className="space-y-6 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8">
 				{/* Filters */}
 				<div className="flex pt-3 flex-col sm:flex-row gap-4 items-start sm:items-center">
 					<div className="relative flex-1 max-w-sm">

@@ -154,7 +154,6 @@ export default function Auth() {
 		setEmail("demo@checkingcheckout.com");
 		setPassword("Netronk@123");
 		setIsLogin(true);
-		handleAuth(new Event("submit") as unknown as React.FormEvent);
 	};
 
 	return (
@@ -186,7 +185,7 @@ export default function Auth() {
 			</aside>
 
 			<div className="flex-1 flex items-center justify-center h-screen">
-				<div className="w-full max-w-md space-y-8 px-4 text-foreground sm:px-0">
+				<div className="w-full max-w-md space-y-8 px-4 sm:px-6 md:px-8 text-foreground sm:px-0">
 					<div className="space-y-1">
 						<h2 className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground">
 							{isLogin ? "Get started now" : "Create your account"}

@@ -562,7 +562,7 @@ export function NewReservationDialog({
 
 						{/* Total Summary */}
 						{roomSelections.length > 0 && (
-							<div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+							<div className="bg-blue-50 p-4 sm:p-6 rounded-md border border-blue-200">
 								<div className="space-y-2">
 									<div className="flex justify-between items-center">
 										<span className="font-semibold">
@@ -600,7 +600,7 @@ export function NewReservationDialog({
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex w-full items-center justify-end gap-3 py-4 border-t">
+					<div className="flex w-full items-center justify-end gap-3 py-4 sm:py-6 border-t">
 						<Button type="button" variant="outline" onClick={onClose}>
 							<X className="h-4 w-4 mr-2" />
 							Cancel

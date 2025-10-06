@@ -31,7 +31,7 @@ export function PropertyDetailsStep({
 						<Button
 							key={type.id}
 							variant="outline"
-							className={`h-auto p-4 flex flex-col items-center gap-3 text-left ${
+							className={`h-auto p-4 sm:p-6 flex flex-col items-center gap-3 text-left ${
 								formData.propertyType === type.id
 									? "bg-primary/10 border-2 border-primary"
 									: ""

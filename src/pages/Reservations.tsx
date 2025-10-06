@@ -131,7 +131,7 @@ export default function Reservations() {
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 				<ReservationsHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
-				<div className="container mx-auto px-4 sm:px-6">
+				<div className="container mx-auto px-4 sm:px-6 md:px-8">
 					<ReservationsFilters
 						locations={locations}
 						selectedLocation=""

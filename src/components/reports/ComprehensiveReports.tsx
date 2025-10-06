@@ -76,7 +76,7 @@ export default function ComprehensiveReports() {
 	}
 
 	return (
-		<div className="space-y-6 px-0 sm:px-4">
+		<div className="space-y-6 px-0 sm:px-4 md:px-6">
 			{/* Filters */}
 			<ReportFilters
 				dateFrom={dateFrom}

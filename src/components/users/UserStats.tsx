@@ -10,7 +10,7 @@ export function UserStats() {
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 				{[...Array(5)].map((_, i) => (
 					<Card key={i} className="bg-card border">
-						<CardContent className="p-6">
+						<CardContent className="p-4 sm:p-6">
 							<div className="flex items-center justify-between">
 								<div>
 									<div className="h-4 bg-muted rounded animate-pulse w-20 mb-2" />

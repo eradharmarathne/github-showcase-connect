@@ -169,7 +169,7 @@ export default function ResetPassword() {
 					></div>
 				</div>
 				<div className="flex-1 flex items-center justify-center h-screen">
-					<div className="w-full max-w-md space-y-8 px-4 sm:px-0">
+					<div className="w-full max-w-md space-y-8 px-4 md:px-8 sm:px-0">
 						<div className="">
 							<div className="mt-5 space-y-2 text-center">
 								<div className="flex items-center justify-center">

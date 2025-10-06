@@ -375,7 +375,7 @@ export default function PaymentForm() {
 
 	if (!reservation) {
 		return (
-			<div className="max-w-4xl mx-auto p-4 text-center">
+			<div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8 text-center">
 				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
 					Reservation Not Found
 				</h1>
@@ -387,7 +387,7 @@ export default function PaymentForm() {
 	}
 
 	return (
-		<div className="w-full mx-auto p-4 space-y-6 pb-20 sm:pb-12">
+		<div className="w-full mx-auto px-4 sm:px-6 md:px-8 space-y-6 pb-20 sm:pb-8">
 			{/* Header */}
 			<div className="flex items-center gap-4">
 				<div className="flex-1">

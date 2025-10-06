@@ -49,7 +49,7 @@ export const SignatureCapture = ({
 					{title}
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="space-y-4">
+			<CardContent className="space-y-4 p-4 sm:p-6">
 				{!signature ? (
 					<div className="text-center py-8">
 						<Dialog open={isOpen} onOpenChange={setIsOpen}>

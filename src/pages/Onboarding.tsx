@@ -443,7 +443,7 @@ export default function Onboarding() {
 	};
 
 	return (
-		<div className="min-h-screen bg-background p-4">
+		<div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
 			<div className="max-w-4xl py-8 sm:py-16 w-full mx-auto">
 				{/* Progress Header */}
 				<OnboardingProgress

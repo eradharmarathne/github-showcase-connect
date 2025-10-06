@@ -93,7 +93,7 @@ export default function ForgotPassword() {
 			<div className="min-h-screen flex items-center justify-center bg-background overflow-hidden">
 				<div className="relative flex-1 hidden items-center justify-center h-screen bg-[url('/images/leavs-art.jpg')] bg-cover lg:flex"></div>
 				<div className="flex-1 flex items-center justify-center h-screen">
-					<div className="w-full max-w-md space-y-8 px-4 bg-background text-gray-600 sm:px-0">
+					<div className="w-full max-w-md space-y-8 px-4 md:px-8 bg-background text-gray-600 sm:px-0">
 						<div className="">
 							<div className="mt-5 space-y-2">
 								<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-green-100">
@@ -155,7 +155,7 @@ export default function ForgotPassword() {
 		<div className="min-h-screen flex items-center justify-center bg-background overflow-hidden">
 			<div className="relative flex-1 hidden items-center justify-center h-screen bg-[url('/images/leavs-art.jpg')] bg-cover lg:flex"></div>
 			<div className="flex-1 flex items-center justify-center h-screen">
-				<div className="w-full max-w-md space-y-8 px-4 text-gray-600 sm:px-0">
+				<div className="w-full max-w-md space-y-8 px-4 md:px-8 text-gray-600 sm:px-0">
 					<div className="">
 						<div className="mt-5 space-y-2">
 							<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">

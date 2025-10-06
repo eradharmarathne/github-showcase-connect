@@ -61,14 +61,14 @@ export function ReportFilters({
 	}, [fetchAvailableCurrencies]);
 
 	return (
-		<Card className="px-4">
-			<CardHeader className="px-0 sm:px-2">
+		<Card className="px-4 sm:px-6 md:px-8">
+			<CardHeader className="px-0 sm:px-2 md:px-4">
 				<CardTitle className="text-base md:text-lg lg:text-xl flex items-center gap-2 font-semibold">
 					<Calendar className="size-5" />
 					{t("reports.comprehensive.filters.title")}
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="px-0 sm:px-2">
+			<CardContent className="px-0 sm:px-2 md:px-4">
 				<div className="grid grid-cols-1 md:grid-cols-4 gap-2">
 					<div>
 						<Label htmlFor="currency">

@@ -30,7 +30,7 @@ export function AccountCard({
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-2">
+			<CardContent className="space-y-2 p-4 sm:p-6">
 				<div className="flex justify-between items-center">
 					<span className="text-sm text-muted-foreground">
 						{t("accounts.card.balance")}

@@ -39,7 +39,7 @@ export function TransactionHistoryCard({
 						transactions.map((txn) => (
 							<div
 								key={`${txn.id}-${txn.date}`}
-								className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+								className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 border rounded-lg hover:bg-muted/50 transition-colors"
 							>
 								<div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
 									<Badge

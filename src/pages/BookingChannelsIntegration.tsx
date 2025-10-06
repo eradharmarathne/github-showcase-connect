@@ -595,7 +595,7 @@ export default function BookingChannelsIntegration() {
 	}
 
 	return (
-		<div className="space-y-6 px-4 sm:px-6 pt-8">
+		<div className="space-y-6 px-4 sm:px-6 md:px-8 pt-8">
 			{/* Header */}
 			<div className="flex items-center gap-2">
 				<Button
@@ -1293,7 +1293,7 @@ export default function BookingChannelsIntegration() {
 										</div>
 									) : (
 										<div className="space-y-4">
-											<div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+											<div className="bg-amber-50 p-4 sm:p-6 rounded-lg border border-amber-200">
 												<div className="flex items-start gap-3">
 													<AlertCircle className="size-5 text-amber-600 mt-0.5" />
 													<div className="space-y-2">

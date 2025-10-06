@@ -500,7 +500,7 @@ export default function BillingSubscription() {
 	// Show subscription error if it's not a 406 error (which is expected when no subscription)
 	if (subscriptionError && !subscriptionError.message?.includes("406") && !subscriptionError.message?.includes("Not Acceptable")) {
 		return (
-			<div className="container mx-auto p-6">
+			<div className="container mx-auto px-4 sm:px-6 md:px-8">
 				<Alert variant="destructive">
 					<AlertTriangle className="h-4 w-4" />
 					<AlertDescription>
@@ -512,7 +512,7 @@ export default function BillingSubscription() {
 	}
 
 	return (
-		<div className="w-full mx-auto pb-20 sm:pb-6 p-4 space-y-6">
+		<div className="w-full mx-auto pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 space-y-6">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>

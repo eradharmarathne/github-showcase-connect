@@ -86,7 +86,7 @@ export default function Reports() {
 						className="w-full"
 					>
 						{/* Mobile Tab Navigation */}
-						<div className="lg:hidden px-4 pb-4">
+						<div className="lg:hidden px-4 sm:px-6 pb-4">
 							<TabsList className="grid w-full grid-cols-2 gap-2 h-auto p-0 bg-transparent">
 								<TabsTrigger
 									value="comprehensive"

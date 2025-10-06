@@ -119,7 +119,7 @@ export const AirbnbDatePicker = ({
 				</PopoverTrigger>
 				<PopoverContent className="w-auto p-0" align="start">
 					<Card className="border-0">
-						<CardContent className="p-4">
+						<CardContent className="p-4 sm:p-6">
 							<div className="text-center mb-4">
 								<h3 className="text-base md:text-lg lg:text-xl font-semibold">
 									{selectingCheckIn

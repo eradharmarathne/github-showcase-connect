@@ -353,7 +353,7 @@ export function AccountDetails({
 					{t("reports.comprehensive.accounts.subtitle")}
 				</CardDescription>
 			</CardHeader>
-			<CardContent className="px-2 sm:px-4">
+			<CardContent className="px-2 sm:px-4 md:px-6">
 				<div className="space-y-4">
 					{accounts.map((account) => (
 						<Card

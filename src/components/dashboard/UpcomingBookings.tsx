@@ -96,7 +96,7 @@ export function UpcomingBookings({
 					</Button>
 				)}
 			</CardHeader>
-			<CardContent className="space-y-3 lg:space-y-4">
+			<CardContent className="space-y-3 lg:space-y-4 p-4 sm:p-6">
 				{upcomingReservations.length > 0 ? (
 					upcomingReservations.map((reservation) => (
 						<div

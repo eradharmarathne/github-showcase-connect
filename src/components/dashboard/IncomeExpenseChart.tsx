@@ -233,7 +233,7 @@ export function IncomeExpenseChart({
 				</div>
 				{/* Chart */}
 				<Card className="bg-card border">
-					<CardContent className="pt-6">
+					<CardContent className="pt-4 sm:pt-6">
 						<div className="h-[300px] bg-muted rounded animate-pulse" />
 					</CardContent>
 				</Card>
