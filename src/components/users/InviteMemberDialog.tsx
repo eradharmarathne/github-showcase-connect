@@ -18,7 +18,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { addUserToLocation } from "@/lib/invite";
 import type { InvitePermissions, Location } from "./types";
 import { defaultInvitePermissions } from "./types";
 
@@ -72,21 +72,39 @@ export function InviteMemberDialog({
 		try {
 			setInviteLoading(true);
 
-			const { data: result, error } = await supabase.rpc(
-				"create_user_invitation",
-				{
-					p_email: inviteEmail.trim().toLowerCase(),
-					p_tenant_id: tenant.id,
+			// Use the updated addUserToLocation function instead of RPC
+			const result = await addUserToLocation({
+				email: inviteEmail.trim().toLowerCase(),
+				tenantId: tenant.id,
+				locationId: inviteLocationId,
+				addedBy: currentUserId,
+				permissions: {
+					access_dashboard: invitePermissions.access_dashboard,
+					access_income: invitePermissions.access_income,
+					access_expenses: invitePermissions.access_expenses,
+					access_reports: invitePermissions.access_reports,
+					access_calendar: invitePermissions.access_calendar,
+					access_bookings: invitePermissions.access_bookings,
+					access_rooms: invitePermissions.access_rooms,
+					access_master_files: invitePermissions.access_master_files,
+					access_accounts: invitePermissions.access_accounts,
+					access_users: invitePermissions.access_users,
+					access_settings: invitePermissions.access_settings,
+					access_booking_channels: invitePermissions.access_booking_channels,
 				},
-			);
+			});
 
-			if (error) throw error;
+			if (!result.success) {
+				throw new Error(result.error || "Failed to invite user");
+			}
 
 			console.log("Invitation result:", result);
 
 			toast({
 				title: "Invitation Sent",
-				description: "Invitation sent and login credentials have been emailed",
+				description: result.user_created
+					? "New user created and login credentials have been emailed"
+					: "User added to location and notification sent",
 			});
 
 			// Reset form
