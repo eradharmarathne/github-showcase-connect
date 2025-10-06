@@ -206,11 +206,11 @@ export default function Accounts() {
 			<AccountSummaryCards accounts={accountsWithBalances} />
 
 			<Tabs defaultValue="accounts" className="space-y-4">
-				<TabsList className="w-full max-w-md border-b">
-					<TabsTrigger value="accounts">
+				<TabsList className="w-full justify-between">
+					<TabsTrigger value="accounts" className="w-full">
 						{t("accounts.tabs.accounts")}
 					</TabsTrigger>
-					<TabsTrigger value="transactions">
+					<TabsTrigger value="transactions" className="w-full">
 						{t("accounts.tabs.transactions")}
 					</TabsTrigger>
 				</TabsList>

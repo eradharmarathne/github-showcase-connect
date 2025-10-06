@@ -30,16 +30,21 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 
 		try {
 			// Only fetch account transfers (account-to-account transactions)
+			// Filter by tenant_id directly on account_transfers table
 			const transfersResponse = await supabase
 				.from("account_transfers")
 				.select(
 					"*, from_account:accounts!from_account_id(name, currency, tenant_id, location_access), to_account:accounts!to_account_id(name, currency, tenant_id, location_access)",
 				)
-				.or(
-					`from_account.tenant_id.eq.${tenant.id},to_account.tenant_id.eq.${tenant.id}`,
-				)
+				.eq("tenant_id", tenant.id)
 				.order("created_at", { ascending: false })
 				.limit(20);
+
+			if (transfersResponse.error) {
+				console.error("Error fetching transfers:", transfersResponse.error);
+				setTransactions([]);
+				return;
+			}
 
 			// Filter account transfers to only include those where at least one account
 			// has access to the selected location
