@@ -62,6 +62,11 @@ export default function Reservations() {
 		amount: number;
 		currency: string;
 	} | null>(null);
+	const [editOtpData, setEditOtpData] = useState<{
+		phoneNumber: string;
+		reservation: any;
+	} | null>(null);
+	const [showEditOTPVerification, setShowEditOTPVerification] = useState(false);
 
 	// Event handlers
 	const handleViewReservation = (id: string) => {
@@ -70,8 +75,18 @@ export default function Reservations() {
 	};
 
 	const handleEditReservation = (reservation: any) => {
-		setEditingReservation(reservation);
-		setIsEditDialogOpen(true);
+		// Check if guest has phone number for OTP verification
+		if (reservation.guest_phone) {
+			setEditOtpData({
+				phoneNumber: reservation.guest_phone,
+				reservation: reservation,
+			});
+			setShowEditOTPVerification(true);
+		} else {
+			// If no phone number, proceed directly to edit
+			setEditingReservation(reservation);
+			setIsEditDialogOpen(true);
+		}
 	};
 
 	const handlePayment = (
@@ -92,6 +107,16 @@ export default function Reservations() {
 		}
 		setShowOTPVerification(false);
 		setOtpData(null);
+	};
+
+	const handleEditOTPVerified = () => {
+		if (editOtpData) {
+			// OTP verified, proceed to edit dialog
+			setEditingReservation(editOtpData.reservation);
+			setIsEditDialogOpen(true);
+		}
+		setShowEditOTPVerification(false);
+		setEditOtpData(null);
 	};
 
 	const handleAddIncome = (reservation: any) => {
@@ -412,6 +437,27 @@ export default function Reservations() {
 						<OTPVerification
 							phoneNumber={otpData.phoneNumber}
 							onVerified={handleOTPVerified}
+							triggerComponent={<div />}
+						/>
+					</DialogContent>
+				</Dialog>
+			)}
+
+			{/* Edit OTP Verification Dialog */}
+			{showEditOTPVerification && editOtpData && (
+				<Dialog
+					open={showEditOTPVerification}
+					onOpenChange={(open) => {
+						if (!open) {
+							setShowEditOTPVerification(false);
+							setEditOtpData(null);
+						}
+					}}
+				>
+					<DialogContent>
+						<OTPVerification
+							phoneNumber={editOtpData.phoneNumber}
+							onVerified={handleEditOTPVerified}
 							triggerComponent={<div />}
 						/>
 					</DialogContent>

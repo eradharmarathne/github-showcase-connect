@@ -152,6 +152,39 @@ export function ReservationEditDialog({
 
 			if (error) throw error;
 
+			// Send SMS notification after successful update
+			if (reservation.guest_phone) {
+				try {
+					// Get room details for SMS
+					const { data: roomData } = await supabase
+						.from("rooms")
+						.select("room_number")
+						.eq("id", formData.room_id || reservation.room_id)
+						.single();
+
+					// Send SMS notification about the update
+					await supabase.functions.invoke("send-sms-notification", {
+						body: {
+							type: "reservation",
+							phoneNumber: reservation.guest_phone,
+							guestName: formData.guest_name || reservation.guest_name,
+							reservationNumber: reservation.reservation_number,
+							roomNumber: roomData?.room_number || "N/A",
+							checkIn: formData.check_in_date || reservation.check_in_date,
+							checkOut: formData.check_out_date || reservation.check_out_date,
+							amount: formData.total_amount || reservation.total_amount,
+							currency: formData.currency || reservation.currency,
+							status: "UPDATED"
+						}
+					});
+					
+					console.log("SMS notification sent successfully for reservation update");
+				} catch (smsError) {
+					console.error("Error sending SMS notification:", smsError);
+					// Don't show error to user as the main operation succeeded
+				}
+			}
+
 			toast({
 				title: "Success",
 				description: "Reservation updated successfully",

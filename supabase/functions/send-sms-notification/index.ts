@@ -242,7 +242,18 @@ function createSMSMessage(data: SMSRequest): string {
 function createReservationSMSMessage(data: SMSRequest): string {
 	const currencyAmount = formatCurrency(data.amount!, data.currency!);
 
-	// Keep reservation message concise
+	// Handle updated reservations differently
+	if (data.status === "UPDATED") {
+		let message = `BOOKING UPDATED\n`;
+		message += `${data.guestName}\n`;
+		message += `${data.reservationNumber}\n`;
+		message += `Room ${data.roomNumber}\n`;
+		message += `${data.checkIn} to ${data.checkOut}\n`;
+		message += `${currencyAmount} - CONFIRMED`;
+		return message;
+	}
+
+	// Keep reservation message concise for new bookings
 	let message = `NEW BOOKING\n`;
 	message += `${data.guestName}\n`;
 	message += `${data.reservationNumber}\n`;
