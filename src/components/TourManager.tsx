@@ -1,109 +1,164 @@
-import React, { useEffect, useRef } from 'react';
-import Shepherd from 'shepherd.js';
-import { useTour, TourType } from '@/context/TourContext';
-import { getTourSteps, tourTheme } from '@/lib/tourSteps';
-import { useToast } from '@/hooks/use-toast';
+import React, { useCallback, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router";
+import Shepherd from "shepherd.js";
+import { TourType, useTour } from "@/context/TourContext";
+import { useToast } from "@/hooks/use-toast";
+import { getTourSteps, tourTheme } from "@/lib/tourSteps";
 
 interface TourManagerProps {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
-  const { activeTour, endTour, markTourAsCompleted } = useTour();
-  const { toast } = useToast();
-  const tourInstanceRef = useRef<any | null>(null);
+	const { activeTour, endTour, markTourAsCompleted } = useTour();
+	const { toast } = useToast();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const tourInstanceRef = useRef<any | null>(null);
 
-  useEffect(() => {
-    if (!activeTour) {
-      // Clean up any existing tour
-      if (tourInstanceRef.current) {
-        tourInstanceRef.current.complete();
-        tourInstanceRef.current = null;
-      }
-      return;
-    }
+	// Define which page each tour should start on
+	const getTourPage = useCallback((tourType: TourType): string => {
+		switch (tourType) {
+			case "dashboard":
+				return "/dashboard";
+			case "reservations":
+				return "/reservations";
+			case "financial-reports":
+				return "/reports";
+			case "calendar":
+				return "/calendar";
+			case "master-files":
+				return "/master-files";
+			case "booking-channels":
+				return "/booking-channels";
+			case "settings":
+				return "/settings";
+			case "first-time-user":
+				return "/dashboard"; // Start first-time tour on dashboard
+			default:
+				return "/dashboard";
+		}
+	}, []);
 
-    // Get steps for the current tour
-    const steps = getTourSteps(activeTour);
-    if (steps.length === 0) {
-      console.warn(`No steps found for tour: ${activeTour}`);
-      endTour();
-      return;
-    }
+	const startTourWithNavigation = useCallback(
+		async (tourType: TourType) => {
+			const requiredPage = getTourPage(tourType);
 
-    // Create new tour instance
-    const tour = new Shepherd.Tour({
-      ...tourTheme,
-      confirmCancel: true,
-      confirmCancelMessage: 'Are you sure you want to exit the tour?'
-    });
+			// Navigate to the required page if not already there
+			if (location.pathname !== requiredPage) {
+				navigate(requiredPage);
 
-    // Add steps to tour
-    tour.addSteps(steps);
+				// Wait a bit for navigation and page rendering
+				await new Promise((resolve) => setTimeout(resolve, 500));
+			}
 
-    // Handle tour completion
-    tour.on('complete', () => {
-      markTourAsCompleted(activeTour);
-      endTour();
-      toast({
-        title: '🎉 Tour Completed!',
-        description: 'Great job! You\'ve completed the tour. You can restart it anytime from the help menu.',
-      });
-    });
+			// Wait a bit more for components to render
+			await new Promise((resolve) => setTimeout(resolve, 300));
 
-    // Handle tour cancellation
-    tour.on('cancel', () => {
-      endTour();
-      toast({
-        title: 'Tour Cancelled',
-        description: 'You can restart the tour anytime from the help menu.',
-        variant: 'default'
-      });
-    });
+			// Get steps for the current tour
+			const steps = getTourSteps(tourType);
+			if (steps.length === 0) {
+				console.warn(`No steps found for tour: ${tourType}`);
+				endTour();
+				return;
+			}
 
-    // Handle individual step events for analytics (optional)
-    tour.on('show', (event) => {
-      console.log(`Tour step shown: ${event.step?.id} in tour: ${activeTour}`);
-    });
+			// Create new tour instance
+			const tour = new Shepherd.Tour({
+				...tourTheme,
+				confirmCancel: true,
+				confirmCancelMessage: "Are you sure you want to exit the tour?",
+			});
 
-    // Start the tour
-    tour.start();
-    tourInstanceRef.current = tour;
+			// Add steps to tour
+			tour.addSteps(steps);
 
-    // Cleanup on unmount or tour change
-    return () => {
-      if (tourInstanceRef.current) {
-        tourInstanceRef.current.complete();
-        tourInstanceRef.current = null;
-      }
-    };
-  }, [activeTour, endTour, markTourAsCompleted, toast]);
+			// Handle tour completion
+			tour.on("complete", () => {
+				markTourAsCompleted(tourType);
+				endTour();
+				toast({
+					title: "🎉 Tour Completed!",
+					description:
+						"Great job! You've completed the tour. You can restart it anytime from the help menu.",
+				});
+			});
 
-  return <>{children}</>;
+			// Handle tour cancellation
+			tour.on("cancel", () => {
+				endTour();
+				toast({
+					title: "Tour Cancelled",
+					description: "You can restart the tour anytime from the help menu.",
+					variant: "default",
+				});
+			});
+
+			// Handle individual step events for analytics (optional)
+			tour.on("show", (event) => {
+				console.log(`Tour step shown: ${event.step?.id} in tour: ${tourType}`);
+			});
+
+			// Start the tour
+			tour.start();
+			tourInstanceRef.current = tour;
+		},
+		[
+			navigate,
+			location.pathname,
+			endTour,
+			markTourAsCompleted,
+			toast,
+			getTourPage,
+		],
+	);
+
+	useEffect(() => {
+		if (!activeTour) {
+			// Clean up any existing tour
+			if (tourInstanceRef.current) {
+				tourInstanceRef.current.complete();
+				tourInstanceRef.current = null;
+			}
+			return;
+		}
+
+		startTourWithNavigation(activeTour);
+
+		// Cleanup on unmount or tour change
+		return () => {
+			if (tourInstanceRef.current) {
+				tourInstanceRef.current.complete();
+				tourInstanceRef.current = null;
+			}
+		};
+	}, [activeTour, startTourWithNavigation]);
+
+	return <>{children}</>;
 };
 
 // Hook to easily start tours from components
 export const useTourHelpers = () => {
-  const { startTour, hasCompletedTour } = useTour();
+	const { startTour, hasCompletedTour } = useTour();
 
-  const startDashboardTour = () => startTour('dashboard');
-  const startReservationsTour = () => startTour('reservations');
-  const startFinancialReportsTour = () => startTour('financial-reports');
-  const startFirstTimeUserTour = () => startTour('first-time-user');
-  const startCalendarTour = () => startTour('calendar');
-  const startMasterFilesTour = () => startTour('master-files');
-  const startSettingsTour = () => startTour('settings');
-  const startBookingChannelsTour = () => startTour('booking-channels');
+	const startDashboardTour = () => startTour("dashboard");
+	const startReservationsTour = () => startTour("reservations");
+	const startFinancialReportsTour = () => startTour("financial-reports");
+	const startFirstTimeUserTour = () => startTour("first-time-user");
+	const startCalendarTour = () => startTour("calendar");
+	const startMasterFilesTour = () => startTour("master-files");
+	const startSettingsTour = () => startTour("settings");
+	const startBookingChannelsTour = () => startTour("booking-channels");
 
-  return {
-    startDashboardTour,
-    startReservationsTour,
-    startFinancialReportsTour,
-    startFirstTimeUserTour,
-    startCalendarTour,
-    startMasterFilesTour,
-    startSettingsTour,
-    startBookingChannelsTour,
-    hasCompletedTour
-  };
+	return {
+		startDashboardTour,
+		startReservationsTour,
+		startFinancialReportsTour,
+		startFirstTimeUserTour,
+		startCalendarTour,
+		startMasterFilesTour,
+		startSettingsTour,
+		startBookingChannelsTour,
+		hasCompletedTour,
+	};
 };

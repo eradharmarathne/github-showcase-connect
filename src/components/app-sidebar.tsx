@@ -24,7 +24,6 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
-import { NavUser } from "@/components/nav-user";
 import { AppSidebarSkeleton } from "@/components/skeleton/AppSidebarSkeleton";
 import { LocationSwitcher } from "@/components/team-switcher";
 import {
