@@ -24,7 +24,7 @@ import ProfileDropdown from "./dropdown-profile";
 import FullscreenToggle from "./FullscreenToggle";
 import ProfileAvatarButton from "./ProfileAvatarButton";
 import ThemeSwitcher from "./ThemeSwitcher";
-import { TourHelpButton } from "./TourHelpButton";
+import { TourHelpButton } from "./CustomTourHelpButton";
 import { Button } from "./ui/button";
 
 export function Layout() {

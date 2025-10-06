@@ -2,15 +2,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { PermissionRoute } from "@/components/PermissionRoute";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { TourManager } from "@/components/TourManager";
+import { TourProvider } from "@/components/tour";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import { TourProvider } from "@/context/TourContext";
-import "@/styles/shepherd-custom.css";
+import "@/components/tour/tour-styles.css";
 import "./i18n";
 import BookingChannelsIntegration from "@/pages/BookingChannelsIntegration";
 import Reports from "@/pages/Reports";
@@ -50,8 +49,7 @@ const App = () => (
 							<Toaster />
 							<Sonner />
 							<BrowserRouter>
-								<TourManager>
-									<Routes>
+								<Routes>
 										<Route path="/" element={<AuthRedirect />} />
 										<Route path="/auth" element={<Auth />} />
 										<Route
@@ -328,9 +326,8 @@ const App = () => (
 												</ProtectedRoute>
 											}
 										/>
-										<Route path="*" element={<NotFound />} />
-									</Routes>
-								</TourManager>
+																	<Route path="*" element={<NotFound />} />
+						</Routes>
 							</BrowserRouter>
 						</LocationProvider>
 					</TourProvider>
