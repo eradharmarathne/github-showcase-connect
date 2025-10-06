@@ -31,6 +31,8 @@ export const tourTheme = {
 	classPrefix: "shepherd-",
 	scrollTo: { behavior: "smooth", block: "center" },
 	useModalOverlay: true,
+	modalOverlayOpeningPadding: 4,
+	modalOverlayOpeningRadius: 8,
 	defaultStepOptions: {
 		cancelIcon: {
 			enabled: true,
@@ -39,6 +41,13 @@ export const tourTheme = {
 		when: {
 			show() {
 				document.body.style.overflow = "hidden";
+				// Close any open modals or popups that might interfere
+				const modals = document.querySelectorAll('[role="dialog"], .popover, .dropdown-menu');
+				modals.forEach(modal => {
+					if (modal instanceof HTMLElement && modal.style.display !== 'none') {
+						modal.style.display = 'none';
+					}
+				});
 			},
 			hide() {
 				document.body.style.overflow = "auto";
@@ -248,13 +257,36 @@ export const financialReportsTourSteps: StepOptions[] = [
           <li>Choose quick presets (this month, last month, etc.)</li>
           <li>Compare different time periods</li>
         </ul>
+        <p class="text-xs text-muted-foreground mt-2">💡 Click "Next" below to continue the tour</p>
       </div>
     `,
 		attachTo: {
 			element: '[data-testid="report-filters"]',
-			on: "bottom",
+			on: "left",
 		},
 		buttons: [tourButtons.back, tourButtons.next],
+		when: {
+			show() {
+				// Temporarily disable filter buttons during this step
+				const filterButtons = document.querySelectorAll('[data-testid="report-filters"] button');
+				filterButtons.forEach(btn => {
+					if (btn instanceof HTMLElement) {
+						btn.style.pointerEvents = 'none';
+						btn.style.opacity = '0.7';
+					}
+				});
+			},
+			hide() {
+				// Re-enable filter buttons when leaving this step
+				const filterButtons = document.querySelectorAll('[data-testid="report-filters"] button');
+				filterButtons.forEach(btn => {
+					if (btn instanceof HTMLElement) {
+						btn.style.pointerEvents = 'auto';
+						btn.style.opacity = '1';
+					}
+				});
+			},
+		},
 	},
 	{
 		id: "financial-summary",

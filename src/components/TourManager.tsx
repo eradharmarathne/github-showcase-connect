@@ -15,6 +15,10 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const tourInstanceRef = useRef<any | null>(null);
+	const tourEventListenersRef = useRef<{
+		handleClick: (e: Event) => void;
+		handleKeyDown: (e: KeyboardEvent) => void;
+	} | null>(null);
 
 	// Define which page each tour should start on
 	const getTourPage = useCallback((tourType: TourType): string => {
@@ -91,6 +95,39 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 
 			await waitForElements();
 
+			// Close any open modals, dialogs, or popups before starting tour
+			const closeOpenModals = () => {
+				// Close any open dialogs or modals
+				const modals = document.querySelectorAll('[role="dialog"], .modal, .popover-content');
+				modals.forEach(modal => {
+					if (modal instanceof HTMLElement) {
+						// Try to find and click close button
+						const closeBtn = modal.querySelector('[aria-label="Close"], .close, [data-dismiss]');
+						if (closeBtn instanceof HTMLElement) {
+							closeBtn.click();
+						} else {
+							// Force hide if no close button found
+							modal.style.display = 'none';
+						}
+					}
+				});
+
+				// Close any open dropdowns
+				const dropdowns = document.querySelectorAll('.dropdown-menu[data-state="open"]');
+				dropdowns.forEach(dropdown => {
+					if (dropdown instanceof HTMLElement) {
+						dropdown.style.display = 'none';
+					}
+				});
+
+				// Press escape to close any remaining modals
+				document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+			};
+
+			closeOpenModals();
+			// Wait a bit for modals to close
+			await new Promise(resolve => setTimeout(resolve, 200));
+
 			// Create new tour instance
 			const tour = new Shepherd.Tour({
 				...tourTheme,
@@ -105,6 +142,8 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			tour.on("complete", () => {
 				markTourAsCompleted(tourType);
 				endTour();
+				// Remove tour event listeners
+				removeTourEventListeners();
 				toast({
 					title: "🎉 Tour Completed!",
 					description:
@@ -115,12 +154,57 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			// Handle tour cancellation
 			tour.on("cancel", () => {
 				endTour();
+				// Remove tour event listeners
+				removeTourEventListeners();
 				toast({
 					title: "Tour Cancelled",
 					description: "You can restart the tour anytime from the help menu.",
 					variant: "default",
 				});
 			});
+
+			// Add global event listeners to prevent interference during tours
+			const addTourEventListeners = () => {
+				// Prevent certain interactions that might interfere with tours
+				const handleClick = (e: Event) => {
+					const target = e.target as HTMLElement;
+					// If clicking on a filter/modal trigger during tour, prevent it
+					if (target.closest('[data-testid="report-filters"] button') && 
+						document.querySelector('.shepherd-element')) {
+						console.log('Preventing filter interaction during tour');
+						e.preventDefault();
+						e.stopPropagation();
+					}
+				};
+
+				const handleKeyDown = (e: KeyboardEvent) => {
+					// Close any popups if they appear during tour
+					if (e.key === 'Escape' && document.querySelector('.shepherd-element')) {
+						const modals = document.querySelectorAll('[role="dialog"]:not(.shepherd-element)');
+						modals.forEach(modal => {
+							if (modal instanceof HTMLElement) {
+								modal.style.display = 'none';
+							}
+						});
+					}
+				};
+
+				document.addEventListener('click', handleClick, { capture: true });
+				document.addEventListener('keydown', handleKeyDown, { capture: true });
+
+				// Store references for cleanup
+				tourEventListenersRef.current = { handleClick, handleKeyDown };
+			};
+
+			const removeTourEventListeners = () => {
+				if (tourEventListenersRef.current) {
+					document.removeEventListener('click', tourEventListenersRef.current.handleClick, { capture: true });
+					document.removeEventListener('keydown', tourEventListenersRef.current.handleKeyDown, { capture: true });
+					tourEventListenersRef.current = null;
+				}
+			};
+
+			addTourEventListeners();
 
 			// Handle individual step events for analytics (optional)
 			tour.on("show", (event) => {
@@ -158,6 +242,12 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			if (tourInstanceRef.current) {
 				tourInstanceRef.current.complete();
 				tourInstanceRef.current = null;
+			}
+			// Clean up event listeners
+			if (tourEventListenersRef.current) {
+				document.removeEventListener('click', tourEventListenersRef.current.handleClick, { capture: true });
+				document.removeEventListener('keydown', tourEventListenersRef.current.handleKeyDown, { capture: true });
+				tourEventListenersRef.current = null;
 			}
 		};
 	}, [activeTour, startTourWithNavigation]);
