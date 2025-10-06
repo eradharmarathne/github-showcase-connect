@@ -58,8 +58,17 @@ export const addUserToLocation = async (
 	try {
 		console.log("Adding user to location:", params);
 
-		// First check if user exists in profiles
-		const { data: existingProfile, error: profileError } = await supabase
+		// Get admin client for user management operations
+		const adminClient = createAdminClient();
+		if (!adminClient) {
+			return {
+				success: false,
+				error: "Admin operations not available - service role key missing",
+			};
+		}
+
+		// First check if user exists in profiles using admin client
+		const { data: existingProfile, error: profileError } = await adminClient
 			.from("profiles")
 			.select("id, email, tenant_id")
 			.eq("email", params.email)
@@ -88,7 +97,7 @@ export const addUserToLocation = async (
 				!existingProfile.tenant_id ||
 				existingProfile.tenant_id !== params.tenantId
 			) {
-				const { error: updateError } = await supabase
+				const { error: updateError } = await adminClient
 					.from("profiles")
 					.update({
 						tenant_id: params.tenantId,
@@ -106,15 +115,6 @@ export const addUserToLocation = async (
 		} else {
 			// User doesn't exist in profiles - check if auth user exists
 			console.log("No profile found, checking if auth user exists");
-
-			// Get admin client for auth operations
-			const adminClient = createAdminClient();
-			if (!adminClient) {
-				return {
-					success: false,
-					error: "Admin operations not available - service role key missing",
-				};
-			}
 
 			const { data: authUsers, error: authError } =
 				await adminClient.auth.admin.listUsers();
@@ -137,7 +137,7 @@ export const addUserToLocation = async (
 				userId = existingAuthUser.id;
 				userCreated = false;
 
-				const { error: profileCreateError } = await supabase
+				const { error: profileCreateError } = await adminClient
 					.from("profiles")
 					.insert({
 						id: userId,
@@ -186,7 +186,7 @@ export const addUserToLocation = async (
 				userCreated = true;
 
 				// Create profile for new user
-				const { error: profileCreateError } = await supabase
+				const { error: profileCreateError } = await adminClient
 					.from("profiles")
 					.insert({
 						id: userId,
@@ -205,8 +205,8 @@ export const addUserToLocation = async (
 			}
 		}
 
-		// Create or update user permissions for this location
-		const { data: existingPermissions, error: permError } = await supabase
+		// Create or update user permissions for this location using admin client
+		const { data: existingPermissions, error: permError } = await adminClient
 			.from("user_permissions")
 			.select("id")
 			.eq("user_id", userId)
@@ -224,7 +224,7 @@ export const addUserToLocation = async (
 
 		if (!existingPermissions) {
 			// No existing permissions - create new
-			const { error: createPermError } = await supabase
+			const { error: createPermError } = await adminClient
 				.from("user_permissions")
 				.insert({
 					user_id: userId,
@@ -242,7 +242,7 @@ export const addUserToLocation = async (
 			}
 		} else {
 			// Update existing permissions
-			const { error: updatePermError } = await supabase
+			const { error: updatePermError } = await adminClient
 				.from("user_permissions")
 				.update({
 					...params.permissions,
