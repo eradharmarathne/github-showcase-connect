@@ -63,6 +63,11 @@ export function AddIncomeDialog({
 		payment_type: "direct" as "direct" | "deferred", // direct = paid now, deferred = add to bill
 		currency: "LKR", // Default currency
 	});
+	// Store the base amount and currency for conversion reference
+	const [baseAmount, setBaseAmount] = useState<number>(0);
+	const [baseCurrency, setBaseCurrency] = useState<string>("LKR");
+	const [displayedReservationAmount, setDisplayedReservationAmount] =
+		useState<number>(0);
 
 	const fetchIncomeTypes = useCallback(async () => {
 		try {
@@ -86,6 +91,14 @@ export function AddIncomeDialog({
 
 	useEffect(() => {
 		if (selectedReservation) {
+			const reservationCurrency = selectedReservation.currency || "LKR";
+			const reservationAmount = selectedReservation.total_amount || 0;
+			
+			// Set the base amount and currency from the reservation
+			setBaseAmount(reservationAmount);
+			setBaseCurrency(reservationCurrency);
+			setDisplayedReservationAmount(reservationAmount);
+			
 			setIncomeForm({
 				amount: 0, // Start with empty amount for additional services
 				note:
@@ -94,7 +107,7 @@ export function AddIncomeDialog({
 				account_id: "",
 				income_type_id: "",
 				payment_type: "direct",
-				currency: selectedReservation.currency || "LKR", // Use reservation currency or default to LKR
+				currency: reservationCurrency, // Use reservation currency
 			});
 		}
 	}, [selectedReservation, t]);
@@ -200,6 +213,49 @@ export function AddIncomeDialog({
 		resetIncomeForm();
 	};
 
+	// Handle currency change with automatic amount conversion
+	const handleCurrencyChange = async (newCurrency: string) => {
+		if (incomeForm.currency === newCurrency) return;
+
+		try {
+			// Convert the current amount from the old currency to the new currency
+			const convertedAmount = await convertCurrency(
+				incomeForm.amount,
+				incomeForm.currency,
+				newCurrency,
+			);
+
+			// Also convert the reservation total amount for display
+			const convertedReservationAmount = await convertCurrency(
+				baseAmount,
+				baseCurrency,
+				newCurrency,
+			);
+
+			setIncomeForm({
+				...incomeForm,
+				currency: newCurrency,
+				amount: Number(convertedAmount.toFixed(2)), // Round to 2 decimal places
+			});
+			
+			setDisplayedReservationAmount(
+				Number(convertedReservationAmount.toFixed(2)),
+			);
+		} catch (error) {
+			console.error("Error converting currency:", error);
+			// If conversion fails, just change the currency without converting amount
+			setIncomeForm({
+				...incomeForm,
+				currency: newCurrency,
+			});
+			toast({
+				title: "Warning",
+				description: "Could not convert amount. Please verify the value.",
+				variant: "destructive",
+			});
+		}
+	};
+
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
 			<DialogContent>
@@ -225,7 +281,7 @@ export function AddIncomeDialog({
 							<p>
 								<strong>{t("income.addDialog.reservationInfo.amount")}</strong>{" "}
 								{incomeForm.currency}{" "}
-								{selectedReservation.total_amount.toLocaleString()}
+								{displayedReservationAmount.toLocaleString()}
 							</p>
 						</div>
 					)}
@@ -249,9 +305,7 @@ export function AddIncomeDialog({
 						<Label htmlFor="currency">Currency</Label>
 						<CurrencySelector
 							currency={incomeForm.currency}
-							onCurrencyChange={(currency) =>
-								setIncomeForm({ ...incomeForm, currency })
-							}
+							onCurrencyChange={handleCurrencyChange}
 							label=""
 							showGoogleSearchLink={false}
 						/>
