@@ -44,13 +44,13 @@ export const PricingDisplay = ({
 	return (
 		<Card className="bg-primary/5 border-primary/20">
 			<CardHeader className="pb-3">
-				<CardTitle className="flex items-center gap-2 text-base">
+				<CardTitle className="flex items-center gap-2 text-sm sm:text-base">
 					<DollarSign className="size-5" />
 					Pricing Breakdown
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				<div className="flex justify-between items-center text-sm">
+				<div className="flex justify-between items-center text-xs sm:text-sm">
 					<span>
 						{symbol} {roomRate.toLocaleString()} × {nights}{" "}
 						{nights === 1 ? "night" : "nights"}
@@ -63,7 +63,7 @@ export const PricingDisplay = ({
 				{advanceAmount > 0 && (
 					<>
 						<Separator />
-						<div className="flex justify-between items-center text-sm">
+						<div className="flex justify-between items-center text-xs sm:text-sm">
 							<span className="text-muted-foreground">Advance Payment</span>
 							<span className="text-emerald-600 font-medium">
 								-{symbol} {advanceAmount.toLocaleString()}
@@ -75,13 +75,13 @@ export const PricingDisplay = ({
 				<Separator />
 				<div className="flex justify-between items-center font-semibold">
 					<span>Total Amount</span>
-					<span className="text-lg text-primary">
+					<span className="text-base sm:text-lg text-primary">
 						{symbol} {totalAmount.toLocaleString()}
 					</span>
 				</div>
 
 				{advanceAmount > 0 && (
-					<div className="flex justify-between items-center text-sm">
+					<div className="flex justify-between items-center text-xs sm:text-sm">
 						<span className="text-muted-foreground">Balance Due</span>
 						<span className="font-medium text-orange-600">
 							{symbol} {balanceAmount.toLocaleString()}

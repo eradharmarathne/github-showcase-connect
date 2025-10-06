@@ -133,7 +133,7 @@ export const OTPVerification = ({
 				</DialogHeader>
 				<Card>
 					<CardContent className="pt-6 space-y-4">
-						<div className="text-center text-sm text-muted-foreground">
+						<div className="text-center text-xs sm:text-sm text-muted-foreground">
 							To edit this reservation, we need to verify your identity.
 							<br />
 							An OTP will be sent to:{" "}
@@ -153,13 +153,13 @@ export const OTPVerification = ({
 							</Button>
 						) : (
 							<div className="space-y-4">
-								<div className="text-center text-sm text-emerald-600">
+								<div className="text-center text-xs sm:text-sm text-emerald-600">
 									<Check className="size-4 inline mr-1" />
 									OTP sent successfully!
 								</div>
 
 								<div className="space-y-2">
-									<label className="text-sm font-medium">
+									<label className="text-xs sm:text-sm font-medium">
 										Enter 6-digit OTP
 									</label>
 									<Input
@@ -170,7 +170,7 @@ export const OTPVerification = ({
 											setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
 										}
 										maxLength={6}
-										className="text-center text-lg tracking-widest"
+										className="text-center text-base sm:text-lg tracking-widest"
 									/>
 								</div>
 

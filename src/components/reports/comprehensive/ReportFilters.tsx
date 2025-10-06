@@ -110,10 +110,6 @@ export function ReportFilters({
 						/>
 					</div>
 					<div className="flex items-end gap-2">
-						<Button onClick={onRefresh} className="flex-1">
-							<RefreshCw className="size-4 mr-2" />
-							{t("reports.comprehensive.buttons.refresh")}
-						</Button>
 						<Button onClick={onExport} variant="outline">
 							{t("reports.comprehensive.buttons.export")}
 						</Button>

@@ -13,14 +13,14 @@ export function CompletionStep({ loading, onComplete }: CompletionStepProps) {
 			<h2 className="text-lg md:text-xl lg:text-2xl font-bold">
 				You're All Set! 🎉
 			</h2>
-			<p className="text-lg text-muted-foreground max-w-md mx-auto">
+			<p className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-md mx-auto">
 				Welcome to Check In_Check Out! Your account has been configured based on
 				your preferences.
 			</p>
 
 			<div className="bg-muted/30 rounded-lg p-6 text-left max-w-md mx-auto">
 				<h3 className="font-medium mb-4">What's Next:</h3>
-				<ul className="space-y-2 text-sm text-muted-foreground">
+				<ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
 					<li className="flex items-center gap-2">
 						<div className="w-1.5 h-1.5 bg-primary rounded-full" />
 						Set up your rooms and room types

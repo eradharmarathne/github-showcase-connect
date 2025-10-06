@@ -85,7 +85,7 @@ export function ReservationEditDialog({
 	const [agents, setAgents] = useState<any[]>([]);
 	const [guides, setGuides] = useState<any[]>([]);
 	const [location, setLocation] = useState<any>(null);
-	const {profile} = useProfile();
+	const { profile } = useProfile();
 	const { selectedLocation } = useLocationContext();
 
 	useEffect(() => {
@@ -94,31 +94,39 @@ export function ReservationEditDialog({
 				console.log("No selected location, skipping room fetch");
 				return;
 			}
-			
+
 			try {
 				const { data, error } = await supabase
 					.from("rooms")
-					.select("id, room_number, room_type, location_id, base_price, currency")
+					.select(
+						"id, room_number, room_type, location_id, base_price, currency",
+					)
 					.eq("is_active", true)
 					.eq("location_id", selectedLocation);
-				
+
 				if (error) {
 					console.error("Error fetching rooms:", error);
 					toast({
 						title: "Connection Error",
-						description: "Unable to load rooms. Please check your internet connection.",
+						description:
+							"Unable to load rooms. Please check your internet connection.",
 						variant: "destructive",
 					});
 					return;
 				}
-				
-				console.log("Fetched rooms for selected location:", selectedLocation, data);
+
+				console.log(
+					"Fetched rooms for selected location:",
+					selectedLocation,
+					data,
+				);
 				setRooms(data || []);
 			} catch (networkError) {
 				console.error("Network error fetching rooms:", networkError);
 				toast({
 					title: "Network Error",
-					description: "Unable to connect to the server. Please check your internet connection and try again.",
+					description:
+						"Unable to connect to the server. Please check your internet connection and try again.",
 					variant: "destructive",
 				});
 			}
@@ -130,12 +138,12 @@ export function ReservationEditDialog({
 					.from("agents")
 					.select("id, name, commission_rate")
 					.eq("is_active", true);
-				
+
 				if (error) {
 					console.error("Error fetching agents:", error);
 					return;
 				}
-				
+
 				setAgents(data || []);
 			} catch (networkError) {
 				console.error("Network error fetching agents:", networkError);
@@ -148,12 +156,12 @@ export function ReservationEditDialog({
 					.from("guides")
 					.select("id, name, commission_rate")
 					.eq("is_active", true);
-				
+
 				if (error) {
 					console.error("Error fetching guides:", error);
 					return;
 				}
-				
+
 				setGuides(data || []);
 			} catch (networkError) {
 				console.error("Network error fetching guides:", networkError);
@@ -184,17 +192,19 @@ export function ReservationEditDialog({
 		if (reservation && isOpen) {
 			console.log("Initializing form with reservation:", reservation);
 			console.log("Selected location:", selectedLocation);
-			
+
 			// Initialize form data with reservation
 			const initialFormData = { ...reservation };
-			
+
 			// If the reservation is for a different location than currently selected,
 			// clear the room_id to force user to select a new room
 			if (reservation.location_id !== selectedLocation) {
-				console.log("Reservation location differs from selected location, clearing room_id");
+				console.log(
+					"Reservation location differs from selected location, clearing room_id",
+				);
 				initialFormData.room_id = null;
 			}
-			
+
 			setFormData(initialFormData);
 			fetchRooms();
 			fetchAgents();
@@ -242,8 +252,14 @@ export function ReservationEditDialog({
 				special_requests: formData.special_requests,
 				arrival_time: formData.arrival_time,
 				room_id: formData.room_id === "" ? null : formData.room_id,
-				agent_id: formData.agent_id === "none" || formData.agent_id === "" ? null : formData.agent_id,
-				guide_id: formData.guide_id === "none" || formData.guide_id === "" ? null : formData.guide_id,
+				agent_id:
+					formData.agent_id === "none" || formData.agent_id === ""
+						? null
+						: formData.agent_id,
+				guide_id:
+					formData.guide_id === "none" || formData.guide_id === ""
+						? null
+						: formData.guide_id,
 				agent_commission: formData.agent_commission,
 				guide_commission: formData.guide_commission,
 				booking_source: formData.booking_source,
@@ -681,7 +697,7 @@ export function ReservationEditDialog({
 					</div>
 
 					<div className="bg-muted p-4 rounded-lg">
-						<div className="grid grid-cols-3 gap-4 text-sm">
+						<div className="grid grid-cols-3 gap-4 text-xs sm:text-sm">
 							<div>
 								<span className="font-medium">Total Amount:</span>
 								<div className="text-lg">

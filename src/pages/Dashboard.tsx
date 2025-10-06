@@ -31,15 +31,15 @@ export default function Dashboard() {
 			/>
 
 			{/* Income & Expense Chart with Booking Sources */}
-			<div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-				<div className="lg:col-span-3">
+			<div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+				<div className="xl:col-span-3">
 					<IncomeExpenseChart
 						selectedLocation={selectedLocation}
 						selectedMonth={selectedMonth}
 						locations={locations}
 					/>
 				</div>
-				<div className="lg:col-span-1">
+				<div className="xl:col-span-1">
 					<BookingSourceChart
 						selectedLocation={selectedLocation}
 						selectedMonth={selectedMonth}

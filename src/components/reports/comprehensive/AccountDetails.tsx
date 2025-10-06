@@ -91,19 +91,18 @@ export function AccountDetails({
 
 				let transfersFromQuery = supabase
 					.from("account_transfers")
-					.select("id, created_at, amount, note, to_accounts!inner(tenant_id)")
+					.select(
+						"id, created_at, amount, note, accounts!to_account_id(tenant_id)",
+					)
 					.eq("from_account_id", account.id)
-					.eq("to_accounts.tenant_id", tenant.id);
-
+					.eq("accounts.tenant_id", tenant.id);
 				let transfersToQuery = supabase
 					.from("account_transfers")
 					.select(
-						"id, created_at, amount, conversion_rate, note, from_accounts!inner(tenant_id)",
+						"id, created_at, amount, conversion_rate, note, accounts!from_account_id(tenant_id)",
 					)
 					.eq("to_account_id", account.id)
-					.eq("from_accounts.tenant_id", tenant.id);
-
-				// Apply location filters
+					.eq("accounts.tenant_id", tenant.id); // Apply location filters
 				if (selectedLocation) {
 					expenseQuery = expenseQuery.eq("location_id", selectedLocation);
 					paymentsQuery = paymentsQuery.eq(
@@ -372,13 +371,13 @@ export function AccountDetails({
 													<CardTitle className="text-base md:text-lg lg:text-xl">
 														{account.name}
 													</CardTitle>
-													<CardDescription className="flex items-center gap-2">
+													<div className="flex items-center gap-2 text-sm text-muted-foreground">
 														<Badge variant="outline">{account.currency}</Badge>
 														<span>
 															{account.transaction_count}{" "}
 															{t("reports.comprehensive.accounts.transactions")}
 														</span>
-													</CardDescription>
+													</div>
 												</div>
 												{expandedAccounts.has(account.id) ? (
 													<ChevronDown className="size-4" />

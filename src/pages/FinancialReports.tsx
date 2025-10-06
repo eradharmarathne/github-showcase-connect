@@ -329,10 +329,10 @@ export default function FinancialReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-green-800 font-medium">Total Income</p>
-								<p className="text-lg sm:text-3xl font-bold text-green-900">
+								<p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-green-900">
 									Rs.{financialData.totalIncome.toLocaleString()}
 								</p>
-								<p className="text-sm text-green-600 mt-1">
+								<p className="text-xs sm:text-sm md:text-base text-green-600 mt-1">
 									{financialData.incomeTransactions} transactions
 								</p>
 							</div>
@@ -346,10 +346,10 @@ export default function FinancialReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-red-800 font-medium">Total Expenses</p>
-								<p className="text-lg sm:text-3xl font-bold text-red-900">
+								<p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-red-900">
 									Rs.{financialData.totalExpenses.toLocaleString()}
 								</p>
-								<p className="text-sm text-red-600 mt-1">
+								<p className="text-xs sm:text-sm md:text-base text-red-600 mt-1">
 									{financialData.expenseTransactions} transactions
 								</p>
 							</div>
@@ -363,10 +363,10 @@ export default function FinancialReports() {
 						<div className="flex items-center justify-between">
 							<div>
 								<p className="text-blue-800 font-medium">Net Profit</p>
-								<p className="text-lg sm:text-3xl font-bold text-blue-900">
+								<p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-blue-900">
 									Rs.{Math.abs(financialData.netProfit).toLocaleString()}
 								</p>
-								<p className="text-sm text-blue-600 mt-1">
+								<p className="text-xs sm:text-sm md:text-base text-blue-600 mt-1">
 									{financialData.profitMargin.toFixed(1)}% margin
 								</p>
 							</div>

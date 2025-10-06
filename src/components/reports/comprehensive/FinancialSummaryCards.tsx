@@ -167,10 +167,10 @@ export function FinancialSummaryCards({
 				<CardContent className="p-3 sm:p-6">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-green-600">
+							<p className="text-xs sm:text-sm font-medium text-green-600">
 								{t("reports.comprehensive.summary.totalIncome")}
 							</p>
-							<p className="text-xl sm:text-2xl font-bold text-green-900">
+							<p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900">
 								{formatCurrency(summary.totalPayments, baseCurrency)}
 							</p>
 						</div>
@@ -183,10 +183,10 @@ export function FinancialSummaryCards({
 				<CardContent className="p-3 sm:p-6">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-blue-600">
+							<p className="text-xs sm:text-sm font-medium text-blue-600">
 								{t("reports.comprehensive.summary.reservationPayments")}
 							</p>
-							<p className="text-xl sm:text-2xl font-bold text-blue-900">
+							<p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">
 								{formatCurrency(summary.totalPayments, baseCurrency)}
 							</p>
 						</div>
@@ -199,10 +199,10 @@ export function FinancialSummaryCards({
 				<CardContent className="p-3 sm:p-6">
 					<div className="flex items-center justify-between">
 						<div>
-							<p className="text-sm font-medium text-red-600">
+							<p className="text-xs sm:text-sm font-medium text-red-600">
 								{t("reports.comprehensive.summary.totalExpenses")}
 							</p>
-							<p className="text-xl sm:text-2xl font-bold text-red-900">
+							<p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-900">
 								{formatCurrency(summary.totalExpenses, baseCurrency)}
 							</p>
 						</div>
@@ -218,17 +218,17 @@ export function FinancialSummaryCards({
 					<div className="flex items-center justify-between">
 						<div>
 							<p
-								className={`text-sm font-medium ${summary.netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
+								className={`text-xs sm:text-sm font-medium ${summary.netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
 							>
 								{t("reports.comprehensive.summary.netProfit")}
 							</p>
 							<p
-								className={`text-xl sm:text-2xl font-bold ${summary.netProfit >= 0 ? "text-emerald-900" : "text-red-900"}`}
+								className={`text-lg sm:text-xl lg:text-2xl font-bold ${summary.netProfit >= 0 ? "text-emerald-900" : "text-red-900"}`}
 							>
 								{formatCurrency(summary.netProfit, baseCurrency)}
 							</p>
 							<p
-								className={`text-sm ${summary.netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
+								className={`text-xs sm:text-sm ${summary.netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
 							>
 								{summary.profitMargin.toFixed(1)}% margin
 							</p>

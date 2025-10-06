@@ -190,7 +190,7 @@ export default function Auth() {
 						<h2 className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground">
 							{isLogin ? "Get started now" : "Create your account"}
 						</h2>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-xs sm:text-sm md:text-base text-muted-foreground">
 							{isLogin
 								? "Enter your credentials to access your account"
 								: "Start your 7-day free trial today"}

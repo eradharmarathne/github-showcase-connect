@@ -52,7 +52,7 @@ const ProfileAvatarButton = React.forwardRef<
 					alt={`${userName}'s avatar`}
 					className="object-cover"
 				/>
-				<AvatarFallback className="rounded-md bg-primary/10 text-primary font-medium text-sm">
+				<AvatarFallback className="rounded-md bg-primary/10 text-primary font-medium text-xs sm:text-sm">
 					{userInitials}
 				</AvatarFallback>
 			</Avatar>
