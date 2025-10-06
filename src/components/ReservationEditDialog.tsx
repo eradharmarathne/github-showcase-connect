@@ -88,10 +88,15 @@ export function ReservationEditDialog({
 
 	useEffect(() => {
 		const fetchRooms = async () => {
+			if (!reservation?.location_id) return;
+			
 			const { data } = await supabase
 				.from("rooms")
 				.select("id, room_number, room_type, location_id, base_price, currency")
-				.eq("is_active", true);
+				.eq("is_active", true)
+				.eq("location_id", reservation.location_id);
+			
+			console.log("Fetched rooms for location:", reservation.location_id, data);
 			setRooms(data || []);
 		};
 
@@ -124,6 +129,7 @@ export function ReservationEditDialog({
 		};
 
 		if (reservation && isOpen) {
+			console.log("Initializing form with reservation:", reservation);
 			setFormData({ ...reservation });
 			fetchRooms();
 			fetchAgents();
@@ -148,9 +154,41 @@ export function ReservationEditDialog({
 
 		setIsSubmitting(true);
 		try {
+			// Filter formData to only include valid database fields
+			const updateData = {
+				guest_name: formData.guest_name,
+				guest_email: formData.guest_email,
+				guest_phone: formData.guest_phone,
+				guest_address: formData.guest_address,
+				guest_id_number: formData.guest_id_number,
+				guest_nationality: formData.guest_nationality,
+				adults: formData.adults,
+				children: formData.children,
+				check_in_date: formData.check_in_date,
+				check_out_date: formData.check_out_date,
+				nights: formData.nights,
+				room_rate: formData.room_rate,
+				total_amount: formData.total_amount,
+				advance_amount: formData.advance_amount,
+				paid_amount: formData.paid_amount,
+				balance_amount: formData.balance_amount,
+				currency: formData.currency,
+				status: formData.status,
+				special_requests: formData.special_requests,
+				arrival_time: formData.arrival_time,
+				room_id: formData.room_id,
+				agent_id: formData.agent_id === "none" ? null : formData.agent_id,
+				guide_id: formData.guide_id === "none" ? null : formData.guide_id,
+				agent_commission: formData.agent_commission,
+				guide_commission: formData.guide_commission,
+				booking_source: formData.booking_source,
+			};
+
+			console.log("Updating reservation with data:", updateData);
+
 			const { error } = await supabase
 				.from("reservations")
-				.update(formData)
+				.update(updateData)
 				.eq("id", reservation?.id);
 
 			if (error) throw error;

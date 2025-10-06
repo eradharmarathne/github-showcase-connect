@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
@@ -126,6 +127,9 @@ export const OTPVerification = ({
 						<Shield className="size-5" />
 						OTP Verification Required
 					</DialogTitle>
+					<DialogDescription>
+						Verify your identity to edit this reservation
+					</DialogDescription>
 				</DialogHeader>
 				<Card>
 					<CardContent className="pt-6 space-y-4">
