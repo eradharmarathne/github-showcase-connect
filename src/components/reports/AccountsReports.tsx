@@ -38,13 +38,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/currency";
+import { Tables } from "@/integrations/supabase/types";
 
-type Account = {
-	id: string;
-	name: string;
-	currency: string;
-	initial_balance: number;
-};
+type Account = Tables<"accounts">;
 
 type AccountBalance = {
 	account: Account;
