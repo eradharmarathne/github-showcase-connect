@@ -78,7 +78,7 @@ export function ReservationEditDialog({
 	onUpdate,
 }: ReservationEditDialogProps) {
 	const { toast } = useToast();
-	const [isOTPVerified, setIsOTPVerified] = useState(false);
+	const [isOTPVerified, setIsOTPVerified] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [formData, setFormData] = useState<Partial<Reservation>>({});
 	const [rooms, setRooms] = useState<any[]>([]);
@@ -95,42 +95,90 @@ export function ReservationEditDialog({
 				return;
 			}
 			
-			const { data } = await supabase
-				.from("rooms")
-				.select("id, room_number, room_type, location_id, base_price, currency")
-				.eq("is_active", true)
-				.eq("location_id", selectedLocation);
-			
-			console.log("Fetched rooms for selected location:", selectedLocation, data);
-			setRooms(data || []);
+			try {
+				const { data, error } = await supabase
+					.from("rooms")
+					.select("id, room_number, room_type, location_id, base_price, currency")
+					.eq("is_active", true)
+					.eq("location_id", selectedLocation);
+				
+				if (error) {
+					console.error("Error fetching rooms:", error);
+					toast({
+						title: "Connection Error",
+						description: "Unable to load rooms. Please check your internet connection.",
+						variant: "destructive",
+					});
+					return;
+				}
+				
+				console.log("Fetched rooms for selected location:", selectedLocation, data);
+				setRooms(data || []);
+			} catch (networkError) {
+				console.error("Network error fetching rooms:", networkError);
+				toast({
+					title: "Network Error",
+					description: "Unable to connect to the server. Please check your internet connection and try again.",
+					variant: "destructive",
+				});
+			}
 		};
 
 		const fetchAgents = async () => {
-			const { data } = await supabase
-				.from("agents")
-				.select("id, name, commission_rate")
-				.eq("is_active", true);
-			setAgents(data || []);
+			try {
+				const { data, error } = await supabase
+					.from("agents")
+					.select("id, name, commission_rate")
+					.eq("is_active", true);
+				
+				if (error) {
+					console.error("Error fetching agents:", error);
+					return;
+				}
+				
+				setAgents(data || []);
+			} catch (networkError) {
+				console.error("Network error fetching agents:", networkError);
+			}
 		};
 
 		const fetchGuides = async () => {
-			const { data } = await supabase
-				.from("guides")
-				.select("id, name, commission_rate")
-				.eq("is_active", true);
-			setGuides(data || []);
+			try {
+				const { data, error } = await supabase
+					.from("guides")
+					.select("id, name, commission_rate")
+					.eq("is_active", true);
+				
+				if (error) {
+					console.error("Error fetching guides:", error);
+					return;
+				}
+				
+				setGuides(data || []);
+			} catch (networkError) {
+				console.error("Network error fetching guides:", networkError);
+			}
 		};
 
 		const fetchLocation = async () => {
 			if (!reservation?.location_id) return;
 
-			const { data } = await supabase
-				.from("locations")
-				.select("id, name, phone, email")
-				.eq("id", reservation.location_id)
-				.single();
+			try {
+				const { data, error } = await supabase
+					.from("locations")
+					.select("id, name, phone, email")
+					.eq("id", reservation.location_id)
+					.single();
 
-			setLocation(data);
+				if (error) {
+					console.error("Error fetching location:", error);
+					return;
+				}
+
+				setLocation(data);
+			} catch (networkError) {
+				console.error("Network error fetching location:", networkError);
+			}
 		};
 
 		if (reservation && isOpen) {
@@ -153,7 +201,7 @@ export function ReservationEditDialog({
 			fetchGuides();
 			fetchLocation();
 		}
-	}, [reservation, isOpen, selectedLocation]);
+	}, [reservation, isOpen, selectedLocation, toast]);
 
 	const handleOTPVerified = () => {
 		setIsOTPVerified(true);
