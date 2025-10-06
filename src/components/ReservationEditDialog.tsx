@@ -144,7 +144,7 @@ export function ReservationEditDialog({
 			// clear the room_id to force user to select a new room
 			if (reservation.location_id !== selectedLocation) {
 				console.log("Reservation location differs from selected location, clearing room_id");
-				initialFormData.room_id = "";
+				initialFormData.room_id = null;
 			}
 			
 			setFormData(initialFormData);
@@ -193,9 +193,9 @@ export function ReservationEditDialog({
 				status: formData.status,
 				special_requests: formData.special_requests,
 				arrival_time: formData.arrival_time,
-				room_id: formData.room_id,
-				agent_id: formData.agent_id === "none" ? null : formData.agent_id,
-				guide_id: formData.guide_id === "none" ? null : formData.guide_id,
+				room_id: formData.room_id === "" ? null : formData.room_id,
+				agent_id: formData.agent_id === "none" || formData.agent_id === "" ? null : formData.agent_id,
+				guide_id: formData.guide_id === "none" || formData.guide_id === "" ? null : formData.guide_id,
 				agent_commission: formData.agent_commission,
 				guide_commission: formData.guide_commission,
 				booking_source: formData.booking_source,
