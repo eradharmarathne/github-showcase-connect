@@ -48,12 +48,12 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			if (location.pathname !== requiredPage) {
 				navigate(requiredPage);
 
-				// Wait a bit for navigation and page rendering
-				await new Promise((resolve) => setTimeout(resolve, 500));
+				// Wait for navigation and page rendering
+				await new Promise((resolve) => setTimeout(resolve, 800));
 			}
 
-			// Wait a bit more for components to render
-			await new Promise((resolve) => setTimeout(resolve, 300));
+			// Wait for components to render and stabilize
+			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			// Get steps for the current tour
 			const steps = getTourSteps(tourType);
@@ -62,6 +62,34 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 				endTour();
 				return;
 			}
+
+			// Wait for critical elements to be available
+			const waitForElements = async () => {
+				const elementsToWait = steps
+					.filter(step => step.attachTo?.element)
+					.map(step => step.attachTo!.element);
+				
+				const maxWaitTime = 3000; // 3 seconds max wait
+				const checkInterval = 100; // Check every 100ms
+				let waited = 0;
+				
+				while (waited < maxWaitTime) {
+					const missingElements = elementsToWait.filter(selector => 
+						!document.querySelector(selector)
+					);
+					
+					if (missingElements.length === 0) {
+						console.log('All tour elements are ready');
+						break;
+					}
+					
+					console.log(`Waiting for elements: ${missingElements.join(', ')}`);
+					await new Promise(resolve => setTimeout(resolve, checkInterval));
+					waited += checkInterval;
+				}
+			};
+
+			await waitForElements();
 
 			// Create new tour instance
 			const tour = new Shepherd.Tour({
