@@ -194,7 +194,7 @@ export const CustomTourOverlay: React.FC<CustomTourOverlayProps> = ({
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				exit={{ opacity: 0 }}
-				className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm"
+				className="fixed inset-0 z-[9999] bg-black/50"
 				onClick={(e) => {
 					if (e.target === overlayRef.current) {
 						onClose();
@@ -209,7 +209,7 @@ export const CustomTourOverlay: React.FC<CustomTourOverlayProps> = ({
 					className="absolute w-96 max-w-[90vw]"
 					style={cardPosition}
 				>
-					<Card className="shadow-2xl border-2 border-primary/20 bg-background/95 backdrop-blur-sm">
+					<Card className="shadow-2xl border-2 border-primary/20 bg-background/95">
 						<CardHeader className="pb-3">
 							<div className="flex items-start justify-between">
 								<div className="flex-1">

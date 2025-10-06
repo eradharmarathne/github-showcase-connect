@@ -18,7 +18,6 @@
 
 /* Tour overlay backdrop */
 .tour-backdrop {
-	backdrop-filter: blur(2px);
 	background: rgba(0, 0, 0, 0.5);
 }
 
