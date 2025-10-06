@@ -44,11 +44,11 @@ const App = () => (
 		<ThemeProvider defaultTheme="system" storageKey="checkingcheckout-theme">
 			<TooltipProvider>
 				<AuthProvider>
-					<TourProvider>
-						<LocationProvider>
-							<Toaster />
-							<Sonner />
-							<BrowserRouter>
+					<LocationProvider>
+						<Toaster />
+						<Sonner />
+						<BrowserRouter>
+							<TourProvider>
 								<Routes>
 										<Route path="/" element={<AuthRedirect />} />
 										<Route path="/auth" element={<Auth />} />
@@ -327,10 +327,10 @@ const App = () => (
 											}
 										/>
 																	<Route path="*" element={<NotFound />} />
-						</Routes>
-							</BrowserRouter>
-						</LocationProvider>
-					</TourProvider>
+								</Routes>
+							</TourProvider>
+						</BrowserRouter>
+					</LocationProvider>
 				</AuthProvider>
 			</TooltipProvider>
 		</ThemeProvider>
