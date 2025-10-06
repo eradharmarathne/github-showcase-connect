@@ -23,14 +23,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 
 export const TourHelpButton: React.FC = () => {
 	const {
-		startDashboardTour,
-		startReservationsTour,
-		startFinancialReportsTour,
-		startFirstTimeUserTour,
-		startCalendarTour,
-		startMasterFilesTour,
-		startSettingsTour,
-		startBookingChannelsTour,
+		startComprehensiveTour,
 		hasCompletedTour,
 	} = useTourHelpers();
 
@@ -38,60 +31,12 @@ export const TourHelpButton: React.FC = () => {
 
 	const tourItems = [
 		{
-			id: "first-time-user",
+			id: "comprehensive-tour",
 			label: "Complete App Tour",
-			description: "Full walkthrough of all features",
+			description: "Comprehensive walkthrough of all features and sections",
 			icon: <BookOpen className="h-4 w-4" />,
-			action: startFirstTimeUserTour,
+			action: startComprehensiveTour,
 			show: true,
-		},
-		{
-			id: "dashboard",
-			label: "Dashboard Tour",
-			description: "Overview and navigation",
-			icon: <Play className="h-4 w-4" />,
-			action: startDashboardTour,
-			show: true,
-		},
-		{
-			id: "reservations",
-			label: "Reservations Tour",
-			description: "Booking management",
-			icon: <Users className="h-4 w-4" />,
-			action: startReservationsTour,
-			show: hasPermission("access_bookings"),
-		},
-		{
-			id: "calendar",
-			label: "Calendar Tour",
-			description: "Visual booking calendar",
-			icon: <Calendar className="h-4 w-4" />,
-			action: startCalendarTour,
-			show: hasPermission("access_calendar"),
-		},
-		{
-			id: "financial-reports",
-			label: "Financial Reports Tour",
-			description: "Income and expense tracking",
-			icon: <DollarSign className="h-4 w-4" />,
-			action: startFinancialReportsTour,
-			show: hasPermission("access_reports"),
-		},
-		{
-			id: "master-files",
-			label: "Master Files Tour",
-			description: "Property configuration",
-			icon: <Settings className="h-4 w-4" />,
-			action: startMasterFilesTour,
-			show: hasPermission("access_master_files"),
-		},
-		{
-			id: "booking-channels",
-			label: "Booking Channels Tour",
-			description: "External platform integration",
-			icon: <Wifi className="h-4 w-4" />,
-			action: startBookingChannelsTour,
-			show: hasPermission("access_booking_channels"),
 		},
 	];
 
@@ -107,7 +52,7 @@ export const TourHelpButton: React.FC = () => {
 					title="Help & Tours"
 				>
 					<HelpCircle className="h-5 w-5" />
-					{!hasCompletedTour("first-time-user") && (
+					{!hasCompletedTour("comprehensive-tour") && (
 						<span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full animate-pulse" />
 					)}
 				</Button>

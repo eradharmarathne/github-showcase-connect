@@ -20,28 +20,10 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 		handleKeyDown: (e: KeyboardEvent) => void;
 	} | null>(null);
 
-	// Define which page each tour should start on
+	// The comprehensive tour starts on dashboard and navigates through all available pages
 	const getTourPage = useCallback((tourType: TourType): string => {
-		switch (tourType) {
-			case "dashboard":
-				return "/dashboard";
-			case "reservations":
-				return "/reservations";
-			case "financial-reports":
-				return "/reports";
-			case "calendar":
-				return "/calendar";
-			case "master-files":
-				return "/master-files";
-			case "booking-channels":
-				return "/booking-channels";
-			case "settings":
-				return "/settings";
-			case "first-time-user":
-				return "/dashboard"; // Start first-time tour on dashboard
-			default:
-				return "/dashboard";
-		}
+		// Always start the comprehensive tour on dashboard
+		return "/dashboard";
 	}, []);
 
 	const startTourWithNavigation = useCallback(
@@ -205,9 +187,32 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 
 			addTourEventListeners();
 
-			// Handle individual step events for analytics (optional)
+			// Handle individual step events for navigation and analytics
 			tour.on("show", (event) => {
-				console.log(`Tour step shown: ${event.step?.id} in tour: ${tourType}`);
+				console.log(`Tour step shown: ${event.step?.id} in comprehensive tour`);
+				
+				// Check if this step requires navigation
+				const stepId = event.step?.id;
+				if (stepId) {
+					const navigationMap: Record<string, string> = {
+						'reservations-intro': '/reservations',
+						'add-reservation': '/reservations',
+						'reservations-table': '/reservations',
+						'calendar-intro': '/calendar',
+						'reports-intro': '/reports',
+						'report-filters': '/reports',
+						'financial-summary-cards': '/reports',
+						'master-files-intro': '/master-files',
+						'settings-intro': '/settings',
+						'booking-channels-intro': '/booking-channels',
+					};
+					
+					const requiredPath = navigationMap[stepId];
+					if (requiredPath && location.pathname !== requiredPath) {
+						console.log(`Navigating to ${requiredPath} for step ${stepId}`);
+						navigate(requiredPath);
+					}
+				}
 			});
 
 			// Start the tour
@@ -254,28 +259,23 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 	return <>{children}</>;
 };
 
-// Hook to easily start tours from components
+// Hook to easily start the comprehensive tour from components
 export const useTourHelpers = () => {
 	const { startTour, hasCompletedTour } = useTour();
 
-	const startDashboardTour = () => startTour("dashboard");
-	const startReservationsTour = () => startTour("reservations");
-	const startFinancialReportsTour = () => startTour("financial-reports");
-	const startFirstTimeUserTour = () => startTour("first-time-user");
-	const startCalendarTour = () => startTour("calendar");
-	const startMasterFilesTour = () => startTour("master-files");
-	const startSettingsTour = () => startTour("settings");
-	const startBookingChannelsTour = () => startTour("booking-channels");
+	const startComprehensiveTour = () => startTour("comprehensive-tour");
 
 	return {
-		startDashboardTour,
-		startReservationsTour,
-		startFinancialReportsTour,
-		startFirstTimeUserTour,
-		startCalendarTour,
-		startMasterFilesTour,
-		startSettingsTour,
-		startBookingChannelsTour,
+		startComprehensiveTour,
 		hasCompletedTour,
+		// Legacy support - all these now start the same comprehensive tour
+		startDashboardTour: startComprehensiveTour,
+		startReservationsTour: startComprehensiveTour,
+		startFinancialReportsTour: startComprehensiveTour,
+		startFirstTimeUserTour: startComprehensiveTour,
+		startCalendarTour: startComprehensiveTour,
+		startMasterFilesTour: startComprehensiveTour,
+		startSettingsTour: startComprehensiveTour,
+		startBookingChannelsTour: startComprehensiveTour,
 	};
 };

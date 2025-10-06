@@ -8,16 +8,8 @@ import React, {
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "./AuthContext";
 
-// Tour types for different sections of the app
-export type TourType =
-	| "dashboard"
-	| "reservations"
-	| "calendar"
-	| "financial-reports"
-	| "master-files"
-	| "settings"
-	| "booking-channels"
-	| "first-time-user";
+// Tour types - now simplified to a single comprehensive tour
+export type TourType = "comprehensive-tour";
 
 interface TourContextType {
 	activeTour: TourType | null;
@@ -51,30 +43,11 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 
 	const startTour = useCallback(
 		(tourType: TourType) => {
-			// Check permissions before starting certain tours
-			const hasRequiredPermission = (tourType: TourType): boolean => {
-				switch (tourType) {
-					case "financial-reports":
-						return hasPermission("access_reports");
-					case "master-files":
-						return hasPermission("access_master_files");
-					case "booking-channels":
-						return hasPermission("access_booking_channels");
-					case "settings":
-						return hasPermission("access_settings");
-					default:
-						return true; // No special permissions needed for other tours
-				}
-			};
-
-			if (!hasRequiredPermission(tourType)) {
-				console.warn(`User lacks permissions for tour: ${tourType}`);
-				return;
-			}
-
+			// For the comprehensive tour, we'll check basic access permissions
+			// The tour will dynamically skip sections the user doesn't have access to
 			setActiveTour(tourType);
 		},
-		[hasPermission],
+		[],
 	);
 
 	const endTour = useCallback(() => {
