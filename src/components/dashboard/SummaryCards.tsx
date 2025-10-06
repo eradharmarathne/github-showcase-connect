@@ -166,6 +166,8 @@ export function SummaryCards({
 		fetchSummaryData();
 	}, [selectedLocation, selectedMonth, tenant?.id]);
 
+
+
 	if (loading) {
 		return <SummaryCardsSkeleton />;
 	}
