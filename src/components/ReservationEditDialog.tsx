@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { OTPVerification } from "./OTPVerification";
+import { useProfile } from "@/hooks/useProfile";
 
 interface Reservation {
 	id: string;
@@ -83,6 +84,7 @@ export function ReservationEditDialog({
 	const [agents, setAgents] = useState<any[]>([]);
 	const [guides, setGuides] = useState<any[]>([]);
 	const [location, setLocation] = useState<any>(null);
+	const {profile} = useProfile();
 
 	useEffect(() => {
 		const fetchRooms = async () => {
@@ -608,7 +610,7 @@ export function ReservationEditDialog({
 							{!isOTPVerified ? (
 								<OTPVerification
 									onVerified={handleOTPVerified}
-									phoneNumber={location?.phone || "94719528589"}
+									phoneNumber={location.phone || profile.phone}
 									locationId={reservation?.location_id}
 									triggerComponent={
 										<Button variant="default">Verify & Enable Editing</Button>
