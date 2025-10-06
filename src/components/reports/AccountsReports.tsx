@@ -192,12 +192,9 @@ export default function AccountsReports() {
 					0,
 				);
 
-				const currentBalance =
-					account.initial_balance +
-					totalIncome -
-					totalExpenses -
-					transfersOut +
-					transfersIn;
+				// Use current_balance from database instead of manual calculation
+				// The database automatically calculates this with triggers
+				const currentBalance = account.current_balance;
 				const transactionCount =
 					incomeData.length +
 					expenseData.length +

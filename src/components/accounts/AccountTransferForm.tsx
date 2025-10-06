@@ -40,9 +40,8 @@ export function AccountTransferForm({
 
 	// Calculate current balance for account
 	const calculateAccountBalance = (account: Account) => {
-		// This function would need to calculate the balance
-		// For now, return the initial balance as a fallback
-		return account.initial_balance;
+		// Use the current_balance column which is automatically calculated by database triggers
+		return account.current_balance;
 	};
 	const [currentExchangeRate, setCurrentExchangeRate] = useState({
 		usdToLkr: 300,

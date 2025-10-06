@@ -73,6 +73,7 @@ export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
 						name,
 						currency,
 						initial_balance,
+						current_balance,
 						location_access,
 						account_income:income!account_id(amount),
 						account_expenses:expenses!account_id(amount),
@@ -111,12 +112,9 @@ export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
 							0,
 						);
 
-						const currentBalance =
-							account.initial_balance +
-							totalIncome -
-							totalExpenses +
-							totalIncoming -
-							totalOutgoing;
+						// Use current_balance from database instead of manual calculation
+						// The database automatically calculates this with triggers
+						const currentBalance = account.current_balance;
 
 						return {
 							id: account.id,

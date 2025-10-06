@@ -252,7 +252,7 @@ export function AccountDetails({
 					name: account.name,
 					currency: account.currency,
 					initial_balance: account.initial_balance,
-					current_balance: account.initial_balance,
+					current_balance: account.current_balance,
 					total_expenses: 0,
 					total_payments: 0,
 					transaction_count: 0,

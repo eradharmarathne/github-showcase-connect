@@ -45,10 +45,10 @@ export default function ComprehensiveReports() {
 					acc.name,
 					acc.currency,
 					acc.initial_balance,
-					acc.current_balance || acc.initial_balance,
+					acc.current_balance,
 					0, // Will be calculated in real implementation
 					0, // Will be calculated in real implementation
-					(acc.current_balance || acc.initial_balance) - acc.initial_balance,
+					acc.current_balance - acc.initial_balance,
 				]),
 			]
 				.map((row) => row.join(","))
