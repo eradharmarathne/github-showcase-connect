@@ -115,6 +115,16 @@ export function AddIncomeDialog({
 
 		if (!selectedReservation) return;
 
+		// Validate required fields
+		if (!incomeForm.account_id) {
+			toast({
+				title: "Error",
+				description: "Please select an account for the payment.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		// Calculate remaining balance
 		const totalAmount = selectedReservation.total_amount || 0;
 		const paidAmount = selectedReservation.paid_amount || 0;
@@ -137,10 +147,10 @@ export function AddIncomeDialog({
 				amount: incomeForm.amount,
 				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
 				note: incomeForm.note || `Payment for reservation ${selectedReservation.reservation_number}`,
-				income_type_id: incomeForm.income_type_id,
+				income_type_id: incomeForm.income_type_id || null, // Convert empty string to null
 				tenant_id: profile?.tenant_id,
 				location_id: selectedLocation,
-				account_id: incomeForm.account_id, // Always require account
+				account_id: incomeForm.account_id, // Required field, validated above
 				payment_method: "cash", // Always cash since we removed deferred
 				type: "booking",
 			});
