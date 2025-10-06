@@ -126,92 +126,98 @@ export default function Reservations() {
 			amenities: reservation.rooms?.amenities || [],
 		};
 		
-		// Open a new window for printing
-		const printWindow = window.open('', '_blank', 'width=800,height=600');
-		if (printWindow) {
-			printWindow.document.open();
-			printWindow.document.write(`
+		// Create a hidden div with printable content
+		const printContent = `
+			<div style="font-family: Arial, sans-serif; padding: 20px;">
+				<div style="text-align: center; margin-bottom: 30px;">
+					<h1>${printableData.hotel_name || 'Hotel Reservation'}</h1>
+					<h2>Reservation Confirmation</h2>
+					<p><strong>Reservation Number:</strong> ${reservation.reservation_number}</p>
+				</div>
+				
+				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+					<div>
+						<h3>Guest Information</h3>
+						<p><strong>Name:</strong> ${reservation.guest_name}</p>
+						<p><strong>Email:</strong> ${reservation.guest_email || 'N/A'}</p>
+						<p><strong>Phone:</strong> ${reservation.guest_phone || 'N/A'}</p>
+						<p><strong>Nationality:</strong> ${reservation.guest_nationality || 'N/A'}</p>
+						<p><strong>Adults:</strong> ${reservation.adults}</p>
+						<p><strong>Children:</strong> ${reservation.children}</p>
+					</div>
+					
+					<div>
+						<h3>Booking Details</h3>
+						<p><strong>Check-in:</strong> ${new Date(reservation.check_in_date).toLocaleDateString()}</p>
+						<p><strong>Check-out:</strong> ${new Date(reservation.check_out_date).toLocaleDateString()}</p>
+						<p><strong>Nights:</strong> ${reservation.nights}</p>
+						<p><strong>Room:</strong> ${printableData.room_number} (${printableData.room_type})</p>
+						<p><strong>Status:</strong> ${reservation.status}</p>
+					</div>
+				</div>
+				
+				<div style="margin-bottom: 20px;">
+					<h3>Financial Summary</h3>
+					<p><strong>Room Rate:</strong> ${reservation.currency} ${reservation.room_rate}</p>
+					<p><strong>Total Amount:</strong> ${reservation.currency} ${reservation.total_amount}</p>
+					<p><strong>Paid Amount:</strong> ${reservation.currency} ${reservation.paid_amount || 0}</p>
+					<p><strong>Balance:</strong> ${reservation.currency} ${(reservation.total_amount - (reservation.paid_amount || 0)).toFixed(2)}</p>
+				</div>
+				
+				${reservation.special_requests ? `
+				<div style="margin-bottom: 20px;">
+					<h3>Special Requests</h3>
+					<p>${reservation.special_requests}</p>
+				</div>
+				` : ''}
+				
+				<div style="margin-bottom: 20px;">
+					<h3>Hotel Information</h3>
+					<p><strong>Location:</strong> ${printableData.location_name}</p>
+					${printableData.hotel_address ? `<p><strong>Address:</strong> ${printableData.hotel_address}</p>` : ''}
+					${printableData.hotel_phone ? `<p><strong>Phone:</strong> ${printableData.hotel_phone}</p>` : ''}
+					${printableData.hotel_email ? `<p><strong>Email:</strong> ${printableData.hotel_email}</p>` : ''}
+				</div>
+			</div>
+		`;
+
+		// Create a hidden iframe for printing
+		const iframe = document.createElement('iframe');
+		iframe.style.display = 'none';
+		document.body.appendChild(iframe);
+
+		const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+		if (iframeDoc) {
+			iframeDoc.open();
+			iframeDoc.write(`
 				<!DOCTYPE html>
 				<html>
 				<head>
 					<title>Reservation ${reservation.reservation_number}</title>
 					<style>
-						body { font-family: Arial, sans-serif; margin: 20px; }
-						.header { text-align: center; margin-bottom: 30px; }
-						.section { margin-bottom: 20px; }
-						.label { font-weight: bold; }
-						.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+						@page {
+							size: A4;
+							margin: 1cm;
+						}
 						@media print {
-							body { margin: 0; }
-							.no-print { display: none; }
+							body { margin: 0; padding: 0; }
 						}
 					</style>
 				</head>
 				<body>
-					<div class="header">
-						<h1>${printableData.hotel_name || 'Hotel Reservation'}</h1>
-						<h2>Reservation Confirmation</h2>
-						<p><strong>Reservation Number:</strong> ${reservation.reservation_number}</p>
-					</div>
-					
-					<div class="grid">
-						<div class="section">
-							<h3>Guest Information</h3>
-							<p><span class="label">Name:</span> ${reservation.guest_name}</p>
-							<p><span class="label">Email:</span> ${reservation.guest_email || 'N/A'}</p>
-							<p><span class="label">Phone:</span> ${reservation.guest_phone || 'N/A'}</p>
-							<p><span class="label">Nationality:</span> ${reservation.guest_nationality || 'N/A'}</p>
-							<p><span class="label">Adults:</span> ${reservation.adults}</p>
-							<p><span class="label">Children:</span> ${reservation.children}</p>
-						</div>
-						
-						<div class="section">
-							<h3>Booking Details</h3>
-							<p><span class="label">Check-in:</span> ${new Date(reservation.check_in_date).toLocaleDateString()}</p>
-							<p><span class="label">Check-out:</span> ${new Date(reservation.check_out_date).toLocaleDateString()}</p>
-							<p><span class="label">Nights:</span> ${reservation.nights}</p>
-							<p><span class="label">Room:</span> ${printableData.room_number} (${printableData.room_type})</p>
-							<p><span class="label">Status:</span> ${reservation.status}</p>
-						</div>
-					</div>
-					
-					<div class="section">
-						<h3>Financial Summary</h3>
-						<p><span class="label">Room Rate:</span> ${reservation.currency} ${reservation.room_rate}</p>
-						<p><span class="label">Total Amount:</span> ${reservation.currency} ${reservation.total_amount}</p>
-						<p><span class="label">Paid Amount:</span> ${reservation.currency} ${reservation.paid_amount || 0}</p>
-						<p><span class="label">Balance:</span> ${reservation.currency} ${(reservation.total_amount - (reservation.paid_amount || 0)).toFixed(2)}</p>
-					</div>
-					
-					${reservation.special_requests ? `
-					<div class="section">
-						<h3>Special Requests</h3>
-						<p>${reservation.special_requests}</p>
-					</div>
-					` : ''}
-					
-					<div class="section">
-						<h3>Hotel Information</h3>
-						<p><span class="label">Location:</span> ${printableData.location_name}</p>
-						${printableData.hotel_address ? `<p><span class="label">Address:</span> ${printableData.hotel_address}</p>` : ''}
-						${printableData.hotel_phone ? `<p><span class="label">Phone:</span> ${printableData.hotel_phone}</p>` : ''}
-						${printableData.hotel_email ? `<p><span class="label">Email:</span> ${printableData.hotel_email}</p>` : ''}
-					</div>
-					
-					<div class="no-print" style="text-align: center; margin-top: 30px;">
-						<button onclick="window.print()">Print</button>
-						<button onclick="window.close()">Close</button>
-					</div>
+					${printContent}
 				</body>
 				</html>
 			`);
-			printWindow.document.close();
-			
-			// Auto-focus and print
-			printWindow.focus();
+			iframeDoc.close();
+
+			// Trigger print dialog directly
+			iframe.contentWindow?.print();
+
+			// Clean up the iframe after printing
 			setTimeout(() => {
-				printWindow.print();
-			}, 500);
+				document.body.removeChild(iframe);
+			}, 1000);
 		}
 	};
 
