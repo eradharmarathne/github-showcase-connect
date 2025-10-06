@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
 type Account = Tables<"accounts">;
+type AccountWithBalance = Account & { currentBalance: number };
 
 interface RecentTransactionsProps {
-	accounts: Account[];
+	accounts: AccountWithBalance[];
 }
 
 export function RecentTransactions({ accounts }: RecentTransactionsProps) {

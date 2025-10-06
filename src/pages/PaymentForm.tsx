@@ -290,8 +290,10 @@ export default function PaymentForm() {
 
 			// Enhanced status logic based on payment completion and payment type
 			const isPaymentComplete = newBalanceAmount <= 0 && pendingExpenses <= 0;
-			const isCompletionPayment = formData.payment_type === "Payment Type" || formData.payment_type === "full_payment";
-			
+			const isCompletionPayment =
+				formData.payment_type === "Payment Type" ||
+				formData.payment_type === "full_payment";
+
 			// Determine new status based on payment completion and type
 			let newStatus = reservation.status;
 			if (isPaymentComplete) {

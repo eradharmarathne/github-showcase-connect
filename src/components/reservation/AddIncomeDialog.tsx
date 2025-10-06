@@ -93,12 +93,12 @@ export function AddIncomeDialog({
 		if (selectedReservation) {
 			const reservationCurrency = selectedReservation.currency || "LKR";
 			const reservationAmount = selectedReservation.total_amount || 0;
-			
+
 			// Set the base amount and currency from the reservation
 			setBaseAmount(reservationAmount);
 			setBaseCurrency(reservationCurrency);
 			setDisplayedReservationAmount(reservationAmount);
-			
+
 			setIncomeForm({
 				amount: 0, // Start with empty amount for additional services
 				note:
@@ -237,7 +237,7 @@ export function AddIncomeDialog({
 				currency: newCurrency,
 				amount: Number(convertedAmount.toFixed(2)), // Round to 2 decimal places
 			});
-			
+
 			setDisplayedReservationAmount(
 				Number(convertedReservationAmount.toFixed(2)),
 			);

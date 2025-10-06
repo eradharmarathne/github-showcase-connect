@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
 type Account = Tables<"accounts">;
+type AccountWithBalance = Account & { currentBalance: number };
 
 export default function Accounts() {
 	const { t } = useTranslation("common");
@@ -29,24 +30,88 @@ export default function Accounts() {
 	const [showTransferDialog, setShowTransferDialog] = useState(false);
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
-	// Fetch accounts
+	// Fetch accounts with calculated balances
 	const {
-		data: accounts = [],
+		data: accountsWithBalances = [],
 		isLoading,
 		error,
 	} = useQuery({
-		queryKey: ["accounts", tenant?.id],
-		queryFn: async () => {
+		queryKey: ["accounts-with-balances", tenant?.id],
+		queryFn: async (): Promise<AccountWithBalance[]> => {
 			if (!tenant?.id) return [];
 
-			const { data, error } = await supabase
+			// First get all accounts
+			const { data: accounts, error: accountsError } = await supabase
 				.from("accounts")
 				.select("*")
 				.eq("tenant_id", tenant.id)
 				.order("created_at", { ascending: false });
 
-			if (error) throw error;
-			return data;
+			if (accountsError) throw accountsError;
+			if (!accounts) return [];
+
+			// Calculate balance for each account
+			const accountsWithBalances: AccountWithBalance[] = [];
+
+			for (const account of accounts) {
+				// Fetch payments (income) for this account
+				const { data: paymentsData } = await supabase
+					.from("payments")
+					.select("amount")
+					.eq("account_id", account.id);
+
+				// Fetch expenses for this account
+				const { data: expensesData } = await supabase
+					.from("expenses")
+					.select("amount")
+					.eq("account_id", account.id);
+
+				// Fetch transfers from this account
+				const { data: transfersFromData } = await supabase
+					.from("account_transfers")
+					.select("amount")
+					.eq("from_account_id", account.id);
+
+				// Fetch transfers to this account
+				const { data: transfersToData } = await supabase
+					.from("account_transfers")
+					.select("amount, conversion_rate")
+					.eq("to_account_id", account.id);
+
+				// Calculate totals
+				const totalPayments = (paymentsData || []).reduce(
+					(sum, payment) => sum + Number(payment.amount),
+					0,
+				);
+				const totalExpenses = (expensesData || []).reduce(
+					(sum, expense) => sum + Number(expense.amount),
+					0,
+				);
+				const transfersOut = (transfersFromData || []).reduce(
+					(sum, transfer) => sum + Number(transfer.amount),
+					0,
+				);
+				const transfersIn = (transfersToData || []).reduce(
+					(sum, transfer) =>
+						sum + Number(transfer.amount) * Number(transfer.conversion_rate),
+					0,
+				);
+
+				// Calculate current balance: initial + payments - expenses - transfersOut + transfersIn
+				const currentBalance =
+					account.initial_balance +
+					totalPayments -
+					totalExpenses -
+					transfersOut +
+					transfersIn;
+
+				accountsWithBalances.push({
+					...account,
+					currentBalance,
+				});
+			}
+
+			return accountsWithBalances;
 		},
 		enabled: !!tenant?.id,
 	});
@@ -70,7 +135,7 @@ export default function Accounts() {
 	});
 
 	const handleAccountSaved = () => {
-		queryClient.invalidateQueries({ queryKey: ["accounts"] });
+		queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
 		setShowAddDialog(false);
 		setEditingAccount(null);
 		toast({
@@ -80,7 +145,7 @@ export default function Accounts() {
 	};
 
 	const handleAccountDeleted = (accountId: string) => {
-		queryClient.invalidateQueries({ queryKey: ["accounts"] });
+		queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
 		toast({
 			title: t("common.success"),
 			description: t("accounts.form.messages.deleteSuccess"),
@@ -88,7 +153,7 @@ export default function Accounts() {
 	};
 
 	const handleTransferCompleted = () => {
-		queryClient.invalidateQueries({ queryKey: ["accounts"] });
+		queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
 		setShowTransferDialog(false);
 		toast({
 			title: t("common.success"),
@@ -127,7 +192,7 @@ export default function Accounts() {
 					<Button
 						onClick={() => setShowTransferDialog(true)}
 						variant="outline"
-						disabled={accounts.length < 2}
+						disabled={accountsWithBalances.length < 2}
 					>
 						{t("accounts.buttons.transferMoney")}
 					</Button>
@@ -138,7 +203,7 @@ export default function Accounts() {
 				</div>
 			</div>
 
-			<AccountSummaryCards accounts={accounts} />
+			<AccountSummaryCards accounts={accountsWithBalances} />
 
 			<Tabs defaultValue="accounts" className="space-y-4">
 				<TabsList>
@@ -152,14 +217,14 @@ export default function Accounts() {
 
 				<TabsContent value="accounts" className="space-y-4">
 					<AccountGrid
-						accounts={accounts}
+						accounts={accountsWithBalances}
 						onEdit={handleEditAccount}
 						onDelete={handleAccountDeleted}
 					/>
 				</TabsContent>
 
 				<TabsContent value="transactions">
-					<RecentTransactions accounts={accounts} />
+					<RecentTransactions accounts={accountsWithBalances} />
 				</TabsContent>
 			</Tabs>
 
@@ -176,7 +241,7 @@ export default function Accounts() {
 			<AccountTransferForm
 				open={showTransferDialog}
 				onOpenChange={setShowTransferDialog}
-				accounts={accounts}
+				accounts={accountsWithBalances}
 				onTransferCompleted={handleTransferCompleted}
 			/>
 		</div>

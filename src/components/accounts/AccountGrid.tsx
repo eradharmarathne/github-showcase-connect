@@ -2,9 +2,10 @@ import { Tables } from "@/integrations/supabase/types";
 import { AccountCard } from "./AccountCard";
 
 type Account = Tables<"accounts">;
+type AccountWithBalance = Account & { currentBalance: number };
 
 interface AccountGridProps {
-	accounts: Account[];
+	accounts: AccountWithBalance[];
 	onEdit: (account: Account) => void;
 	onDelete: (accountId: string) => void;
 }
@@ -16,7 +17,7 @@ export function AccountGrid({ accounts, onEdit, onDelete }: AccountGridProps) {
 				<AccountCard
 					key={account.id}
 					account={account}
-					balance={account.initial_balance} // For now, using initial_balance
+					balance={account.currentBalance} // Use calculated current balance
 					onEdit={onEdit}
 					onDelete={onDelete}
 				/>
