@@ -88,7 +88,7 @@ export function PermissionMatrix({ onEditUser }: PermissionMatrixProps) {
 								key={user.id}
 								className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
 							>
-								<div className="flex items-center gap-3 mb-3">
+								<div className="flex flex-wrap items-start sm:items-center gap-3 mb-3">
 									<div className="p-1 bg-primary/10 rounded-full">
 										<User className="size-4 text-primary" />
 									</div>
