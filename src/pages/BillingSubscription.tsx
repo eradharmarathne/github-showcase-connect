@@ -24,6 +24,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import {
@@ -71,12 +72,11 @@ interface UsageData {
 export default function BillingSubscription() {
 	const navigate = useNavigate();
 	const { toast } = useToast();
-	const { tenant, subscription, user } = useAuth();
+	const { tenant, user } = useAuth();
+	const { data: currentSubscription, isLoading: subscriptionLoading, error: subscriptionError } = useSubscription();
 
 	const [loading, setLoading] = useState(true);
 	const [plans, setPlans] = useState<PlanWithCreemProduct[]>([]);
-	const [currentSubscription, setCurrentSubscription] =
-		useState<Subscription | null>(subscription);
 	const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
 	const [cancelling, setCancelling] = useState(false);
 	const [trialDaysRemaining, setTrialDaysRemaining] = useState<number | null>(
@@ -209,26 +209,6 @@ export default function BillingSubscription() {
 					);
 
 					setPlans(plansWithProducts);
-
-					// Fetch current subscription if not provided by auth context
-					if (!subscription && tenant) {
-						const { data: subData, error: subError } = await supabase
-							.from("subscriptions")
-							.select("*")
-							.eq("tenant_id", tenant.id)
-							.in("status", ["active", "trialing"])
-							.order("created_at", { ascending: false })
-							.limit(1);
-
-						if (subError) {
-							console.error("Error fetching subscription:", subError);
-							setCurrentSubscription(null);
-						} else {
-							const subscription =
-								subData && subData.length > 0 ? subData[0] : null;
-							setCurrentSubscription(subscription);
-						}
-					}
 				} catch (error) {
 					console.error("Error fetching billing data:", error);
 					toast({
@@ -243,7 +223,7 @@ export default function BillingSubscription() {
 
 			fetchPlansAndSubscription();
 		}
-	}, [tenant, subscription, toast]);
+	}, [tenant, toast]);
 
 	// Additional useEffect for fetch functions
 	useEffect(() => {
@@ -352,7 +332,7 @@ export default function BillingSubscription() {
 
 	// Handle manual subscription sync/refresh
 	const handleSyncSubscription = async () => {
-		if (!tenant || !currentSubscription) return;
+		if (!tenant) return;
 
 		setSyncing(true);
 		try {
@@ -366,14 +346,12 @@ export default function BillingSubscription() {
 					plans (*)
 				`)
 					.eq("tenant_id", tenant.id)
-					.single();
+					.maybeSingle();
 
 			if (subscriptionError) {
 				console.error("Subscription fetch error:", subscriptionError);
 				throw new Error("Failed to fetch subscription data");
 			}
-
-			setCurrentSubscription(subscriptionData);
 
 			// Also refresh tenant data
 			const { data: tenantData, error: tenantError } = await supabase
@@ -392,7 +370,7 @@ export default function BillingSubscription() {
 				description: "Subscription status refreshed",
 			});
 
-			// Force a page reload to ensure all components are updated
+			// Force a page reload to ensure all components are updated with fresh data
 			window.location.reload();
 		} catch (error) {
 			console.error("Sync error:", error);
@@ -507,12 +485,34 @@ export default function BillingSubscription() {
 			)
 		: 0;
 
-	if (loading) {
-		return null;
+	// Show loading spinner while data is being fetched
+	if (loading || subscriptionLoading) {
+		return (
+			<div className="flex items-center justify-center min-h-[400px]">
+				<div className="text-center space-y-4">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+					<p className="text-muted-foreground">Loading billing information...</p>
+				</div>
+			</div>
+		);
+	}
+
+	// Show subscription error if it's not a 406 error (which is expected when no subscription)
+	if (subscriptionError && !subscriptionError.message?.includes("406") && !subscriptionError.message?.includes("Not Acceptable")) {
+		return (
+			<div className="container mx-auto p-6">
+				<Alert variant="destructive">
+					<AlertTriangle className="h-4 w-4" />
+					<AlertDescription>
+						Unable to load subscription details. Please try refreshing the page.
+					</AlertDescription>
+				</Alert>
+			</div>
+		);
 	}
 
 	return (
-		<div className="w-full mx-auto p-4 space-y-6">
+		<div className="w-full mx-auto pb-20 sm:pb-6 p-4 space-y-6">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
@@ -522,21 +522,6 @@ export default function BillingSubscription() {
 					<p className="text-muted-foreground">
 						Manage your subscription and billing settings
 					</p>
-				</div>
-				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleSyncSubscription}
-						disabled={syncing}
-						className="flex items-center gap-2"
-					>
-						<RefreshCw className={`size-4 ${syncing ? "animate-spin" : ""}`} />
-						{syncing ? "Syncing..." : "Refresh Status"}
-					</Button>
-					<Button variant="outline" onClick={() => navigate("/settings")}>
-						Back to Settings
-					</Button>
 				</div>
 			</div>
 

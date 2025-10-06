@@ -101,10 +101,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				.select("*")
 				.eq("tenant_id", tenantId)
 				.in("status", ["active", "trialing"])
-				.single();
+				.maybeSingle(); // Use maybeSingle to handle no results gracefully
 
-			if (error && error.code !== "PGRST116") {
+			if (error) {
 				console.error("Error fetching subscription:", error);
+				// Don't set subscription to null for 406 errors - they're expected when no subscription exists
+				if (!error.message?.includes("406") && !error.message?.includes("Not Acceptable")) {
+					setSubscription(null);
+				}
 				return null;
 			}
 

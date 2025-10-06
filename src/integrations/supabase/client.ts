@@ -27,6 +27,13 @@ function getSupabaseClient() {
 				persistSession: true,
 				autoRefreshToken: true,
 				storageKey: "cco-supabase-auth", // Unique storage key
+				detectSessionInUrl: true,
+				flowType: "pkce",
+			},
+			global: {
+				headers: {
+					"X-Client-Info": "checking-checkout-web",
+				},
 			},
 		});
 
@@ -52,6 +59,12 @@ function getSupabaseAdminClient() {
 			return supabaseAdminInstance;
 		}
 
+		// Only create admin client if service role key is available
+		if (!SUPABASE_SERVICE_ROLE_KEY) {
+			console.warn("Service role key not available for admin client");
+			return getSupabaseClient(); // Fallback to regular client
+		}
+
 		supabaseAdminInstance = createClient<Database>(
 			SUPABASE_URL,
 			SUPABASE_SERVICE_ROLE_KEY,
@@ -60,6 +73,11 @@ function getSupabaseAdminClient() {
 					autoRefreshToken: false,
 					persistSession: false,
 					storageKey: "cco-supabase-admin-auth", // Unique storage key for admin
+				},
+				global: {
+					headers: {
+						"X-Client-Info": "checking-checkout-admin",
+					},
 				},
 			},
 		);

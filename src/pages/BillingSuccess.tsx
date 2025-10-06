@@ -54,7 +54,7 @@ export default function BillingSuccess() {
 				if (subscriptionId && customerId && tenant) {
 					const subscriptionData = {
 						tenant_id: tenant.id,
-						status: "active",
+						status: "active" as const,
 						creem_customer_id: customerId,
 						creem_subscription_id: subscriptionId,
 						current_period_start: new Date().toISOString(),
@@ -64,32 +64,58 @@ export default function BillingSuccess() {
 						).toISOString(), // 30 days
 					};
 
-					// Check if subscription already exists
-					const { data: existingSubscription } = await supabase
+					// Check if subscription already exists for this tenant
+					const { data: existingSubscription, error: fetchError } = await supabase
 						.from("subscriptions")
 						.select("*")
 						.eq("tenant_id", tenant.id)
-						.single();
+						.maybeSingle(); // Use maybeSingle to avoid error when no results
 
+					if (fetchError) {
+						console.error("Error fetching existing subscription:", fetchError);
+						throw fetchError;
+					}
+
+					let subscriptionResult;
 					if (existingSubscription) {
 						// Update existing subscription
-						await supabase
+						subscriptionResult = await supabase
 							.from("subscriptions")
 							.update(subscriptionData)
-							.eq("id", existingSubscription.id);
+							.eq("id", existingSubscription.id)
+							.select()
+							.single();
 					} else {
-						// Create new subscription
-						await supabase.from("subscriptions").insert(subscriptionData);
+						// Create new subscription - ensure we have plan_id
+						const subscriptionWithPlan = {
+							...subscriptionData,
+							plan_id: productId || "starter", // Default to starter if no product ID
+						};
+						subscriptionResult = await supabase
+							.from("subscriptions")
+							.insert(subscriptionWithPlan)
+							.select()
+							.single();
+					}
+
+					if (subscriptionResult.error) {
+						console.error("Error updating/creating subscription:", subscriptionResult.error);
+						throw subscriptionResult.error;
 					}
 
 					// Update tenant subscription status
-					await supabase
+					const { error: tenantUpdateError } = await supabase
 						.from("tenants")
 						.update({
-							subscription_status: "active",
+							subscription_status: "active" as const,
 							trial_ends_at: null, // Clear trial end date
 						})
 						.eq("id", tenant.id);
+
+					if (tenantUpdateError) {
+						console.error("Error updating tenant:", tenantUpdateError);
+						throw tenantUpdateError;
+					}
 
 					toast({
 						title: "Payment Successful!",
