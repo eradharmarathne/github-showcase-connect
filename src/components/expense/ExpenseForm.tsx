@@ -46,12 +46,11 @@ export function ExpenseForm({
 		accountId: "",
 		date: format(new Date(), "yyyy-MM-dd"),
 		note: "",
+		currency: "LKR" as "LKR" | "USD" | "EUR" | "GBP", // Add currency selection
 	});
 
 	const selectedAccount = accounts.find((a) => a.id === formData.accountId);
-	const currencySymbol = selectedAccount?.currency
-		? getCurrencySymbol(selectedAccount.currency)
-		: "Rs.";
+	const currencySymbol = getCurrencySymbol(formData.currency);
 
 	const mainCategories = [...new Set(expenseTypes.map((et) => et.main_type))];
 	const subCategories = expenseTypes
@@ -65,6 +64,7 @@ export function ExpenseForm({
 		accountId: string;
 		date: string;
 		note: string;
+		currency?: string;
 	}) => {
 		setFormData({
 			...formData,
@@ -74,6 +74,7 @@ export function ExpenseForm({
 			accountId: data.accountId,
 			date: data.date,
 			note: data.note,
+			currency: (data.currency as "LKR" | "USD" | "EUR" | "GBP") || formData.currency,
 		});
 	};
 
@@ -105,16 +106,12 @@ export function ExpenseForm({
 		}
 
 		try {
-			const accountForCurrency = accounts.find(
-				(acc) => acc.id === formData.accountId,
-			);
-
 			const { error } = await supabase.from("expenses").insert([
 				{
 					main_type: formData.mainCategory,
 					sub_type: formData.subCategory,
 					amount: parseFloat(formData.amount),
-					currency: accountForCurrency?.currency || "LKR",
+					currency: formData.currency,
 					account_id: formData.accountId,
 					location_id: selectedLocation,
 					date: formData.date,
@@ -193,7 +190,7 @@ export function ExpenseForm({
 						body: {
 							type: "expense",
 							amount: parseFloat(formData.amount),
-							currency: selectedAccount.currency,
+							currency: formData.currency,
 							category: `${formData.mainCategory} - ${formData.subCategory}`,
 							account: selectedAccount.name,
 							locationId: selectedLocation,
@@ -226,6 +223,7 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 				accountId: "",
 				date: format(new Date(), "yyyy-MM-dd"),
 				note: "",
+				currency: "LKR",
 			});
 
 			onSuccess();
@@ -319,6 +317,26 @@ ${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 									required
 								/>
 							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="currency">{t("expense.form.fields.currency")}</Label>
+							<Select
+								value={formData.currency}
+								onValueChange={(value: "LKR" | "USD" | "EUR" | "GBP") =>
+									setFormData({ ...formData, currency: value })
+								}
+							>
+								<SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="LKR">LKR - Sri Lankan Rupee</SelectItem>
+									<SelectItem value="USD">USD - US Dollar</SelectItem>
+									<SelectItem value="EUR">EUR - Euro</SelectItem>
+									<SelectItem value="GBP">GBP - British Pound</SelectItem>
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div className="space-y-2">

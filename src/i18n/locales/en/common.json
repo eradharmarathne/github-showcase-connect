@@ -801,6 +801,7 @@
         "mainCategory": "Main Category",
         "subCategory": "Sub Category",
         "amount": "Amount",
+        "currency": "Currency",
         "account": "Account",
         "date": "Date",
         "note": "Note"
@@ -809,6 +810,7 @@
         "location": "Select Location",
         "mainCategory": "Select main category",
         "subCategory": "Select sub category",
+        "currency": "Select currency",
         "account": "Select account",
         "note": "Add details about this expense..."
       },
