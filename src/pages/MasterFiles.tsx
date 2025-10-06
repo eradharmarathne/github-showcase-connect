@@ -80,38 +80,41 @@ export default function MasterFiles() {
 	};
 
 	return (
-		<div className="p-6">
+		<div className="p-2 sm:p-4 md:p-6">
 			<Card className="h-full">
-				<CardHeader>
-					<CardTitle className="text-2xl font-bold flex items-center gap-3">
-						<Building2 className="size-7 text-primary" />
+				<CardHeader className="p-4 sm:p-6">
+					<CardTitle className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
+						<Building2 className="size-5 sm:size-7 text-primary" />
 						{t("masterFiles.title")}
 					</CardTitle>
-					<p className="text-muted-foreground">{t("masterFiles.subtitle")}</p>
+					<p className="text-sm sm:text-base text-muted-foreground">{t("masterFiles.subtitle")}</p>
 				</CardHeader>
-				<CardContent className="p-6">
+				<CardContent className="p-2 sm:p-4 md:p-6">
 					<Tabs
 						value={activeTab}
 						onValueChange={handleTabChange}
-						className="space-y-6"
+						className="space-y-4 sm:space-y-6"
 					>
-						<TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 h-auto p-1">
-							{masterFilesTabs.map((tab) => {
-								const Icon = tab.icon;
-								return (
-									<TabsTrigger
-										key={tab.id}
-										value={tab.id}
-										className="flex items-center gap-2 p-3 h-auto data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-									>
-										<Icon className="size-4" />
-										<span className="hidden sm:inline font-medium">
-											{tab.name}
-										</span>
-									</TabsTrigger>
-								);
-							})}
-						</TabsList>
+						{/* Mobile: Horizontal scroll, Desktop: Grid */}
+						<div className="overflow-x-auto md:overflow-x-visible">
+							<TabsList className="flex w-max md:grid md:w-full md:grid-cols-5 gap-1 sm:gap-2 h-auto p-1 min-w-max">
+								{masterFilesTabs.map((tab) => {
+									const Icon = tab.icon;
+									return (
+										<TabsTrigger
+											key={tab.id}
+											value={tab.id}
+											className="flex items-center gap-1 sm:gap-2 p-2 sm:p-3 h-auto whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+										>
+											<Icon className="size-3 sm:size-4" />
+											<span className="text-xs sm:text-sm font-medium">
+												{tab.name}
+											</span>
+										</TabsTrigger>
+									);
+								})}
+							</TabsList>
+						</div>
 
 						<div className="grid gap-6">
 							{masterFilesTabs.map((tab) => (

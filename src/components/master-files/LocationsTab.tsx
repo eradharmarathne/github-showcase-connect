@@ -448,52 +448,58 @@ export default function LocationsTab() {
 				</Dialog>
 			</div>
 
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Location Name</TableHead>
-						<TableHead>Status</TableHead>
-						<TableHead>Created Date</TableHead>
-						<TableHead>Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{locations.map((location) => (
-						<TableRow key={location.id}>
-							<TableCell className="font-medium">{location.name}</TableCell>
-							<TableCell>
-								<Badge variant={location.is_active ? "default" : "secondary"}>
-									{location.is_active ? "Active" : "Inactive"}
-								</Badge>
-							</TableCell>
-							<TableCell>
-								{new Date(location.created_at).toLocaleDateString()}
-							</TableCell>
-							<TableCell>
-								<div className="flex gap-2">
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleEdit(location)}
-									>
-										<Edit className="size-4" />
-									</Button>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleDelete(location.id)}
-										disabled={deletingLocationId === location.id}
-									>
-										{deletingLocationId === location.id ? null : (
-											<Trash2 className="size-4" />
-										)}
-									</Button>
-								</div>
-							</TableCell>
+			<div className="overflow-x-auto">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="min-w-[150px]">Location Name</TableHead>
+							<TableHead className="min-w-[100px]">Status</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">Created Date</TableHead>
+							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{locations.map((location) => (
+							<TableRow key={location.id}>
+								<TableCell className="font-medium">{location.name}</TableCell>
+								<TableCell>
+									<Badge variant={location.is_active ? "default" : "secondary"}>
+										{location.is_active ? "Active" : "Inactive"}
+									</Badge>
+								</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									{new Date(location.created_at).toLocaleDateString()}
+								</TableCell>
+								<TableCell>
+									<div className="flex gap-1 sm:gap-2">
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleEdit(location)}
+											className="p-1 sm:p-2"
+										>
+											<Edit className="size-3 sm:size-4" />
+											<span className="sr-only">Edit</span>
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleDelete(location.id)}
+											disabled={deletingLocationId === location.id}
+											className="p-1 sm:p-2"
+										>
+											{deletingLocationId === location.id ? null : (
+												<Trash2 className="size-3 sm:size-4" />
+											)}
+											<span className="sr-only">Delete</span>
+										</Button>
+									</div>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 
 			{/* Delete Confirmation Alert Dialog */}
 			<AlertDialog

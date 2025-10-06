@@ -373,53 +373,59 @@ export default function GuidesTab() {
 				</Dialog>
 			</div>
 
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Name</TableHead>
-						<TableHead>License</TableHead>
-						<TableHead>Phone</TableHead>
-						<TableHead>Email</TableHead>
-						<TableHead>Commission %</TableHead>
-						<TableHead>Status</TableHead>
-						<TableHead>Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{guides.map((guide) => (
-						<TableRow key={guide.id}>
-							<TableCell className="font-medium">{guide.name}</TableCell>
-							<TableCell>{guide.license_number || "-"}</TableCell>
-							<TableCell>{guide.phone || "-"}</TableCell>
-							<TableCell>{guide.email || "-"}</TableCell>
-							<TableCell>{guide.commission_rate}%</TableCell>
-							<TableCell>
-								<Badge variant={guide.is_active ? "default" : "secondary"}>
-									{guide.is_active ? "Active" : "Inactive"}
-								</Badge>
-							</TableCell>
-							<TableCell>
-								<div className="flex gap-2">
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleEdit(guide)}
-									>
-										<Edit className="size-4" />
-									</Button>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleDelete(guide.id)}
-									>
-										<Trash2 className="size-4" />
-									</Button>
-								</div>
-							</TableCell>
+			<div className="overflow-x-auto">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="min-w-[120px]">Name</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">License</TableHead>
+							<TableHead className="min-w-[100px] hidden md:table-cell">Phone</TableHead>
+							<TableHead className="min-w-[150px] hidden lg:table-cell">Email</TableHead>
+							<TableHead className="min-w-[100px]">Commission %</TableHead>
+							<TableHead className="min-w-[80px] hidden sm:table-cell">Status</TableHead>
+							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{guides.map((guide) => (
+							<TableRow key={guide.id}>
+								<TableCell className="font-medium">{guide.name}</TableCell>
+								<TableCell className="hidden sm:table-cell">{guide.license_number || "-"}</TableCell>
+								<TableCell className="hidden md:table-cell">{guide.phone || "-"}</TableCell>
+								<TableCell className="hidden lg:table-cell">{guide.email || "-"}</TableCell>
+								<TableCell>{guide.commission_rate}%</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									<Badge variant={guide.is_active ? "default" : "secondary"}>
+										{guide.is_active ? "Active" : "Inactive"}
+									</Badge>
+								</TableCell>
+								<TableCell>
+									<div className="flex gap-1 sm:gap-2">
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleEdit(guide)}
+											className="p-1 sm:p-2"
+										>
+											<Edit className="size-3 sm:size-4" />
+											<span className="sr-only">Edit</span>
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleDelete(guide.id)}
+											className="p-1 sm:p-2"
+										>
+											<Trash2 className="size-3 sm:size-4" />
+											<span className="sr-only">Delete</span>
+										</Button>
+									</div>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 
 			{/* Delete Confirmation Dialog */}
 			<AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>

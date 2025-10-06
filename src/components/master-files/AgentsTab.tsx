@@ -372,53 +372,59 @@ export default function AgentsTab() {
 				</Dialog>
 			</div>
 
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Name</TableHead>
-						<TableHead>Agency</TableHead>
-						<TableHead>Phone</TableHead>
-						<TableHead>Email</TableHead>
-						<TableHead>Commission %</TableHead>
-						<TableHead>Status</TableHead>
-						<TableHead>Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{agents.map((agent) => (
-						<TableRow key={agent.id}>
-							<TableCell className="font-medium">{agent.name}</TableCell>
-							<TableCell>{agent.agency_name || "-"}</TableCell>
-							<TableCell>{agent.phone || "-"}</TableCell>
-							<TableCell>{agent.email || "-"}</TableCell>
-							<TableCell>{agent.commission_rate}%</TableCell>
-							<TableCell>
-								<Badge variant={agent.is_active ? "default" : "secondary"}>
-									{agent.is_active ? "Active" : "Inactive"}
-								</Badge>
-							</TableCell>
-							<TableCell>
-								<div className="flex gap-2">
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleEdit(agent)}
-									>
-										<Edit className="size-4" />
-									</Button>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleDelete(agent.id)}
-									>
-										<Trash2 className="size-4" />
-									</Button>
-								</div>
-							</TableCell>
+			<div className="overflow-x-auto">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="min-w-[120px]">Name</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">Agency</TableHead>
+							<TableHead className="min-w-[100px] hidden md:table-cell">Phone</TableHead>
+							<TableHead className="min-w-[150px] hidden lg:table-cell">Email</TableHead>
+							<TableHead className="min-w-[100px]">Commission %</TableHead>
+							<TableHead className="min-w-[80px] hidden sm:table-cell">Status</TableHead>
+							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{agents.map((agent) => (
+							<TableRow key={agent.id}>
+								<TableCell className="font-medium">{agent.name}</TableCell>
+								<TableCell className="hidden sm:table-cell">{agent.agency_name || "-"}</TableCell>
+								<TableCell className="hidden md:table-cell">{agent.phone || "-"}</TableCell>
+								<TableCell className="hidden lg:table-cell">{agent.email || "-"}</TableCell>
+								<TableCell>{agent.commission_rate}%</TableCell>
+								<TableCell className="hidden sm:table-cell">
+									<Badge variant={agent.is_active ? "default" : "secondary"}>
+										{agent.is_active ? "Active" : "Inactive"}
+									</Badge>
+								</TableCell>
+								<TableCell>
+									<div className="flex gap-1 sm:gap-2">
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleEdit(agent)}
+											className="p-1 sm:p-2"
+										>
+											<Edit className="size-3 sm:size-4" />
+											<span className="sr-only">Edit</span>
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleDelete(agent.id)}
+											className="p-1 sm:p-2"
+										>
+											<Trash2 className="size-3 sm:size-4" />
+											<span className="sr-only">Delete</span>
+										</Button>
+									</div>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 
 			{/* Delete Confirmation Dialog */}
 			<AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>

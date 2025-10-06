@@ -549,56 +549,62 @@ export default function RoomsTab() {
 				</Dialog>
 			</div>
 
-			<Table>
-				<TableHeader>
-					<TableRow>
-						<TableHead>Room Number</TableHead>
-						<TableHead>Type</TableHead>
-						<TableHead>Location</TableHead>
-						<TableHead>Occupancy</TableHead>
-						<TableHead>Base Price</TableHead>
-						<TableHead>Status</TableHead>
-						<TableHead>Actions</TableHead>
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{rooms.map((room) => (
-						<TableRow key={room.id}>
-							<TableCell className="font-medium">{room.room_number}</TableCell>
-							<TableCell>{room.room_type}</TableCell>
-							<TableCell>{(room as any).locations?.name}</TableCell>
-							<TableCell>{room.max_occupancy}</TableCell>
-							<TableCell>
-								{getCurrencySymbol(room.currency)}
-								{room.base_price}
-							</TableCell>
-							<TableCell>
-								<Badge variant={room.is_active ? "default" : "secondary"}>
-									{room.is_active ? "Active" : "Inactive"}
-								</Badge>
-							</TableCell>
-							<TableCell>
-								<div className="flex gap-2">
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleEdit(room)}
-									>
-										<Edit className="size-4" />
-									</Button>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => handleDelete(room.id)}
-									>
-										<Trash2 className="size-4" />
-									</Button>
-								</div>
-							</TableCell>
+			<div className="overflow-x-auto">
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead className="min-w-[120px]">Room Number</TableHead>
+							<TableHead className="min-w-[100px]">Type</TableHead>
+							<TableHead className="min-w-[120px] hidden sm:table-cell">Location</TableHead>
+							<TableHead className="min-w-[100px] hidden md:table-cell">Occupancy</TableHead>
+							<TableHead className="min-w-[100px]">Base Price</TableHead>
+							<TableHead className="min-w-[80px] hidden lg:table-cell">Status</TableHead>
+							<TableHead className="min-w-[100px]">Actions</TableHead>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHeader>
+					<TableBody>
+						{rooms.map((room) => (
+							<TableRow key={room.id}>
+								<TableCell className="font-medium">{room.room_number}</TableCell>
+								<TableCell>{room.room_type}</TableCell>
+								<TableCell className="hidden sm:table-cell">{(room as any).locations?.name}</TableCell>
+								<TableCell className="hidden md:table-cell">{room.max_occupancy}</TableCell>
+								<TableCell>
+									{getCurrencySymbol(room.currency)}
+									{room.base_price}
+								</TableCell>
+								<TableCell className="hidden lg:table-cell">
+									<Badge variant={room.is_active ? "default" : "secondary"}>
+										{room.is_active ? "Active" : "Inactive"}
+									</Badge>
+								</TableCell>
+								<TableCell>
+									<div className="flex gap-1 sm:gap-2">
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleEdit(room)}
+											className="p-1 sm:p-2"
+										>
+											<Edit className="size-3 sm:size-4" />
+											<span className="sr-only">Edit</span>
+										</Button>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={() => handleDelete(room.id)}
+											className="p-1 sm:p-2"
+										>
+											<Trash2 className="size-3 sm:size-4" />
+											<span className="sr-only">Delete</span>
+										</Button>
+									</div>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
 		</div>
 	);
 }
