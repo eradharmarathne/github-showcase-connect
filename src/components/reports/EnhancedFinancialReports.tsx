@@ -527,7 +527,7 @@ export default function EnhancedFinancialReports() {
 								<p className="text-sm font-medium text-green-600">
 									{t("reports.enhanced.summary.totalIncome")}
 								</p>
-								<p className="text-xl sm:text-3xl font-bold text-green-900">
+								<p className="text-sm sm:text-base lg:text-xl font-bold text-green-900">
 									{formatCurrency(summary.totalIncome, baseCurrency)}
 								</p>
 								<p className="text-sm text-green-600">
@@ -547,7 +547,7 @@ export default function EnhancedFinancialReports() {
 								<p className="text-sm font-medium text-red-600">
 									{t("reports.enhanced.summary.totalExpenses")}
 								</p>
-								<p className="text-xl sm:text-3xl font-bold text-red-900">
+								<p className="text-sm sm:text-base lg:text-xl font-bold text-red-900">
 									{formatCurrency(summary.totalExpenses, baseCurrency)}
 								</p>
 								<p className="text-sm text-red-600">
@@ -572,7 +572,7 @@ export default function EnhancedFinancialReports() {
 									{t("reports.enhanced.summary.netProfit")}
 								</p>
 								<p
-									className={`text-xl sm:text-3xl font-bold ${summary.netProfit >= 0 ? "text-blue-900" : "text-red-900"}`}
+									className={`text-sm sm:text-base lg:text-xl font-bold ${summary.netProfit >= 0 ? "text-blue-900" : "text-red-900"}`}
 								>
 									{formatCurrency(summary.netProfit, baseCurrency)}
 								</p>

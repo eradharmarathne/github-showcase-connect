@@ -162,51 +162,48 @@ export function FinancialSummaryCards({
 	}
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-4 gap-6" data-testid="financial-summary-cards">
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="financial-summary-cards">
 			<Card className="bg-green-50 border-green-200">
-				<CardContent className="p-3 sm:p-6">
+				<CardContent className="p-1 sm:p-2 lg:p-4">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-xs sm:text-sm font-medium text-green-600">
 								{t("reports.comprehensive.summary.totalIncome")}
 							</p>
-							<p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-900">
+							<p className="text-sm sm:text-base lg:text-lg font-bold text-green-900">
 								{formatCurrency(summary.totalPayments, baseCurrency)}
 							</p>
 						</div>
-						<TrendingUp className="size-8 text-green-600" />
 					</div>
 				</CardContent>
 			</Card>
 
 			<Card className="bg-blue-50 border-blue-200">
-				<CardContent className="p-3 sm:p-6">
+				<CardContent className="p-1 sm:p-2 lg:p-4">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-xs sm:text-sm font-medium text-blue-600">
 								{t("reports.comprehensive.summary.reservationPayments")}
 							</p>
-							<p className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-900">
+							<p className="text-sm sm:text-base lg:text-lg font-bold text-blue-900">
 								{formatCurrency(summary.totalPayments, baseCurrency)}
 							</p>
 						</div>
-						<CreditCard className="size-8 text-blue-600" />
 					</div>
 				</CardContent>
 			</Card>
 
 			<Card className="bg-red-50 border-red-200">
-				<CardContent className="p-3 sm:p-6">
+				<CardContent className="p-1 sm:p-2 lg:p-4">
 					<div className="flex items-center justify-between">
 						<div>
 							<p className="text-xs sm:text-sm font-medium text-red-600">
 								{t("reports.comprehensive.summary.totalExpenses")}
 							</p>
-							<p className="text-lg sm:text-xl lg:text-2xl font-bold text-red-900">
+							<p className="text-sm sm:text-base lg:text-lg font-bold text-red-900">
 								{formatCurrency(summary.totalExpenses, baseCurrency)}
 							</p>
 						</div>
-						<TrendingDown className="size-8 text-red-600" />
 					</div>
 				</CardContent>
 			</Card>
@@ -214,7 +211,7 @@ export function FinancialSummaryCards({
 			<Card
 				className={`${summary.netProfit >= 0 ? "bg-emerald-50 border-emerald-200" : "bg-red-50 border-red-200"}`}
 			>
-				<CardContent className="p-3 sm:p-6">
+				<CardContent className="p-1 sm:p-2 lg:p-4">
 					<div className="flex items-center justify-between">
 						<div>
 							<p
@@ -223,7 +220,7 @@ export function FinancialSummaryCards({
 								{t("reports.comprehensive.summary.netProfit")}
 							</p>
 							<p
-								className={`text-lg sm:text-xl lg:text-2xl font-bold ${summary.netProfit >= 0 ? "text-emerald-900" : "text-red-900"}`}
+								className={`text-sm sm:text-base lg:text-lg font-bold ${summary.netProfit >= 0 ? "text-emerald-900" : "text-red-900"}`}
 							>
 								{formatCurrency(summary.netProfit, baseCurrency)}
 							</p>
@@ -233,9 +230,6 @@ export function FinancialSummaryCards({
 								{summary.profitMargin.toFixed(1)}% margin
 							</p>
 						</div>
-						<DollarSign
-							className={`size-4 ${summary.netProfit >= 0 ? "text-emerald-600" : "text-red-600"}`}
-						/>
 					</div>
 				</CardContent>
 			</Card>

@@ -137,28 +137,24 @@ export default function Reports() {
 									value="comprehensive"
 									className="flex items-center gap-2 text-md"
 								>
-									<BarChart3 className="size-4" />
 									{t("reports.tabs.desktop.financialOverview")}
 								</TabsTrigger>
 								<TabsTrigger
 									value="detailed"
 									className="flex items-center gap-2 text-md"
 								>
-									<TrendingUp className="size-4" />
 									{t("reports.tabs.desktop.detailedReports")}
 								</TabsTrigger>
 								<TabsTrigger
 									value="accounts"
 									className="flex items-center gap-2 text-md"
 								>
-									<CreditCard className="size-4" />
 									{t("reports.tabs.desktop.accountStatements")}
 								</TabsTrigger>
 								<TabsTrigger
 									value="commission"
 									className="flex items-center gap-2 text-md"
 								>
-									<Percent className="size-4" />
 									{t("reports.tabs.desktop.commissions")}
 								</TabsTrigger>
 							</TabsList>

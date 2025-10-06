@@ -131,8 +131,7 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			// Create new tour instance
 			const tour = new Shepherd.Tour({
 				...tourTheme,
-				confirmCancel: true,
-				confirmCancelMessage: "Are you sure you want to exit the tour?",
+				confirmCancel: false
 			});
 
 			// Add steps to tour

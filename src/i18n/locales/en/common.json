@@ -605,7 +605,10 @@
     "all": "All",
     "none": "None",
     "select": "Select",
-    "deselect": "Deselect"
+    "deselect": "Deselect",
+    "buttons": {
+      "refresh": "Refresh"
+    }
   },
   "auth": {
     "login": "Login",
