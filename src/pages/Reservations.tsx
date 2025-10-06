@@ -17,7 +17,7 @@ import { ViewReservationDialog } from "@/components/ViewReservationDialog";
 import { useLocationContext } from "@/context/LocationContext";
 import { useIncomeData } from "@/hooks/useIncomeData";
 import { useReservationFinancials } from "@/hooks/useReservationFinancials";
-import { useReservationPrint } from "@/hooks/useReservationPrint";
+import { useTenant } from "@/hooks/useTenant";
 import { useReservationsData } from "@/hooks/useReservationsData";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -29,7 +29,7 @@ export default function Reservations() {
 	const { refetch } = useReservationsData();
 	const { refetch: refetchFinancials } = useReservationFinancials();
 	const { accounts } = useIncomeData();
-	const { printReservation } = useReservationPrint();
+	const { tenant } = useTenant();
 	const navigate = useNavigate();
 
 	// State management
@@ -100,7 +100,119 @@ export default function Reservations() {
 	};
 
 	const handlePrint = (reservation: any) => {
-		printReservation(reservation);
+		// Transform reservation data with tenant and location information
+		const printableData = {
+			...reservation,
+			// Enhanced hotel/tenant information from context
+			tenant_name: tenant?.hotel_name || tenant?.name,
+			hotel_name: tenant?.hotel_name || tenant?.name,
+			hotel_address: tenant?.hotel_address,
+			hotel_phone: tenant?.hotel_phone,
+			hotel_email: tenant?.hotel_email,
+			hotel_website: tenant?.hotel_website,
+			logo_url: tenant?.logo_url,
+
+			// Enhanced location information
+			location_name: reservation.locations?.name || "Unknown Location",
+			location_address: reservation.locations?.address || null,
+			location_phone: reservation.locations?.phone || null,
+			location_email: reservation.locations?.email || null,
+
+			// Room details
+			room_number: reservation.rooms?.room_number || "Unknown Room",
+			room_type: reservation.rooms?.room_type || "Unknown Type",
+			bed_type: reservation.rooms?.bed_type || null,
+			room_description: reservation.rooms?.description || null,
+			amenities: reservation.rooms?.amenities || [],
+		};
+		
+		// Open a new window for printing
+		const printWindow = window.open('', '_blank', 'width=800,height=600');
+		if (printWindow) {
+			printWindow.document.open();
+			printWindow.document.write(`
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Reservation ${reservation.reservation_number}</title>
+					<style>
+						body { font-family: Arial, sans-serif; margin: 20px; }
+						.header { text-align: center; margin-bottom: 30px; }
+						.section { margin-bottom: 20px; }
+						.label { font-weight: bold; }
+						.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+						@media print {
+							body { margin: 0; }
+							.no-print { display: none; }
+						}
+					</style>
+				</head>
+				<body>
+					<div class="header">
+						<h1>${printableData.hotel_name || 'Hotel Reservation'}</h1>
+						<h2>Reservation Confirmation</h2>
+						<p><strong>Reservation Number:</strong> ${reservation.reservation_number}</p>
+					</div>
+					
+					<div class="grid">
+						<div class="section">
+							<h3>Guest Information</h3>
+							<p><span class="label">Name:</span> ${reservation.guest_name}</p>
+							<p><span class="label">Email:</span> ${reservation.guest_email || 'N/A'}</p>
+							<p><span class="label">Phone:</span> ${reservation.guest_phone || 'N/A'}</p>
+							<p><span class="label">Nationality:</span> ${reservation.guest_nationality || 'N/A'}</p>
+							<p><span class="label">Adults:</span> ${reservation.adults}</p>
+							<p><span class="label">Children:</span> ${reservation.children}</p>
+						</div>
+						
+						<div class="section">
+							<h3>Booking Details</h3>
+							<p><span class="label">Check-in:</span> ${new Date(reservation.check_in_date).toLocaleDateString()}</p>
+							<p><span class="label">Check-out:</span> ${new Date(reservation.check_out_date).toLocaleDateString()}</p>
+							<p><span class="label">Nights:</span> ${reservation.nights}</p>
+							<p><span class="label">Room:</span> ${printableData.room_number} (${printableData.room_type})</p>
+							<p><span class="label">Status:</span> ${reservation.status}</p>
+						</div>
+					</div>
+					
+					<div class="section">
+						<h3>Financial Summary</h3>
+						<p><span class="label">Room Rate:</span> ${reservation.currency} ${reservation.room_rate}</p>
+						<p><span class="label">Total Amount:</span> ${reservation.currency} ${reservation.total_amount}</p>
+						<p><span class="label">Paid Amount:</span> ${reservation.currency} ${reservation.paid_amount || 0}</p>
+						<p><span class="label">Balance:</span> ${reservation.currency} ${(reservation.total_amount - (reservation.paid_amount || 0)).toFixed(2)}</p>
+					</div>
+					
+					${reservation.special_requests ? `
+					<div class="section">
+						<h3>Special Requests</h3>
+						<p>${reservation.special_requests}</p>
+					</div>
+					` : ''}
+					
+					<div class="section">
+						<h3>Hotel Information</h3>
+						<p><span class="label">Location:</span> ${printableData.location_name}</p>
+						${printableData.hotel_address ? `<p><span class="label">Address:</span> ${printableData.hotel_address}</p>` : ''}
+						${printableData.hotel_phone ? `<p><span class="label">Phone:</span> ${printableData.hotel_phone}</p>` : ''}
+						${printableData.hotel_email ? `<p><span class="label">Email:</span> ${printableData.hotel_email}</p>` : ''}
+					</div>
+					
+					<div class="no-print" style="text-align: center; margin-top: 30px;">
+						<button onclick="window.print()">Print</button>
+						<button onclick="window.close()">Close</button>
+					</div>
+				</body>
+				</html>
+			`);
+			printWindow.document.close();
+			
+			// Auto-focus and print
+			printWindow.focus();
+			setTimeout(() => {
+				printWindow.print();
+			}, 500);
+		}
 	};
 
 	const handleIncomeSuccess = () => {

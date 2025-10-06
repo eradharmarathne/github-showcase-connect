@@ -524,7 +524,7 @@ export default function BillingSubscription() {
 	}
 
 	return (
-		<div className="w-full mx-auto pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 space-y-6">
+		<div className="w-full mx-auto pt-8 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 space-y-6">
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
