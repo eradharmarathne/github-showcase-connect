@@ -22,6 +22,7 @@ export type Database = {
 					from_account_id: string;
 					id: string;
 					note: string | null;
+					tenant_id: string | null;
 					to_account_id: string;
 				};
 				Insert: {
@@ -31,6 +32,7 @@ export type Database = {
 					from_account_id: string;
 					id?: string;
 					note?: string | null;
+					tenant_id?: string | null;
 					to_account_id: string;
 				};
 				Update: {
@@ -40,6 +42,7 @@ export type Database = {
 					from_account_id?: string;
 					id?: string;
 					note?: string | null;
+					tenant_id?: string | null;
 					to_account_id?: string;
 				};
 				Relationships: [
@@ -55,6 +58,13 @@ export type Database = {
 						columns: ["from_account_id"];
 						isOneToOne: false;
 						referencedRelation: "accounts";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "account_transfers_tenant_id_fkey";
+						columns: ["tenant_id"];
+						isOneToOne: false;
+						referencedRelation: "tenants";
 						referencedColumns: ["id"];
 					},
 					{
@@ -158,6 +168,13 @@ export type Database = {
 					unit_price?: number;
 				};
 				Relationships: [
+					{
+						foreignKeyName: "additional_services_reservation_id_fkey";
+						columns: ["reservation_id"];
+						isOneToOne: false;
+						referencedRelation: "reservation_financials";
+						referencedColumns: ["id"];
+					},
 					{
 						foreignKeyName: "additional_services_reservation_id_fkey";
 						columns: ["reservation_id"];
@@ -913,6 +930,13 @@ export type Database = {
 						foreignKeyName: "income_reservation_id_fkey";
 						columns: ["booking_id"];
 						isOneToOne: false;
+						referencedRelation: "reservation_financials";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "income_reservation_id_fkey";
+						columns: ["booking_id"];
+						isOneToOne: false;
 						referencedRelation: "reservations";
 						referencedColumns: ["id"];
 					},
@@ -1172,6 +1196,13 @@ export type Database = {
 						foreignKeyName: "payments_reservation_id_fkey";
 						columns: ["reservation_id"];
 						isOneToOne: false;
+						referencedRelation: "reservation_financials";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "payments_reservation_id_fkey";
+						columns: ["reservation_id"];
+						isOneToOne: false;
 						referencedRelation: "reservations";
 						referencedColumns: ["id"];
 					},
@@ -1295,6 +1326,7 @@ export type Database = {
 					agent_id: string | null;
 					arrival_time: string | null;
 					balance_amount: number | null;
+					booking_group_id: string | null;
 					booking_source: string | null;
 					check_in_date: string;
 					check_out_date: string;
@@ -1334,6 +1366,7 @@ export type Database = {
 					agent_id?: string | null;
 					arrival_time?: string | null;
 					balance_amount?: number | null;
+					booking_group_id?: string | null;
 					booking_source?: string | null;
 					check_in_date: string;
 					check_out_date: string;
@@ -1373,6 +1406,7 @@ export type Database = {
 					agent_id?: string | null;
 					arrival_time?: string | null;
 					balance_amount?: number | null;
+					booking_group_id?: string | null;
 					booking_source?: string | null;
 					check_in_date?: string;
 					check_out_date?: string;
@@ -1908,6 +1942,26 @@ export type Database = {
 					},
 				];
 			};
+			reservation_financials: {
+				Row: {
+					balance_amount_original: number | null;
+					expenses_usd: number | null;
+					guest_name: string | null;
+					id: string | null;
+					needs_to_pay_usd: number | null;
+					original_currency:
+						| Database["public"]["Enums"]["currency_type"]
+						| null;
+					paid_amount_original: number | null;
+					reservation_number: string | null;
+					room_amount_original: number | null;
+					room_amount_usd: number | null;
+					status: Database["public"]["Enums"]["reservation_status"] | null;
+					total_amount_original: number | null;
+					user_paid_amount_usd: number | null;
+				};
+				Relationships: [];
+			};
 		};
 		Functions: {
 			accept_invitation: {
@@ -1918,8 +1972,24 @@ export type Database = {
 				Args: { p_location_id: string };
 				Returns: Json;
 			};
+			convert_currency: {
+				Args: {
+					amount_to_convert: number;
+					from_currency_code: string;
+					to_currency_code: string;
+				};
+				Returns: number;
+			};
 			create_user_invitation: {
 				Args: { p_email: string; p_role?: string; p_tenant_id: string };
+				Returns: string;
+			};
+			fix_all_reservation_balances: {
+				Args: Record<PropertyKey, never>;
+				Returns: string;
+			};
+			fix_reservation_balance: {
+				Args: { reservation_uuid: string };
 				Returns: string;
 			};
 			generate_invitation_token: {
@@ -1935,7 +2005,7 @@ export type Database = {
 				Returns: string;
 			};
 			generate_reservation_number: {
-				Args: Record<PropertyKey, never> | { p_tenant_id: string };
+				Args: { p_tenant_id: string };
 				Returns: string;
 			};
 			generate_tenant_slug: {
@@ -1955,6 +2025,19 @@ export type Database = {
 					initial_balance: number;
 					location_access: string[];
 					name: string;
+				}[];
+			};
+			get_accounts_by_location: {
+				Args: { location_id_param: string; tenant_id_param: string };
+				Returns: {
+					created_at: string;
+					currency: Database["public"]["Enums"]["currency_type"];
+					current_balance: number;
+					id: string;
+					initial_balance: number;
+					location_access: string[];
+					name: string;
+					tenant_id: string;
 				}[];
 			};
 			get_tenant_limits: {

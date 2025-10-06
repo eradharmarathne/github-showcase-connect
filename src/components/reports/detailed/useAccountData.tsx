@@ -16,26 +16,31 @@ export function useAccountData(baseCurrency: Currency) {
 		if (!tenant?.id || !selectedLocation) return null;
 
 		try {
-			// Fetch all accounts for the tenant and location with explicit query
-			const accountsRes = await supabase.rpc("get_accounts_by_location", {
-				tenant_id_param: tenant.id,
-				location_id_param: selectedLocation,
-			});
+			// Use the new RPC function to get accounts with calculated balances
+			const { data: accountsData, error: accountsError } = await supabase.rpc(
+				"get_accounts_by_location",
+				{
+					tenant_id_param: tenant.id,
+					location_id_param: selectedLocation,
+				},
+			);
 
-			// If RPC doesn't exist, fallback to direct query with type assertion
-			let accountsData: any[] = [];
-			if (accountsRes.error) {
-				const { data } = await supabase
-					.from("accounts")
-					.select(
-						"id, name, currency, initial_balance, tenant_id, location_id, created_at",
-					)
-					.eq("tenant_id", tenant.id)
-					.eq("location_id", selectedLocation)
-					.order("name");
-				accountsData = data || [];
-			} else {
-				accountsData = accountsRes.data || [];
+			if (accountsError) {
+				console.error("Error fetching accounts:", accountsError);
+				return null;
+			}
+
+			if (!accountsData || accountsData.length === 0) {
+				return {
+					accounts: [],
+					allTransactions: [],
+					accountSummary: {
+						totalInitialBalance: 0,
+						totalCurrentBalance: 0,
+						totalIncome: 0,
+						totalExpenses: 0,
+					},
+				};
 			}
 
 			const accountDetails: AccountDetail[] = [];
@@ -198,7 +203,7 @@ export function useAccountData(baseCurrency: Currency) {
 					});
 				}
 
-				// Convert initial balance and totals to base currency
+				// Convert initial balance to base currency
 				const convertedInitialBalance = await convertCurrency(
 					account.initial_balance,
 					account.currency as Currency,
@@ -207,8 +212,9 @@ export function useAccountData(baseCurrency: Currency) {
 					selectedLocation,
 				);
 
+				// Use the current_balance from RPC result (already calculated)
 				const convertedCurrentBalance = await convertCurrency(
-					runningBalance,
+					account.current_balance,
 					account.currency as Currency,
 					baseCurrency,
 					tenant.id,
