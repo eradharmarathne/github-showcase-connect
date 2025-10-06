@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ interface UsageData {
 }
 
 export default function BillingSubscription() {
+	const { t } = useTranslation("common");
 	const navigate = useNavigate();
 	const { toast } = useToast();
 	const { tenant, user } = useAuth();
@@ -527,10 +529,10 @@ export default function BillingSubscription() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
-						Billing & Subscription
+						{t("billing.title")}
 					</h1>
 					<p className="text-muted-foreground">
-						Manage your subscription and billing settings
+						{t("billing.subtitle")}
 					</p>
 				</div>
 			</div>
@@ -580,7 +582,7 @@ export default function BillingSubscription() {
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<Crown className="size-5 text-yellow-600" />
-							Current Subscription
+							{t("billing.currentSubscription.title")}
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -598,7 +600,7 @@ export default function BillingSubscription() {
 									onClick={handleCancelSubscription}
 									disabled={cancelling}
 								>
-									{cancelling ? "Cancelling..." : "Cancel Subscription"}
+									{cancelling ? t("billing.currentSubscription.cancelling") : t("billing.currentSubscription.cancelSubscription")}
 								</Button>
 							)}
 						</div>
@@ -619,7 +621,7 @@ export default function BillingSubscription() {
 			{/* Available Plans */}
 			<div className="space-y-4">
 				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold">
-					Available Plans
+					{t("billing.plans.title")}
 				</h2>
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{plans.map((plan) => {
@@ -688,8 +690,8 @@ export default function BillingSubscription() {
 										>
 											<CreditCard className="size-4 mr-2" />
 											{processingPlanId === plan.id
-												? "Processing..."
-												: "Subscribe"}
+												? t("billing.plans.processing")
+												: t("billing.plans.subscribe")}
 										</Button>
 									)}
 								</CardContent>

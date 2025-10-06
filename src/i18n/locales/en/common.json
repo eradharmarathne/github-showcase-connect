@@ -1167,5 +1167,68 @@
         "custom": "Custom Range"
       }
     }
+  },
+  "billing": {
+    "title": "Billing & Subscription",
+    "subtitle": "Manage your subscription and billing settings",
+    "currentSubscription": {
+      "title": "Current Subscription",
+      "cancelSubscription": "Cancel Subscription",
+      "cancelling": "Cancelling...",
+      "renews": "Renews",
+      "expires": "Expires",
+      "on": "on"
+    },
+    "trial": {
+      "expired": "Your 7-day free trial has expired. Please subscribe to continue using the service.",
+      "expiresTomorrow": "Your 7-day free trial expires tomorrow. Subscribe now to continue using all features.",
+      "expiresInDays": "Your 7-day free trial expires in {{days}} days. Subscribe now to continue using all features."
+    },
+    "plans": {
+      "title": "Available Plans",
+      "currentPlan": "Current Plan",
+      "subscribe": "Subscribe",
+      "processing": "Processing...",
+      "features": {
+        "locations": "{{count}} locations",
+        "rooms": "{{count}} rooms",
+        "unlimitedUsers": "Unlimited users",
+        "support": "24/7 Support"
+      },
+      "billing": {
+        "monthly": "month",
+        "yearly": "year"
+      }
+    },
+    "payment": {
+      "title": "Payment Processing",
+      "description": "Payments are processed securely through Creem.io. All major credit cards are accepted. Your payment information is never stored on our servers.",
+      "demoMode": {
+        "title": "Demo Mode:",
+        "description": "Set VITE_CREEM_API_KEY environment variable to enable real payment processing."
+      }
+    },
+    "status": {
+      "active": "ACTIVE",
+      "trialing": "TRIALING",
+      "pastDue": "PAST DUE",
+      "cancelled": "CANCELLED",
+      "unpaid": "UNPAID"
+    },
+    "errors": {
+      "configurationError": "Configuration Error",
+      "paymentConfigError": "Payment system is not properly configured. Please contact support or try again later.",
+      "planConfigError": "The {{planName}} plan is not properly configured for payments. Please contact support.",
+      "paymentSystemError": "Payment System Error",
+      "checkoutError": "Failed to initialize checkout: {{error}}. Please try again or contact support.",
+      "subscriptionError": "Failed to start subscription process",
+      "noActiveSubscription": "No active subscription to cancel",
+      "loadingError": "Unable to load subscription details. Please try refreshing the page.",
+      "syncError": "Failed to sync subscription status. If you just made a payment, please contact support."
+    },
+    "messages": {
+      "subscriptionRefreshed": "Subscription status refreshed",
+      "subscriptionCancelled": "Subscription cancelled successfully"
+    }
   }
 }
