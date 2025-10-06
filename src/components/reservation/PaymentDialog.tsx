@@ -411,6 +411,7 @@ export function PaymentDialog({
 												Partial Payment
 											</SelectItem>
 											<SelectItem value="full_payment">Full Payment</SelectItem>
+											<SelectItem value="Payment Type">Payment Type</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>

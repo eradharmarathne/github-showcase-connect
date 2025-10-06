@@ -288,15 +288,28 @@ export default function PaymentForm() {
 				.filter((inc) => inc.payment_method === "pending")
 				.reduce((sum, inc) => sum + Number(inc.amount), 0);
 
-			// Only mark as confirmed if both room balance is paid AND no pending expenses exist
-			const shouldMarkConfirmed = newBalanceAmount <= 0 && pendingExpenses <= 0;
+			// Enhanced status logic based on payment completion and payment type
+			const isPaymentComplete = newBalanceAmount <= 0 && pendingExpenses <= 0;
+			const isCompletionPayment = formData.payment_type === "Payment Type" || formData.payment_type === "full_payment";
+			
+			// Determine new status based on payment completion and type
+			let newStatus = reservation.status;
+			if (isPaymentComplete) {
+				if (isCompletionPayment) {
+					// Mark as checked_out (completed) when payment is done AND payment type is Payment Type or full_payment
+					newStatus = "checked_out";
+				} else if (reservation.status === "tentative") {
+					// Mark as confirmed for other payment types when balance is paid
+					newStatus = "confirmed";
+				}
+			}
 
 			await supabase
 				.from("reservations")
 				.update({
 					paid_amount: newPaidAmount,
 					balance_amount: newBalanceAmount,
-					status: shouldMarkConfirmed ? "confirmed" : reservation.status,
+					status: newStatus,
 				})
 				.eq("id", reservationId)
 				.eq("tenant_id", tenant?.id);
@@ -593,6 +606,7 @@ export default function PaymentForm() {
 										<SelectItem value="balance_payment">
 											Balance Payment
 										</SelectItem>
+										<SelectItem value="Payment Type">Payment Type</SelectItem>
 										<SelectItem value="refund">Refund</SelectItem>
 									</SelectContent>
 								</Select>
