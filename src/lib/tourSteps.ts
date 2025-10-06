@@ -40,17 +40,35 @@ export const tourTheme = {
 		scrollTo: { behavior: "smooth", block: "center" },
 		when: {
 			show() {
+				// Ensure only one modal overlay exists
+				const existingOverlays = document.querySelectorAll('.shepherd-modal-overlay-container');
+				if (existingOverlays.length > 1) {
+					// Remove extra overlays
+					for (let i = 1; i < existingOverlays.length; i++) {
+						existingOverlays[i].remove();
+					}
+				}
+				
 				document.body.style.overflow = "hidden";
 				// Close any open modals or popups that might interfere
-				const modals = document.querySelectorAll('[role="dialog"], .popover, .dropdown-menu');
+				const modals = document.querySelectorAll('[role="dialog"]:not(.shepherd-element), .popover, .dropdown-menu, [data-state="open"]');
 				modals.forEach(modal => {
-					if (modal instanceof HTMLElement && modal.style.display !== 'none') {
+					if (modal instanceof HTMLElement && !modal.closest('.shepherd-element')) {
 						modal.style.display = 'none';
+						// Also remove any backdrop/overlay classes
+						modal.setAttribute('data-state', 'closed');
 					}
 				});
 			},
 			hide() {
 				document.body.style.overflow = "auto";
+				// Clean up any residual overlays
+				const overlays = document.querySelectorAll('.shepherd-modal-overlay-container');
+				overlays.forEach(overlay => {
+					if (overlay instanceof HTMLElement) {
+						overlay.style.display = 'none';
+					}
+				});
 			},
 		},
 	},

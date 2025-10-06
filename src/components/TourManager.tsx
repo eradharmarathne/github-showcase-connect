@@ -80,7 +80,7 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			// Close any open modals, dialogs, or popups before starting tour
 			const closeOpenModals = () => {
 				// Close any open dialogs or modals
-				const modals = document.querySelectorAll('[role="dialog"], .modal, .popover-content');
+				const modals = document.querySelectorAll('[role="dialog"]:not(.shepherd-element), .modal, .popover-content, [data-state="open"]');
 				modals.forEach(modal => {
 					if (modal instanceof HTMLElement) {
 						// Try to find and click close button
@@ -90,6 +90,7 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 						} else {
 							// Force hide if no close button found
 							modal.style.display = 'none';
+							modal.setAttribute('data-state', 'closed');
 						}
 					}
 				});
@@ -99,8 +100,13 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 				dropdowns.forEach(dropdown => {
 					if (dropdown instanceof HTMLElement) {
 						dropdown.style.display = 'none';
+						dropdown.setAttribute('data-state', 'closed');
 					}
 				});
+
+				// Remove any existing Shepherd overlays
+				const existingOverlays = document.querySelectorAll('.shepherd-modal-overlay-container');
+				existingOverlays.forEach(overlay => overlay.remove());
 
 				// Press escape to close any remaining modals
 				document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
@@ -125,6 +131,10 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 				endTour();
 				// Remove tour event listeners
 				removeTourEventListeners();
+				// Clean up any remaining overlays
+				const overlays = document.querySelectorAll('.shepherd-modal-overlay-container');
+				overlays.forEach(overlay => overlay.remove());
+				document.body.style.overflow = "auto";
 				toast({
 					title: "🎉 Tour Completed!",
 					description:
@@ -137,6 +147,10 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 				endTour();
 				// Remove tour event listeners
 				removeTourEventListeners();
+				// Clean up any remaining overlays
+				const overlays = document.querySelectorAll('.shepherd-modal-overlay-container');
+				overlays.forEach(overlay => overlay.remove());
+				document.body.style.overflow = "auto";
 				toast({
 					title: "Tour Cancelled",
 					description: "You can restart the tour anytime from the help menu.",
@@ -190,6 +204,27 @@ export const TourManager: React.FC<TourManagerProps> = ({ children }) => {
 			// Handle individual step events for navigation and analytics
 			tour.on("show", (event) => {
 				console.log(`Tour step shown: ${event.step?.id} in comprehensive tour`);
+				
+				// Clean up any lingering modals from previous steps
+				const cleanupModals = () => {
+					const modals = document.querySelectorAll('[role="dialog"]:not(.shepherd-element), [data-state="open"]:not(.shepherd-element)');
+					modals.forEach(modal => {
+						if (modal instanceof HTMLElement) {
+							modal.style.display = 'none';
+							modal.setAttribute('data-state', 'closed');
+						}
+					});
+					
+					// Ensure only one shepherd overlay exists
+					const overlays = document.querySelectorAll('.shepherd-modal-overlay-container');
+					if (overlays.length > 1) {
+						for (let i = 1; i < overlays.length; i++) {
+							overlays[i].remove();
+						}
+					}
+				};
+				
+				cleanupModals();
 				
 				// Check if this step requires navigation
 				const stepId = event.step?.id;
