@@ -87,7 +87,7 @@ export function BookingDetailsDialog({
 					{/* Guest Information */}
 					<div className="space-y-3">
 						<div className="flex items-center justify-between">
-							<h3 className="font-semibold text-lg">
+							<h3 className="text-base md:text-lg lg:text-xl font-semibold">
 								{reservation.guest_name}
 							</h3>
 							<Badge

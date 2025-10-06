@@ -57,7 +57,7 @@ export default function BillingError() {
 					</div>
 
 					<div className="space-y-2">
-						<h3 className="text-lg font-semibold">Payment Not Completed</h3>
+						<h3 className="text-base md:text-lg lg:text-xl font-semibold">Payment Not Completed</h3>
 						<p className="text-muted-foreground">{getErrorMessage()}</p>
 					</div>
 

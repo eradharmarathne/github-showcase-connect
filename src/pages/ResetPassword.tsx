@@ -151,7 +151,7 @@ export default function ResetPassword() {
 				<div className="relative flex-1 hidden items-center justify-center h-screen bg-gray-900 lg:flex">
 					<div className="relative z-10 w-full max-w-md">
 						<div className=" mt-16 space-y-3">
-							<h3 className="text-foreground text-3xl font-bold">
+							<h3 className="text-base md:text-lg lg:text-xl font-bold text-foreground">
 								Secure Password Reset
 							</h3>
 							<p className="text-muted-foreground">
@@ -196,7 +196,7 @@ export default function ResetPassword() {
 				<div className="relative flex-1 hidden items-center justify-center h-screen bg-gray-900 lg:flex">
 					<div className="relative z-10 w-full max-w-md">
 						<div className=" mt-16 space-y-3">
-							<h3 className="text-white text-3xl font-bold">
+							<h3 className="text-base md:text-lg lg:text-xl font-bold text-white">
 								Password Successfully Reset
 							</h3>
 							<p className="text-gray-300">

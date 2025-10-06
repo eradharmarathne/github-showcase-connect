@@ -225,7 +225,7 @@ export default function BillingSuccess() {
 					</div>
 
 					<div className="space-y-2">
-						<h3 className="text-lg font-semibold">Welcome to Your New Plan!</h3>
+						<h3 className="text-base md:text-lg lg:text-xl font-semibold">Welcome to Your New Plan!</h3>
 						<p className="text-muted-foreground">
 							Your subscription has been activated and you now have access to
 							all premium features.

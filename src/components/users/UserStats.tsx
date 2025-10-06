@@ -27,7 +27,7 @@ export function UserStats() {
 
 	return (
 		<div className="space-y-4">
-			<h3 className="text-lg font-semibold">User Statistics</h3>
+			<h3 className="text-base md:text-lg lg:text-xl font-semibold">User Statistics</h3>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 				<Card className="bg-card border">
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

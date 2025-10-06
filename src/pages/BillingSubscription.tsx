@@ -608,7 +608,7 @@ export default function BillingSubscription() {
 
 			{/* Available Plans */}
 			<div className="space-y-4">
-				<h2 className="text-xl font-semibold">Available Plans</h2>
+				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold">Available Plans</h2>
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{plans.map((plan) => {
 						const isCurrentPlan = currentSubscription?.plan_id === plan.id;

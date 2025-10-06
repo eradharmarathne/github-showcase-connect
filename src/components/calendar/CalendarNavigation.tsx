@@ -37,7 +37,7 @@ export function CalendarNavigation({
 				>
 					<ChevronLeft className="size-4" />
 				</Button>
-				<h2 className="text-xl font-semibold min-w-[200px] text-center">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold min-w-[200px] text-center">
 					{format(currentDate, "MMMM yyyy")}
 				</h2>
 				<Button

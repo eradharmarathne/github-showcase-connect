@@ -221,7 +221,7 @@ const PrintableReservation = React.forwardRef<
 
 			{/* Guest Information */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 					Guest Information
 				</h2>
 				<div className="print-grid">
@@ -278,7 +278,7 @@ const PrintableReservation = React.forwardRef<
 
 			{/* Room & Booking Details */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 					Accommodation Details
 				</h2>
 				<div className="print-grid">
@@ -380,7 +380,7 @@ const PrintableReservation = React.forwardRef<
 
 			{/* Booking Status & Source */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 					Booking Status & Information
 				</h2>
 				<div className="print-grid">
@@ -447,7 +447,7 @@ const PrintableReservation = React.forwardRef<
 			{/* Guide Information */}
 			{(reservation.guide_name || reservation.guide_id) && (
 				<div className="mb-8">
-					<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 						Guide Information
 					</h2>
 					<div className="print-grid">
@@ -510,7 +510,7 @@ const PrintableReservation = React.forwardRef<
 			{/* Agent Information */}
 			{(reservation.agent_name || reservation.agent_id) && (
 				<div className="mb-8">
-					<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 						Travel Agent Information
 					</h2>
 					<div className="print-grid">
@@ -566,7 +566,7 @@ const PrintableReservation = React.forwardRef<
 
 			{/* Hotel Contact Information */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 					Hotel Contact Information
 				</h2>
 				<div className="print-grid">
@@ -624,7 +624,7 @@ const PrintableReservation = React.forwardRef<
 			{/* Commission Details */}
 			{(reservation.guide_commission || reservation.agent_commission) && (
 				<div className="mb-8">
-					<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 						Commission Details
 					</h2>
 					<div className="print-grid">
@@ -671,7 +671,7 @@ const PrintableReservation = React.forwardRef<
 			{/* Special Requests */}
 			{reservation.special_requests && (
 				<div className="mb-8">
-					<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 						Special Requests
 					</h2>
 					<div className="p-4 bg-gray-100 rounded border">
@@ -684,7 +684,7 @@ const PrintableReservation = React.forwardRef<
 
 			{/* Financial Summary */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 					Financial Summary
 				</h2>
 				<div className="bg-gray-50 p-6 rounded border">
@@ -753,7 +753,7 @@ const PrintableReservation = React.forwardRef<
 
 			{/* Terms and Conditions */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-200 p-3 border-l-4 border-gray-500">
 					Terms and Conditions
 				</h2>
 				<div className="text-sm space-y-2 bg-gray-50 p-4 rounded border">

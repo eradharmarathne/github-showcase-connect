@@ -476,7 +476,7 @@ export default function FinancialReports() {
 						<CardContent>
 							<div className="space-y-4">
 								<div className="border-b pb-4">
-									<h3 className="font-semibold text-green-700 mb-2">INCOME</h3>
+									<h3 className="text-base md:text-lg lg:text-xl font-semibold text-green-700 mb-2">INCOME</h3>
 									{Object.entries(incomeByType).map(([type, amount]) => (
 										<div key={type} className="flex justify-between py-1">
 											<span>{type}</span>
@@ -494,7 +494,7 @@ export default function FinancialReports() {
 								</div>
 
 								<div className="border-b pb-4">
-									<h3 className="font-semibold text-red-700 mb-2">EXPENSES</h3>
+									<h3 className="text-base md:text-lg lg:text-xl font-semibold text-red-700 mb-2">EXPENSES</h3>
 									{Object.entries(expensesByCategory).map(
 										([category, amount]) => (
 											<div key={category} className="flex justify-between py-1">

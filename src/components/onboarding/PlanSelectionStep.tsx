@@ -153,7 +153,7 @@ export function PlanSelectionStep({
 			{selectedPlanId && (
 				<div className="bg-muted/50 rounded-lg p-6 space-y-4">
 					<div className="text-center">
-						<h3 className="text-lg font-semibold mb-2">
+						<h3 className="text-base md:text-lg lg:text-xl font-semibold mb-2">
 							Ready to get started?
 						</h3>
 						<p className="text-sm text-muted-foreground">

@@ -121,7 +121,7 @@ export const AirbnbDatePicker = ({
 					<Card className="border-0">
 						<CardContent className="p-4">
 							<div className="text-center mb-4">
-								<h3 className="font-semibold text-lg">
+								<h3 className="text-base md:text-lg lg:text-xl font-semibold">
 									{selectingCheckIn
 										? "Select check-in date"
 										: "Select check-out date"}

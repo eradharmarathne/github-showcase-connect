@@ -939,7 +939,7 @@ export default function BookingChannelsIntegration() {
 							<div className="space-y-4">
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 											Guest Details
 										</h4>
 										<div className="mt-1">
@@ -954,7 +954,7 @@ export default function BookingChannelsIntegration() {
 										</div>
 									</div>
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 											Property
 										</h4>
 										<div className="mt-1">
@@ -971,7 +971,7 @@ export default function BookingChannelsIntegration() {
 
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 											Check-in / Check-out
 										</h4>
 										<div className="mt-1">
@@ -989,7 +989,7 @@ export default function BookingChannelsIntegration() {
 										</div>
 									</div>
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 											Guests
 										</h4>
 										<div className="mt-1">
@@ -1007,7 +1007,7 @@ export default function BookingChannelsIntegration() {
 
 								<div className="grid grid-cols-2 gap-4">
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 											Source & Status
 										</h4>
 										<div className="mt-1 flex gap-2">
@@ -1020,7 +1020,7 @@ export default function BookingChannelsIntegration() {
 										</div>
 									</div>
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 											Amount
 										</h4>
 										<div className="mt-1">
@@ -1039,7 +1039,7 @@ export default function BookingChannelsIntegration() {
 
 								{getPaymentInfo(selectedBooking)?.type === "airbnb" && (
 									<div>
-										<h4 className="text-sm font-medium text-muted-foreground mb-2">
+										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground mb-2">
 											Payment Breakdown
 										</h4>
 										<div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
@@ -1066,7 +1066,7 @@ export default function BookingChannelsIntegration() {
 								)}
 
 								<div>
-									<h4 className="text-sm font-medium text-muted-foreground mb-2">
+									<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground mb-2">
 										Booking Details
 									</h4>
 									<div className="bg-gray-50 p-3 rounded-lg space-y-1 text-sm">
@@ -1111,7 +1111,7 @@ export default function BookingChannelsIntegration() {
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 								<div>
-									<h4 className="text-sm font-medium text-muted-foreground mb-3">
+									<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground mb-3">
 										Source Breakdown
 									</h4>
 									<div className="space-y-2">
@@ -1136,7 +1136,7 @@ export default function BookingChannelsIntegration() {
 								</div>
 
 								<div>
-									<h4 className="text-sm font-medium text-muted-foreground mb-3">
+									<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground mb-3">
 										Status Breakdown
 									</h4>
 									<div className="space-y-2">
@@ -1297,7 +1297,7 @@ export default function BookingChannelsIntegration() {
 												<div className="flex items-start gap-3">
 													<AlertCircle className="size-5 text-amber-600 mt-0.5" />
 													<div className="space-y-2">
-														<h4 className="font-medium text-amber-800">
+														<h4 className="text-sm md:text-base lg:text-lg font-medium text-amber-800">
 															Setup Instructions
 														</h4>
 														<ol className="text-sm text-amber-700 space-y-1 ml-4 list-decimal">

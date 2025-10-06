@@ -31,7 +31,7 @@ export function AccountDetailsList({
 }: AccountDetailsListProps) {
 	return (
 		<div>
-			<h3 className="text-xl font-semibold text-green-600 mb-4">
+			<h3 className="text-base md:text-lg lg:text-xl font-semibold text-green-600 mb-4">
 				Account Details
 			</h3>
 			<div className="space-y-4">

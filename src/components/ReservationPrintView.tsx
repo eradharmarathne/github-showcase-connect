@@ -91,7 +91,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Guest Information */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-blue-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-blue-500">
 					Guest Information
 				</h2>
 				<div className="grid grid-cols-2 gap-4">
@@ -134,7 +134,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Booking Details */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-green-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-green-500">
 					Booking Details
 				</h2>
 				<div className="grid grid-cols-2 gap-4">
@@ -190,7 +190,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 			{/* Special Requests */}
 			{reservation.special_requests && (
 				<div className="mb-8">
-					<h2 className="text-xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-purple-500">
+					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-purple-500">
 						Special Requests
 					</h2>
 					<div className="p-4 bg-gray-50 rounded border">
@@ -201,7 +201,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Financial Summary */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-100 p-3 border-l-2 sm:border-l-4 border-orange-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-2 sm:border-l-4 border-orange-500">
 					Financial Summary
 				</h2>
 				<div className="bg-gray-50 p-4 rounded border">
@@ -248,7 +248,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Terms and Conditions */}
 			<div className="mb-8">
-				<h2 className="text-xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-red-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-red-500">
 					Terms and Conditions
 				</h2>
 				<div className="text-sm space-y-2">

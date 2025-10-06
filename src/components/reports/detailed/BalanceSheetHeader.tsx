@@ -18,7 +18,7 @@ export function BalanceSheetHeader({
 	return (
 		<div className="flex flex-col sm:flex-row gap-y-2 justify-between items-start sm:items-center">
 			<div>
-				<h2 className="text-lg sm:text-2xl font-bold text-foreground flex items-center gap-2">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold text-foreground flex items-center gap-2">
 					<CreditCard className="size-6" />
 					Detailed Balance Sheet
 				</h2>

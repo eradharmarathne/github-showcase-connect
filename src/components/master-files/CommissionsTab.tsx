@@ -46,7 +46,7 @@ export default function CommissionsTab() {
 	return (
 		<div>
 			<div className="mb-6">
-				<h2 className="text-md sm:text-2xl font-bold text-foreground flex items-center gap-2">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold text-foreground flex items-center gap-2">
 					<Percent className="size-6" />
 					Commission Settings
 				</h2>

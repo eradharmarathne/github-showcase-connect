@@ -118,7 +118,7 @@ export function GridView({
 		return (
 			<Card className="p-8 text-center">
 				<CalendarIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-				<h3 className="text-lg font-semibold text-gray-600 mb-2">
+				<h3 className="text-base md:text-lg lg:text-xl font-semibold text-gray-600 mb-2">
 					No Reservations Found
 				</h3>
 				<p className="text-gray-500 mb-4">

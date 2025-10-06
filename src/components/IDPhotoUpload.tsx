@@ -346,7 +346,7 @@ export const IDPhotoUpload = ({
 					{/* Photo Grid */}
 					{photos.length > 0 && (
 						<div className="space-y-3">
-							<h4 className="text-sm font-medium text-muted-foreground">
+							<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 								Uploaded Photos ({photos.length}/{maxPhotos})
 							</h4>
 							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

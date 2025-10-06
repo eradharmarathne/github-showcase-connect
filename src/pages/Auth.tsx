@@ -165,7 +165,7 @@ export default function Auth() {
 			>
 				<div className="flex size-full items-center justify-center bg-linear-to-br from-blue-400 to-blue-600 p-16 dark:from-blue-600 dark:to-blue-500">
 					<div>
-						<h2 className="max-w-lg text-2xl font-semibold leading-9 text-white dark:text-white">
+						<h2 className="max-w-lg text-lg md:text-xl lg:text-2xl font-semibold leading-9 text-white dark:text-white">
 							Welcome to Checking &amp; Checkout
 						</h2>
 						<p className="mt-4 text-white dark:text-white">
@@ -188,7 +188,7 @@ export default function Auth() {
 			<div className="flex-1 flex items-center justify-center h-screen">
 				<div className="w-full max-w-md space-y-8 px-4 text-foreground sm:px-0">
 					<div className="space-y-1">
-						<h2 className="text-xl font-semibold tracking-tight text-foreground">
+						<h2 className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground">
 							{isLogin ? "Get started now" : "Create your account"}
 						</h2>
 						<p className="text-sm text-muted-foreground">

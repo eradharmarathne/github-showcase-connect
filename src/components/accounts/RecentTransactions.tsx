@@ -146,7 +146,7 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 	if (loading) {
 		return (
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">
+				<h3 className="text-base md:text-lg lg:text-xl font-semibold">
 					{t("accounts.transactions.title")}
 				</h3>
 				<RecentTransactionsSkeleton />
@@ -157,7 +157,7 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 	if (transactions.length === 0) {
 		return (
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">
+				<h3 className="text-base md:text-lg lg:text-xl font-semibold">
 					{t("accounts.transactions.title")}
 				</h3>
 				<div className="text-center py-8">
@@ -171,7 +171,7 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 
 	return (
 		<div className="space-y-4">
-			<h3 className="text-lg font-semibold">
+			<h3 className="text-base md:text-lg lg:text-xl font-semibold">
 				{t("accounts.transactions.title")}
 			</h3>
 			<div className="space-y-3">

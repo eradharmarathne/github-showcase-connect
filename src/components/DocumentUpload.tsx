@@ -322,7 +322,7 @@ export const DocumentUpload = ({
 					{/* File List */}
 					{files.length > 0 && (
 						<div className="space-y-2">
-							<h4 className="text-sm font-medium text-muted-foreground">
+							<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
 								Uploaded Files ({files.length}/{maxFiles})
 							</h4>
 							<div className="space-y-2">
