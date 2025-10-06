@@ -77,7 +77,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Header */}
 			<div className="text-center mb-8 border-b-2 border-gray-300 pb-6">
-				<h1 className="text-lg sm:text-3xl font-bold mb-2">
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">
 					RESERVATION CONFIRMATION
 				</h1>
 				<div className="text-xl font-semibold text-gray-700">

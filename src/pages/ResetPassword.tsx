@@ -221,7 +221,7 @@ export default function ResetPassword() {
 								<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-green-100">
 									<CheckCircle className="size-6 text-green-600" />
 								</div>
-								<h1 className="text-xl font-semibold text-foreground">
+								<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">
 									Password Reset Complete
 								</h1>
 								<p className="text-sm text-muted-foreground">
@@ -249,7 +249,7 @@ export default function ResetPassword() {
 							<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-blue-100">
 								<Lock className="size-6 text-blue-600" />
 							</div>
-							<h1 className="text-xl font-semibold text-foreground">
+							<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">
 								Set New Password
 							</h1>
 							<p className="text-sm text-muted-foreground">

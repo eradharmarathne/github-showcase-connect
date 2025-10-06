@@ -376,7 +376,7 @@ export default function PaymentForm() {
 	if (!reservation) {
 		return (
 			<div className="max-w-4xl mx-auto p-4 text-center">
-				<h1 className="text-lg sm:text-2xl font-bold mb-4">
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
 					Reservation Not Found
 				</h1>
 				<Button asChild>
@@ -391,7 +391,7 @@ export default function PaymentForm() {
 			{/* Header */}
 			<div className="flex items-center gap-4">
 				<div className="flex-1">
-					<h1 className="text-lg sm:text-2xl font-bold text-foreground">
+					<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
 						New Payment
 					</h1>
 					<p className="text-muted-foreground">

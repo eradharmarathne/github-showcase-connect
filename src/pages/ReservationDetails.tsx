@@ -159,7 +159,7 @@ export default function ReservationDetails() {
 	if (!reservation) {
 		return (
 			<div className="max-w-4xl mx-auto p-4 text-center">
-				<h1 className="text-lg sm:text-2xl font-bold mb-4">
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">
 					Reservation Not Found
 				</h1>
 				<Button asChild>
@@ -175,7 +175,7 @@ export default function ReservationDetails() {
 			<div className="flex flex-col sm:flex-row items-start px-4 sm:px-0 sm:items-center gap-4 no-print">
 				<div className="flex flex-1 items-center gap-4">
 					<div className="flex-1">
-						<h1 className="text-lg sm:text-2xl font-bold text-foreground">
+						<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
 							Reservation Details
 						</h1>
 						<p className="text-muted-foreground">
@@ -226,7 +226,7 @@ export default function ReservationDetails() {
 
 			{/* Print Header - Only visible when printing */}
 			<div className="hidden print:block text-center mb-6">
-				<h1 className="text-lg sm:text-2xl font-bold">Reservation Details</h1>
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Reservation Details</h1>
 				<p className="text-lg">#{reservation.reservation_number}</p>
 				<p className="text-sm text-muted-foreground">
 					Generated on {new Date().toLocaleString()}

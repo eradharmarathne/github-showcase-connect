@@ -15,7 +15,7 @@ export function ReservationsHeader({
 	return (
 		<div className="container mx-auto p-4 sm:p-6">
 			<div className="mb-6">
-				<h1 className="text-2xl font-bold">{t("reservations.title")}</h1>
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">{t("reservations.title")}</h1>
 				<p className="text-muted-foreground">{t("reservations.subtitle")}</p>
 			</div>
 

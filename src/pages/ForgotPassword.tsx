@@ -99,7 +99,7 @@ export default function ForgotPassword() {
 								<div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-green-100">
 									<Mail className="size-6 text-green-600" />
 								</div>
-								<h1 className="text-xl font-semibold text-foreground">
+								<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">
 									Check Your Email
 								</h1>
 								<p className="text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ export default function ForgotPassword() {
 				<div className="w-full max-w-md space-y-8 px-4 text-gray-600 sm:px-0">
 					<div className="">
 						<div className="mt-5 space-y-2">
-							<h1 className="text-xl font-semibold text-foreground">
+							<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">
 								Reset Your Password
 							</h1>
 							<p className="text-sm text-muted-foreground">

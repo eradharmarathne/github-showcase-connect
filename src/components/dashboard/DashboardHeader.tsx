@@ -78,7 +78,7 @@ export function DashboardHeader({
 		<div className="flex flex-col space-y-4">
 			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 				<div>
-					<h1 className="text-xl lg:text-2xl font-bold text-foreground">
+					<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
 						{t("dashboard.header.welcome")}
 					</h1>
 					<p className="text-sm lg:text-base text-muted-foreground">

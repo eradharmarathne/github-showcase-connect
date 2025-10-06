@@ -74,7 +74,7 @@ export function CalendarHeader({
 	return (
 		<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pt-8">
 			<div className="flex items-center gap-3">
-				<h1 className="text-2xl font-bold">Enhanced Calendar</h1>
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">Enhanced Calendar</h1>
 				{activeFilters > 0 && (
 					<Badge variant="secondary" className="flex items-center gap-1">
 						{activeFilters} Filter{activeFilters > 1 ? "s" : ""}

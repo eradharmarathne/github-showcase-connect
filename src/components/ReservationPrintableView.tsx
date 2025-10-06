@@ -191,7 +191,7 @@ const PrintableReservation = React.forwardRef<
 						/>
 					</div>
 				)}
-				<h1 className="text-3xl font-bold mb-2 text-blue-900">
+				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2 text-blue-900">
 					RESERVATION CONFIRMATION
 				</h1>
 				<div className="text-xl font-semibold text-gray-700 mb-2">

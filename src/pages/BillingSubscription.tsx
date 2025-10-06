@@ -516,7 +516,7 @@ export default function BillingSubscription() {
 			{/* Header */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-bold text-foreground">
+					<h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
 						Billing & Subscription
 					</h1>
 					<p className="text-muted-foreground">
