@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { OTPVerification } from "./OTPVerification";
 import { useProfile } from "@/hooks/useProfile";
+import { useLocationContext } from "@/context/LocationContext";
 
 interface Reservation {
 	id: string;
@@ -85,18 +86,22 @@ export function ReservationEditDialog({
 	const [guides, setGuides] = useState<any[]>([]);
 	const [location, setLocation] = useState<any>(null);
 	const {profile} = useProfile();
+	const { selectedLocation } = useLocationContext();
 
 	useEffect(() => {
 		const fetchRooms = async () => {
-			if (!reservation?.location_id) return;
+			if (!selectedLocation) {
+				console.log("No selected location, skipping room fetch");
+				return;
+			}
 			
 			const { data } = await supabase
 				.from("rooms")
 				.select("id, room_number, room_type, location_id, base_price, currency")
 				.eq("is_active", true)
-				.eq("location_id", reservation.location_id);
+				.eq("location_id", selectedLocation);
 			
-			console.log("Fetched rooms for location:", reservation.location_id, data);
+			console.log("Fetched rooms for selected location:", selectedLocation, data);
 			setRooms(data || []);
 		};
 
@@ -130,13 +135,25 @@ export function ReservationEditDialog({
 
 		if (reservation && isOpen) {
 			console.log("Initializing form with reservation:", reservation);
-			setFormData({ ...reservation });
+			console.log("Selected location:", selectedLocation);
+			
+			// Initialize form data with reservation
+			const initialFormData = { ...reservation };
+			
+			// If the reservation is for a different location than currently selected,
+			// clear the room_id to force user to select a new room
+			if (reservation.location_id !== selectedLocation) {
+				console.log("Reservation location differs from selected location, clearing room_id");
+				initialFormData.room_id = "";
+			}
+			
+			setFormData(initialFormData);
 			fetchRooms();
 			fetchAgents();
 			fetchGuides();
 			fetchLocation();
 		}
-	}, [reservation, isOpen]);
+	}, [reservation, isOpen, selectedLocation]);
 
 	const handleOTPVerified = () => {
 		setIsOTPVerified(true);
