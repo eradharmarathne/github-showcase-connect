@@ -216,6 +216,31 @@ export function PaymentDialog({
 		}
 	}, [reservation, initialCurrency, initialAmount]);
 
+	// Handle currency change with automatic amount conversion
+	const handleCurrencyChange = async (newCurrency: string) => {
+		try {
+			// Convert current amount from current currency to new currency
+			const convertedAmount = await convertCurrency(
+				formData.amount,
+				formData.currency,
+				newCurrency,
+			);
+
+			setFormData({
+				...formData,
+				currency: newCurrency as any,
+				amount: Math.round(convertedAmount * 100) / 100, // Round to 2 decimal places
+			});
+		} catch (error) {
+			console.error("Error converting currency:", error);
+			// If conversion fails, just change currency without changing amount
+			setFormData({
+				...formData,
+				currency: newCurrency as any,
+			});
+		}
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!reservation || !tenant?.id) return;
@@ -437,9 +462,7 @@ export function PaymentDialog({
 									<Label htmlFor="currency">Currency</Label>
 									<CurrencySelector
 										currency={formData.currency}
-										onCurrencyChange={(currency) =>
-											setFormData({ ...formData, currency })
-										}
+										onCurrencyChange={handleCurrencyChange}
 										label=""
 										showGoogleSearchLink={true}
 									/>
