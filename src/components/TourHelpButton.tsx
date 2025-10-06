@@ -87,7 +87,7 @@ export const TourHelpButton: React.FC = () => {
 					</DropdownMenuItem>
 				))}
 
-				{!hasCompletedTour("first-time-user") && (
+				{!hasCompletedTour("comprehensive-tour") && (
 					<>
 						<DropdownMenuSeparator />
 						<div className="p-3 bg-blue-50 m-1 rounded-lg">
