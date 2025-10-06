@@ -85,7 +85,10 @@ export function DashboardHeader({
 						{t("dashboard.header.subtitle")}
 					</p>
 				</div>
-				<div className="flex flex-col sm:flex-row gap-2" data-testid="quick-actions">
+				<div
+					className="flex flex-col sm:flex-row gap-2"
+					data-testid="quick-actions"
+				>
 					{hasIncomePermission && (
 						<Button
 							asChild

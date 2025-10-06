@@ -229,7 +229,9 @@ export default function ReservationDetails() {
 				<h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
 					Reservation Details
 				</h1>
-				<p className="text-base md:text-lg lg:text-xl">#{reservation.reservation_number}</p>
+				<p className="text-base md:text-lg lg:text-xl">
+					#{reservation.reservation_number}
+				</p>
 				<p className="text-xs sm:text-sm md:text-base text-muted-foreground">
 					Generated on {new Date().toLocaleString()}
 				</p>

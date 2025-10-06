@@ -44,7 +44,7 @@ export default function Reports() {
 								{t("reports.subtitle")}
 							</CardDescription>
 						</div>
-						<div className="flex gap-2 w-full sm:w-auto">
+						<div className="flex gap-2 w-full sm:w-auto" data-testid="report-filters">
 							<Button
 								variant="outline"
 								size="sm"

@@ -105,7 +105,9 @@ export default function ForgotPassword() {
 								<p className="text-xs sm:text-sm md:text-base text-muted-foreground">
 									We've sent password reset instructions to:
 								</p>
-								<p className="text-xs sm:text-sm md:text-base font-medium text-foreground">{email}</p>
+								<p className="text-xs sm:text-sm md:text-base font-medium text-foreground">
+									{email}
+								</p>
 							</div>
 						</div>
 						<div className="space-y-4">

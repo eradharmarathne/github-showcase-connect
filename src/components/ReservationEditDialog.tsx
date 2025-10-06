@@ -19,12 +19,12 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { OTPVerification } from "./OTPVerification";
-import { useProfile } from "@/hooks/useProfile";
-import { useLocationContext } from "@/context/LocationContext";
 
 interface Reservation {
 	id: string;

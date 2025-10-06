@@ -519,7 +519,7 @@ export default function EnhancedFinancialReports() {
 			</Card>
 
 			{/* Summary Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-6" data-testid="financial-summary-cards">
 				<Card className="bg-green-50 border-green-200">
 					<CardContent className="p-4 sm:p-6">
 						<div className="flex items-center justify-between">

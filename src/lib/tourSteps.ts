@@ -1,102 +1,102 @@
-import Shepherd from 'shepherd.js';
-import { TourType } from '@/context/TourContext';
+import Shepherd from "shepherd.js";
+import { TourType } from "@/context/TourContext";
 
 // Import Shepherd.js CSS
-import 'shepherd.js/dist/css/shepherd.css';
+import "shepherd.js/dist/css/shepherd.css";
 
 // Define step options type
 type StepOptions = {
-  id: string;
-  title?: string;
-  text?: string;
-  attachTo?: {
-    element: string;
-    on: 'top' | 'bottom' | 'left' | 'right';
-  };
-  buttons?: Array<{
-    text: string;
-    classes?: string;
-    action: () => any;
-  }>;
-  classes?: string;
-  when?: {
-    show?: () => void;
-    hide?: () => void;
-  };
+	id: string;
+	title?: string;
+	text?: string;
+	attachTo?: {
+		element: string;
+		on: "top" | "bottom" | "left" | "right";
+	};
+	buttons?: Array<{
+		text: string;
+		classes?: string;
+		action: () => any;
+	}>;
+	classes?: string;
+	when?: {
+		show?: () => void;
+		hide?: () => void;
+	};
 };
 
 // Custom tour theme styles
 export const tourTheme = {
-  classes: 'shadow-lg border border-primary/20 rounded-lg',
-  classPrefix: 'shepherd-',
-  scrollTo: { behavior: 'smooth', block: 'center' },
-  useModalOverlay: true,
-  defaultStepOptions: {
-    cancelIcon: {
-      enabled: true,
-    },
-    scrollTo: { behavior: 'smooth', block: 'center' },
-    when: {
-      show() {
-        document.body.style.overflow = 'hidden';
-      },
-      hide() {
-        document.body.style.overflow = 'auto';
-      }
-    }
-  }
+	classes: "shadow-lg border border-primary/20 rounded-lg",
+	classPrefix: "shepherd-",
+	scrollTo: { behavior: "smooth", block: "center" },
+	useModalOverlay: true,
+	defaultStepOptions: {
+		cancelIcon: {
+			enabled: true,
+		},
+		scrollTo: { behavior: "smooth", block: "center" },
+		when: {
+			show() {
+				document.body.style.overflow = "hidden";
+			},
+			hide() {
+				document.body.style.overflow = "auto";
+			},
+		},
+	},
 } as const;
 
 // Common button configurations
 export const tourButtons = {
-  next: {
-    text: 'Next',
-    classes: 'btn btn-primary',
-    action: function() {
-      return this.next();
-    }
-  },
-  back: {
-    text: 'Back', 
-    classes: 'btn btn-secondary',
-    action: function() {
-      return this.back();
-    }
-  },
-  skip: {
-    text: 'Skip Tour',
-    classes: 'btn btn-ghost',
-    action: function() {
-      return this.cancel();
-    }
-  },
-  finish: {
-    text: 'Finish',
-    classes: 'btn btn-primary',
-    action: function() {
-      return this.complete();
-    }
-  }
+	next: {
+		text: "Next",
+		classes: "btn btn-primary",
+		action: function () {
+			return this.next();
+		},
+	},
+	back: {
+		text: "Back",
+		classes: "btn btn-secondary",
+		action: function () {
+			return this.back();
+		},
+	},
+	skip: {
+		text: "Skip Tour",
+		classes: "btn btn-ghost",
+		action: function () {
+			return this.cancel();
+		},
+	},
+	finish: {
+		text: "Finish",
+		classes: "btn btn-primary",
+		action: function () {
+			return this.complete();
+		},
+	},
 };
 
 // Dashboard tour steps
 export const dashboardTourSteps: StepOptions[] = [
-  {
-    id: 'welcome',
-    title: '🏨 Welcome to CheckingCheckout!',
-    text: `
+	{
+		id: "welcome",
+		title: "🏨 Welcome to CheckingCheckout!",
+		text: `
       <div class="space-y-3">
         <p>Welcome to your hospitality ERP dashboard! Let's take a quick tour to get you started.</p>
         <p>This tour will show you the main features and how to navigate the system.</p>
       </div>
     `,
-    buttons: [tourButtons.skip, tourButtons.next],
-    classes: 'shepherd-theme-welcome'
-  },
-  {
-    id: 'sidebar',
-    title: '📱 Navigation Sidebar',
-    text: `
+		buttons: [tourButtons.skip, tourButtons.next],
+		classes: "shepherd-theme-welcome",
+	},
+	{
+		id: "sidebar",
+		title: "📱 Navigation Sidebar",
+		text: `
       <div class="space-y-3">
         <p>This is your main navigation sidebar. Here you can access:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -107,31 +107,31 @@ export const dashboardTourSteps: StepOptions[] = [
         </ul>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="app-sidebar"]',
-      on: 'right'
-    },
-    buttons: [tourButtons.back, tourButtons.next]
-  },
-  {
-    id: 'location-switcher',
-    title: '📍 Location Switcher', 
-    text: `
+		attachTo: {
+			element: '[data-testid="app-sidebar"]',
+			on: "right",
+		},
+		buttons: [tourButtons.back, tourButtons.next],
+	},
+	{
+		id: "location-switcher",
+		title: "📍 Location Switcher",
+		text: `
       <div class="space-y-3">
         <p>If you manage multiple properties, use this switcher to change between locations.</p>
         <p>Each location has its own set of rooms, bookings, and financial data.</p>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="team-switcher"]',
-      on: 'bottom'
-    },
-    buttons: [tourButtons.back, tourButtons.next]
-  },
-  {
-    id: 'dashboard-cards',
-    title: '📊 Financial Overview',
-    text: `
+		attachTo: {
+			element: '[data-testid="team-switcher"]',
+			on: "bottom",
+		},
+		buttons: [tourButtons.back, tourButtons.next],
+	},
+	{
+		id: "dashboard-cards",
+		title: "📊 Financial Overview",
+		text: `
       <div class="space-y-3">
         <p>These cards show your key financial metrics at a glance:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -141,16 +141,16 @@ export const dashboardTourSteps: StepOptions[] = [
         </ul>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="financial-cards"]',
-      on: 'top'
-    },
-    buttons: [tourButtons.back, tourButtons.next]
-  },
-  {
-    id: 'quick-actions',
-    title: '⚡ Quick Actions',
-    text: `
+		attachTo: {
+			element: '[data-testid="financial-cards"]',
+			on: "top",
+		},
+		buttons: [tourButtons.back, tourButtons.next],
+	},
+	{
+		id: "quick-actions",
+		title: "⚡ Quick Actions",
+		text: `
       <div class="space-y-3">
         <p>Use these buttons for common daily tasks:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -160,20 +160,20 @@ export const dashboardTourSteps: StepOptions[] = [
         </ul>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="quick-actions"]',
-      on: 'bottom'
-    },
-    buttons: [tourButtons.back, tourButtons.finish]
-  }
+		attachTo: {
+			element: '[data-testid="quick-actions"]',
+			on: "bottom",
+		},
+		buttons: [tourButtons.back, tourButtons.finish],
+	},
 ];
 
 // Reservations tour steps
 export const reservationsTourSteps: StepOptions[] = [
-  {
-    id: 'reservations-intro',
-    title: '🛏️ Reservations Management',
-    text: `
+	{
+		id: "reservations-intro",
+		title: "🛏️ Reservations Management",
+		text: `
       <div class="space-y-3">
         <p>This is your reservations hub where you can:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -184,27 +184,27 @@ export const reservationsTourSteps: StepOptions[] = [
         </ul>
       </div>
     `,
-    buttons: [tourButtons.skip, tourButtons.next]
-  },
-  {
-    id: 'add-reservation',
-    title: '➕ Create New Reservation',
-    text: `
+		buttons: [tourButtons.skip, tourButtons.next],
+	},
+	{
+		id: "add-reservation",
+		title: "➕ Create New Reservation",
+		text: `
       <div class="space-y-3">
         <p>Click this button to create a new reservation.</p>
         <p>You can add guest details, select rooms, set dates, and configure pricing all in one place.</p>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="add-reservation-btn"]',
-      on: 'left'
-    },
-    buttons: [tourButtons.back, tourButtons.next]
-  },
-  {
-    id: 'reservations-table',
-    title: '📋 Reservations Table',
-    text: `
+		attachTo: {
+			element: '[data-testid="add-reservation-btn"]',
+			on: "left",
+		},
+		buttons: [tourButtons.back, tourButtons.next],
+	},
+	{
+		id: "reservations-table",
+		title: "📋 Reservations Table",
+		text: `
       <div class="space-y-3">
         <p>This table shows all your reservations with key information:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -216,31 +216,31 @@ export const reservationsTourSteps: StepOptions[] = [
         <p>Click on any row to view full details or make changes.</p>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="reservations-table"]',
-      on: 'top'
-    },
-    buttons: [tourButtons.back, tourButtons.finish]
-  }
+		attachTo: {
+			element: '[data-testid="reservations-table"]',
+			on: "top",
+		},
+		buttons: [tourButtons.back, tourButtons.finish],
+	},
 ];
 
 // Financial Reports tour steps
 export const financialReportsTourSteps: StepOptions[] = [
-  {
-    id: 'financial-intro',
-    title: '💰 Financial Reports',
-    text: `
+	{
+		id: "financial-intro",
+		title: "💰 Financial Reports",
+		text: `
       <div class="space-y-3">
         <p>Track your business performance with comprehensive financial reports.</p>
         <p>Monitor income, expenses, and profitability across all your properties.</p>
       </div>
     `,
-    buttons: [tourButtons.skip, tourButtons.next]
-  },
-  {
-    id: 'date-filters',
-    title: '📅 Date Range Filters',
-    text: `
+		buttons: [tourButtons.skip, tourButtons.next],
+	},
+	{
+		id: "date-filters",
+		title: "📅 Date Range Filters",
+		text: `
       <div class="space-y-3">
         <p>Use these controls to filter reports by date range:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -250,16 +250,16 @@ export const financialReportsTourSteps: StepOptions[] = [
         </ul>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="report-filters"]',
-      on: 'bottom'
-    },
-    buttons: [tourButtons.back, tourButtons.next]
-  },
-  {
-    id: 'financial-summary',
-    title: '📈 Financial Summary Cards',
-    text: `
+		attachTo: {
+			element: '[data-testid="report-filters"]',
+			on: "bottom",
+		},
+		buttons: [tourButtons.back, tourButtons.next],
+	},
+	{
+		id: "financial-summary",
+		title: "📈 Financial Summary Cards",
+		text: `
       <div class="space-y-3">
         <p>These cards provide a quick overview of your financial performance:</p>
         <ul class="list-disc list-inside space-y-1 text-sm">
@@ -269,20 +269,20 @@ export const financialReportsTourSteps: StepOptions[] = [
         </ul>
       </div>
     `,
-    attachTo: {
-      element: '[data-testid="financial-summary-cards"]',
-      on: 'top'
-    },
-    buttons: [tourButtons.back, tourButtons.finish]
-  }
+		attachTo: {
+			element: '[data-testid="financial-summary-cards"]',
+			on: "top",
+		},
+		buttons: [tourButtons.back, tourButtons.finish],
+	},
 ];
 
 // First-time user tour (comprehensive)
 export const firstTimeUserTourSteps: StepOptions[] = [
-  {
-    id: 'welcome-new-user',
-    title: '🎉 Welcome to CheckingCheckout!',
-    text: `
+	{
+		id: "welcome-new-user",
+		title: "🎉 Welcome to CheckingCheckout!",
+		text: `
       <div class="space-y-4">
         <p class="text-lg font-semibold">Congratulations on setting up your account!</p>
         <p>Let's take a quick tour to help you get started with your hospitality business management.</p>
@@ -291,14 +291,14 @@ export const firstTimeUserTourSteps: StepOptions[] = [
         </div>
       </div>
     `,
-    buttons: [tourButtons.skip, tourButtons.next],
-    classes: 'shepherd-theme-welcome shepherd-large'
-  },
-  ...dashboardTourSteps.slice(1), // Include dashboard steps
-  {
-    id: 'setup-next-steps',
-    title: '🚀 Next Steps',
-    text: `
+		buttons: [tourButtons.skip, tourButtons.next],
+		classes: "shepherd-theme-welcome shepherd-large",
+	},
+	...dashboardTourSteps.slice(1), // Include dashboard steps
+	{
+		id: "setup-next-steps",
+		title: "🚀 Next Steps",
+		text: `
       <div class="space-y-4">
         <p>Great! You've completed the basic tour. Here's what to do next:</p>
         <ol class="list-decimal list-inside space-y-2 text-sm">
@@ -312,59 +312,59 @@ export const firstTimeUserTourSteps: StepOptions[] = [
         </div>
       </div>
     `,
-    buttons: [tourButtons.finish],
-    classes: 'shepherd-theme-success shepherd-large'
-  }
+		buttons: [tourButtons.finish],
+		classes: "shepherd-theme-success shepherd-large",
+	},
 ];
 
 // Get tour steps by type
 export const getTourSteps = (tourType: TourType): StepOptions[] => {
-  switch (tourType) {
-    case 'dashboard':
-      return dashboardTourSteps;
-    case 'reservations':
-      return reservationsTourSteps;
-    case 'financial-reports':
-      return financialReportsTourSteps;
-    case 'first-time-user':
-      return firstTimeUserTourSteps;
-    case 'calendar':
-      return [
-        {
-          id: 'calendar-intro',
-          title: '📅 Calendar View',
-          text: 'View and manage your bookings in a visual calendar format. You can see availability, conflicts, and quickly add new reservations.',
-          buttons: [tourButtons.finish]
-        }
-      ];
-    case 'master-files':
-      return [
-        {
-          id: 'master-files-intro', 
-          title: '⚙️ Master Files',
-          text: 'Configure your property settings, rooms, agents, guides, and other essential data for your business.',
-          buttons: [tourButtons.finish]
-        }
-      ];
-    case 'settings':
-      return [
-        {
-          id: 'settings-intro',
-          title: '🔧 Settings',
-          text: 'Manage your account preferences, user permissions, and system configurations.',
-          buttons: [tourButtons.finish]
-        }
-      ];
-    case 'booking-channels':
-      return [
-        {
-          id: 'booking-channels-intro',
-          title: '🌐 Booking Channels',
-          text: 'Connect with external booking platforms like Booking.com, Airbnb, and manage channel synchronization.',
-          buttons: [tourButtons.finish]
-        }
-      ];
-    default:
-      return [];
-  }
+	switch (tourType) {
+		case "dashboard":
+			return dashboardTourSteps;
+		case "reservations":
+			return reservationsTourSteps;
+		case "financial-reports":
+			return financialReportsTourSteps;
+		case "first-time-user":
+			return firstTimeUserTourSteps;
+		case "calendar":
+			return [
+				{
+					id: "calendar-intro",
+					title: "📅 Calendar View",
+					text: "View and manage your bookings in a visual calendar format. You can see availability, conflicts, and quickly add new reservations.",
+					buttons: [tourButtons.finish],
+				},
+			];
+		case "master-files":
+			return [
+				{
+					id: "master-files-intro",
+					title: "⚙️ Master Files",
+					text: "Configure your property settings, rooms, agents, guides, and other essential data for your business.",
+					buttons: [tourButtons.finish],
+				},
+			];
+		case "settings":
+			return [
+				{
+					id: "settings-intro",
+					title: "🔧 Settings",
+					text: "Manage your account preferences, user permissions, and system configurations.",
+					buttons: [tourButtons.finish],
+				},
+			];
+		case "booking-channels":
+			return [
+				{
+					id: "booking-channels-intro",
+					title: "🌐 Booking Channels",
+					text: "Connect with external booking platforms like Booking.com, Airbnb, and manage channel synchronization.",
+					buttons: [tourButtons.finish],
+				},
+			];
+		default:
+			return [];
+	}
 };
