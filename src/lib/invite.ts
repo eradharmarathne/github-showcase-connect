@@ -58,17 +58,8 @@ export const addUserToLocation = async (
 	try {
 		console.log("Adding user to location:", params);
 
-		// Get admin client for user management operations
-		const adminClient = createAdminClient();
-		if (!adminClient) {
-			return {
-				success: false,
-				error: "Admin operations not available - service role key missing",
-			};
-		}
-
-		// First check if user exists in profiles using admin client
-		const { data: existingProfile, error: profileError } = await adminClient
+		// First check if user exists in profiles using regular client (RLS allows this)
+		const { data: existingProfile, error: profileError } = await supabase
 			.from("profiles")
 			.select("id, email, tenant_id")
 			.eq("email", params.email)
@@ -92,12 +83,12 @@ export const addUserToLocation = async (
 			userId = existingProfile.id;
 			userCreated = false;
 
-			// Update tenant_id if not set or different
+			// Update tenant_id if not set or different (regular client with RLS)
 			if (
 				!existingProfile.tenant_id ||
 				existingProfile.tenant_id !== params.tenantId
 			) {
-				const { error: updateError } = await adminClient
+				const { error: updateError } = await supabase
 					.from("profiles")
 					.update({
 						tenant_id: params.tenantId,
@@ -116,6 +107,15 @@ export const addUserToLocation = async (
 			// User doesn't exist in profiles - check if auth user exists
 			console.log("No profile found, checking if auth user exists");
 
+			// Get admin client only for auth operations
+			const adminClient = createAdminClient();
+			if (!adminClient) {
+				return {
+					success: false,
+					error: "Admin operations not available - service role key missing",
+				};
+			}
+
 			const { data: authUsers, error: authError } =
 				await adminClient.auth.admin.listUsers();
 
@@ -132,12 +132,12 @@ export const addUserToLocation = async (
 			);
 
 			if (existingAuthUser) {
-				// Auth user exists but no profile - create profile
+				// Auth user exists but no profile - create profile using regular client
 				console.log("Auth user exists, creating profile");
 				userId = existingAuthUser.id;
 				userCreated = false;
 
-				const { error: profileCreateError } = await adminClient
+				const { error: profileCreateError } = await supabase
 					.from("profiles")
 					.insert({
 						id: userId,
@@ -162,7 +162,7 @@ export const addUserToLocation = async (
 
 				password = generateSecurePassword();
 
-				// Create auth user using admin client
+				// Create auth user using admin client (auth operations require admin)
 				const { data: authData, error: authCreateError } =
 					await adminClient.auth.admin.createUser({
 						email: params.email,
@@ -185,8 +185,8 @@ export const addUserToLocation = async (
 				userId = authData.user.id;
 				userCreated = true;
 
-				// Create profile for new user
-				const { error: profileCreateError } = await adminClient
+				// Create profile for new user using regular client (RLS allows this now)
+				const { error: profileCreateError } = await supabase
 					.from("profiles")
 					.insert({
 						id: userId,
@@ -205,8 +205,8 @@ export const addUserToLocation = async (
 			}
 		}
 
-		// Create or update user permissions for this location using admin client
-		const { data: existingPermissions, error: permError } = await adminClient
+		// Create or update user permissions for this location using regular client (RLS allows this)
+		const { data: existingPermissions, error: permError } = await supabase
 			.from("user_permissions")
 			.select("id")
 			.eq("user_id", userId)
@@ -223,8 +223,8 @@ export const addUserToLocation = async (
 		}
 
 		if (!existingPermissions) {
-			// No existing permissions - create new
-			const { error: createPermError } = await adminClient
+			// No existing permissions - create new using regular client (RLS allows this)
+			const { error: createPermError } = await supabase
 				.from("user_permissions")
 				.insert({
 					user_id: userId,
@@ -241,8 +241,8 @@ export const addUserToLocation = async (
 				};
 			}
 		} else {
-			// Update existing permissions
-			const { error: updatePermError } = await adminClient
+			// Update existing permissions using regular client (RLS allows this)
+			const { error: updatePermError } = await supabase
 				.from("user_permissions")
 				.update({
 					...params.permissions,
