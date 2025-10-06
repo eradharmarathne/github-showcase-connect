@@ -8,6 +8,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { TourProvider } from "@/context/TourContext";
+import { TourManager } from "@/components/TourManager";
+import "@/styles/shepherd-custom.css";
 import "./i18n";
 import BookingChannelsIntegration from "@/pages/BookingChannelsIntegration";
 import Reports from "@/pages/Reports";
@@ -42,9 +45,11 @@ const App = () => (
 		<ThemeProvider defaultTheme="system" storageKey="checkingcheckout-theme">
 			<TooltipProvider>
 				<AuthProvider>
-					<LocationProvider>
-						<Toaster />
-						<Sonner />
+					<TourProvider>
+						<LocationProvider>
+							<TourManager>
+								<Toaster />
+								<Sonner />
 						<BrowserRouter>
 							<Routes>
 								<Route path="/" element={<AuthRedirect />} />
@@ -324,7 +329,9 @@ const App = () => (
 								<Route path="*" element={<NotFound />} />
 							</Routes>
 						</BrowserRouter>
-					</LocationProvider>
+							</TourManager>
+						</LocationProvider>
+					</TourProvider>
 				</AuthProvider>
 			</TooltipProvider>
 		</ThemeProvider>

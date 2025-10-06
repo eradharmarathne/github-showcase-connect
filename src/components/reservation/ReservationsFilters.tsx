@@ -111,7 +111,7 @@ export function ReservationsFilters({
 				/>
 			</div>
 
-			<Button onClick={onNewReservation} className="flex-shrink-0">
+			<Button onClick={onNewReservation} className="flex-shrink-0" data-testid="add-reservation-btn">
 				<Calendar className="size-4 mr-2" />
 				{t("reservations.filters.newReservation")}
 			</Button>

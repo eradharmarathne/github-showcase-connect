@@ -226,7 +226,7 @@ export function ReservationsDesktopTable({
 		<div className="hidden lg:block">
 			<Card>
 				<CardContent>
-					<Table>
+					<Table data-testid="reservations-table">
 						<TableHeader>
 							<TableRow>
 								<TableHead>

@@ -85,13 +85,14 @@ export function DashboardHeader({
 						{t("dashboard.header.subtitle")}
 					</p>
 				</div>
-				<div className="flex flex-col sm:flex-row gap-2">
+				<div className="flex flex-col sm:flex-row gap-2" data-testid="quick-actions">
 					{hasIncomePermission && (
 						<Button
 							asChild
 							variant="default"
 							size="sm"
 							className="w-full sm:w-auto"
+							data-testid="add-income-btn"
 						>
 							<Link to="/reservations">
 								<Plus className="size-4" />
@@ -105,6 +106,7 @@ export function DashboardHeader({
 							variant="outline"
 							size="sm"
 							className="w-full sm:w-auto"
+							data-testid="add-expense-btn"
 						>
 							<Link to="/expense">
 								<Plus className="size-4" />

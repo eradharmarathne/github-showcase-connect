@@ -1,0 +1,245 @@
+/* Shepherd.js custom styling for CheckingCheckout app */
+
+/* Tour overlay customization */
+.shepherd-modal-overlay-container {
+  pointer-events: none;
+}
+
+.shepherd-modal-overlay-container.shepherd-modal-is-visible {
+  pointer-events: auto;
+  z-index: 9998;
+}
+
+/* Main tour element styling */
+.shepherd-element {
+  max-width: 420px;
+  z-index: 9999;
+  font-family: var(--font-sans);
+}
+
+/* Header styling */
+.shepherd-header {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%);
+  color: hsl(var(--primary-foreground));
+  padding: 1rem 1.5rem 1rem 1rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  position: relative;
+}
+
+.shepherd-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.4;
+  color: hsl(var(--primary-foreground));
+}
+
+/* Cancel icon styling */
+.shepherd-cancel-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 0.375rem;
+  color: hsl(var(--primary-foreground));
+  cursor: pointer;
+  height: 1.5rem;
+  width: 1.5rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.shepherd-cancel-icon:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Content styling */
+.shepherd-text {
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+
+.shepherd-text p {
+  margin: 0 0 0.75rem 0;
+}
+
+.shepherd-text p:last-child {
+  margin-bottom: 0;
+}
+
+.shepherd-text ul {
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+}
+
+.shepherd-text li {
+  margin: 0.25rem 0;
+}
+
+/* Footer styling */
+.shepherd-footer {
+  background: hsl(var(--muted) / 0.3);
+  padding: 1rem 1.5rem;
+  border-radius: 0 0 0.75rem 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Button styling */
+.shepherd-button {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.shepherd-button:hover {
+  background: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px);
+}
+
+.shepherd-button.btn-secondary {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+}
+
+.shepherd-button.btn-secondary:hover {
+  background: hsl(var(--secondary) / 0.8);
+}
+
+.shepherd-button.btn-ghost {
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.shepherd-button.btn-ghost:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+/* Arrow styling */
+.shepherd-arrow:before {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+}
+
+/* Custom theme classes */
+.shepherd-theme-welcome .shepherd-header {
+  background: linear-gradient(135deg, hsl(220 70% 50%) 0%, hsl(220 70% 45%) 100%);
+}
+
+.shepherd-theme-success .shepherd-header {
+  background: linear-gradient(135deg, hsl(142 76% 36%) 0%, hsl(142 76% 31%) 100%);
+}
+
+.shepherd-large {
+  max-width: 500px;
+}
+
+.shepherd-large .shepherd-text {
+  padding: 2rem;
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .shepherd-element {
+    max-width: 320px;
+    margin: 0 1rem;
+  }
+  
+  .shepherd-large {
+    max-width: 320px;
+  }
+  
+  .shepherd-header {
+    padding: 0.875rem 1rem 0.875rem 0.875rem;
+  }
+  
+  .shepherd-text {
+    padding: 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .shepherd-large .shepherd-text {
+    padding: 1.25rem;
+    font-size: 0.85rem;
+  }
+  
+  .shepherd-footer {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .shepherd-button {
+    padding: 0.625rem 1.25rem;
+    width: 100%;
+  }
+}
+
+/* Animation for tour steps */
+.shepherd-element {
+  animation: shepherdFadeIn 0.3s ease-out;
+}
+
+@keyframes shepherdFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Highlight effect for targeted elements */
+.shepherd-target-highlighted {
+  animation: shepherdPulse 2s infinite;
+}
+
+@keyframes shepherdPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0.1);
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .shepherd-text {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  
+  .shepherd-footer {
+    background: hsl(var(--muted) / 0.5);
+  }
+}
+
+/* Focus management */
+.shepherd-modal-overlay-container .shepherd-target {
+  position: relative;
+  z-index: 9999;
+}

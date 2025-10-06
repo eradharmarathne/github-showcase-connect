@@ -156,7 +156,7 @@ export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
 	}
 
 	return (
-		<Card className="bg-card border">
+		<Card className="bg-card border" data-testid="financial-summary-cards">
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
 					<DollarSign className="size-5 text-primary" />

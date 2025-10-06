@@ -188,6 +188,7 @@ export function AppSidebar({
 			collapsible="icon"
 			{...props}
 			className="z-20 bg-background text-foreground"
+			data-testid="app-sidebar"
 		>
 			<SidebarHeader>
 				<LocationSwitcher

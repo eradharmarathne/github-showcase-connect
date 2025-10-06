@@ -24,6 +24,7 @@ import ProfileDropdown from "./dropdown-profile";
 import FullscreenToggle from "./FullscreenToggle";
 import ProfileAvatarButton from "./ProfileAvatarButton";
 import ThemeSwitcher from "./ThemeSwitcher";
+import { TourHelpButton } from "./TourHelpButton";
 import { Button } from "./ui/button";
 
 export function Layout() {
@@ -137,6 +138,7 @@ export function Layout() {
 							</Breadcrumb>
 						</div>
 						<div className="flex items-center gap-1.5">
+							<TourHelpButton />
 							<FullscreenToggle />
 							<ThemeSwitcher />
 							<LanguageDropdown
