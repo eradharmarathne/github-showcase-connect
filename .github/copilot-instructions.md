@@ -173,7 +173,8 @@ Components should respect the currently selected location and filter all queries
 ## File Conventions
 
 - TypeScript throughout with strict types from Supabase 
-- Generate types using Supabase CLI: `npx supabase gen types typescript --project-id "$PROJECT_REF" --schema public > src/integrations/supabase/types.ts`
+- Generate types using Supabase CLI: `npx supabase gen types typescript --project-id "
+" --schema public > src/integrations/supabase/types.ts`
 - PascalCase for React components (e.g., `UserProfile.tsx`)
 - camelCase for functions and variables (e.g., `fetchUserData`, `userName`)
 - kebab-case for directories and non-component files (e.g., `user-profile/`, `utils.ts`)
