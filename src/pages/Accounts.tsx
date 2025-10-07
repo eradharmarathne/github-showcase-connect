@@ -30,17 +30,16 @@ export default function Accounts() {
 	const [showTransferDialog, setShowTransferDialog] = useState(false);
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
-	// Fetch accounts with calculated balances
+	// Fetch accounts and map current_balance to currentBalance for component compatibility
 	const {
 		data: accountsWithBalances = [],
 		isLoading,
 		error,
 	} = useQuery({
-		queryKey: ["accounts-with-balances", tenant?.id],
+		queryKey: ["accounts", tenant?.id],
 		queryFn: async (): Promise<AccountWithBalance[]> => {
 			if (!tenant?.id) return [];
 
-			// First get all accounts
 			const { data: accounts, error: accountsError } = await supabase
 				.from("accounts")
 				.select("*")
@@ -48,70 +47,12 @@ export default function Accounts() {
 				.order("created_at", { ascending: false });
 
 			if (accountsError) throw accountsError;
-			if (!accounts) return [];
-
-			// Calculate balance for each account
-			const accountsWithBalances: AccountWithBalance[] = [];
-
-			for (const account of accounts) {
-				// Fetch payments (income) for this account
-				const { data: paymentsData } = await supabase
-					.from("payments")
-					.select("amount")
-					.eq("account_id", account.id);
-
-				// Fetch expenses for this account
-				const { data: expensesData } = await supabase
-					.from("expenses")
-					.select("amount")
-					.eq("account_id", account.id);
-
-				// Fetch transfers from this account
-				const { data: transfersFromData } = await supabase
-					.from("account_transfers")
-					.select("amount")
-					.eq("from_account_id", account.id);
-
-				// Fetch transfers to this account
-				const { data: transfersToData } = await supabase
-					.from("account_transfers")
-					.select("amount, conversion_rate")
-					.eq("to_account_id", account.id);
-
-				// Calculate totals
-				const totalPayments = (paymentsData || []).reduce(
-					(sum, payment) => sum + Number(payment.amount),
-					0,
-				);
-				const totalExpenses = (expensesData || []).reduce(
-					(sum, expense) => sum + Number(expense.amount),
-					0,
-				);
-				const transfersOut = (transfersFromData || []).reduce(
-					(sum, transfer) => sum + Number(transfer.amount),
-					0,
-				);
-				const transfersIn = (transfersToData || []).reduce(
-					(sum, transfer) =>
-						sum + Number(transfer.amount) * Number(transfer.conversion_rate),
-					0,
-				);
-
-				// Calculate current balance: initial + payments - expenses - transfersOut + transfersIn
-				const currentBalance =
-					account.initial_balance +
-					totalPayments -
-					totalExpenses -
-					transfersOut +
-					transfersIn;
-
-				accountsWithBalances.push({
-					...account,
-					currentBalance,
-				});
-			}
-
-			return accountsWithBalances;
+			
+			// Map current_balance to currentBalance for component compatibility
+			return (accounts || []).map(account => ({
+				...account,
+				currentBalance: Number(account.current_balance)
+			}));
 		},
 		enabled: !!tenant?.id,
 	});
@@ -192,7 +133,7 @@ export default function Accounts() {
 					<Button
 						onClick={() => setShowTransferDialog(true)}
 						variant="outline"
-						disabled={accountsWithBalances.length < 2}
+												disabled={accountsWithBalances.length < 2}
 					>
 						{t("accounts.buttons.transferMoney")}
 					</Button>
