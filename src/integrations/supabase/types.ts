@@ -93,6 +93,7 @@ export type Database = {
           location_access: string[]
           name: string
           tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -103,6 +104,7 @@ export type Database = {
           location_access?: string[]
           name: string
           tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -113,6 +115,7 @@ export type Database = {
           location_access?: string[]
           name?: string
           tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -139,6 +142,7 @@ export type Database = {
           tenant_id: string | null
           total_amount: number
           unit_price: number
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -154,6 +158,7 @@ export type Database = {
           tenant_id?: string | null
           total_amount: number
           unit_price: number
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -169,6 +174,7 @@ export type Database = {
           tenant_id?: string | null
           total_amount?: number
           unit_price?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -254,6 +260,7 @@ export type Database = {
           location_id: string
           mapping_type: string
           room_id: string | null
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -265,6 +272,7 @@ export type Database = {
           location_id: string
           mapping_type: string
           room_id?: string | null
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -276,6 +284,7 @@ export type Database = {
           location_id?: string
           mapping_type?: string
           room_id?: string | null
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -293,6 +302,13 @@ export type Database = {
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "beds24_property_mappings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       booking_payments: {
@@ -306,6 +322,8 @@ export type Database = {
           is_advance: boolean
           note: string | null
           payment_method: string
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           account_id: string
@@ -317,6 +335,8 @@ export type Database = {
           is_advance?: boolean
           note?: string | null
           payment_method: string
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           account_id?: string
@@ -328,6 +348,8 @@ export type Database = {
           is_advance?: boolean
           note?: string | null
           payment_method?: string
+          tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -351,6 +373,13 @@ export type Database = {
             referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "booking_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       booking_sync_urls: {
@@ -361,6 +390,8 @@ export type Database = {
           last_synced_at: string | null
           location_id: string
           source: string
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -369,6 +400,8 @@ export type Database = {
           last_synced_at?: string | null
           location_id: string
           source: string
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -377,6 +410,8 @@ export type Database = {
           last_synced_at?: string | null
           location_id?: string
           source?: string
+          tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -384,6 +419,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_sync_urls_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -401,7 +443,9 @@ export type Database = {
           room_id: string | null
           source: Database["public"]["Enums"]["booking_source"]
           status: Database["public"]["Enums"]["booking_status"]
+          tenant_id: string
           total_amount: number
+          updated_at: string | null
         }
         Insert: {
           advance_amount?: number
@@ -415,7 +459,9 @@ export type Database = {
           room_id?: string | null
           source: Database["public"]["Enums"]["booking_source"]
           status?: Database["public"]["Enums"]["booking_status"]
+          tenant_id: string
           total_amount: number
+          updated_at?: string | null
         }
         Update: {
           advance_amount?: number
@@ -429,7 +475,9 @@ export type Database = {
           room_id?: string | null
           source?: Database["public"]["Enums"]["booking_source"]
           status?: Database["public"]["Enums"]["booking_status"]
+          tenant_id?: string
           total_amount?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -446,6 +494,13 @@ export type Database = {
             referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "bookings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       channel_property_mappings: {
@@ -457,6 +512,7 @@ export type Database = {
           is_active: boolean
           location_id: string
           mapping_type: string
+          tenant_id: string
           updated_at: string
         }
         Insert: {
@@ -467,6 +523,7 @@ export type Database = {
           is_active?: boolean
           location_id: string
           mapping_type?: string
+          tenant_id: string
           updated_at?: string
         }
         Update: {
@@ -477,6 +534,7 @@ export type Database = {
           is_active?: boolean
           location_id?: string
           mapping_type?: string
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
@@ -485,6 +543,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "channel_property_mappings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -552,20 +617,34 @@ export type Database = {
           id: string
           main_type: string
           sub_type: string
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           main_type: string
           sub_type: string
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           main_type?: string
           sub_type?: string
+          tenant_id?: string
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expense_types_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       expenses: {
         Row: {
@@ -579,6 +658,8 @@ export type Database = {
           main_type: string
           note: string | null
           sub_type: string
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           account_id: string
@@ -591,6 +672,8 @@ export type Database = {
           main_type: string
           note?: string | null
           sub_type: string
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           account_id?: string
@@ -603,6 +686,8 @@ export type Database = {
           main_type?: string
           note?: string | null
           sub_type?: string
+          tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -626,6 +711,13 @@ export type Database = {
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "expenses_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       external_bookings: {
@@ -646,6 +738,7 @@ export type Database = {
           room_name: string | null
           source: string
           status: string
+          tenant_id: string
           total_amount: number | null
           updated_at: string
         }
@@ -666,6 +759,7 @@ export type Database = {
           room_name?: string | null
           source: string
           status: string
+          tenant_id: string
           total_amount?: number | null
           updated_at?: string
         }
@@ -686,6 +780,7 @@ export type Database = {
           room_name?: string | null
           source?: string
           status?: string
+          tenant_id?: string
           total_amount?: number | null
           updated_at?: string
         }
@@ -695,6 +790,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_bookings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -852,6 +954,7 @@ export type Database = {
           payment_method: string
           tenant_id: string | null
           type: Database["public"]["Enums"]["income_type"]
+          updated_at: string | null
         }
         Insert: {
           account_id?: string | null
@@ -872,6 +975,7 @@ export type Database = {
           payment_method: string
           tenant_id?: string | null
           type: Database["public"]["Enums"]["income_type"]
+          updated_at?: string | null
         }
         Update: {
           account_id?: string | null
@@ -892,6 +996,7 @@ export type Database = {
           payment_method?: string
           tenant_id?: string | null
           type?: Database["public"]["Enums"]["income_type"]
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -958,18 +1063,21 @@ export type Database = {
           id: string
           tenant_id: string | null
           type_name: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           tenant_id?: string | null
           type_name: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           tenant_id?: string | null
           type_name?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1052,6 +1160,7 @@ export type Database = {
           phone: string | null
           property_type: string | null
           tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           address?: string | null
@@ -1063,6 +1172,7 @@ export type Database = {
           phone?: string | null
           property_type?: string | null
           tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           address?: string | null
@@ -1074,6 +1184,7 @@ export type Database = {
           phone?: string | null
           property_type?: string | null
           tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1093,6 +1204,8 @@ export type Database = {
           id: string
           location_id: string
           month: number
+          tenant_id: string
+          updated_at: string | null
           year: number
         }
         Insert: {
@@ -1102,6 +1215,8 @@ export type Database = {
           id?: string
           location_id: string
           month: number
+          tenant_id: string
+          updated_at?: string | null
           year: number
         }
         Update: {
@@ -1111,6 +1226,8 @@ export type Database = {
           id?: string
           location_id?: string
           month?: number
+          tenant_id?: string
+          updated_at?: string | null
           year?: number
         }
         Relationships: [
@@ -1135,6 +1252,13 @@ export type Database = {
             referencedRelation: "locations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "monthly_rent_payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payments: {
@@ -1151,6 +1275,8 @@ export type Database = {
           payment_type: string
           reference_number: string | null
           reservation_id: string
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           account_id: string
@@ -1165,6 +1291,8 @@ export type Database = {
           payment_type: string
           reference_number?: string | null
           reservation_id: string
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           account_id?: string
@@ -1179,6 +1307,8 @@ export type Database = {
           payment_type?: string
           reference_number?: string | null
           reservation_id?: string
+          tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1207,6 +1337,13 @@ export type Database = {
             columns: ["reservation_id"]
             isOneToOne: false
             referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1274,6 +1411,7 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
           tenant_id: string | null
           tenant_role: Database["public"]["Enums"]["tenant_role"] | null
+          updated_at: string | null
           verification_code: string | null
           verification_code_expires: string | null
         }
@@ -1291,6 +1429,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           tenant_id?: string | null
           tenant_role?: Database["public"]["Enums"]["tenant_role"] | null
+          updated_at?: string | null
           verification_code?: string | null
           verification_code_expires?: string | null
         }
@@ -1308,6 +1447,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           tenant_id?: string | null
           tenant_role?: Database["public"]["Enums"]["tenant_role"] | null
+          updated_at?: string | null
           verification_code?: string | null
           verification_code_expires?: string | null
         }
@@ -1358,7 +1498,7 @@ export type Database = {
           room_rate: number
           special_requests: string | null
           status: Database["public"]["Enums"]["reservation_status"]
-          tenant_id: string | null
+          tenant_id: string
           total_amount: number
           updated_at: string
         }
@@ -1398,7 +1538,7 @@ export type Database = {
           room_rate: number
           special_requests?: string | null
           status?: Database["public"]["Enums"]["reservation_status"]
-          tenant_id?: string | null
+          tenant_id: string
           total_amount: number
           updated_at?: string
         }
@@ -1438,7 +1578,7 @@ export type Database = {
           room_rate?: number
           special_requests?: string | null
           status?: Database["public"]["Enums"]["reservation_status"]
-          tenant_id?: string | null
+          tenant_id?: string
           total_amount?: number
           updated_at?: string
         }
@@ -1488,6 +1628,8 @@ export type Database = {
           is_available: boolean
           price: number
           room_id: string
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -1496,6 +1638,8 @@ export type Database = {
           is_available?: boolean
           price: number
           room_id: string
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -1504,6 +1648,8 @@ export type Database = {
           is_available?: boolean
           price?: number
           room_id?: string
+          tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1511,6 +1657,13 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_pricing_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -1854,6 +2007,7 @@ export type Database = {
           location_id: string
           tenant_id: string | null
           tenant_role: Database["public"]["Enums"]["tenant_role"] | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -1875,6 +2029,7 @@ export type Database = {
           location_id: string
           tenant_id?: string | null
           tenant_role?: Database["public"]["Enums"]["tenant_role"] | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -1896,6 +2051,7 @@ export type Database = {
           location_id?: string
           tenant_id?: string | null
           tenant_role?: Database["public"]["Enums"]["tenant_role"] | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: [
