@@ -16,6 +16,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { getCurrencySymbol } from "@/utils/currency";
@@ -37,6 +38,7 @@ export function ExpenseForm({
 	const { t } = useTranslation();
 	const { toast } = useToast();
 	const { selectedLocation } = useLocationContext();
+	const { tenant } = useTenant();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const [formData, setFormData] = useState({
@@ -117,6 +119,7 @@ export function ExpenseForm({
 					location_id: selectedLocation,
 					date: formData.date,
 					note: formData.note || null,
+					tenant_id: tenant?.id,
 				},
 			]);
 
