@@ -22,6 +22,8 @@ import {
 	removeCustomCurrency,
 	updateCurrencyRate,
 } from "@/utils/currency";
+import { useLocationContext } from "@/context/LocationContext";
+import { useTenant } from "@/hooks/useTenant";
 import { CurrencyRate } from "./types";
 
 export function CurrencyManagement() {
@@ -32,15 +34,21 @@ export function CurrencyManagement() {
 	const [deleteCurrencyConfirmOpen, setDeleteCurrencyConfirmOpen] =
 		useState(false);
 	const [currencyToDelete, setCurrencyToDelete] = useState<string | null>(null);
+	const { tenant } = useTenant();
+	const { selectedLocation } = useLocationContext();
 
 	const fetchCurrencyRates = useCallback(async () => {
+		if (!tenant?.id || !selectedLocation) {
+			return;
+		}
+
 		try {
-			const rates = await getCurrencyDetails();
+			const rates = await getCurrencyDetails(tenant.id, selectedLocation);
 			setCurrencyRates(rates);
 		} catch (error) {
 			console.error("Error fetching currency rates:", error);
 		}
-	}, []);
+	}, [tenant?.id, selectedLocation]);
 
 	useEffect(() => {
 		fetchCurrencyRates();
@@ -48,9 +56,13 @@ export function CurrencyManagement() {
 
 	const addCurrency = async () => {
 		if (!newCurrencyCode.trim() || newCurrencyRate <= 0) {
+			return;
+		}
+
+		if (!tenant?.id || !selectedLocation) {
 			toast({
 				title: "Error",
-				description: "Please provide a valid currency code and rate",
+				description: "Tenant or location information not available",
 				variant: "destructive",
 			});
 			return;
@@ -59,8 +71,10 @@ export function CurrencyManagement() {
 		setIsAddingCurrency(true);
 		try {
 			const result = await addCustomCurrency(
-				newCurrencyCode.trim().toUpperCase(),
+				newCurrencyCode.toUpperCase(),
 				newCurrencyRate,
+				tenant.id,
+				selectedLocation,
 			);
 
 			if (result.success) {
@@ -91,8 +105,22 @@ export function CurrencyManagement() {
 	};
 
 	const updateCurrency = async (currencyCode: string, newRate: number) => {
+		if (!tenant?.id || !selectedLocation) {
+			toast({
+				title: "Error",
+				description: "Tenant or location information not available",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		try {
-			const result = await updateCurrencyRate(currencyCode, newRate);
+			const result = await updateCurrencyRate(
+				currencyCode,
+				newRate,
+				tenant.id,
+				selectedLocation,
+			);
 			if (result.success) {
 				toast({
 					title: "Success",
@@ -124,8 +152,21 @@ export function CurrencyManagement() {
 	const confirmDeleteCurrency = async () => {
 		if (!currencyToDelete) return;
 
+		if (!tenant?.id || !selectedLocation) {
+			toast({
+				title: "Error",
+				description: "Tenant or location information not available",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		try {
-			const result = await removeCustomCurrency(currencyToDelete);
+			const result = await removeCustomCurrency(
+				currencyToDelete,
+				tenant.id,
+				selectedLocation,
+			);
 			if (result.success) {
 				toast({
 					title: "Success",

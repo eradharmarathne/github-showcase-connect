@@ -9,6 +9,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useLocationContext } from "@/context/LocationContext";
+import { useTenant } from "@/hooks/useTenant";
 import type { CurrencyRate } from "@/utils/currency";
 import {
 	getCurrencyConversionSearchUrl,
@@ -30,11 +32,18 @@ export const CurrencySelector = ({
 }: CurrencySelectorProps) => {
 	const [currencies, setCurrencies] = useState<CurrencyRate[]>([]);
 	const [loading, setLoading] = useState(true);
+	const { tenant } = useTenant();
+	const { selectedLocation } = useLocationContext();
 
 	useEffect(() => {
 		const loadCurrencies = async () => {
+			if (!tenant?.id || !selectedLocation) {
+				setLoading(false);
+				return;
+			}
+
 			try {
-				const currencyDetails = await getCurrencyDetails();
+				const currencyDetails = await getCurrencyDetails(tenant.id, selectedLocation);
 				setCurrencies(currencyDetails);
 			} catch (error) {
 				console.error("Error loading currencies:", error);
@@ -44,7 +53,7 @@ export const CurrencySelector = ({
 		};
 
 		loadCurrencies();
-	}, []);
+	}, [tenant?.id, selectedLocation]);
 
 	const selectedCurrency = currencies.find((c) => c.currency_code === currency);
 
