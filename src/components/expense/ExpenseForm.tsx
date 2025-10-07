@@ -122,68 +122,22 @@ export function ExpenseForm({
 
 			if (error) throw error;
 
-			// Calculate new account balance
+			// Fetch updated account balance (automatically updated by database trigger)
 			const selectedAccount = accounts.find(
 				(acc) => acc.id === formData.accountId,
 			);
 			if (selectedAccount) {
-				// Fetch current account transactions to calculate balance
-				const [
-					incomesRes,
-					expensesRes,
-					outgoingTransfersRes,
-					incomingTransfersRes,
-				] = await Promise.all([
-					supabase
-						.from("income")
-						.select("amount")
-						.eq("account_id", formData.accountId),
-					supabase
-						.from("expenses")
-						.select("amount")
-						.eq("account_id", formData.accountId),
-					supabase
-						.from("account_transfers")
-						.select("amount")
-						.eq("from_account_id", formData.accountId),
-					supabase
-						.from("account_transfers")
-						.select("amount, conversion_rate")
-						.eq("to_account_id", formData.accountId),
-				]);
+				// Refresh account to get the updated balance
+				const { data: updatedAccount } = await supabase
+					.from("accounts")
+					.select("current_balance, currency, name")
+					.eq("id", formData.accountId)
+					.single();
 
-				let currentBalance = selectedAccount.initial_balance;
-
-				// Add all income
-				const totalIncome = (incomesRes.data || []).reduce(
-					(sum, item) => sum + parseFloat(item.amount.toString()),
-					0,
+				const currentBalance = updatedAccount?.current_balance || 0;
+				const currencySymbol = getCurrencySymbol(
+					updatedAccount?.currency || selectedAccount.currency,
 				);
-				currentBalance += totalIncome;
-
-				// Subtract all expenses (including the new one we just added)
-				const totalExpenses = (expensesRes.data || []).reduce(
-					(sum, item) => sum + parseFloat(item.amount.toString()),
-					0,
-				);
-				currentBalance -= totalExpenses;
-
-				// Subtract outgoing transfers
-				const totalOutgoingTransfers = (outgoingTransfersRes.data || []).reduce(
-					(sum, item) => sum + parseFloat(item.amount.toString()),
-					0,
-				);
-				currentBalance -= totalOutgoingTransfers;
-
-				// Add incoming transfers (with conversion rate)
-				const totalIncomingTransfers = (incomingTransfersRes.data || []).reduce(
-					(sum, item) =>
-						sum + parseFloat(item.amount.toString()) * item.conversion_rate,
-					0,
-				);
-				currentBalance += totalIncomingTransfers;
-
-				const currencySymbol = getCurrencySymbol(selectedAccount.currency);
 
 				// Send SMS notification for expense
 				try {
@@ -193,7 +147,7 @@ export function ExpenseForm({
 							amount: parseFloat(formData.amount),
 							currency: formData.currency,
 							category: `${formData.mainCategory} - ${formData.subCategory}`,
-							account: selectedAccount.name,
+							account: updatedAccount?.name || selectedAccount.name,
 							locationId: selectedLocation,
 							date: format(new Date(formData.date), "MMM dd, yyyy"),
 							note: formData.note,
@@ -207,7 +161,7 @@ export function ExpenseForm({
 				toast({
 					title: t("expense.form.messages.success"),
 					description: `${t("expense.form.messages.successDetails")}
-${selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
+${updatedAccount?.name || selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
 				});
 			} else {
 				toast({

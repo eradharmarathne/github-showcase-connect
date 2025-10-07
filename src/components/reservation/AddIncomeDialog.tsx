@@ -129,81 +129,70 @@ export function AddIncomeDialog({
 			return;
 		}
 
-		// Calculate remaining balance for immediate payments only
-		const totalAmount = selectedReservation.total_amount || 0;
-		const paidAmount = selectedReservation.paid_amount || 0;
-		const remainingBalance = totalAmount - paidAmount;
-
-		// Prevent overpayment only for immediate payments
-		if (incomeForm.payment_method === "cash" && incomeForm.amount > remainingBalance) {
-			toast({
-				title: "Error",
-				description: `Payment amount (${incomeForm.currency} ${incomeForm.amount}) exceeds remaining balance (${selectedReservation.currency} ${remainingBalance}). Maximum allowed: ${selectedReservation.currency} ${remainingBalance}`,
-				variant: "destructive",
-			});
-			return;
-		}
-
 		try {
-			// Calculate new amounts based on payment method
-			const paidAmount = selectedReservation.paid_amount || 0;
-			const totalAmount = selectedReservation.total_amount || 0;
 			const isAddToBill = incomeForm.payment_method === "pending";
 
-			// Insert the income record
-			const { error: incomeError } = await supabase.from("income").insert({
-				booking_id: selectedReservation.id,
-				amount: incomeForm.amount,
-				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
-				note:
-					incomeForm.note ||
-					(isAddToBill 
-						? `Additional service for reservation ${selectedReservation.reservation_number}`
-						: `Payment for reservation ${selectedReservation.reservation_number}`),
-				income_type_id: incomeForm.income_type_id || null,
-				tenant_id: profile?.tenant_id,
-				location_id: selectedLocation,
-				account_id: isAddToBill ? null : incomeForm.account_id, // No account for pending items
-				payment_method: incomeForm.payment_method,
-				type: "booking",
-			});
-
-			if (incomeError) throw incomeError;
-
-			let reservationUpdates = {};
-
 			if (isAddToBill) {
-				// Add to bill: increase total amount, balance remains for guest to pay later
-				const newTotalAmount = totalAmount + incomeForm.amount;
-				const newBalanceAmount = newTotalAmount - paidAmount;
-				reservationUpdates = {
-					total_amount: newTotalAmount,
-					balance_amount: newBalanceAmount,
-				};
+				// Add to bill: create income record with pending status
+				// Database trigger will automatically update reservation total_amount and balance_amount
+				const { error: incomeError } = await supabase.from("income").insert({
+					booking_id: selectedReservation.id,
+					amount: incomeForm.amount,
+					currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
+					note:
+						incomeForm.note ||
+						`Additional service for reservation ${selectedReservation.reservation_number}`,
+					income_type_id: incomeForm.income_type_id || null,
+					tenant_id: profile?.tenant_id,
+					location_id: selectedLocation,
+					account_id: null, // No account for pending items
+					payment_method: "pending",
+					type: "booking",
+				});
+
+				if (incomeError) throw incomeError;
+
+				toast({
+					title: "Success",
+					description: "Item added to guest bill successfully",
+				});
 			} else {
-				// Immediate payment: increase paid amount, reduce balance
-				const newPaidAmount = paidAmount + incomeForm.amount;
-				const newBalanceAmount = totalAmount - newPaidAmount;
-				reservationUpdates = {
-					paid_amount: newPaidAmount,
-					balance_amount: newBalanceAmount,
-				};
+				// Immediate payment: create payment record
+				// Database trigger will automatically update account balance and reservation amounts
+				const selectedAccount = accounts.find(
+					(acc) => acc.id === incomeForm.account_id,
+				);
+				const accountCurrency = selectedAccount?.currency || "LKR";
+
+				// Convert amount to account currency if needed
+				let convertedAmount = incomeForm.amount;
+				if (incomeForm.currency !== accountCurrency) {
+					// TODO: Implement currency conversion
+					convertedAmount = incomeForm.amount; // For now, use same amount
+				}
+
+				const { error: paymentError } = await supabase.from("payments").insert({
+					reservation_id: selectedReservation.id,
+					amount: convertedAmount,
+					currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+					payment_method: incomeForm.payment_method,
+					payment_type: "reservation",
+					payment_number: `PAY-${Date.now()}`,
+					account_id: incomeForm.account_id,
+					notes:
+						incomeForm.note ||
+						`Payment for reservation ${selectedReservation.reservation_number}`,
+					tenant_id: profile?.tenant_id,
+					created_by: profile?.id || null,
+				});
+
+				if (paymentError) throw paymentError;
+
+				toast({
+					title: "Success",
+					description: "Payment recorded successfully",
+				});
 			}
-
-			// Update reservation amounts
-			const { error: reservationError } = await supabase
-				.from("reservations")
-				.update(reservationUpdates)
-				.eq("id", selectedReservation.id);
-
-			if (reservationError) throw reservationError;
-
-			toast({
-				title: "Success",
-				description: isAddToBill 
-					? "Item added to guest bill successfully"
-					: "Payment recorded successfully",
-			});
 
 			onSuccess();
 			handleClose();
