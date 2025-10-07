@@ -18,6 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +62,7 @@ export function AddIncomeDialog({
 		account_id: "",
 		income_type_id: "",
 		currency: "LKR", // Default currency
+		payment_method: "cash", // "cash" for immediate payment, "pending" for add to bill
 	});
 	// Store the base amount and currency for conversion reference
 	const [baseAmount, setBaseAmount] = useState<number>(0);
@@ -118,7 +120,7 @@ export function AddIncomeDialog({
 		if (!selectedReservation) return;
 
 		// Validate required fields
-		if (!incomeForm.account_id) {
+		if (incomeForm.payment_method === "cash" && !incomeForm.account_id) {
 			toast({
 				title: "Error",
 				description: "Please select an account for the payment.",
@@ -127,13 +129,13 @@ export function AddIncomeDialog({
 			return;
 		}
 
-		// Calculate remaining balance
+		// Calculate remaining balance for immediate payments only
 		const totalAmount = selectedReservation.total_amount || 0;
 		const paidAmount = selectedReservation.paid_amount || 0;
 		const remainingBalance = totalAmount - paidAmount;
 
-		// Prevent overpayment
-		if (incomeForm.amount > remainingBalance) {
+		// Prevent overpayment only for immediate payments
+		if (incomeForm.payment_method === "cash" && incomeForm.amount > remainingBalance) {
 			toast({
 				title: "Error",
 				description: `Payment amount (${incomeForm.currency} ${incomeForm.amount}) exceeds remaining balance (${selectedReservation.currency} ${remainingBalance}). Maximum allowed: ${selectedReservation.currency} ${remainingBalance}`,
@@ -143,42 +145,64 @@ export function AddIncomeDialog({
 		}
 
 		try {
-			// Create income record - always direct payment now
+			// Calculate new amounts based on payment method
+			const paidAmount = selectedReservation.paid_amount || 0;
+			const totalAmount = selectedReservation.total_amount || 0;
+			const isAddToBill = incomeForm.payment_method === "pending";
+
+			// Insert the income record
 			const { error: incomeError } = await supabase.from("income").insert({
 				booking_id: selectedReservation.id,
 				amount: incomeForm.amount,
 				currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
 				note:
 					incomeForm.note ||
-					`Payment for reservation ${selectedReservation.reservation_number}`,
-				income_type_id: incomeForm.income_type_id || null, // Convert empty string to null
+					(isAddToBill 
+						? `Additional service for reservation ${selectedReservation.reservation_number}`
+						: `Payment for reservation ${selectedReservation.reservation_number}`),
+				income_type_id: incomeForm.income_type_id || null,
 				tenant_id: profile?.tenant_id,
 				location_id: selectedLocation,
-				account_id: incomeForm.account_id, // Required field, validated above
-				payment_method: "cash", // Always cash since we removed deferred
+				account_id: isAddToBill ? null : incomeForm.account_id, // No account for pending items
+				payment_method: incomeForm.payment_method,
 				type: "booking",
 			});
 
 			if (incomeError) throw incomeError;
 
-			// Update reservation with new paid amount
-			const newPaidAmount = paidAmount + incomeForm.amount;
-			const newBalanceAmount = totalAmount - newPaidAmount;
+			let reservationUpdates = {};
 
-			// Update reservation amounts only - status changes handled elsewhere
-			const { error: reservationError } = await supabase
-				.from("reservations")
-				.update({
+			if (isAddToBill) {
+				// Add to bill: increase total amount, balance remains for guest to pay later
+				const newTotalAmount = totalAmount + incomeForm.amount;
+				const newBalanceAmount = newTotalAmount - paidAmount;
+				reservationUpdates = {
+					total_amount: newTotalAmount,
+					balance_amount: newBalanceAmount,
+				};
+			} else {
+				// Immediate payment: increase paid amount, reduce balance
+				const newPaidAmount = paidAmount + incomeForm.amount;
+				const newBalanceAmount = totalAmount - newPaidAmount;
+				reservationUpdates = {
 					paid_amount: newPaidAmount,
 					balance_amount: newBalanceAmount,
-				})
+				};
+			}
+
+			// Update reservation amounts
+			const { error: reservationError } = await supabase
+				.from("reservations")
+				.update(reservationUpdates)
 				.eq("id", selectedReservation.id);
 
 			if (reservationError) throw reservationError;
 
 			toast({
 				title: "Success",
-				description: "Payment recorded successfully",
+				description: isAddToBill 
+					? "Item added to guest bill successfully"
+					: "Payment recorded successfully",
 			});
 
 			onSuccess();
@@ -200,6 +224,7 @@ export function AddIncomeDialog({
 			account_id: "",
 			income_type_id: "",
 			currency: "LKR", // Reset to default currency
+			payment_method: "cash", // Reset to immediate payment
 		});
 	};
 
@@ -344,6 +369,30 @@ export function AddIncomeDialog({
 							</SelectContent>
 						</Select>
 					</div>
+					<div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-md">
+						<Switch
+							id="add-to-bill"
+							checked={incomeForm.payment_method === "pending"}
+							onCheckedChange={(checked) =>
+								setIncomeForm({ 
+									...incomeForm, 
+									payment_method: checked ? "pending" : "cash",
+									account_id: checked ? "" : incomeForm.account_id // Clear account if adding to bill
+								})
+							}
+						/>
+						<div className="flex-1">
+							<Label htmlFor="add-to-bill" className="text-sm font-medium">
+								Add to Guest Bill
+							</Label>
+							<p className="text-xs text-gray-600">
+								{incomeForm.payment_method === "pending" 
+									? "This item will be added to the guest's total bill to pay at checkout"
+									: "This will be recorded as an immediate payment"}
+							</p>
+						</div>
+					</div>
+					{incomeForm.payment_method === "cash" && (
 					<div>
 						<Label htmlFor="account_id">
 							{t("income.addDialog.form.accountRequired")}
@@ -372,15 +421,18 @@ export function AddIncomeDialog({
 							{t("income.addDialog.form.accountDescription")}
 						</p>
 					</div>
+					)}
 					<div className="flex gap-2 justify-end">
 						<Button type="button" variant="outline" onClick={handleClose}>
 							{t("income.addDialog.buttons.cancel")}
 						</Button>
 						<Button
 							type="submit"
-							disabled={!incomeForm.amount || !incomeForm.account_id}
+							disabled={!incomeForm.amount || (incomeForm.payment_method === "cash" && !incomeForm.account_id)}
 						>
-							{t("income.addDialog.buttons.record")}
+							{incomeForm.payment_method === "pending" 
+								? "Add to Bill" 
+								: t("income.addDialog.buttons.record")}
 						</Button>
 					</div>
 				</form>
