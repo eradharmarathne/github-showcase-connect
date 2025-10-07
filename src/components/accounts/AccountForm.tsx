@@ -57,12 +57,17 @@ export function AccountForm({
 		try {
 			if (editingAccount) {
 				// Update existing account
+				// Calculate adjustment needed for current_balance when initial_balance changes
+				const initialBalanceDifference = formData.initial_balance - editingAccount.initial_balance;
+				const newCurrentBalance = editingAccount.current_balance + initialBalanceDifference;
+
 				const { error } = await supabase
 					.from("accounts")
 					.update({
 						name: formData.name,
 						currency: formData.currency,
 						initial_balance: formData.initial_balance,
+						current_balance: newCurrentBalance, // Adjust current_balance by the difference
 						location_access: formData.location_access,
 					})
 					.eq("id", editingAccount.id);
@@ -79,6 +84,7 @@ export function AccountForm({
 					name: formData.name,
 					currency: formData.currency,
 					initial_balance: formData.initial_balance,
+					current_balance: formData.initial_balance, // Set current_balance equal to initial_balance
 					location_access: formData.location_access,
 					tenant_id: tenant?.id || "",
 				});
