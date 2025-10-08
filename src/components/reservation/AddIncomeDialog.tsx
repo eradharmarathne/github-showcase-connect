@@ -176,7 +176,9 @@ export function AddIncomeDialog({
 					);
 				}
 
-				const { error: paymentError } = await supabase.from("payments").insert({
+			const { data: paymentData, error: paymentError } = await supabase
+				.from("payments")
+				.insert({
 					reservation_id: selectedReservation.id,
 					amount: convertedAmount,
 					currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
@@ -189,17 +191,49 @@ export function AddIncomeDialog({
 						`Payment for reservation ${selectedReservation.reservation_number}`,
 					tenant_id: profile?.tenant_id,
 					created_by: profile?.id,
-				});
+				})
+				.select()
+				.single();
 
-				if (paymentError) throw paymentError;
+			if (paymentError) throw paymentError;
 
-				toast({
-					title: "Success",
-					description: "Payment recorded successfully",
-				});
-			}
+			// TODO: Enable after Phase 3 SQL execution
+			// Log currency conversion if currencies differ
+			// if (
+			// 	paymentData &&
+			// 	incomeForm.currency !== accountCurrency &&
+			// 	profile?.tenant_id
+			// ) {
+			// 	const { error: conversionLogError } = await supabase
+			// 		.from("currency_conversion_log")
+			// 		.insert({
+			// 			transaction_type: "payment",
+			// 			transaction_id: paymentData.id,
+			// 			from_currency: incomeForm.currency,
+			// 			to_currency: accountCurrency,
+			// 			from_amount: incomeForm.amount,
+			// 			to_amount: convertedAmount,
+			// 			exchange_rate: convertedAmount / incomeForm.amount,
+			// 			rate_source: "system",
+			// 			tenant_id: profile.tenant_id,
+			// 			created_by: profile.id,
+			// 			notes: `Payment for reservation ${selectedReservation.reservation_number}`,
+			// 		});
 
-			onSuccess();
+			// 	if (conversionLogError) {
+			// 		console.error(
+			// 			"Failed to log currency conversion:",
+			// 			conversionLogError,
+			// 		);
+			// 		// Non-critical error, don't block transaction
+			// 	}
+			// }
+
+			toast({
+				title: "Success",
+				description: "Payment recorded successfully",
+			});
+		}			onSuccess();
 			handleClose();
 		} catch (error) {
 			console.error("Error recording income:", error);

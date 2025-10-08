@@ -109,21 +109,63 @@ export function ExpenseForm({
 		}
 
 		try {
-			const { error } = await supabase.from("expenses").insert([
-				{
-					main_type: formData.mainCategory,
-					sub_type: formData.subCategory,
-					amount: parseFloat(formData.amount),
-					currency: formData.currency,
-					account_id: formData.accountId,
-					location_id: selectedLocation,
-					date: formData.date,
-					note: formData.note || null,
-					tenant_id: tenant?.id,
-				},
-			]);
+			const { data: expenseData, error } = await supabase
+				.from("expenses")
+				.insert([
+					{
+						main_type: formData.mainCategory,
+						sub_type: formData.subCategory,
+						amount: parseFloat(formData.amount),
+						currency: formData.currency,
+						account_id: formData.accountId,
+						location_id: selectedLocation,
+						date: formData.date,
+						note: formData.note || null,
+						tenant_id: tenant?.id,
+					},
+				])
+				.select()
+				.single();
 
 			if (error) throw error;
+
+			// TODO: Enable after Phase 3 SQL execution
+			// Log currency conversion if expense involved currency conversion
+			// const selectedAccount = accounts.find((acc) => acc.id === formData.accountId);
+			// if (
+			// 	expenseData &&
+			// 	selectedAccount &&
+			// 	formData.currency !== selectedAccount.currency &&
+			// 	tenant?.id
+			// ) {
+			// 	const convertedAmount = await convertCurrency(
+			// 		parseFloat(formData.amount),
+			// 		formData.currency,
+			// 		selectedAccount.currency,
+			// 		tenant.id,
+			// 		selectedLocation,
+			// 	);
+
+			// 	const { error: conversionLogError } = await supabase
+			// 		.from("currency_conversion_log")
+			// 		.insert({
+			// 			transaction_type: "expense",
+			// 			transaction_id: expenseData.id,
+			// 			from_currency: formData.currency,
+			// 			to_currency: selectedAccount.currency,
+			// 			from_amount: parseFloat(formData.amount),
+			// 			to_amount: convertedAmount,
+			// 			exchange_rate: convertedAmount / parseFloat(formData.amount),
+			// 			rate_source: "system",
+			// 			tenant_id: tenant.id,
+			// 			created_by: profile?.id,
+			// 			notes: `${formData.mainCategory} - ${formData.subCategory}`,
+			// 		});
+
+			// 	if (conversionLogError) {
+			// 		console.error("Failed to log currency conversion:", conversionLogError);
+			// 	}
+			// }
 
 			// Fetch updated account balance (automatically updated by database trigger)
 			const { data: updatedAccount } = await supabase
