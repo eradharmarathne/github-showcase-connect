@@ -3,8 +3,10 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
+	ReferenceLine,
 	ResponsiveContainer,
 	XAxis,
+	YAxis,
 } from "recharts";
 import {
 	ChartConfig,
@@ -19,36 +21,43 @@ import {
 
 interface FinancialChartContainerProps {
 	data: ChartDataPoint[];
-	activeChart: "income" | "expenses";
 	selectedCurrency: string;
 }
 
 const chartConfig = {
 	income: {
 		label: "Income",
-		color: "hsl(var(--chart-1))",
+		color: "hsl(142 76% 36%)", // Green color for income
 	},
 	expenses: {
 		label: "Expenses",
-		color: "hsl(var(--chart-2))",
+		color: "hsl(0 84% 60%)", // Red color for expenses
 	},
 } satisfies ChartConfig;
 
 export function FinancialChartContainer({
 	data,
-	activeChart,
 	selectedCurrency,
 }: FinancialChartContainerProps) {
 	const { data: currencies } = useAvailableCurrencies();
 	const currencySymbol =
 		currencies?.find((c) => c.value === selectedCurrency)?.symbol || "";
 
+	// Transform data to make expenses negative for better visualization
+	const transformedData = React.useMemo(() => {
+		return data.map((item) => ({
+			...item,
+			expenses: -Math.abs(item.expenses), // Make expenses negative
+			net: item.income - item.expenses, // Calculate net
+		}));
+	}, [data]);
+
 	return (
 		<div className="flex-1 flex items-center justify-center min-h-0">
 			<ChartContainer config={chartConfig} className="h-[300px] w-full">
 				<ResponsiveContainer width="100%" height="100%">
 					<BarChart
-						data={data}
+						data={transformedData}
 						margin={{
 							left: 12,
 							right: 12,
@@ -71,6 +80,27 @@ export function FinancialChartContainer({
 								});
 							}}
 						/>
+						<YAxis
+							tickLine={false}
+							axisLine={false}
+							tickFormatter={(value) => {
+								const absValue = Math.abs(value);
+								if (absValue >= 1000000) {
+									return `${currencySymbol}${(absValue / 1000000).toFixed(1)}M`;
+								}
+								if (absValue >= 1000) {
+									return `${currencySymbol}${(absValue / 1000).toFixed(1)}K`;
+								}
+								return `${currencySymbol}${absValue.toFixed(0)}`;
+							}}
+						/>
+						{/* Zero reference line */}
+						<ReferenceLine
+							y={0}
+							stroke="hsl(var(--muted-foreground))"
+							strokeDasharray="2 2"
+							strokeWidth={1}
+						/>
 						<ChartTooltip
 							content={
 								<ChartTooltipContent
@@ -82,24 +112,33 @@ export function FinancialChartContainer({
 											year: "numeric",
 										});
 									}}
-									formatter={(value, name) => [
-										`${currencySymbol}${Number(value).toLocaleString(
-											undefined,
-											{
+									formatter={(value, name) => {
+										const absValue = Math.abs(Number(value));
+										const label =
+											chartConfig[name as keyof typeof chartConfig]?.label ||
+											name;
+										return [
+											`${currencySymbol}${absValue.toLocaleString(undefined, {
 												minimumFractionDigits: 2,
 												maximumFractionDigits: 2,
-											},
-										)}`,
-										chartConfig[name as keyof typeof chartConfig]?.label ||
-											name,
-									]}
+											})}`,
+											label,
+										];
+									}}
 								/>
 							}
 						/>
+						{/* Income bars (positive) */}
 						<Bar
-							dataKey={activeChart}
-							fill={chartConfig[activeChart].color}
-							radius={[4, 4, 0, 0]}
+							dataKey="income"
+							fill={chartConfig.income.color}
+							radius={[2, 2, 0, 0]}
+						/>
+						{/* Expense bars (negative) */}
+						<Bar
+							dataKey="expenses"
+							fill={chartConfig.expenses.color}
+							radius={[0, 0, 2, 2]}
 						/>
 					</BarChart>
 				</ResponsiveContainer>

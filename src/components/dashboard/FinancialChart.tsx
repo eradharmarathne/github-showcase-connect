@@ -12,9 +12,6 @@ import { FinancialChartControls } from "./FinancialChartControls";
 import { FinancialChartHeader } from "./FinancialChartHeader";
 
 export function FinancialChart() {
-	const [activeChart, setActiveChart] = React.useState<"income" | "expenses">(
-		"income",
-	);
 	const [selectedCurrency, setSelectedCurrency] = React.useState("USD");
 
 	const { data: currencies } = useAvailableCurrencies();
@@ -91,15 +88,12 @@ export function FinancialChart() {
 					/>
 
 					<FinancialChartControls
-						activeChart={activeChart}
-						onActiveChartChange={setActiveChart}
 						totals={chartData.totals}
 						selectedCurrency={selectedCurrency}
 					/>
 
 					<FinancialChartContainer
 						data={chartData.data}
-						activeChart={activeChart}
 						selectedCurrency={selectedCurrency}
 					/>
 				</div>

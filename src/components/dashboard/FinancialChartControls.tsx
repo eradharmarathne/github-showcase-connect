@@ -2,8 +2,6 @@ import * as React from "react";
 import { useAvailableCurrencies } from "@/hooks/useFinancialChartData";
 
 interface FinancialChartControlsProps {
-	activeChart: "income" | "expenses";
-	onActiveChartChange: (chart: "income" | "expenses") => void;
 	totals: {
 		income: number;
 		expenses: number;
@@ -12,8 +10,6 @@ interface FinancialChartControlsProps {
 }
 
 export function FinancialChartControls({
-	activeChart,
-	onActiveChartChange,
 	totals,
 	selectedCurrency,
 }: FinancialChartControlsProps) {
@@ -21,41 +17,47 @@ export function FinancialChartControls({
 	const currencySymbol =
 		currencies?.find((c) => c.value === selectedCurrency)?.symbol || "";
 
+	const netProfit = totals.income - totals.expenses;
+
 	const chartTypes = [
 		{
 			key: "income" as const,
-			label: "Income",
+			label: "Total Income",
 			value: totals.income,
 			color: "text-green-600",
 		},
 		{
 			key: "expenses" as const,
-			label: "Expenses",
+			label: "Total Expenses",
 			value: totals.expenses,
 			color: "text-red-600",
+		},
+		{
+			key: "net" as const,
+			label: "Net Profit",
+			value: netProfit,
+			color: netProfit >= 0 ? "text-blue-600" : "text-orange-600",
 		},
 	];
 
 	return (
 		<div className="flex mt-4 sm:mt-0">
 			{chartTypes.map((chart) => (
-				<button
+				<div
 					key={chart.key}
-					data-active={activeChart === chart.key}
-					className="data-[active=true]:bg-muted/50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6 hover:bg-muted/30 transition-colors"
-					onClick={() => onActiveChartChange(chart.key)}
+					className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-center even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
 				>
 					<span className="text-muted-foreground text-xs">{chart.label}</span>
 					<span
 						className={`text-lg leading-none font-bold sm:text-3xl ${chart.color}`}
 					>
 						{currencySymbol}
-						{chart.value.toLocaleString(undefined, {
+						{Math.abs(chart.value).toLocaleString(undefined, {
 							minimumFractionDigits: 2,
 							maximumFractionDigits: 2,
 						})}
 					</span>
-				</button>
+				</div>
 			))}
 		</div>
 	);
