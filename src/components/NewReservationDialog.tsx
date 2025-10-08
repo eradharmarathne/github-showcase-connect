@@ -1,10 +1,6 @@
-import { addDays, format } from "date-fns";
-import { Calendar, Save, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
-import {
-	MultiRoomSelector,
-	type RoomSelection,
-} from "@/components/reservation/MultiRoomSelector";
+import { Calendar, ChevronLeft, ChevronRight, Save, X } from "lucide-react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { type RoomSelection } from "@/components/reservation/MultiRoomSelector";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -13,26 +9,19 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { PhoneInput } from "@/components/ui/phone-input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
-import { useFormFieldPreferences } from "@/hooks/useFormFieldPreferences";
 import { useProfile } from "@/hooks/useProfile";
 import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
+import { GuestData, GuestInformationStep } from "./reservation/new/GuestInformationStep";
+import { PaymentData, PaymentStep } from "./reservation/new/PaymentStep";
+import { PricingStep } from "./reservation/new/PricingStep";
+import { RoomSelectionStep } from "./reservation/new/RoomSelectionStep";
+import { ConfirmationStep } from "./reservation/new/ConfirmationStep";
 
 type Room = Tables<"rooms">;
 
@@ -41,6 +30,16 @@ interface NewReservationDialogProps {
 	onClose: () => void;
 	onReservationCreated: () => void;
 }
+
+const STEPS = [
+	{ id: "guest", title: "Guest Information", icon: Calendar },
+	{ id: "rooms", title: "Room Selection", icon: Calendar },
+	{ id: "pricing", title: "Pricing", icon: Calendar },
+	{ id: "payment", title: "Payment", icon: Calendar },
+	{ id: "confirmation", title: "Confirmation", icon: Calendar },
+] as const;
+
+type StepId = (typeof STEPS)[number]["id"];
 
 export function NewReservationDialog({
 	isOpen,
@@ -51,15 +50,15 @@ export function NewReservationDialog({
 	const { profile } = useProfile();
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
-	const { preferences: fieldPreferences } = useFormFieldPreferences();
 	const { isRangeAvailable } = useRoomAvailability();
 
+	const [currentStep, setCurrentStep] = useState<StepId>("guest");
 	const [rooms, setRooms] = useState<Room[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 	const [roomSelections, setRoomSelections] = useState<RoomSelection[]>([]);
 
-	const [guestData, setGuestData] = useState({
+	const [guestData, setGuestData] = useState<GuestData>({
 		guest_name: "",
 		guest_email: "",
 		guest_phone: "",
@@ -71,9 +70,9 @@ export function NewReservationDialog({
 		booking_source: "direct",
 	});
 
-	const [paymentData, setPaymentData] = useState({
+	const [paymentData, setPaymentData] = useState<PaymentData>({
 		advance_amount: 0,
-		currency: "LKR" as string,
+		currency: "LKR",
 	});
 
 	// Sync payment currency with the first room selection's currency
@@ -127,6 +126,7 @@ export function NewReservationDialog({
 	const fetchRooms = useCallback(async () => {
 		if (!selectedLocation || !tenant?.id) return;
 
+		setLoading(true);
 		try {
 			const { data, error } = await supabase
 				.from("rooms")
@@ -145,6 +145,8 @@ export function NewReservationDialog({
 				description: "Failed to fetch rooms",
 				variant: "destructive",
 			});
+		} finally {
+			setLoading(false);
 		}
 	}, [selectedLocation, tenant?.id, toast]);
 
@@ -152,6 +154,7 @@ export function NewReservationDialog({
 	useEffect(() => {
 		if (isOpen) {
 			fetchRooms();
+			setCurrentStep("guest"); // Reset to first step
 		}
 	}, [isOpen, fetchRooms]);
 
@@ -161,22 +164,6 @@ export function NewReservationDialog({
 
 	const handlePaymentDataChange = (field: string, value: any) => {
 		setPaymentData((prev) => ({ ...prev, [field]: value }));
-	};
-
-	// Get currency symbol helper
-	const getCurrencySymbol = (currency: string) => {
-		switch (currency) {
-			case "USD":
-				return "$";
-			case "EUR":
-				return "€";
-			case "GBP":
-				return "£";
-			case "LKR":
-				return "Rs.";
-			default:
-				return "";
-		}
 	};
 
 	const generateReservationNumber = async (): Promise<string> => {
@@ -196,71 +183,105 @@ export function NewReservationDialog({
 		}
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const validateCurrentStep = (): boolean => {
+		switch (currentStep) {
+			case "guest": {
+				if (!guestData.guest_name.trim()) {
+					toast({
+						title: "Validation Error",
+						description: "Guest name is required",
+						variant: "destructive",
+					});
+					return false;
+				}
+				return true;
+			}
 
-		if (!tenant?.id || !profile?.id) {
+			case "rooms": {
+				if (roomSelections.length === 0) {
+					toast({
+						title: "Validation Error",
+						description: "Please select at least one room",
+						variant: "destructive",
+					});
+					return false;
+				}
+				// Validate that all room selections have room_id
+				const invalidSelections = roomSelections.filter(
+					(selection) => !selection.room_id,
+				);
+				if (invalidSelections.length > 0) {
+					toast({
+						title: "Validation Error",
+						description: "Please select a room for all room selections",
+						variant: "destructive",
+					});
+					return false;
+				}
+				// Validate that all room selections have dates
+				const missingDatesSelections = roomSelections.filter(
+					(selection) => !selection.check_in_date || !selection.check_out_date,
+				);
+				if (missingDatesSelections.length > 0) {
+					toast({
+						title: "Validation Error",
+						description:
+							"Please select check-in and check-out dates for all room selections",
+						variant: "destructive",
+					});
+					return false;
+				}
+				// Validate room availability for all selections
+				const unavailableSelections = roomSelections.filter((selection) => {
+					const checkIn = new Date(selection.check_in_date);
+					const checkOut = new Date(selection.check_out_date);
+					return !isRangeAvailable(checkIn, checkOut, selection.room_id);
+				});
+				if (unavailableSelections.length > 0) {
+					toast({
+						title: "Room Unavailable",
+						description:
+							"One or more selected rooms are not available for the chosen dates. Please adjust your selection.",
+						variant: "destructive",
+					});
+					return false;
+				}
+				return true;
+			}
+
+			case "pricing":
+			case "payment":
+			case "confirmation":
+				return true;
+
+			default:
+				return true;
+		}
+	};
+
+	const handleNext = () => {
+		if (!validateCurrentStep()) return;
+
+		const currentIndex = STEPS.findIndex((step) => step.id === currentStep);
+		if (currentIndex < STEPS.length - 1) {
+			setCurrentStep(STEPS[currentIndex + 1].id);
+		}
+	};
+
+	const handlePrevious = () => {
+		const currentIndex = STEPS.findIndex((step) => step.id === currentStep);
+		if (currentIndex > 0) {
+			setCurrentStep(STEPS[currentIndex - 1].id);
+		}
+	};
+
+	const handleSubmit = async () => {
+		if (!validateCurrentStep()) return;
+
+		if (!tenant?.id || !profile?.id || !selectedLocation) {
 			toast({
 				title: "Error",
-				description: "Missing tenant or profile information",
-				variant: "destructive",
-			});
-			return;
-		}
-
-		if (
-			!selectedLocation ||
-			!guestData.guest_name ||
-			roomSelections.length === 0
-		) {
-			toast({
-				title: "Error",
-				description:
-					"Please fill in all required fields and select at least one room",
-				variant: "destructive",
-			});
-			return;
-		}
-
-		// Validate that all room selections have room_id
-		const invalidSelections = roomSelections.filter(
-			(selection) => !selection.room_id,
-		);
-		if (invalidSelections.length > 0) {
-			toast({
-				title: "Error",
-				description: "Please select a room for all room selections",
-				variant: "destructive",
-			});
-			return;
-		}
-
-		// Validate that all room selections have dates
-		const missingDatesSelections = roomSelections.filter(
-			(selection) => !selection.check_in_date || !selection.check_out_date,
-		);
-		if (missingDatesSelections.length > 0) {
-			toast({
-				title: "Error",
-				description:
-					"Please select check-in and check-out dates for all room selections",
-				variant: "destructive",
-			});
-			return;
-		}
-
-		// Validate room availability for all selections
-		const unavailableSelections = roomSelections.filter((selection) => {
-			const checkIn = new Date(selection.check_in_date);
-			const checkOut = new Date(selection.check_out_date);
-			return !isRangeAvailable(checkIn, checkOut, selection.room_id);
-		});
-
-		if (unavailableSelections.length > 0) {
-			toast({
-				title: "Room Unavailable",
-				description:
-					"One or more selected rooms are not available for the chosen dates. Please adjust your selection.",
+				description: "Missing required information",
 				variant: "destructive",
 			});
 			return;
@@ -327,23 +348,7 @@ export function NewReservationDialog({
 			});
 
 			// Reset form and close dialog
-			setRoomSelections([]);
-			setGuestData({
-				guest_name: "",
-				guest_email: "",
-				guest_phone: "",
-				guest_address: "",
-				guest_nationality: "",
-				guest_passport_number: "",
-				guest_id_number: "",
-				special_requests: "",
-				booking_source: "direct",
-			});
-			setPaymentData({
-				advance_amount: 0,
-				currency: "LKR",
-			});
-
+			resetForm();
 			onReservationCreated();
 			onClose();
 		} catch (error) {
@@ -358,265 +363,186 @@ export function NewReservationDialog({
 		}
 	};
 
+	const resetForm = () => {
+		setCurrentStep("guest");
+		setRoomSelections([]);
+		setGuestData({
+			guest_name: "",
+			guest_email: "",
+			guest_phone: "",
+			guest_address: "",
+			guest_nationality: "",
+			guest_passport_number: "",
+			guest_id_number: "",
+			special_requests: "",
+			booking_source: "direct",
+		});
+		setPaymentData({
+			advance_amount: 0,
+			currency: "LKR",
+		});
+	};
+
+	const renderCurrentStep = () => {
+		const commonProps = {
+			key: currentStep, // Force re-render when step changes
+		};
+
+		switch (currentStep) {
+			case "guest":
+				return (
+					<GuestInformationStep
+						{...commonProps}
+						guestData={guestData}
+						onGuestDataChange={handleGuestDataChange}
+					/>
+				);
+			case "rooms":
+				return (
+					<RoomSelectionStep
+						{...commonProps}
+						rooms={rooms}
+						roomSelections={roomSelections}
+						onRoomSelectionsChange={setRoomSelections}
+						defaultCurrency={paymentData.currency}
+					/>
+				);
+			case "pricing":
+				return (
+					<PricingStep
+						{...commonProps}
+						roomSelections={roomSelections}
+						convertedTotal={convertedTotal}
+						paymentCurrency={paymentData.currency}
+					/>
+				);
+			case "payment":
+				return (
+					<PaymentStep
+						{...commonProps}
+						paymentData={paymentData}
+						onPaymentDataChange={handlePaymentDataChange}
+						roomSelections={roomSelections}
+						convertedTotal={convertedTotal}
+					/>
+				);
+			case "confirmation":
+				return (
+					<ConfirmationStep
+						{...commonProps}
+						guestData={guestData}
+						roomSelections={roomSelections}
+						paymentData={paymentData}
+						convertedTotal={convertedTotal}
+					/>
+				);
+			default:
+				return null;
+		}
+	};
+
+	const currentStepIndex = STEPS.findIndex((step) => step.id === currentStep);
+	const isFirstStep = currentStepIndex === 0;
+	const isLastStep = currentStepIndex === STEPS.length - 1;
+
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-4xl sm:max-w-6xl md:max-w-7xl max-h-[90vh] sm:min-h-[95vh] overflow-y-auto">
+			<DialogContent className="max-w-4xl sm:max-w-6xl md:max-w-7xl max-h-[90vh] sm:min-h-[95vh] overflow-hidden flex flex-col">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Calendar className="h-5 w-5" />
 						Create New Reservation
 					</DialogTitle>
 					<DialogDescription>
-						Fill in the details to create a new reservation for one or more
-						rooms
+						Step {currentStepIndex + 1} of {STEPS.length}:{" "}
+						{STEPS[currentStepIndex].title}
 					</DialogDescription>
 				</DialogHeader>
 
-				<form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto">
-					{/* Guest Information */}
-					<div className="space-y-4">
-						<h3 className="text-base md:text-lg lg:text-xl font-semibold">
-							Guest Information
-						</h3>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<div className="md:col-span-2 space-y-2">
-								<Label htmlFor="guest_name">Guest Name *</Label>
-								<Input
-									id="guest_name"
-									value={guestData.guest_name}
-									onChange={(e) =>
-										handleGuestDataChange("guest_name", e.target.value)
-									}
-									placeholder="Enter guest name"
-									required
-								/>
-							</div>
-
-							{fieldPreferences?.show_guest_email !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="guest_email">Email</Label>
-									<Input
-										id="guest_email"
-										type="email"
-										value={guestData.guest_email}
-										onChange={(e) =>
-											handleGuestDataChange("guest_email", e.target.value)
-										}
-										placeholder="Enter email address"
-									/>
-								</div>
-							)}
-
-							{fieldPreferences?.show_guest_phone !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="guest_phone">Phone</Label>
-									<PhoneInput
-										defaultCountry="LK"
-										international
-										value={guestData.guest_phone}
-										onChange={(value) =>
-											handleGuestDataChange("guest_phone", value || "")
-										}
-										placeholder="Enter phone number"
-									/>
-								</div>
-							)}
-
-							{fieldPreferences?.show_guest_nationality !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="guest_nationality">Nationality</Label>
-									<Input
-										id="guest_nationality"
-										value={guestData.guest_nationality}
-										onChange={(e) =>
-											handleGuestDataChange("guest_nationality", e.target.value)
-										}
-										placeholder="Enter nationality"
-									/>
-								</div>
-							)}
-
-							{fieldPreferences?.show_guest_passport_number !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="guest_passport_number">Passport Number</Label>
-									<Input
-										id="guest_passport_number"
-										value={guestData.guest_passport_number}
-										onChange={(e) =>
-											handleGuestDataChange(
-												"guest_passport_number",
-												e.target.value,
-											)
-										}
-										placeholder="Enter passport number"
-									/>
-								</div>
-							)}
-
-							{fieldPreferences?.show_guest_id_number !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="guest_id_number">ID Number</Label>
-									<Input
-										id="guest_id_number"
-										value={guestData.guest_id_number}
-										onChange={(e) =>
-											handleGuestDataChange("guest_id_number", e.target.value)
-										}
-										placeholder="Enter ID number"
-									/>
-								</div>
-							)}
-
-							{fieldPreferences?.show_guest_address !== false && (
-								<div className="md:col-span-2 space-y-2">
-									<Label htmlFor="guest_address">Address</Label>
-									<Textarea
-										id="guest_address"
-										value={guestData.guest_address}
-										onChange={(e) =>
-											handleGuestDataChange("guest_address", e.target.value)
-										}
-										placeholder="Enter address"
-										rows={3}
-									/>
-								</div>
-							)}
-						</div>
-					</div>
-
-					{/* Booking Source */}
-					{fieldPreferences?.show_booking_source !== false && (
-						<div className="space-y-2">
-							<Label htmlFor="booking_source">Booking Source</Label>
-							<Select
-								value={guestData.booking_source}
-								onValueChange={(value) =>
-									handleGuestDataChange("booking_source", value)
-								}
+				{/* Progress indicator */}
+				<div className="flex items-center justify-between mb-6">
+					{STEPS.map((step, index) => (
+						<div key={step.id} className="flex items-center">
+							<div
+								className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+									index <= currentStepIndex
+										? "bg-blue-600 text-white"
+										: "bg-gray-200 text-gray-600"
+								}`}
 							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select booking source" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="direct">Direct</SelectItem>
-									<SelectItem value="airbnb">Airbnb</SelectItem>
-									<SelectItem value="booking_com">Booking.com</SelectItem>
-									<SelectItem value="expedia">Expedia</SelectItem>
-									<SelectItem value="agoda">Agoda</SelectItem>
-									<SelectItem value="beds24">Beds24</SelectItem>
-									<SelectItem value="manual">Manual</SelectItem>
-									<SelectItem value="online">Online</SelectItem>
-									<SelectItem value="phone">Phone</SelectItem>
-									<SelectItem value="email">Email</SelectItem>
-									<SelectItem value="walk_in">Walk-in</SelectItem>
-									<SelectItem value="ical">iCal</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-					)}
-
-					{/* Room Selections */}
-					<MultiRoomSelector
-						rooms={rooms}
-						roomSelections={roomSelections}
-						onRoomSelectionsChange={setRoomSelections}
-						defaultCurrency={paymentData.currency}
-					/>
-
-					{/* Special Requests */}
-					{fieldPreferences?.show_special_requests !== false && (
-						<div className="space-y-2">
-							<Label htmlFor="special_requests">Special Requests</Label>
-							<Textarea
-								id="special_requests"
-								value={guestData.special_requests}
-								onChange={(e) =>
-									handleGuestDataChange("special_requests", e.target.value)
-								}
-								placeholder="Any special requests or notes"
-							/>
-						</div>
-					)}
-
-					{/* Payment Information */}
-					<div className="space-y-4">
-						<h3 className="text-base md:text-lg lg:text-xl font-semibold">
-							Payment Information
-						</h3>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{fieldPreferences?.show_advance_amount !== false && (
-								<div className="space-y-2">
-									<Label htmlFor="advance_amount">Advance Amount</Label>
-									<Input
-										id="advance_amount"
-										type="number"
-										step="0.01"
-										value={paymentData.advance_amount}
-										onChange={(e) =>
-											handlePaymentDataChange(
-												"advance_amount",
-												Number(e.target.value),
-											)
-										}
-										placeholder="Enter advance amount"
-									/>
-								</div>
+								{index + 1}
+							</div>
+							<span
+								className={`ml-2 text-sm hidden sm:inline ${
+									index <= currentStepIndex
+										? "text-blue-600 font-medium"
+										: "text-gray-500"
+								}`}
+							>
+								{step.title}
+							</span>
+							{index < STEPS.length - 1 && (
+								<div
+									className={`w-8 h-0.5 mx-2 ${
+										index < currentStepIndex ? "bg-blue-600" : "bg-gray-200"
+									}`}
+								/>
 							)}
 						</div>
+					))}
+				</div>
 
-						{/* Total Summary */}
-						{roomSelections.length > 0 && (
-							<div className="bg-blue-50 p-4 sm:p-6 rounded-md border border-blue-200">
-								<div className="space-y-2">
-									<div className="flex justify-between items-center">
-										<span className="font-semibold">
-											Grand Total ({roomSelections.length} room
-											{roomSelections.length > 1 ? "s" : ""}):
-										</span>
-										<span className="text-xl font-bold text-blue-700">
-											{getCurrencySymbol(paymentData.currency)}
-											{convertedTotal.toFixed(2)}
-										</span>
-									</div>
-									{paymentData.advance_amount > 0 && (
-										<>
-											<div className="flex justify-between items-center text-sm">
-												<span>Advance Amount:</span>
-												<span>
-													{getCurrencySymbol(paymentData.currency)}
-													{paymentData.advance_amount.toFixed(2)}
-												</span>
-											</div>
-											<div className="flex justify-between items-center text-sm font-semibold">
-												<span>Balance Amount:</span>
-												<span>
-													{getCurrencySymbol(paymentData.currency)}
-													{(
-														convertedTotal - paymentData.advance_amount
-													).toFixed(2)}
-												</span>
-											</div>
-										</>
-									)}
-								</div>
+				{/* Step content */}
+				<div className="flex-1 overflow-y-auto">
+					<Suspense
+						fallback={
+							<div className="flex items-center justify-center p-8">
+								Loading...
 							</div>
+						}
+					>
+						{loading ? (
+							<div className="flex items-center justify-center p-8">
+								Loading rooms...
+							</div>
+						) : (
+							renderCurrentStep()
+						)}
+					</Suspense>
+				</div>
+
+				{/* Navigation buttons */}
+				<div className="flex w-full items-center justify-between gap-3 py-4 sm:py-6 border-t mt-6">
+					<div className="flex gap-2">
+						{!isFirstStep && (
+							<Button type="button" variant="outline" onClick={handlePrevious}>
+								<ChevronLeft className="h-4 w-4 mr-2" />
+								Previous
+							</Button>
 						)}
 					</div>
 
-					{/* Action Buttons */}
-					<div className="flex w-full items-center justify-end gap-3 py-4 sm:py-6 border-t">
+					<div className="flex gap-2">
 						<Button type="button" variant="outline" onClick={onClose}>
 							<X className="h-4 w-4 mr-2" />
 							Cancel
 						</Button>
-						<Button className="border" type="submit" disabled={submitting}>
-							<Save className="h-4 w-4 mr-2" />
-							{submitting
-								? "Creating..."
-								: `Create Reservation${roomSelections.length > 1 ? "s" : ""}`}
-						</Button>
+
+						{isLastStep ? (
+							<Button onClick={handleSubmit} disabled={submitting}>
+								<Save className="h-4 w-4 mr-2" />
+								{submitting
+									? "Creating..."
+									: `Create Reservation${roomSelections.length > 1 ? "s" : ""}`}
+							</Button>
+						) : (
+							<Button onClick={handleNext}>
+								Next
+								<ChevronRight className="h-4 w-4 ml-2" />
+							</Button>
+						)}
 					</div>
-				</form>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);
