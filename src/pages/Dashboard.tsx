@@ -19,44 +19,40 @@ export default function Dashboard() {
 	const { hasAnyPermission } = usePermissions();
 
 	return (
-		<div className="space-y-4 w-full pb-20 sm:pb-8 lg:space-y-6 animate-fade-in p-4">
-			{/* Header with Filters */}
-			<DashboardHeader
-				selectedLocation={selectedLocation}
-				selectedMonth={selectedMonth}
-				setSelectedMonth={setSelectedMonth}
-				hasIncomePermission={hasAnyPermission(["access_income"])}
-				hasExpensePermission={hasAnyPermission(["access_expenses"])}
-				onLocationsLoad={setLocations}
-			/>
-
-			{/* Account Balances and Upcoming Bookings - Responsive Layout */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-				{/* Account Balances */}
-				<div className="w-full">
-					<AccountBalances selectedLocation={selectedLocation} />
-				</div>
-
-				{/* Upcoming Bookings */}
-				<div className="w-full">
-					<UpcomingBookings
+		<div className="min-h-screen">
+			<div className="space-y-6 w-full pb-20 sm:pb-8 lg:space-y-8 animate-fade-in p-4 sm:p-6 lg:p-8 max-w-[1920px] mx-auto">
+				{/* Header with Filters */}
+				<div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 border border-primary/20">
+					<DashboardHeader
 						selectedLocation={selectedLocation}
-						hasCalendarPermission={hasAnyPermission(["access_calendar"])}
+						selectedMonth={selectedMonth}
+						setSelectedMonth={setSelectedMonth}
+						hasIncomePermission={hasAnyPermission(["access_income"])}
+						hasExpensePermission={hasAnyPermission(["access_expenses"])}
+						onLocationsLoad={setLocations}
 					/>
 				</div>
-			</div>
 
-			{/* Income & Expense Chart */}
-			<div className="w-full">
-				<FinancialChart />
-			</div>
+				{/* Income & Expense Chart */}
+				<div className="w-full">
+					<FinancialChart />
+				</div>
 
-			{/* Booking Source Chart with Shortcuts */}
-			<div className="w-full">
-				<BookingSourceChart
-					selectedLocation={selectedLocation}
-					selectedMonth={selectedMonth}
-				/>
+				{/* Account Balances and Upcoming Bookings - Responsive Layout */}
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+					{/* Account Balances */}
+					<div className="w-full">
+						<AccountBalances selectedLocation={selectedLocation} />
+					</div>
+
+					{/* Upcoming Bookings */}
+					<div className="w-full">
+						<UpcomingBookings
+							selectedLocation={selectedLocation}
+							hasCalendarPermission={hasAnyPermission(["access_calendar"])}
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

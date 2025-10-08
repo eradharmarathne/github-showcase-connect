@@ -119,20 +119,6 @@ export function DashboardHeader({
 					)}
 				</div>
 			</div>
-
-			{/* Filters Row */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				{/* Location selector removed - now handled by sidebar */}
-				<div className="space-y-1">
-					<Label className="text-xs">{t("dashboard.header.monthFilter")}</Label>
-					<Input
-						type="month"
-						value={selectedMonth}
-						onChange={(e) => setSelectedMonth(e.target.value)}
-						className="h-9 w-fit min-w-40"
-					/>
-				</div>
-			</div>
 		</div>
 	);
 }

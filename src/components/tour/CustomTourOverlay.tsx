@@ -214,7 +214,7 @@ export const CustomTourOverlay: React.FC<CustomTourOverlayProps> = ({
 					className="absolute w-96 max-w-[90vw]"
 					style={cardPosition}
 				>
-					<Card className="shadow-2xl border-2 border-primary/20 bg-background/95">
+					<Card className="border-2 border-primary/20 bg-background/95">
 						<CardHeader className="pb-3">
 							<div className="flex items-start justify-between">
 								<div className="flex-1">

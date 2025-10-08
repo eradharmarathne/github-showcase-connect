@@ -44,7 +44,7 @@ supabase gen types typescript --local             # Generate TypeScript types fr
 After any schema changes:
 ```bash
 # Generate types and update src/integrations/supabase/types.ts
-supabase gen types typescript --local > src/integrations/supabase/types.ts
+npx supabase gen types typescript --project-id "$PROJECT_REF" --schema public > database.types.ts
 ```
 
 ## Architecture Overview

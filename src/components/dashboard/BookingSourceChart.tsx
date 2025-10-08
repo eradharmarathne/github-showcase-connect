@@ -248,70 +248,74 @@ export function BookingSourceChart({
 				<CardTitle className="text-sm font-medium">
 					Booking Sources & Quick Actions
 				</CardTitle>
-				<span className="text-xs text-muted-foreground">
-					{totalBookings} total bookings
-				</span>
 			</CardHeader>
 			<CardContent>
-				<div className="h-[500px] flex flex-col">{/* Increased height for shortcuts */}
-					<ChartContainer
-						config={{}}
-						className="mx-auto aspect-square h-[220px]"
-					>
-						<PieChart>
-							<Pie
-								data={sourceData}
-								cx="50%"
-								cy="50%"
-								innerRadius={50}
-								outerRadius={90}
-								paddingAngle={2}
-								dataKey="count"
-							>
-								{sourceData.map((entry, index) => (
-									<Cell
-										key={`cell-${index}`}
-										fill={
-											SOURCE_COLORS[entry.source] ||
-											FALLBACK_COLORS[index % FALLBACK_COLORS.length]
-										}
-									/>
-								))}
-							</Pie>
-							<ChartTooltip
-								content={
-									<ChartTooltipContent
-										labelFormatter={(value) => value}
-										formatter={(value, name, entry) => [
-											`${entry.payload.count} bookings (${entry.payload.percentage.toFixed(1)}%)`,
-											entry.payload.source,
-										]}
-									/>
-								}
-							/>
-						</PieChart>
-					</ChartContainer>
-
-					{/* Legend */}
-					<div className="mt-2 flex-1 overflow-y-auto">
-						<div className="grid grid-cols-1 gap-1 text-xs">
-							{sourceData.map((entry, index) => (
-								<div key={entry.source} className="flex items-center gap-2">
-									<div
-										className="w-2 h-2 rounded-full flex-shrink-0"
-										style={{
-											backgroundColor:
+				<div className="grid grid-cols-1 sm:grid-cols-2">
+					<div className="flex py-4 sm:py-8 justify-center flex-col sm:flex-row flex-1 min-h-[300px]">
+						<ChartContainer
+							config={{}}
+							className="mx-auto aspect-square h-[220px]"
+						>
+							<PieChart>
+								<Pie
+									data={sourceData}
+									cx="50%"
+									cy="50%"
+									innerRadius={50}
+									outerRadius={90}
+									paddingAngle={2}
+									dataKey="count"
+								>
+									{sourceData.map((entry, index) => (
+										<Cell
+											key={`cell-${index}`}
+											fill={
 												SOURCE_COLORS[entry.source] ||
-												FALLBACK_COLORS[index % FALLBACK_COLORS.length],
-										}}
-									/>
-									<span className="truncate text-xs">
-										{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}
-										%)
-									</span>
-								</div>
-							))}
+												FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+											}
+										/>
+									))}
+								</Pie>
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											labelFormatter={(value) => value}
+											formatter={(value, name, entry) => [
+												`${entry.payload.count} bookings (${entry.payload.percentage.toFixed(1)}%)`,
+												entry.payload.source,
+											]}
+										/>
+									}
+								/>
+							</PieChart>
+						</ChartContainer>
+
+						{/* Legend */}
+						<div className="mt-2 flex-1">
+							<div className="grid grid-cols-1 gap-1 text-xs">
+								{sourceData.map((entry, index) => (
+									<div key={entry.source} className="flex items-center gap-2">
+										<div
+											className="w-2 h-2 rounded-full flex-shrink-0"
+											style={{
+												backgroundColor:
+													SOURCE_COLORS[entry.source] ||
+													FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+											}}
+										/>
+										<span className="truncate text-xs">
+											{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}
+											%)
+										</span>
+									</div>
+								))}
+							</div>
+							<span className="text-xs text-muted-foreground">
+					{totalBookings} total bookings
+				</span>
 						</div>
+
+						
 					</div>
 
 					{/* Quick Action Shortcuts */}
@@ -325,7 +329,7 @@ export function BookingSourceChart({
 									Ctrl/Cmd + Key
 								</Badge>
 							</div>
-							<div className="grid grid-cols-1 gap-2">
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 								<Button
 									variant="outline"
 									size="sm"

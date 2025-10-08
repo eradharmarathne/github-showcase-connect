@@ -21,7 +21,7 @@ export function FinancialChart() {
 		error,
 	} = useFinancialChartData({
 		currency: selectedCurrency,
-		period: "daily",
+		period: "monthly",
 	});
 
 	// Auto-select first available currency when currencies load
