@@ -387,15 +387,11 @@ export function NewReservationDialog({
 	};
 
 	const renderCurrentStep = () => {
-		const commonProps = {
-			key: currentStep, // Force re-render when step changes
-		};
-
 		switch (currentStep) {
 			case "guest":
 				return (
 					<GuestInformationStep
-						{...commonProps}
+						key={currentStep}
 						guestData={guestData}
 						onGuestDataChange={handleGuestDataChange}
 					/>
@@ -403,7 +399,7 @@ export function NewReservationDialog({
 			case "rooms":
 				return (
 					<RoomSelectionStep
-						{...commonProps}
+						key={currentStep}
 						rooms={rooms}
 						roomSelections={roomSelections}
 						onRoomSelectionsChange={setRoomSelections}
@@ -413,7 +409,7 @@ export function NewReservationDialog({
 			case "pricing":
 				return (
 					<PricingStep
-						{...commonProps}
+						key={currentStep}
 						roomSelections={roomSelections}
 						convertedTotal={convertedTotal}
 						paymentCurrency={paymentData.currency}
@@ -422,7 +418,7 @@ export function NewReservationDialog({
 			case "payment":
 				return (
 					<PaymentStep
-						{...commonProps}
+						key={currentStep}
 						paymentData={paymentData}
 						onPaymentDataChange={handlePaymentDataChange}
 						roomSelections={roomSelections}
@@ -432,7 +428,7 @@ export function NewReservationDialog({
 			case "confirmation":
 				return (
 					<ConfirmationStep
-						{...commonProps}
+						key={currentStep}
 						guestData={guestData}
 						roomSelections={roomSelections}
 						paymentData={paymentData}

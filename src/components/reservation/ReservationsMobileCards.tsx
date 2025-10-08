@@ -5,6 +5,7 @@ import { ReservationsListSkeleton } from "@/components/skeleton/ReservationsList
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
+import { useLocationContext } from "@/context/LocationContext";
 import { useReservationPrint } from "@/hooks/useReservationPrint";
 import { useReservationsData } from "@/hooks/useReservationsData";
 import type { Database } from "@/integrations/supabase/types";
@@ -37,16 +38,21 @@ export function ReservationsMobileCards({
 	const { reservations, loading } = useReservationsData();
 	const { printReservation } = useReservationPrint();
 	const { tenant } = useAuth();
+	const { selectedLocation } = useLocationContext();
 
 	// State for converted amounts
 	const [convertedAmounts, setConvertedAmounts] = useState<
 		Record<string, number>
 	>({});
 
-	// Convert currency amounts when selectedCurrency changes
+	// Effect to convert amounts when currency or reservations change
 	useEffect(() => {
+		if (!tenant?.id || !selectedLocation) {
+			return;
+		}
+
 		const convertAmounts = async () => {
-			if (!reservations) return;
+			if (!reservations.length) return;
 
 			const newConvertedAmounts: Record<string, number> = {};
 
@@ -57,6 +63,8 @@ export function ReservationsMobileCards({
 						roomAmount,
 						reservation.currency,
 						selectedCurrency,
+						tenant.id,
+						selectedLocation,
 					);
 					newConvertedAmounts[reservation.id] = convertedAmount;
 				} catch (error) {
@@ -72,9 +80,7 @@ export function ReservationsMobileCards({
 		};
 
 		convertAmounts();
-	}, [reservations, selectedCurrency]);
-
-	// Utility functions
+	}, [reservations, selectedCurrency, tenant?.id, selectedLocation]);	// Utility functions
 	const getStatusColor = (status: string): string => {
 		const colors: Record<string, string> = {
 			confirmed: "bg-green-100 text-green-800",

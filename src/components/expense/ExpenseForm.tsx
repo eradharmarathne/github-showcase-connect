@@ -12,8 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 import { ExpenseCategories } from "./ExpenseCategories";
-import { ExpenseDetails } from "./ExpenseDetails";
 import { ExpenseReceipt } from "./ExpenseReceipt";
+import { ExpenseDetails } from "./ExpenseDetails";
 
 type Account = Tables<"accounts">;
 type ExpenseType = Tables<"expense_types">;
