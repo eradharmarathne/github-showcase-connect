@@ -15,10 +15,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { ExpenseType } from "./types";
 
 export function ExpenseManagement() {
+	const { tenant } = useTenant();
 	const [expenseTypes, setExpenseTypes] = useState<ExpenseType[]>([]);
 	const [newMainType, setNewMainType] = useState("");
 	const [newSubType, setNewSubType] = useState("");
@@ -29,9 +31,12 @@ export function ExpenseManagement() {
 		useState(false);
 
 	const fetchExpenseTypes = useCallback(async () => {
+		if (!tenant?.id) return;
+		
 		const { data, error } = await supabase
 			.from("expense_types")
 			.select("*")
+			.eq("tenant_id", tenant.id)
 			.order("main_type, sub_type");
 
 		if (error) {
@@ -44,7 +49,7 @@ export function ExpenseManagement() {
 		} else {
 			setExpenseTypes(data || []);
 		}
-	}, []);
+	}, [tenant?.id]);
 
 	useEffect(() => {
 		fetchExpenseTypes();
@@ -60,10 +65,20 @@ export function ExpenseManagement() {
 			return;
 		}
 
+		if (!tenant?.id) {
+			toast({
+				title: "Error",
+				description: "No tenant context available",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		const { error } = await supabase.from("expense_types").insert([
 			{
 				main_type: newMainType.trim(),
 				sub_type: newSubType.trim(),
+				tenant_id: tenant.id,
 			},
 		]);
 
@@ -91,13 +106,14 @@ export function ExpenseManagement() {
 	};
 
 	const confirmDeleteExpenseType = async () => {
-		if (!expenseTypeToDelete) return;
+		if (!expenseTypeToDelete || !tenant?.id) return;
 
 		try {
 			const { error } = await supabase
 				.from("expense_types")
 				.delete()
-				.eq("id", expenseTypeToDelete);
+				.eq("id", expenseTypeToDelete)
+				.eq("tenant_id", tenant.id);
 			if (error) throw error;
 			toast({
 				title: "Success",
