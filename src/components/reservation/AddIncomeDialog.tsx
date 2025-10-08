@@ -119,6 +119,16 @@ export function AddIncomeDialog({
 
 		if (!selectedReservation) return;
 
+		// Validate required context
+		if (!profile?.tenant_id || !selectedLocation) {
+			toast({
+				title: "Error",
+				description: "Missing tenant or location information. Please try again.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		// Validate required fields
 		if (incomeForm.payment_method === "cash" && !incomeForm.account_id) {
 			toast({
@@ -143,7 +153,7 @@ export function AddIncomeDialog({
 						incomeForm.note ||
 						`Additional service for reservation ${selectedReservation.reservation_number}`,
 					income_type_id: incomeForm.income_type_id || null,
-					tenant_id: profile?.tenant_id,
+					tenant_id: profile.tenant_id,
 					location_id: selectedLocation,
 					account_id: null, // No account for pending items
 					payment_method: "pending",
@@ -171,8 +181,8 @@ export function AddIncomeDialog({
 						incomeForm.amount,
 						incomeForm.currency,
 						accountCurrency,
-						profile?.tenant_id!,
-						selectedLocation!,
+						profile.tenant_id,
+						selectedLocation,
 					);
 				}
 
@@ -189,51 +199,51 @@ export function AddIncomeDialog({
 					notes:
 						incomeForm.note ||
 						`Payment for reservation ${selectedReservation.reservation_number}`,
-					tenant_id: profile?.tenant_id,
-					created_by: profile?.id,
+					tenant_id: profile.tenant_id,
+					created_by: profile.id,
 				})
 				.select()
 				.single();
 
 			if (paymentError) throw paymentError;
 
-			// TODO: Enable after Phase 3 SQL execution
 			// Log currency conversion if currencies differ
-			// if (
-			// 	paymentData &&
-			// 	incomeForm.currency !== accountCurrency &&
-			// 	profile?.tenant_id
-			// ) {
-			// 	const { error: conversionLogError } = await supabase
-			// 		.from("currency_conversion_log")
-			// 		.insert({
-			// 			transaction_type: "payment",
-			// 			transaction_id: paymentData.id,
-			// 			from_currency: incomeForm.currency,
-			// 			to_currency: accountCurrency,
-			// 			from_amount: incomeForm.amount,
-			// 			to_amount: convertedAmount,
-			// 			exchange_rate: convertedAmount / incomeForm.amount,
-			// 			rate_source: "system",
-			// 			tenant_id: profile.tenant_id,
-			// 			created_by: profile.id,
-			// 			notes: `Payment for reservation ${selectedReservation.reservation_number}`,
-			// 		});
+			if (
+				paymentData &&
+				incomeForm.currency !== accountCurrency
+			) {
+				const { error: conversionLogError } = await supabase
+					.from("currency_conversion_log")
+					.insert({
+						transaction_type: "payment",
+						transaction_id: paymentData.id,
+						from_currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
+						to_currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+						from_amount: incomeForm.amount,
+						to_amount: convertedAmount,
+						exchange_rate: convertedAmount / incomeForm.amount,
+						rate_source: "system",
+						tenant_id: profile.tenant_id,
+						created_by: profile.id,
+						notes: `Payment for reservation ${selectedReservation.reservation_number}`,
+					});
 
-			// 	if (conversionLogError) {
-			// 		console.error(
-			// 			"Failed to log currency conversion:",
-			// 			conversionLogError,
-			// 		);
-			// 		// Non-critical error, don't block transaction
-			// 	}
-			// }
+				if (conversionLogError) {
+					console.error(
+						"Failed to log currency conversion:",
+						conversionLogError,
+					);
+					// Non-critical error, don't block transaction
+				}
+			}
 
 			toast({
 				title: "Success",
 				description: "Payment recorded successfully",
 			});
-		}			onSuccess();
+		}
+
+		onSuccess();
 			handleClose();
 		} catch (error) {
 			console.error("Error recording income:", error);
@@ -265,14 +275,30 @@ export function AddIncomeDialog({
 	const handleCurrencyChange = async (newCurrency: string) => {
 		if (incomeForm.currency === newCurrency) return;
 
+		// Validate required context before proceeding
+		if (!profile?.tenant_id || !selectedLocation) {
+			console.error("Missing tenant_id or location_id for currency conversion");
+			// Just change currency without conversion if context is missing
+			setIncomeForm((prev) => ({
+				...prev,
+				currency: newCurrency,
+			}));
+			toast({
+				title: "Warning",
+				description: "Could not convert amount. Please verify the value.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		try {
 			// Convert the current amount from the old currency to the new currency
 			const convertedAmount = await convertCurrency(
 				incomeForm.amount,
 				incomeForm.currency,
 				newCurrency,
-				profile?.tenant_id!,
-				selectedLocation!,
+				profile.tenant_id,
+				selectedLocation,
 			);
 
 			// Also convert the reservation total amount for display
@@ -280,8 +306,8 @@ export function AddIncomeDialog({
 				baseAmount,
 				baseCurrency,
 				newCurrency,
-				profile?.tenant_id!,
-				selectedLocation!,
+				profile.tenant_id,
+				selectedLocation,
 			);
 
 			setIncomeForm((prev) => ({

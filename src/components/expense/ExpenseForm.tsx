@@ -16,10 +16,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/useProfile";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { getCurrencySymbol } from "@/utils/currency";
+import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 
 type Account = Tables<"accounts">;
 type ExpenseType = Tables<"expense_types">;
@@ -37,6 +38,7 @@ export function ExpenseForm({
 }: ExpenseFormProps) {
 	const { t } = useTranslation();
 	const { toast } = useToast();
+	const { profile } = useProfile();
 	const { selectedLocation } = useLocationContext();
 	const { tenant } = useTenant();
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,43 +131,42 @@ export function ExpenseForm({
 
 			if (error) throw error;
 
-			// TODO: Enable after Phase 3 SQL execution
 			// Log currency conversion if expense involved currency conversion
-			// const selectedAccount = accounts.find((acc) => acc.id === formData.accountId);
-			// if (
-			// 	expenseData &&
-			// 	selectedAccount &&
-			// 	formData.currency !== selectedAccount.currency &&
-			// 	tenant?.id
-			// ) {
-			// 	const convertedAmount = await convertCurrency(
-			// 		parseFloat(formData.amount),
-			// 		formData.currency,
-			// 		selectedAccount.currency,
-			// 		tenant.id,
-			// 		selectedLocation,
-			// 	);
+			const selectedAccount = accounts.find((acc) => acc.id === formData.accountId);
+			if (
+				expenseData &&
+				selectedAccount &&
+				formData.currency !== selectedAccount.currency &&
+				tenant?.id
+			) {
+				const convertedAmount = await convertCurrency(
+					parseFloat(formData.amount),
+					formData.currency,
+					selectedAccount.currency,
+					tenant.id,
+					selectedLocation!,
+				);
 
-			// 	const { error: conversionLogError } = await supabase
-			// 		.from("currency_conversion_log")
-			// 		.insert({
-			// 			transaction_type: "expense",
-			// 			transaction_id: expenseData.id,
-			// 			from_currency: formData.currency,
-			// 			to_currency: selectedAccount.currency,
-			// 			from_amount: parseFloat(formData.amount),
-			// 			to_amount: convertedAmount,
-			// 			exchange_rate: convertedAmount / parseFloat(formData.amount),
-			// 			rate_source: "system",
-			// 			tenant_id: tenant.id,
-			// 			created_by: profile?.id,
-			// 			notes: `${formData.mainCategory} - ${formData.subCategory}`,
-			// 		});
+				const { error: conversionLogError } = await supabase
+					.from("currency_conversion_log")
+					.insert({
+						transaction_type: "expense",
+						transaction_id: expenseData.id,
+						from_currency: formData.currency,
+						to_currency: selectedAccount.currency,
+						from_amount: parseFloat(formData.amount),
+						to_amount: convertedAmount,
+						exchange_rate: convertedAmount / parseFloat(formData.amount),
+						rate_source: "system",
+						tenant_id: tenant.id,
+						created_by: profile?.id,
+						notes: `${formData.mainCategory} - ${formData.subCategory}`,
+					});
 
-			// 	if (conversionLogError) {
-			// 		console.error("Failed to log currency conversion:", conversionLogError);
-			// 	}
-			// }
+				if (conversionLogError) {
+					console.error("Failed to log currency conversion:", conversionLogError);
+				}
+			}
 
 			// Fetch updated account balance (automatically updated by database trigger)
 			const { data: updatedAccount } = await supabase

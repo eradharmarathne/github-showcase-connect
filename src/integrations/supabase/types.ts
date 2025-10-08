@@ -554,6 +554,72 @@ export type Database = {
           },
         ]
       }
+      currency_conversion_log: {
+        Row: {
+          conversion_date: string
+          created_at: string
+          created_by: string | null
+          exchange_rate: number
+          from_amount: number
+          from_currency: Database["public"]["Enums"]["currency_type"]
+          id: string
+          notes: string | null
+          rate_source: string | null
+          tenant_id: string
+          to_amount: number
+          to_currency: Database["public"]["Enums"]["currency_type"]
+          transaction_id: string
+          transaction_type: string
+        }
+        Insert: {
+          conversion_date?: string
+          created_at?: string
+          created_by?: string | null
+          exchange_rate: number
+          from_amount: number
+          from_currency: Database["public"]["Enums"]["currency_type"]
+          id?: string
+          notes?: string | null
+          rate_source?: string | null
+          tenant_id: string
+          to_amount: number
+          to_currency: Database["public"]["Enums"]["currency_type"]
+          transaction_id: string
+          transaction_type: string
+        }
+        Update: {
+          conversion_date?: string
+          created_at?: string
+          created_by?: string | null
+          exchange_rate?: number
+          from_amount?: number
+          from_currency?: Database["public"]["Enums"]["currency_type"]
+          id?: string
+          notes?: string | null
+          rate_source?: string | null
+          tenant_id?: string
+          to_amount?: number
+          to_currency?: Database["public"]["Enums"]["currency_type"]
+          transaction_id?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "currency_conversion_log_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "currency_conversion_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       currency_rates: {
         Row: {
           created_at: string
@@ -794,6 +860,69 @@ export type Database = {
           },
           {
             foreignKeyName: "external_bookings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_audit_log: {
+        Row: {
+          change_amount: number | null
+          changed_at: string
+          changed_by: string | null
+          entity_id: string
+          entity_type: string
+          field_name: string
+          id: string
+          new_value: number
+          notes: string | null
+          old_value: number | null
+          tenant_id: string
+          transaction_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          change_amount?: number | null
+          changed_at?: string
+          changed_by?: string | null
+          entity_id: string
+          entity_type: string
+          field_name: string
+          id?: string
+          new_value: number
+          notes?: string | null
+          old_value?: number | null
+          tenant_id: string
+          transaction_id?: string | null
+          transaction_type: string
+        }
+        Update: {
+          change_amount?: number | null
+          changed_at?: string
+          changed_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          field_name?: string
+          id?: string
+          new_value?: number
+          notes?: string | null
+          old_value?: number | null
+          tenant_id?: string
+          transaction_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_audit_log_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_audit_log_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2119,6 +2248,27 @@ export type Database = {
         }
         Relationships: []
       }
+      unified_transaction_history: {
+        Row: {
+          account_id: string | null
+          account_name: string | null
+          amount: number | null
+          created_by: string | null
+          currency: Database["public"]["Enums"]["currency_type"] | null
+          description: string | null
+          entry_type: string | null
+          location_id: string | null
+          payment_method: string | null
+          reference_number: string | null
+          related_reservation_id: string | null
+          related_reservation_number: string | null
+          tenant_id: string | null
+          transaction_date: string | null
+          transaction_id: string | null
+          transaction_type: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_invitation: {
@@ -2246,6 +2396,22 @@ export type Database = {
       is_tenant_admin: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      log_currency_conversion: {
+        Args: {
+          p_created_by?: string
+          p_exchange_rate: number
+          p_from_amount: number
+          p_from_currency: Database["public"]["Enums"]["currency_type"]
+          p_notes?: string
+          p_rate_source: string
+          p_tenant_id: string
+          p_to_amount: number
+          p_to_currency: Database["public"]["Enums"]["currency_type"]
+          p_transaction_id: string
+          p_transaction_type: string
+        }
+        Returns: string
       }
       update_account_balance: {
         Args: { account_id_param: string }
