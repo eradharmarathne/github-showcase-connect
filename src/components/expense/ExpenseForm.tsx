@@ -126,52 +126,41 @@ export function ExpenseForm({
 			if (error) throw error;
 
 			// Fetch updated account balance (automatically updated by database trigger)
-			const selectedAccount = accounts.find(
-				(acc) => acc.id === formData.accountId,
+			const { data: updatedAccount } = await supabase
+				.from("accounts")
+				.select("current_balance, currency, name")
+				.eq("id", formData.accountId)
+				.single();
+
+			const currentBalance = updatedAccount?.current_balance || 0;
+			const currencySymbol = getCurrencySymbol(
+				updatedAccount?.currency || formData.currency,
 			);
-			if (selectedAccount) {
-				// Refresh account to get the updated balance
-				const { data: updatedAccount } = await supabase
-					.from("accounts")
-					.select("current_balance, currency, name")
-					.eq("id", formData.accountId)
-					.single();
 
-				const currentBalance = updatedAccount?.current_balance || 0;
-				const currencySymbol = getCurrencySymbol(
-					updatedAccount?.currency || selectedAccount.currency,
-				);
-
-				// Send SMS notification for expense
-				try {
-					await supabase.functions.invoke("send-sms-notification", {
-						body: {
-							type: "expense",
-							amount: parseFloat(formData.amount),
-							currency: formData.currency,
-							category: `${formData.mainCategory} - ${formData.subCategory}`,
-							account: updatedAccount?.name || selectedAccount.name,
-							locationId: selectedLocation,
-							date: format(new Date(formData.date), "MMM dd, yyyy"),
-							note: formData.note,
-							accountBalance: currentBalance,
-						},
-					});
-				} catch (smsError) {
-					console.error("SMS notification failed:", smsError);
-				}
-
-				toast({
-					title: t("expense.form.messages.success"),
-					description: `${t("expense.form.messages.successDetails")}
-${updatedAccount?.name || selectedAccount.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
+			// Send SMS notification for expense
+			try {
+				await supabase.functions.invoke("send-sms-notification", {
+					body: {
+						type: "expense",
+						amount: parseFloat(formData.amount),
+						currency: formData.currency,
+						category: `${formData.mainCategory} - ${formData.subCategory}`,
+						account: updatedAccount?.name,
+						locationId: selectedLocation,
+						date: format(new Date(formData.date), "MMM dd, yyyy"),
+						note: formData.note,
+						accountBalance: currentBalance,
+					},
 				});
-			} else {
-				toast({
-					title: t("expense.form.messages.success"),
-					description: t("expense.form.messages.successGeneral"),
-				});
+			} catch (smsError) {
+				console.error("SMS notification failed:", smsError);
 			}
+
+			toast({
+				title: t("expense.form.messages.success"),
+				description: `${t("expense.form.messages.successDetails")}
+${updatedAccount?.name} - ${currencySymbol}${currentBalance.toLocaleString()}`,
+			});
 
 			// Reset form
 			setFormData({

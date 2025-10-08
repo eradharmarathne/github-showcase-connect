@@ -167,8 +167,13 @@ export function AddIncomeDialog({
 				// Convert amount to account currency if needed
 				let convertedAmount = incomeForm.amount;
 				if (incomeForm.currency !== accountCurrency) {
-					// TODO: Implement currency conversion
-					convertedAmount = incomeForm.amount; // For now, use same amount
+					convertedAmount = await convertCurrency(
+						incomeForm.amount,
+						incomeForm.currency,
+						accountCurrency,
+						profile?.tenant_id!,
+						selectedLocation!,
+					);
 				}
 
 				const { error: paymentError } = await supabase.from("payments").insert({
@@ -183,7 +188,7 @@ export function AddIncomeDialog({
 						incomeForm.note ||
 						`Payment for reservation ${selectedReservation.reservation_number}`,
 					tenant_id: profile?.tenant_id,
-					created_by: profile?.id || null,
+					created_by: profile?.id,
 				});
 
 				if (paymentError) throw paymentError;
