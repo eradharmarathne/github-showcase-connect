@@ -1,6 +1,47 @@
 # Copilot Instructions
 
-This is a multi-tenant hospitality ERP system built with React, TypeScript, Vite, and Supabase. The app manages hotel reservations, income/expenses, reports, and booking channels integration across multiple locations.
+CheckingCheckout is a multi-tenant SaaS hospitality ERP system for hotels and guesthouses. Built with React 18, TypeScript, Vite, Supabase (PostgreSQL), and TailwindCSS.
+
+## Development Commands
+
+### Core Development
+```bash
+bun dev              # Start development server (port 8080)
+bun build            # Production build
+bun build:dev        # Development build with source maps
+bun preview          # Preview production build
+```
+
+### Code Quality
+```bash
+bun lint             # Lint with Biome (auto-fix)
+bun format           # Format with Biome
+bun check            # Run all Biome checks
+```
+
+**Note:** This project uses Biome, not ESLint/Prettier. Biome config enforces tab indentation and double quotes.
+
+### Supabase Operations
+```bash
+supabase start                                    # Start local Supabase instance
+supabase stop                                     # Stop local instance
+supabase db push                                  # Push schema changes
+supabase functions deploy                         # Deploy all Edge Functions
+supabase functions deploy <function-name>         # Deploy specific function
+supabase gen types typescript --local             # Generate TypeScript types from schema
+```
+
+**CRITICAL:** Always use Rube Supabase MCP for database schema changes, migrations, Edge Function deployment, and Supabase configuration. Never make direct changes without using Rube MCP workflow:
+1. `RUBE_SEARCH_TOOLS` to find appropriate tools
+2. `RUBE_CREATE_PLAN` to plan changes
+3. `RUBE_MULTI_EXECUTE_TOOL` or `RUBE_REMOTE_WORKBENCH` to execute
+
+### Type Generation Workflow
+After any schema changes:
+```bash
+# Generate types and update src/integrations/supabase/types.ts
+supabase gen types typescript --local > src/integrations/supabase/types.ts
+```
 
 ## Core Architecture
 
@@ -11,7 +52,15 @@ This is a multi-tenant hospitality ERP system built with React, TypeScript, Vite
 - **Multi-tenancy**: Complete tenant isolation with `tenant_id` foreign keys
 - **Code Quality**: Biome for linting and formatting (replaces ESLint/Prettier)
 
-## Database Schema Overview
+## Multi-Tenant Architecture Overview
+
+### Complete Tenant Isolation
+**Hierarchy:** `Tenants → Locations → Rooms/Reservations/Income/Expenses`
+
+- Every table includes `tenant_id` for data separation at the database level
+- Row Level Security (RLS) policies enforce tenant boundaries
+- Context providers manage tenant/location state globally
+- All queries MUST filter by `tenant_id` (and `location_id` where applicable)
 
 ### Core Entity Relationships
 - **Tenants** → **Locations** → **Rooms** → **Reservations**
@@ -19,30 +68,85 @@ This is a multi-tenant hospitality ERP system built with React, TypeScript, Vite
 - **Income/Expenses** → **Accounts** (financial tracking)
 - **External_bookings** + **Beds24_property_mappings** (channel integration)
 
-### Multi-Tenant Architecture
-- `tenants` table: Central tenant management with hotel details, trial periods, subscription status
-- `profiles` table: User management with `tenant_id` association and role-based access
-- `user_permissions` table: Granular boolean permissions per user/location/tenant
-- `locations` table: Property/location management within tenants
-- All transactional tables include `tenant_id` for data isolation
+### Auth & State Management Flow
 
-### Permission System
-Granular boolean flags in `user_permissions` table:
-- `access_dashboard`, `access_income`, `access_expenses`, `access_reports`
-- `access_calendar`, `access_bookings`, `access_rooms`, `access_master_files`
-- `access_accounts`, `access_users`, `access_settings`, `access_booking_channels`
-- `is_tenant_admin` flag for elevated permissions
-- `tenant_role` enum: `tenant_admin`, `tenant_billing`, `tenant_manager`, `tenant_staff`
+1. **AuthContext** (`src/context/AuthContext.tsx`)
+   - Manages Supabase auth session, user, profile, tenant, subscription
+   - Provides: `user`, `profile`, `tenant`, `subscription`, `isOwner`, `hasActiveTrial`, `hasActiveSubscription`
+   - Auto-creates profile on sign-in
+   - Fetches tenant and subscription data when profile has `tenant_id`
+
+2. **LocationContext** (`src/context/LocationContext.tsx`)
+   - Manages selected location within current tenant
+   - Auto-selects first available location
+   - Components must use `selectedLocation` to filter queries
+   - Provides: `selectedLocation`, `setSelectedLocation`, `locations`, `getSelectedLocationData()`
+
+3. **Permission System** (`src/hooks/usePermissions.tsx`)
+   - Granular boolean permissions stored in `user_permissions` table
+   - **Tenant Owner Bypass:** Users where `profile.id === tenant.owner_profile_id` bypass ALL permission checks
+   - Permissions: `access_dashboard`, `access_income`, `access_expenses`, `access_reports`, `access_calendar`, `access_bookings`, `access_rooms`, `access_master_files`, `access_accounts`, `access_users`, `access_settings`, `access_booking_channels`
+   - Use `hasAnyPermission(['access_feature'])` or `hasPermission('access_feature')`
 
 ### Routing Patterns
-All protected routes follow this structure:
+**ALL protected routes follow this pattern:**
 ```tsx
 <Route path="/page" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-  <Route index element={<PermissionRoute permission={["access_feature"]}>
-    <Component />
-  </PermissionRoute>} />
+  <Route index element={
+    <PermissionRoute permission={["access_feature"]}>
+      <Component />
+    </PermissionRoute>
+  } />
 </Route>
 ```
+
+**Components:**
+- `ProtectedRoute`: Checks authentication, redirects to `/` if not logged in
+- `PermissionRoute`: Checks permissions, shows access denied if insufficient
+- `SmartRedirect`: Routes users to first accessible page based on permissions
+- `Layout`: Contains `AppSidebar` with navigation, location switcher, user menu
+
+**CRITICAL:** Always wrap routes with BOTH `ProtectedRoute` AND `PermissionRoute` (except public routes like `/auth`, `/onboarding`, `/billing`).
+
+### Data Fetching Pattern
+
+Use TanStack Query with Supabase, always filtering by tenant/location:
+```tsx
+const { data } = useQuery({
+  queryKey: ['reservations', locationId, tenant?.id],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from('reservations')
+      .select(`
+        *,
+        rooms(room_number, room_type),
+        locations(name),
+        guides(name),
+        agents(name)
+      `)
+      .eq('tenant_id', tenant.id)           // REQUIRED: tenant filter
+      .eq('location_id', locationId);       // REQUIRED: location filter
+
+    if (error) throw error;
+    return data;
+  }
+});
+```
+
+**Always include:**
+- `tenant_id` filter (from `useAuth()`)
+- `location_id` filter (from `useLocationContext()`)
+- Proper error handling
+- Related data via Supabase joins
+
+### Supabase Client Singleton
+
+`src/integrations/supabase/client.ts` uses singleton pattern with HMR support:
+- Single client instance persists across component updates
+- Custom storage key: `cco-supabase-auth`
+- PKCE flow for enhanced security
+- Auto-refresh tokens enabled
+- `createAdminClient()` for Edge Functions only (never in frontend)
 
 ### Pages Structure
 Current pages in `/src/pages/`:
@@ -68,36 +172,31 @@ Current pages in `/src/pages/`:
 
 ## Supabase Integration
 
-### Database Schema (30 tables)
-**Core Business Tables:**
-- `reservations`: Complete booking lifecycle with guest details, payments, commissions
-- `rooms`: Property inventory with pricing, amenities, availability 
-- `income`/`expenses`: Financial transactions linked to accounts and locations
-- `external_bookings`: Channel manager integration with raw booking data
-- `booking_payments`: Payment tracking with multiple methods
+### Database Schema Essentials
 
-**Multi-Tenancy Tables:**
-- `tenants`: Hotel/company management with subscription and trial tracking
-- `profiles`: User accounts with role-based access (`admin`, `manager`, `staff`)
-- `user_permissions`: Per-location granular permission matrix
-- `subscriptions`/`plans`: SaaS billing integration with Creem
+**Core Tables:**
+- `tenants` - Organization management, trial tracking, subscription status
+- `profiles` - User accounts linked to tenants via `tenant_id`
+- `user_permissions` - Per-user granular permission matrix
+- `locations` - Properties within a tenant
+- `rooms` - Inventory with pricing
+- `reservations` - Complete booking lifecycle
+- `income` / `expenses` - Financial transactions
+- `accounts` - Account balances (chart of accounts)
+- `external_bookings` - Channel manager integration
+- `beds24_property_mappings` - Property mapping for channel manager
 
-**Integration Tables:**
-- `beds24_property_mappings`: External channel property mapping
-- `booking_sync_urls`: iCal and external calendar sync endpoints
-- `currency_rates`: Multi-currency support for international operations
-
-### Custom Enums & Types
+**Key Enums:**
 - `currency_type`: `LKR`, `USD`, `EUR`, `GBP`
 - `reservation_status`: `tentative`, `confirmed`, `checked_in`, `checked_out`, `cancelled`
 - `booking_source`: `direct`, `airbnb`, `booking_com`, `beds24`, `manual`, etc.
-- `user_role`/`tenant_role`: Hierarchical permission system
+- `tenant_role`: `tenant_admin`, `tenant_billing`, `tenant_manager`, `tenant_staff`
 
-### RPC Functions
-- `get_user_permissions`: Returns user's permission matrix across tenants
-- `generate_reservation_number`: Auto-increment booking references
-- `accept_invitation`: User onboarding workflow
-- `is_email_allowed`: Tenant access control
+**RPC Functions:**
+- `get_user_permissions` - Returns permission matrix for current user
+- `generate_reservation_number` - Auto-increment booking references
+- `accept_invitation` - User onboarding workflow
+- `is_email_allowed` - Tenant access control
 
 ### Edge Functions
 Located in `/supabase/functions/`:
@@ -109,6 +208,7 @@ Located in `/supabase/functions/`:
 - `booking-reminders`: Automated guest communication
 - `sync-ical` / `scheduled-calendar-sync`: External calendar synchronization
 - `send-user-credentials`: User credential management
+- `handle-creem-webhook`: SaaS billing webhooks
 - `clear-bookings`: Booking cleanup operations
 
 ## Development Workflow
@@ -131,9 +231,9 @@ Located in `/supabase/functions/`:
 
 #### Permission Checking
 ```tsx
-const { hasAnyPermission, hasPermission, isAdmin } = usePermissions();
+const { hasAnyPermission, hasPermission, isTenantOwner } = usePermissions();
 if (!hasAnyPermission(["access_income"])) return <AccessDenied />;
-// Admin users bypass all permission checks via tenant owner relationship
+// Tenant owners bypass all permission checks via tenant owner relationship
 ```
 
 #### Data Fetching with Multi-Tenancy
@@ -170,11 +270,53 @@ Components should respect the currently selected location and filter all queries
 - Token-based authentication with automatic renewal
 - Configurable message templates
 
+### Subscription Management
+- SaaS billing via Creem integration (`src/lib/creem.ts`)
+- Trial period tracking: `tenant.trial_ends_at`
+- Subscription status: `subscription.status` (`active` | `trialing`)
+- Access control: Check `hasActiveTrial` or `hasActiveSubscription` from `useAuth()`
+
+### Onboarding Flow
+Users without `tenant_id` or with incomplete tenant onboarding are redirected to `/onboarding`:
+```tsx
+// Check in SmartRedirect component
+if (!profile?.tenant_id || !tenant || !tenant.onboarding_completed) {
+  return <Navigate to="/onboarding" replace />;
+}
+```
+
+## Component Structure
+
+- **Pages**: `/src/pages/` - Route components (28 pages)
+- **Components**: `/src/components/` - Reusable UI components
+- **UI Components**: `/src/components/ui/` - shadcn/ui components
+- **Contexts**: `/src/context/` - Global state providers (Auth, Location, Theme)
+- **Hooks**: `/src/hooks/` - Custom React hooks
+- **Lib**: `/src/lib/` - Utility functions and helpers
+- **Integrations**: `/src/integrations/supabase/` - Supabase client and types
+
+**Domain-Specific Components:**
+- `components/master-files/` - Agents, Commissions, Guides, Locations, Rooms
+- `components/reports/` - Financial reports and analytics
+- `components/reservation/` - Booking management components
+- `components/calendar/` - Calendar and timeline views
+- `components/settings/` - Settings management
+- `components/users/` - User management
+- `components/skeleton/` - Loading skeletons
+
+## Environment Variables
+
+Required in `.env.local`:
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # For Edge Functions only
+```
+
 ## File Conventions
 
 - TypeScript throughout with strict types from Supabase 
-- Generate types using Supabase CLI: `npx supabase gen types typescript --project-id "
-" --schema public > src/integrations/supabase/types.ts`
+- Generate types using Supabase CLI: `supabase gen types typescript --local > src/integrations/supabase/types.ts`
 - PascalCase for React components (e.g., `UserProfile.tsx`)
 - camelCase for functions and variables (e.g., `fetchUserData`, `userName`)
 - kebab-case for directories and non-component files (e.g., `user-profile/`, `utils.ts`)
