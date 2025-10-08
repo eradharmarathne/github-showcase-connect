@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { FinancialChart } from "@/components/dashboard/FinancialChart";
 import { FinancialReportsSkeleton } from "@/components/skeleton/FinancialReportsSkeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -377,9 +376,6 @@ export default function FinancialReports() {
 					</CardContent>
 				</Card>
 			</div>
-
-			{/* Interactive Financial Chart */}
-			<FinancialChart />
 
 			{/* Report Tabs */}
 			<Tabs defaultValue="summary" className="w-full">

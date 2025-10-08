@@ -6,6 +6,6 @@ export { UpcomingBookingsSkeleton } from "../skeleton/UpcomingBookingsSkeleton";
 export { AccountBalances } from "./AccountBalances";
 export { BookingSourceChart } from "./BookingSourceChart";
 export { DashboardHeader } from "./DashboardHeader";
-export { IncomeExpenseChart } from "./IncomeExpenseChart";
+export { FinancialChart } from "./FinancialChart";
 export { SummaryCards } from "./SummaryCards";
 export { UpcomingBookings } from "./UpcomingBookings";

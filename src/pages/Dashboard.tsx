@@ -3,7 +3,7 @@ import {
 	AccountBalances,
 	BookingSourceChart,
 	DashboardHeader,
-	IncomeExpenseChart,
+	FinancialChart,
 	UpcomingBookings,
 } from "@/components/dashboard";
 import { useLocationContext } from "@/context/LocationContext";
@@ -33,11 +33,7 @@ export default function Dashboard() {
 			{/* Income & Expense Chart with Booking Sources */}
 			<div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
 				<div className="xl:col-span-3">
-					<IncomeExpenseChart
-						selectedLocation={selectedLocation}
-						selectedMonth={selectedMonth}
-						locations={locations}
-					/>
+					<FinancialChart />
 				</div>
 				<div className="xl:col-span-1">
 					<BookingSourceChart
