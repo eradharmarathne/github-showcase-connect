@@ -80,7 +80,7 @@ export function ReservationsMobileCards({
 		};
 
 		convertAmounts();
-	}, [reservations, selectedCurrency, tenant?.id, selectedLocation]);	// Utility functions
+	}, [reservations, selectedCurrency, tenant?.id, selectedLocation]); // Utility functions
 	const getStatusColor = (status: string): string => {
 		const colors: Record<string, string> = {
 			confirmed: "bg-green-100 text-green-800",

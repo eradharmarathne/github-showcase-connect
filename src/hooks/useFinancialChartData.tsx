@@ -1,0 +1,220 @@
+import { useQuery } from "@tanstack/react-query";
+import {
+	eachDayOfInterval,
+	endOfMonth,
+	format,
+	parseISO,
+	startOfMonth,
+} from "date-fns";
+import { useAuth } from "@/context/AuthContext";
+import { useLocationContext } from "@/context/LocationContext";
+import { supabase } from "@/integrations/supabase/client";
+import { convertCurrency } from "@/utils/currency";
+
+export interface ChartDataPoint {
+	date: string;
+	income: number;
+	expenses: number;
+}
+
+export interface ChartTotals {
+	income: number;
+	expenses: number;
+}
+
+export interface CurrencyOption {
+	value: string;
+	label: string;
+	symbol: string;
+}
+
+export interface UseFinancialChartDataProps {
+	currency: string;
+	period: "daily" | "monthly";
+	startDate?: Date;
+	endDate?: Date;
+}
+
+export function useFinancialChartData({
+	currency,
+	period = "daily",
+	startDate = startOfMonth(new Date()),
+	endDate = endOfMonth(new Date()),
+}: UseFinancialChartDataProps) {
+	const { tenant } = useAuth();
+	const { selectedLocation } = useLocationContext();
+
+	return useQuery({
+		queryKey: [
+			"financial-chart-data",
+			tenant?.id,
+			selectedLocation,
+			currency,
+			period,
+			startDate,
+			endDate,
+		],
+		queryFn: async (): Promise<{
+			data: ChartDataPoint[];
+			totals: ChartTotals;
+		}> => {
+			if (!tenant?.id || !selectedLocation) {
+				throw new Error("Tenant or location not available");
+			}
+
+			// Generate date range
+			const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
+
+			// Fetch income data
+			const { data: incomeData, error: incomeError } = await supabase
+				.from("income")
+				.select("amount, currency, created_at")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.gte("created_at", startDate.toISOString())
+				.lte("created_at", endDate.toISOString())
+				.order("created_at");
+
+			if (incomeError) throw incomeError;
+
+			// Fetch expense data
+			const { data: expenseData, error: expenseError } = await supabase
+				.from("expenses")
+				.select("amount, currency, created_at")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.gte("created_at", startDate.toISOString())
+				.lte("created_at", endDate.toISOString())
+				.order("created_at");
+
+			if (expenseError) throw expenseError;
+
+			// Convert currencies and group by date
+			const chartData: ChartDataPoint[] = [];
+			let totalIncome = 0;
+			let totalExpenses = 0;
+
+			for (const date of dateRange) {
+				const dateStr = format(date, "yyyy-MM-dd");
+
+				// Calculate income for this date
+				let dayIncome = 0;
+				const incomeForDate =
+					incomeData?.filter(
+						(item) =>
+							format(parseISO(item.created_at), "yyyy-MM-dd") === dateStr,
+					) || [];
+
+				for (const item of incomeForDate) {
+					const converted = await convertCurrency(
+						item.amount,
+						item.currency,
+						currency,
+						tenant.id,
+						selectedLocation,
+					);
+					dayIncome += converted;
+				}
+
+				// Calculate expenses for this date
+				let dayExpenses = 0;
+				const expensesForDate =
+					expenseData?.filter(
+						(item) =>
+							format(parseISO(item.created_at), "yyyy-MM-dd") === dateStr,
+					) || [];
+
+				for (const item of expensesForDate) {
+					const converted = await convertCurrency(
+						item.amount,
+						item.currency,
+						currency,
+						tenant.id,
+						selectedLocation,
+					);
+					dayExpenses += converted;
+				}
+
+				chartData.push({
+					date: dateStr,
+					income: dayIncome,
+					expenses: dayExpenses,
+				});
+
+				totalIncome += dayIncome;
+				totalExpenses += dayExpenses;
+			}
+
+			return {
+				data: chartData,
+				totals: {
+					income: totalIncome,
+					expenses: totalExpenses,
+				},
+			};
+		},
+		enabled: !!tenant?.id && !!selectedLocation,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+	});
+}
+
+// Hook to fetch available currencies from database
+export function useAvailableCurrencies() {
+	const { tenant } = useAuth();
+	const { selectedLocation } = useLocationContext();
+
+	return useQuery({
+		queryKey: ["available-currencies", tenant?.id, selectedLocation],
+		queryFn: async (): Promise<CurrencyOption[]> => {
+			if (!tenant?.id || !selectedLocation) {
+				throw new Error("Tenant or location not available");
+			}
+
+			// Fetch distinct currencies from both income and expenses tables
+			const { data: incomeData, error: incomeError } = await supabase
+				.from("income")
+				.select("currency")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation);
+
+			if (incomeError) throw incomeError;
+
+			const { data: expenseData, error: expenseError } = await supabase
+				.from("expenses")
+				.select("currency")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation);
+
+			if (expenseError) throw expenseError;
+
+			// Get unique currencies
+			const allCurrencies = [
+				...new Set([
+					...(incomeData?.map((item) => item.currency) || []),
+					...(expenseData?.map((item) => item.currency) || []),
+				]),
+			];
+
+			// Map to currency options with symbols
+			const currencyMap: Record<string, CurrencyOption> = {
+				LKR: { value: "LKR", label: "LKR - Sri Lankan Rupee", symbol: "Rs" },
+				USD: { value: "USD", label: "USD - US Dollar", symbol: "$" },
+				EUR: { value: "EUR", label: "EUR - Euro", symbol: "€" },
+				GBP: { value: "GBP", label: "GBP - British Pound", symbol: "£" },
+			};
+
+			const availableCurrencies = allCurrencies
+				.map((currency) => currencyMap[currency])
+				.filter(Boolean);
+
+			// Always include USD as fallback if no currencies found
+			if (availableCurrencies.length === 0) {
+				return [currencyMap["USD"]];
+			}
+
+			return availableCurrencies;
+		},
+		enabled: !!tenant?.id && !!selectedLocation,
+		staleTime: 10 * 60 * 1000, // 10 minutes
+	});
+}

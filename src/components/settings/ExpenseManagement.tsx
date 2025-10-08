@@ -32,7 +32,7 @@ export function ExpenseManagement() {
 
 	const fetchExpenseTypes = useCallback(async () => {
 		if (!tenant?.id) return;
-		
+
 		const { data, error } = await supabase
 			.from("expense_types")
 			.select("*")
