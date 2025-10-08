@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { useAuth } from "@/context/AuthContext";
 
 type Account = Tables<"accounts">;
 
@@ -36,6 +37,7 @@ export function AccountTransferForm({
 	onTransferCompleted,
 }: AccountTransferFormProps) {
 	const { toast } = useToast();
+	const { tenant } = useAuth();
 	const [isTransferring, setIsTransferring] = useState(false);
 
 	// Calculate current balance for account
@@ -129,6 +131,7 @@ export function AccountTransferForm({
 				amount: transferData.amount,
 				conversion_rate: transferData.conversionRate,
 				note: transferData.note,
+				tenant_id: tenant?.id,
 			});
 
 			if (error) throw error;
