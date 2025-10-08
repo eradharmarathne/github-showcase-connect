@@ -47,11 +47,11 @@ export default function Accounts() {
 				.order("created_at", { ascending: false });
 
 			if (accountsError) throw accountsError;
-			
+
 			// Map current_balance to currentBalance for component compatibility
-			return (accounts || []).map(account => ({
+			return (accounts || []).map((account) => ({
 				...account,
-				currentBalance: Number(account.current_balance)
+				currentBalance: Number(account.current_balance),
 			}));
 		},
 		enabled: !!tenant?.id,
@@ -133,7 +133,7 @@ export default function Accounts() {
 					<Button
 						onClick={() => setShowTransferDialog(true)}
 						variant="outline"
-												disabled={accountsWithBalances.length < 2}
+						disabled={accountsWithBalances.length < 2}
 					>
 						{t("accounts.buttons.transferMoney")}
 					</Button>

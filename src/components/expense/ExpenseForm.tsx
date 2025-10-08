@@ -132,7 +132,9 @@ export function ExpenseForm({
 			if (error) throw error;
 
 			// Log currency conversion if expense involved currency conversion
-			const selectedAccount = accounts.find((acc) => acc.id === formData.accountId);
+			const selectedAccount = accounts.find(
+				(acc) => acc.id === formData.accountId,
+			);
 			if (
 				expenseData &&
 				selectedAccount &&
@@ -164,7 +166,10 @@ export function ExpenseForm({
 					});
 
 				if (conversionLogError) {
-					console.error("Failed to log currency conversion:", conversionLogError);
+					console.error(
+						"Failed to log currency conversion:",
+						conversionLogError,
+					);
 				}
 			}
 

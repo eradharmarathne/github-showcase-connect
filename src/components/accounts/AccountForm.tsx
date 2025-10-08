@@ -58,8 +58,10 @@ export function AccountForm({
 			if (editingAccount) {
 				// Update existing account
 				// Calculate adjustment needed for current_balance when initial_balance changes
-				const initialBalanceDifference = formData.initial_balance - editingAccount.initial_balance;
-				const newCurrentBalance = editingAccount.current_balance + initialBalanceDifference;
+				const initialBalanceDifference =
+					formData.initial_balance - editingAccount.initial_balance;
+				const newCurrentBalance =
+					editingAccount.current_balance + initialBalanceDifference;
 
 				const { error } = await supabase
 					.from("accounts")

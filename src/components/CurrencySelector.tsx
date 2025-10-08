@@ -43,7 +43,10 @@ export const CurrencySelector = ({
 			}
 
 			try {
-				const currencyDetails = await getCurrencyDetails(tenant.id, selectedLocation);
+				const currencyDetails = await getCurrencyDetails(
+					tenant.id,
+					selectedLocation,
+				);
 				setCurrencies(currencyDetails);
 			} catch (error) {
 				console.error("Error loading currencies:", error);

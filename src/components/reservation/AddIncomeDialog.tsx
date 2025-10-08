@@ -123,7 +123,8 @@ export function AddIncomeDialog({
 		if (!profile?.tenant_id || !selectedLocation) {
 			toast({
 				title: "Error",
-				description: "Missing tenant or location information. Please try again.",
+				description:
+					"Missing tenant or location information. Please try again.",
 				variant: "destructive",
 			});
 			return;
@@ -186,64 +187,65 @@ export function AddIncomeDialog({
 					);
 				}
 
-			const { data: paymentData, error: paymentError } = await supabase
-				.from("payments")
-				.insert({
-					reservation_id: selectedReservation.id,
-					amount: convertedAmount,
-					currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
-					payment_method: incomeForm.payment_method,
-					payment_type: "reservation",
-					payment_number: `PAY-${Date.now()}`,
-					account_id: incomeForm.account_id,
-					notes:
-						incomeForm.note ||
-						`Payment for reservation ${selectedReservation.reservation_number}`,
-					tenant_id: profile.tenant_id,
-					created_by: profile.id,
-				})
-				.select()
-				.single();
-
-			if (paymentError) throw paymentError;
-
-			// Log currency conversion if currencies differ
-			if (
-				paymentData &&
-				incomeForm.currency !== accountCurrency
-			) {
-				const { error: conversionLogError } = await supabase
-					.from("currency_conversion_log")
+				const { data: paymentData, error: paymentError } = await supabase
+					.from("payments")
 					.insert({
-						transaction_type: "payment",
-						transaction_id: paymentData.id,
-						from_currency: incomeForm.currency as "LKR" | "USD" | "EUR" | "GBP",
-						to_currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
-						from_amount: incomeForm.amount,
-						to_amount: convertedAmount,
-						exchange_rate: convertedAmount / incomeForm.amount,
-						rate_source: "system",
+						reservation_id: selectedReservation.id,
+						amount: convertedAmount,
+						currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+						payment_method: incomeForm.payment_method,
+						payment_type: "reservation",
+						payment_number: `PAY-${Date.now()}`,
+						account_id: incomeForm.account_id,
+						notes:
+							incomeForm.note ||
+							`Payment for reservation ${selectedReservation.reservation_number}`,
 						tenant_id: profile.tenant_id,
 						created_by: profile.id,
-						notes: `Payment for reservation ${selectedReservation.reservation_number}`,
-					});
+					})
+					.select()
+					.single();
 
-				if (conversionLogError) {
-					console.error(
-						"Failed to log currency conversion:",
-						conversionLogError,
-					);
-					// Non-critical error, don't block transaction
+				if (paymentError) throw paymentError;
+
+				// Log currency conversion if currencies differ
+				if (paymentData && incomeForm.currency !== accountCurrency) {
+					const { error: conversionLogError } = await supabase
+						.from("currency_conversion_log")
+						.insert({
+							transaction_type: "payment",
+							transaction_id: paymentData.id,
+							from_currency: incomeForm.currency as
+								| "LKR"
+								| "USD"
+								| "EUR"
+								| "GBP",
+							to_currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+							from_amount: incomeForm.amount,
+							to_amount: convertedAmount,
+							exchange_rate: convertedAmount / incomeForm.amount,
+							rate_source: "system",
+							tenant_id: profile.tenant_id,
+							created_by: profile.id,
+							notes: `Payment for reservation ${selectedReservation.reservation_number}`,
+						});
+
+					if (conversionLogError) {
+						console.error(
+							"Failed to log currency conversion:",
+							conversionLogError,
+						);
+						// Non-critical error, don't block transaction
+					}
 				}
+
+				toast({
+					title: "Success",
+					description: "Payment recorded successfully",
+				});
 			}
 
-			toast({
-				title: "Success",
-				description: "Payment recorded successfully",
-			});
-		}
-
-		onSuccess();
+			onSuccess();
 			handleClose();
 		} catch (error) {
 			console.error("Error recording income:", error);
@@ -428,10 +430,10 @@ export function AddIncomeDialog({
 							id="add-to-bill"
 							checked={incomeForm.payment_method === "pending"}
 							onCheckedChange={(checked) =>
-								setIncomeForm({ 
-									...incomeForm, 
+								setIncomeForm({
+									...incomeForm,
 									payment_method: checked ? "pending" : "cash",
-									account_id: checked ? "" : incomeForm.account_id // Clear account if adding to bill
+									account_id: checked ? "" : incomeForm.account_id, // Clear account if adding to bill
 								})
 							}
 						/>
@@ -440,41 +442,41 @@ export function AddIncomeDialog({
 								Add to Guest Bill
 							</Label>
 							<p className="text-xs text-gray-600">
-								{incomeForm.payment_method === "pending" 
+								{incomeForm.payment_method === "pending"
 									? "This item will be added to the guest's total bill to pay at checkout"
 									: "This will be recorded as an immediate payment"}
 							</p>
 						</div>
 					</div>
 					{incomeForm.payment_method === "cash" && (
-					<div>
-						<Label htmlFor="account_id">
-							{t("income.addDialog.form.accountRequired")}
-						</Label>
-						<Select
-							value={incomeForm.account_id}
-							onValueChange={(value) =>
-								setIncomeForm((prev) => ({ ...prev, account_id: value }))
-							}
-							required
-						>
-							<SelectTrigger>
-								<SelectValue
-									placeholder={t("income.addDialog.form.accountPlaceholder")}
-								/>
-							</SelectTrigger>
-							<SelectContent>
-								{accounts.map((account) => (
-									<SelectItem key={account.id} value={account.id}>
-										{account.name} ({account.currency})
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						<p className="text-sm text-gray-600 mt-1">
-							{t("income.addDialog.form.accountDescription")}
-						</p>
-					</div>
+						<div>
+							<Label htmlFor="account_id">
+								{t("income.addDialog.form.accountRequired")}
+							</Label>
+							<Select
+								value={incomeForm.account_id}
+								onValueChange={(value) =>
+									setIncomeForm((prev) => ({ ...prev, account_id: value }))
+								}
+								required
+							>
+								<SelectTrigger>
+									<SelectValue
+										placeholder={t("income.addDialog.form.accountPlaceholder")}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									{accounts.map((account) => (
+										<SelectItem key={account.id} value={account.id}>
+											{account.name} ({account.currency})
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<p className="text-sm text-gray-600 mt-1">
+								{t("income.addDialog.form.accountDescription")}
+							</p>
+						</div>
 					)}
 					<div className="flex gap-2 justify-end">
 						<Button type="button" variant="outline" onClick={handleClose}>
@@ -482,10 +484,13 @@ export function AddIncomeDialog({
 						</Button>
 						<Button
 							type="submit"
-							disabled={!incomeForm.amount || (incomeForm.payment_method === "cash" && !incomeForm.account_id)}
+							disabled={
+								!incomeForm.amount ||
+								(incomeForm.payment_method === "cash" && !incomeForm.account_id)
+							}
 						>
-							{incomeForm.payment_method === "pending" 
-								? "Add to Bill" 
+							{incomeForm.payment_method === "pending"
+								? "Add to Bill"
 								: t("income.addDialog.buttons.record")}
 						</Button>
 					</div>
