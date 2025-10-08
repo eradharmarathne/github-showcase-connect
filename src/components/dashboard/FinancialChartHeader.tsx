@@ -34,7 +34,7 @@ export function FinancialChartHeader({
 	);
 
 	return (
-		<div className="flex flex-col items-stretch border-b pb-4 mb-4 sm:flex-row">
+		<div className="flex flex-col items-stretch p-4 border-b mb-4 sm:flex-row">
 			<div className="flex flex-1 flex-col justify-center gap-1">
 				<h3 className="text-lg font-semibold">Income vs Expenses</h3>
 				<p className="text-sm text-muted-foreground">

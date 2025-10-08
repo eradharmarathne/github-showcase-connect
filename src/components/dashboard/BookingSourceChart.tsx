@@ -1,6 +1,10 @@
+import { Plus, Calendar, Users, Phone, Mail, MapPin, DollarSign, CreditCard } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { Cell, Pie, PieChart } from "recharts";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	ChartContainer,
@@ -70,9 +74,64 @@ export function BookingSourceChart({
 }: BookingSourceChartProps) {
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const [sourceData, setSourceData] = useState<BookingSourceData[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [totalBookings, setTotalBookings] = useState(0);
+
+	// Keyboard shortcut handlers
+	useEffect(() => {
+		const handleKeyPress = (event: KeyboardEvent) => {
+			if (event.ctrlKey || event.metaKey) {
+				switch (event.key) {
+					case "n":
+						event.preventDefault();
+						navigate("/reservations/new");
+						break;
+					case "c":
+						event.preventDefault();
+						navigate("/calendar");
+						break;
+					case "r":
+						event.preventDefault();
+						navigate("/reservations");
+						break;
+					case "i":
+						event.preventDefault();
+						navigate("/income");
+						break;
+					case "e":
+						event.preventDefault();
+						navigate("/expense");
+						break;
+				}
+			}
+		};
+
+		document.addEventListener("keydown", handleKeyPress);
+		return () => document.removeEventListener("keydown", handleKeyPress);
+	}, [navigate]);
+
+	// Shortcut action handlers
+	const handleQuickAction = (action: string) => {
+		switch (action) {
+			case "new-reservation":
+				navigate("/reservations/new");
+				break;
+			case "calendar":
+				navigate("/calendar");
+				break;
+			case "reservations":
+				navigate("/reservations");
+				break;
+			case "income":
+				navigate("/income");
+				break;
+			case "expense":
+				navigate("/expense");
+				break;
+		}
+	};
 
 	useEffect(() => {
 		const fetchBookingSourceData = async () => {
@@ -187,17 +246,17 @@ export function BookingSourceChart({
 		<Card className="bg-card border">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 				<CardTitle className="text-sm font-medium">
-					{t("dashboard.bookingSources.title")}
+					Booking Sources & Quick Actions
 				</CardTitle>
 				<span className="text-xs text-muted-foreground">
-					{totalBookings} {t("dashboard.bookingSources.totalBookings")}
+					{totalBookings} total bookings
 				</span>
 			</CardHeader>
 			<CardContent>
-				<div className="h-[400px] flex flex-col">
+				<div className="h-[500px] flex flex-col">{/* Increased height for shortcuts */}
 					<ChartContainer
 						config={{}}
-						className="mx-auto aspect-square h-[280px]"
+						className="mx-auto aspect-square h-[220px]"
 					>
 						<PieChart>
 							<Pie
@@ -252,6 +311,67 @@ export function BookingSourceChart({
 									</span>
 								</div>
 							))}
+						</div>
+					</div>
+
+					{/* Quick Action Shortcuts */}
+					<div className="mt-4 pt-4 border-t">
+						<div className="flex flex-col gap-2">
+							<div className="flex items-center justify-between mb-2">
+								<span className="text-xs font-medium text-muted-foreground">
+									Quick Actions
+								</span>
+								<Badge variant="outline" className="text-xs">
+									Ctrl/Cmd + Key
+								</Badge>
+							</div>
+							<div className="grid grid-cols-1 gap-2">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handleQuickAction("new-reservation")}
+									className="justify-start text-xs h-8"
+								>
+									<Plus className="w-3 h-3 mr-2" />
+									New Reservation (N)
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handleQuickAction("calendar")}
+									className="justify-start text-xs h-8"
+								>
+									<Calendar className="w-3 h-3 mr-2" />
+									Calendar (C)
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handleQuickAction("reservations")}
+									className="justify-start text-xs h-8"
+								>
+									<Users className="w-3 h-3 mr-2" />
+									Reservations (R)
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handleQuickAction("income")}
+									className="justify-start text-xs h-8"
+								>
+									<DollarSign className="w-3 h-3 mr-2" />
+									Add Income (I)
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => handleQuickAction("expense")}
+									className="justify-start text-xs h-8"
+								>
+									<CreditCard className="w-3 h-3 mr-2" />
+									Add Expense (E)
+								</Button>
+							</div>
 						</div>
 					</div>
 				</div>

@@ -30,19 +30,6 @@ export default function Dashboard() {
 				onLocationsLoad={setLocations}
 			/>
 
-			{/* Income & Expense Chart with Booking Sources */}
-			<div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-				<div className="xl:col-span-3">
-					<FinancialChart />
-				</div>
-				<div className="xl:col-span-1">
-					<BookingSourceChart
-						selectedLocation={selectedLocation}
-						selectedMonth={selectedMonth}
-					/>
-				</div>
-			</div>
-
 			{/* Account Balances and Upcoming Bookings - Responsive Layout */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
 				{/* Account Balances */}
@@ -57,6 +44,19 @@ export default function Dashboard() {
 						hasCalendarPermission={hasAnyPermission(["access_calendar"])}
 					/>
 				</div>
+			</div>
+
+			{/* Income & Expense Chart */}
+			<div className="w-full">
+				<FinancialChart />
+			</div>
+
+			{/* Booking Source Chart with Shortcuts */}
+			<div className="w-full">
+				<BookingSourceChart
+					selectedLocation={selectedLocation}
+					selectedMonth={selectedMonth}
+				/>
 			</div>
 		</div>
 	);

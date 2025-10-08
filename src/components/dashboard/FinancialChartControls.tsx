@@ -45,7 +45,7 @@ export function FinancialChartControls({
 			{chartTypes.map((chart) => (
 				<div
 					key={chart.key}
-					className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-center even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
+					className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-center sm:border-t-0 sm:px-8 sm:py-6"
 				>
 					<span className="text-muted-foreground text-xs">{chart.label}</span>
 					<span

@@ -53,45 +53,23 @@ export function FinancialChartContainer({
 	}, [data]);
 
 	return (
-		<div className="flex-1 flex items-center justify-center min-h-0">
+		<div className="flex-1 flex items-center mt-8 px-4 border-t pt-4 justify-center min-h-0">
 			<ChartContainer config={chartConfig} className="h-[300px] w-full">
 				<ResponsiveContainer width="100%" height="100%">
-					<BarChart
-						data={transformedData}
-						margin={{
-							left: 12,
-							right: 12,
-							top: 12,
-							bottom: 12,
-						}}
-					>
+					<BarChart data={transformedData}>
 						<CartesianGrid vertical={false} />
 						<XAxis
 							dataKey="date"
 							tickLine={false}
 							axisLine={false}
-							tickMargin={8}
-							minTickGap={32}
+							tickMargin={0}
+							minTickGap={0}
 							tickFormatter={(value) => {
 								const date = new Date(value);
 								return date.toLocaleDateString("en-US", {
 									month: "short",
 									day: "numeric",
 								});
-							}}
-						/>
-						<YAxis
-							tickLine={false}
-							axisLine={false}
-							tickFormatter={(value) => {
-								const absValue = Math.abs(value);
-								if (absValue >= 1000000) {
-									return `${currencySymbol}${(absValue / 1000000).toFixed(1)}M`;
-								}
-								if (absValue >= 1000) {
-									return `${currencySymbol}${(absValue / 1000).toFixed(1)}K`;
-								}
-								return `${currencySymbol}${absValue.toFixed(0)}`;
 							}}
 						/>
 						{/* Zero reference line */}
@@ -138,7 +116,7 @@ export function FinancialChartContainer({
 						<Bar
 							dataKey="expenses"
 							fill={chartConfig.expenses.color}
-							radius={[0, 0, 2, 2]}
+							radius={[2, 2, 0, 0]}
 						/>
 					</BarChart>
 				</ResponsiveContainer>

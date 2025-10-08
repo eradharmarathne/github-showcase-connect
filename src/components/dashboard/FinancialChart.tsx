@@ -79,7 +79,7 @@ export function FinancialChart() {
 
 	return (
 		<Card className="w-full">
-			<CardContent className="p-6">
+			<CardContent className="p-0">
 				<div className="w-full h-full flex flex-col">
 					<FinancialChartHeader
 						selectedCurrency={selectedCurrency}
