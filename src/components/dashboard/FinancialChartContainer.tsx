@@ -64,6 +64,7 @@ export function FinancialChartContainer({
 							axisLine={false}
 							tickMargin={0}
 							minTickGap={0}
+							interval={1}
 							tickFormatter={(value) => {
 								const date = new Date(value);
 								return date.toLocaleDateString("en-US", {

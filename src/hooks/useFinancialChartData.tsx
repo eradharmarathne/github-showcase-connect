@@ -3,7 +3,6 @@ import {
 	eachDayOfInterval,
 	endOfMonth,
 	format,
-	parseISO,
 	startOfMonth,
 } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
@@ -65,29 +64,34 @@ export function useFinancialChartData({
 			// Generate date range
 			const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
 
+			console.log("Chart date range:", format(startDate, "yyyy-MM-dd"), "to", format(endDate, "yyyy-MM-dd"));
+
 			// Fetch income data
 			const { data: incomeData, error: incomeError } = await supabase
 				.from("income")
-				.select("amount, currency, created_at")
+				.select("amount, currency, date")
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
-				.gte("created_at", startDate.toISOString())
-				.lte("created_at", endDate.toISOString())
-				.order("created_at");
+				.gte("date", format(startDate, "yyyy-MM-dd"))
+				.lte("date", format(endDate, "yyyy-MM-dd"))
+				.order("date");
 
 			if (incomeError) throw incomeError;
 
 			// Fetch expense data
 			const { data: expenseData, error: expenseError } = await supabase
 				.from("expenses")
-				.select("amount, currency, created_at")
+				.select("amount, currency, date")
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
-				.gte("created_at", startDate.toISOString())
-				.lte("created_at", endDate.toISOString())
-				.order("created_at");
+				.gte("date", format(startDate, "yyyy-MM-dd"))
+				.lte("date", format(endDate, "yyyy-MM-dd"))
+				.order("date");
 
 			if (expenseError) throw expenseError;
+
+			console.log("Fetched income:", incomeData?.length, "items");
+			console.log("Fetched expenses:", expenseData?.length, "items", expenseData);
 
 			// Convert currencies and group by date
 			const chartData: ChartDataPoint[] = [];
@@ -100,10 +104,7 @@ export function useFinancialChartData({
 				// Calculate income for this date
 				let dayIncome = 0;
 				const incomeForDate =
-					incomeData?.filter(
-						(item) =>
-							format(parseISO(item.created_at), "yyyy-MM-dd") === dateStr,
-					) || [];
+					incomeData?.filter((item) => item.date === dateStr) || [];
 
 				for (const item of incomeForDate) {
 					const converted = await convertCurrency(
@@ -119,10 +120,11 @@ export function useFinancialChartData({
 				// Calculate expenses for this date
 				let dayExpenses = 0;
 				const expensesForDate =
-					expenseData?.filter(
-						(item) =>
-							format(parseISO(item.created_at), "yyyy-MM-dd") === dateStr,
-					) || [];
+					expenseData?.filter((item) => item.date === dateStr) || [];
+
+				if (expensesForDate.length > 0) {
+					console.log(`Date ${dateStr}: found ${expensesForDate.length} expenses`, expensesForDate);
+				}
 
 				for (const item of expensesForDate) {
 					const converted = await convertCurrency(
@@ -144,6 +146,9 @@ export function useFinancialChartData({
 				totalIncome += dayIncome;
 				totalExpenses += dayExpenses;
 			}
+
+			console.log("Final chart data points:", chartData.length);
+			console.log("Total expenses:", totalExpenses);
 
 			return {
 				data: chartData,
