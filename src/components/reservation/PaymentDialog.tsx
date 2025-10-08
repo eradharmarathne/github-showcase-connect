@@ -302,6 +302,7 @@ export function PaymentDialog({
 			// Create payment record (database trigger will automatically update reservation)
 			const { error: paymentError } = await supabase.from("payments").insert({
 				reservation_id: reservation.id,
+				tenant_id: tenant?.id!,
 				amount: convertedAmount,
 				currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
 				payment_method: formData.payment_method,
