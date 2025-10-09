@@ -153,19 +153,17 @@ export function TimelineView({
 				const viewStart = startOfDay(currentDate);
 				const viewEnd = addDays(viewStart, 29);
 
-				const { data, error } = await supabase
-					.from("external_bookings")
-					.select(
-						"id, room_id, external_id, property_id, source, guest_name, check_in, check_out, status, total_amount, currency, adults, children, room_name",
-					)
-					.eq("tenant_id", tenant.id)
-					.eq("location_id", selectedLocation)
-					.or(
-						`check_in.lte.${format(viewEnd, "yyyy-MM-dd")},check_out.gte.${format(viewStart, "yyyy-MM-dd")}`,
-					)
-					.order("check_in", { ascending: true });
-
-				if (error) throw error;
+			const { data, error } = await supabase
+				.from("external_bookings")
+				.select(
+					"id, room_id, external_id, property_id, source, guest_name, check_in, check_out, status, total_amount, currency, adults, children, room_name",
+				)
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.or(
+					`check_in.lte.${format(viewEnd, "yyyy-MM-dd")},check_out.gte.${format(viewStart, "yyyy-MM-dd")}`,
+				)
+				.order("check_in", { ascending: true });				if (error) throw error;
 				return data || [];
 			},
 			enabled: !!selectedLocation && !!tenant?.id,
