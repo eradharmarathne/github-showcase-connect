@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { TimelineView } from "@/components/calendar/timeline-view";
-import { PermissionRoute } from "@/components/permission-route";
+import { PermissionRoute } from "@/components/routing/permission-route";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
 import { getCurrencySymbol } from "@/utils/currency";

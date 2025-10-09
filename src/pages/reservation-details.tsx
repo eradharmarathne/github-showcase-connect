@@ -11,8 +11,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { OTPVerification } from "@/components/otp-verification";
-import { SignatureCapture } from "@/components/signature-capture";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +18,8 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { OTPVerification } from "@/components/auth/otp-verification";
+import { SignatureCapture } from "@/components/media/signature-capture";
 
 type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations">;

@@ -12,8 +12,6 @@ import {
 import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { LocationSwitcher } from "@/components/shared/location-switcher";
 import { AppSidebarSkeleton } from "@/components/skeleton/app-sidebar-skeleton";
 import {
@@ -24,6 +22,8 @@ import {
 } from "@/components/ui/sidebar";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useProfile } from "@/hooks/use-profile";
+import { NavMain } from "../layout/nav-main";
+import { NavProjects } from "../layout/nav-projects";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { profile } = useProfile();

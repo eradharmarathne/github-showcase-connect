@@ -17,14 +17,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
-import { ConfirmationStep } from "./reservation/new/ConfirmationStep";
-import {
-	GuestData,
-	GuestInformationStep,
-} from "./reservation/new/GuestInformationStep";
-import { PaymentData, PaymentStep } from "./reservation/new/PaymentStep";
-import { PricingStep } from "./reservation/new/PricingStep";
-import { RoomSelectionStep } from "./reservation/new/RoomSelectionStep";
+import { ConfirmationStep } from "../reservation/new/ConfirmationStep";
+import { GuestData, GuestInformationStep } from "../reservation/new/GuestInformationStep";
+import { PaymentData, PaymentStep } from "../reservation/new/PaymentStep";
+import { PricingStep } from "../reservation/new/PricingStep";
+import { RoomSelectionStep } from "../reservation/new/RoomSelectionStep";
+
 
 type Room = Tables<"rooms">;
 

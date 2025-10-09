@@ -1,8 +1,8 @@
 import { CreditCard, Download } from "lucide-react";
-import { CurrencySelector } from "@/components/currency-selector";
 import { Button } from "@/components/ui/button";
 import { type Currency } from "@/utils/currency";
 import { type AccountDetail } from "./AccountDetailsList";
+import { CurrencySelector } from "@/components/common/currency-selector";
 
 type BalanceSheetHeaderProps = {
 	baseCurrency: Currency;

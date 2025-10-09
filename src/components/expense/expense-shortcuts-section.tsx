@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { ExpenseShortcuts } from "@/components/expense-shortcuts";
+import { ExpenseShortcuts } from "@/components/common/expense-shortcuts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 

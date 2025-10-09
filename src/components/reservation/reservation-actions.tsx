@@ -7,7 +7,6 @@ import {
 	MoreHorizontal,
 	Printer,
 } from "lucide-react";
-import { OTPVerification } from "@/components/otp-verification";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -16,6 +15,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { OTPVerification } from "../auth/otp-verification";
 
 type ReservationForActions = {
 	id: string;

@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { Navigate, useLocation } from "react-router";
+import { useLocation } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePermissions } from "@/hooks/use-permissions";
 import { Tables } from "@/integrations/supabase/types";

@@ -6,10 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./i18n";
 import { Settings, Users } from "lucide-react";
 import { ThemeProvider } from "next-themes";
-import { AuthRedirect } from "./components/auth-redirect";
-import { PermissionRoute } from "./components/permission-route";
-import { ProtectedRoute } from "./components/protected-route";
-import { SmartRedirect } from "./components/smart-redirect";
+import { AuthRedirect } from "./components/auth/auth-redirect";
 import AuthProvider from "./context/auth-context";
 import { LocationProvider } from "./context/location-context";
 import AccessDenied from "./pages/access-denied";
@@ -32,7 +29,10 @@ import Reports from "./pages/reports";
 import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
-import { Layout } from "./components/layout";
+import { Layout } from "./components/layout/layout";
+import { PermissionRoute } from "./components/routing/permission-route";
+import { SmartRedirect } from "./components/routing/smart-redirect";
+import { ProtectedRoute } from "./components/routing/protected-route";
 
 const queryClient = new QueryClient();
 

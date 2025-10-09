@@ -1,7 +1,7 @@
 import { addDays, format } from "date-fns";
 import { Calendar, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { CurrencySelector } from "@/components/currency-selector";
+import { CurrencySelector } from "@/components/common/currency-selector";
 import { ReservationDateSelector } from "@/components/reservation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

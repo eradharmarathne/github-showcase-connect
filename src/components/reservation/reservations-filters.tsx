@@ -1,6 +1,6 @@
 import { Calendar, MapPin, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CurrencySelector } from "@/components/currency-selector";
+import { CurrencySelector } from "@/components/common/currency-selector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

@@ -24,7 +24,7 @@ import { useProfile } from "@/hooks/use-profile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
-import { OTPVerification } from "./otp-verification";
+import { OTPVerification } from "../auth/otp-verification";
 
 interface Reservation {
 	id: string;

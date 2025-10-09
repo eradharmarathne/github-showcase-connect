@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { ArrowLeft, CreditCard, Save } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { CurrencySelector } from "@/components/currency-selector";
+import { CurrencySelector } from "@/components/common/currency-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

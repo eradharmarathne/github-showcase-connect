@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { NewReservationDialog } from "@/components/new-reservation-dialog";
-import { OTPVerification } from "@/components/otp-verification";
 import { AddIncomeDialog } from "@/components/reservation";
 import { PaymentDialog } from "@/components/reservation/payment-dialog";
 import { PaymentsTable } from "@/components/reservation/payments-table";
@@ -10,10 +8,8 @@ import { ReservationsDesktopTable } from "@/components/reservation/reservations-
 import { ReservationsFilters } from "@/components/reservation/reservations-filters";
 import { ReservationsHeader } from "@/components/reservation/reservations-header";
 import { ReservationsMobileCards } from "@/components/reservation/reservations-mobile-cards";
-import { ReservationEditDialog } from "@/components/reservation-edit-dialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { ViewReservationDialog } from "@/components/view-reservation-dialog";
 import { useLocationContext } from "@/context/location-context";
 import { useReservationFinancials } from "@/hooks/use-reservation-financials";
 import {
@@ -22,6 +18,9 @@ import {
 } from "@/hooks/use-reservations-data";
 import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
+import { ReservationEditDialog } from "@/components/modals/reservation-edit-dialog";
+import { OTPVerification } from "@/components/auth/otp-verification";
+import { NewReservationDialog, ViewReservationDialog } from "@/components/modals";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 
