@@ -1,7 +1,7 @@
 import { LanguagesIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/shared/app-sidebar";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -28,8 +28,6 @@ import ThemeSwitcher from "./ThemeSwitcher";
 import { Button } from "./ui/button";
 
 export function Layout() {
-	const { selectedLocation, setSelectedLocation, locations, loading } =
-		useLocationContext();
 	const isMobile = useIsMobile();
 	const location = useLocation();
 	const { t } = useTranslation();
@@ -109,10 +107,6 @@ export function Layout() {
 	return (
 		<SidebarProvider>
 			<AppSidebar
-				locations={locations}
-				selectedLocation={selectedLocation}
-				onLocationChange={setSelectedLocation}
-				locationsLoading={loading}
 			/>
 			<SidebarInset>
 				{/* Header */}

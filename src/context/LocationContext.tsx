@@ -11,6 +11,7 @@ interface LocationContextType {
 	locations: Location[];
 	loading: boolean;
 	getSelectedLocationData: () => Location | null;
+	refetchLocations: () => Promise<void>;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(
@@ -23,33 +24,33 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(true);
 	const { tenant } = useAuth();
 
-	useEffect(() => {
-		const fetchLocations = async () => {
-			if (!tenant?.id) {
-				setLocations([]);
-				setLoading(false);
-				return;
-			}
+	const fetchLocations = React.useCallback(async () => {
+		if (!tenant?.id) {
+			setLocations([]);
+			setLoading(false);
+			return;
+		}
 
-			try {
-				const { data, error } = await supabase
-					.from("locations")
-					.select("*")
-					.eq("tenant_id", tenant.id)
-					.eq("is_active", true)
-					.order("name");
+		try {
+			const { data, error } = await supabase
+				.from("locations")
+				.select("*")
+				.eq("tenant_id", tenant.id)
+				.eq("is_active", true)
+				.order("name");
 
-				if (error) throw error;
-				setLocations(data || []);
-			} catch (error) {
-				console.error("Error fetching locations:", error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchLocations();
+			if (error) throw error;
+			setLocations(data || []);
+		} catch (error) {
+			console.error("Error fetching locations:", error);
+		} finally {
+			setLoading(false);
+		}
 	}, [tenant?.id]);
+
+	useEffect(() => {
+		fetchLocations();
+	}, [fetchLocations]);
 
 	// Auto-select first location when locations are loaded
 	useEffect(() => {
@@ -71,6 +72,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 				locations,
 				loading,
 				getSelectedLocationData,
+				refetchLocations: fetchLocations,
 			}}
 		>
 			{children}

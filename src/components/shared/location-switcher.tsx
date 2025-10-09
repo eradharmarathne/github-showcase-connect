@@ -1,5 +1,4 @@
 import { ChevronsUpDown, MapPin } from "lucide-react";
-import * as React from "react";
 
 import {
 	DropdownMenu,
@@ -16,26 +15,13 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import Logo from "./ui/logo";
+import Logo from "../ui/logo";
+import { useLocationContext } from "@/context/LocationContext";
+import { useCallback } from "react";
 
-interface Location {
-	id: string;
-	name: string;
-	is_active: boolean;
-}
-
-export function LocationSwitcher({
-	locations,
-	selectedLocation,
-	onLocationChange,
-	loading = false,
-}: {
-	locations: Location[];
-	selectedLocation: string;
-	onLocationChange: (locationId: string) => void;
-	loading?: boolean;
-}) {
+export function LocationSwitcher() {
 	const { isMobile } = useSidebar();
+	const { selectedLocation, setSelectedLocation, locations } = useLocationContext();
 
 	const activeLocation = locations.find((loc) => loc.id === selectedLocation);
 
@@ -49,6 +35,13 @@ export function LocationSwitcher({
 		return "Active Location";
 	};
 
+	const onLocationChange = useCallback(
+		(locationId: string) => {
+			setSelectedLocation(locationId);
+		},
+		[setSelectedLocation],
+	);
+
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
@@ -57,7 +50,7 @@ export function LocationSwitcher({
 						<SidebarMenuButton
 							size="lg"
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-							data-testid="team-switcher"
+							data-testid="location-switcher"
 						>
 							<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
 								<Logo />

@@ -76,7 +76,7 @@ export default function Auth() {
 	useEffect(() => {
 		if (user && !submitting) {
 			// User is authenticated, redirect to smart redirect for proper routing
-			navigate("/", { replace: true });
+			navigate("/dashboard", { replace: true });
 		}
 	}, [user, navigate, submitting]);
 

@@ -48,7 +48,7 @@ export const dashboardTour: PageTour = {
 					</ul>
 				</div>
 			`,
-			targetElement: '[data-testid="team-switcher"]',
+			targetElement: '[data-testid="location-switcher"]',
 			position: "bottom",
 			showBack: true,
 			showNext: true,

@@ -13,6 +13,8 @@ export const SmartRedirect = () => {
 		return null;
 	}
 
+	console.log({ profile, tenant });
+
 	// If user doesn't have a tenant_id in their profile, they need to complete onboarding
 	if (!profile?.tenant_id || !tenant) {
 		return <Navigate to="/onboarding" replace />;

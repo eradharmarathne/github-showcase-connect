@@ -18,6 +18,7 @@ import {
 	ChartDataPoint,
 	useAvailableCurrencies,
 } from "@/hooks/useFinancialChartData";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FinancialChartContainerProps {
 	data: ChartDataPoint[];
@@ -52,6 +53,8 @@ export function FinancialChartContainer({
 		}));
 	}, [data]);
 
+	const  isMobile = useIsMobile();
+
 	return (
 		<div className="flex-1 flex items-center mt-8 px-4 border-t pt-4 justify-center min-h-0">
 			<ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -64,7 +67,7 @@ export function FinancialChartContainer({
 							axisLine={false}
 							tickMargin={0}
 							minTickGap={0}
-							interval={1}
+							interval={isMobile ? 5 : 1}
 							tickFormatter={(value) => {
 								const date = new Date(value);
 								return date.toLocaleDateString("en-US", {

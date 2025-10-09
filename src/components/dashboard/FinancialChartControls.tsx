@@ -41,7 +41,7 @@ export function FinancialChartControls({
 	];
 
 	return (
-		<div className="flex mt-4 sm:mt-0">
+		<div className="flex flex-wrap mt-4 sm:mt-0">
 			{chartTypes.map((chart) => (
 				<div
 					key={chart.key}

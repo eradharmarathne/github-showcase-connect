@@ -25,7 +25,7 @@ import { useLocation } from "react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { AppSidebarSkeleton } from "@/components/skeleton/AppSidebarSkeleton";
-import { LocationSwitcher } from "@/components/team-switcher";
+import { LocationSwitcher } from "@/components/shared/location-switcher";
 import {
 	Sidebar,
 	SidebarContent,
@@ -37,45 +37,12 @@ import { useAuth } from "@/context/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useProfile } from "@/hooks/useProfile";
 
-interface Location {
-	id: string;
-	name: string;
-	is_active: boolean;
-}
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-	locations?: Location[];
-	selectedLocation?: string;
-	onLocationChange?: (locationId: string) => void;
-	locationsLoading?: boolean;
-}
-
-export function AppSidebar({
-	locations = [],
-	selectedLocation,
-	onLocationChange,
-	locationsLoading = false,
-	...props
-}: AppSidebarProps) {
-	const { user } = useAuth();
+export function AppSidebar( props: React.ComponentProps<typeof Sidebar>) {
 	const { profile } = useProfile();
-	const { hasAnyPermission, permissions, loading } = usePermissions();
+	const { hasAnyPermission, loading } = usePermissions();
 	const location = useLocation();
 	const { t } = useTranslation();
-
-	// Handle location change with permission check
-	const handleLocationChange = React.useCallback(
-		(locationId: string) => {
-			// Call the parent's onLocationChange if provided
-			if (onLocationChange) {
-				onLocationChange(locationId);
-			}
-
-			// Note: Permissions are automatically refreshed when location context changes
-			// The sidebar will re-render with updated navigation items based on new permissions
-		},
-		[onLocationChange],
-	);
 
 	// Main navigation items based on user permissions
 	const getNavMainItems = () => {
@@ -191,10 +158,6 @@ export function AppSidebar({
 		>
 			<SidebarHeader>
 				<LocationSwitcher
-					locations={locations}
-					selectedLocation={selectedLocation}
-					onLocationChange={handleLocationChange}
-					loading={locationsLoading}
 				/>
 			</SidebarHeader>
 			<SidebarContent>

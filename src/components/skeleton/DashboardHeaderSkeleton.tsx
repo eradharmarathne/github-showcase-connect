@@ -48,18 +48,6 @@ export function DashboardHeaderSkeleton({
 					)}
 				</div>
 			</div>
-
-			{/* Filters Row */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-				<div className="space-y-1">
-					<Skeleton className="h-3 w-20" />
-					<Skeleton className="h-9 w-full" />
-				</div>
-				<div className="space-y-1">
-					<Skeleton className="h-3 w-18" />
-					<Skeleton className="h-9 w-full" />
-				</div>
-			</div>
 		</div>
 	);
 }

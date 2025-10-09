@@ -45,6 +45,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useAuth } from "@/context/AuthContext";
+import { useLocationContext } from "@/context/LocationContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -82,6 +83,7 @@ export default function LocationsTab() {
 	});
 	const { toast } = useToast();
 	const { tenant } = useAuth();
+	const { refetchLocations: refetchGlobalLocations } = useLocationContext();
 
 	const fetchLocations = useCallback(async () => {
 		if (!tenant?.id) {
@@ -155,7 +157,7 @@ export default function LocationsTab() {
 			setIsDialogOpen(false);
 			setEditingLocation(null);
 			setFormData({ name: "", is_active: true });
-			fetchLocations();
+			await Promise.all([fetchLocations(), refetchGlobalLocations()]);
 		} catch (error) {
 			toast({
 				title: "Error",
@@ -348,7 +350,7 @@ export default function LocationsTab() {
 				title: "Success",
 				description: "Location and all associated records deleted successfully",
 			});
-			fetchLocations();
+			await Promise.all([fetchLocations(), refetchGlobalLocations()]);
 		} catch (error) {
 			console.error("Delete location error:", error);
 			toast({

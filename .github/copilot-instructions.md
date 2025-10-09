@@ -166,7 +166,7 @@ Current pages in `/src/pages/`:
   - **master-files/**: AgentsTab, CommissionsTab, GuidesTab, LocationsTab, RoomsTab
   - **reports/**: AccountsReports, CommissionReports, ComprehensiveReports, DetailedBalanceSheet, EnhancedFinancialReports
 - **UI Components**: shadcn/ui components in `/src/components/ui/`
-- **Layout**: Uses `AppSidebar` component with `NavMain`, `NavUser`, `NavProjects`, and `LocationSwitcher` (team-switcher)
+- **Layout**: Uses `AppSidebar` component with `NavMain`, `NavUser`, `NavProjects`, and `LocationSwitcher` (location-switcher)
 - **Contexts**: Auth and Location management
 - **Hooks**: Custom hooks like `usePermissions`, `useProfile`, `useTenant`
 
