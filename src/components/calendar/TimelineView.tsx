@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { CalendarLegend } from "./CalendarLegend";
 import { RoomRow } from "./RoomRow";
+import { TimelineViewSkeleton } from "@/components/skeleton/TimelineViewSkelton";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Reservation = {
@@ -204,20 +205,11 @@ export function TimelineView({
 	});
 
 	if (roomsLoading || reservationsLoading) {
-		return (
-			<div className="border rounded-lg overflow-hidden">
-				<div className="animate-pulse">
-					<div className="h-12 bg-gray-200 border-b"></div>
-					{Array.from({ length: 5 }, (_, i) => (
-						<div key={i} className="h-16 bg-gray-100 border-b"></div>
-					))}
-				</div>
-			</div>
-		);
+		return <TimelineViewSkeleton />;
 	}
 
 	return (
-		<div className="border rounded-lg overflow-hidden bg-background flex flex-col h-[calc(100vh-180px)] w-full">
+		<div className="border rounded-lg overflow-hidden bg-background flex flex-col h-fit w-full">
 			{/* Calendar Header */}
 			<div className="border-b bg-muted/50 sticky top-0 z-20">
 				<div className="flex w-full">
