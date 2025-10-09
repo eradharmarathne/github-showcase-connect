@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { ReservationsListSkeleton } from "@/components/skeleton/ReservationsListSkeleton";
+import { ReservationsListSkeleton } from "@/components/skeleton/reservations-list-skeleton";
 import {
 	Table,
 	TableBody,
@@ -9,7 +9,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useLocationContext } from "@/context/LocationContext";
-import { useIncomeData } from "@/hooks/useReservationsData";
+import { useIncomeData } from "@/hooks/use-reservations-data";
 
 type IncomeRecord = {
 	id: string;
