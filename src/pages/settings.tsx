@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import {
-	BookingManagement,
 	CurrencyManagement,
 	ExpenseManagement,
 	FormFieldPreferences,
@@ -16,7 +15,7 @@ export default function Settings() {
 	return (
 		<div className="w-full pb-8 mx-auto p-6">
 			<Tabs defaultValue="profile" className="w-full">
-				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-1 h-auto p-1">
+				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1 h-auto p-1">
 					<TabsTrigger value="profile" className="text-xs sm:text-sm px-2 py-2">
 						{t("settings.profile")}
 					</TabsTrigger>
@@ -47,12 +46,6 @@ export default function Settings() {
 					>
 						{t("settings.currency")}
 					</TabsTrigger>
-					<TabsTrigger
-						value="bookings"
-						className="text-xs sm:text-sm px-2 py-2"
-					>
-						{t("settings.bookings")}
-					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="profile">
@@ -77,10 +70,6 @@ export default function Settings() {
 
 				<TabsContent value="currency">
 					<CurrencyManagement />
-				</TabsContent>
-
-				<TabsContent value="bookings">
-					<BookingManagement />
 				</TabsContent>
 			</Tabs>
 		</div>

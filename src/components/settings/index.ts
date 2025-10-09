@@ -1,4 +1,3 @@
-export { BookingManagement } from "./booking-management";
 export { CurrencyManagement } from "./currency-management";
 export { ExpenseManagement } from "./expense-management";
 export { FormFieldPreferences } from "./form-field-preferences";

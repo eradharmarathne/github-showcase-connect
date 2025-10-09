@@ -1,7 +1,6 @@
 import { CheckCircle2, Edit, Phone, Save, User, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { PhoneVerification } from "@/components/PhoneVerification";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,9 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useProfile } from "@/hook/use-profile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
+import { PhoneVerification } from "../auth/phone-verification";
 
 export function ProfileSettings() {
 	const { toast } = useToast();

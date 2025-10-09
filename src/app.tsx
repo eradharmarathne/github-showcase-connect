@@ -4,7 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./i18n";
-import { Settings, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { ThemeProvider } from "next-themes";
 import { AuthRedirect } from "./components/auth/auth-redirect";
 import AuthProvider from "./context/auth-context";
@@ -33,6 +33,7 @@ import { Layout } from "./components/layout/layout";
 import { PermissionRoute } from "./components/routing/permission-route";
 import { SmartRedirect } from "./components/routing/smart-redirect";
 import { ProtectedRoute } from "./components/routing/protected-route";
+import Settings from "./pages/settings";
 
 const queryClient = new QueryClient();
 

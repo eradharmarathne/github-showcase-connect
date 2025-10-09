@@ -68,7 +68,7 @@ export function useUsers() {
 				const location = perm.locations;
 
 				// If a specific location is selected, only show users with access to that location
-				if (selectedLocation !== "all" && location.id !== selectedLocation) {
+				if (location.id !== selectedLocation) {
 					return;
 				}
 
