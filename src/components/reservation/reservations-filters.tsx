@@ -40,9 +40,6 @@ interface ReservationsFiltersProps {
 }
 
 export function ReservationsFilters({
-	locations,
-	selectedLocation,
-	onLocationChange,
 	searchQuery,
 	onSearchChange,
 	statusFilter,
@@ -56,22 +53,6 @@ export function ReservationsFilters({
 
 	return (
 		<div className="flex flex-col lg:flex-row gap-4">
-			{locations.length > 1 && (
-				<Select value={selectedLocation} onValueChange={onLocationChange}>
-					<SelectTrigger className="w-full lg:w-48">
-						<SelectValue
-							placeholder={t("reservations.filters.selectLocation")}
-						/>
-					</SelectTrigger>
-					<SelectContent className="z-50 bg-background border">
-						{locations.map((location) => (
-							<SelectItem key={location.id} value={location.id}>
-								{location.name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			)}
 
 			<div className="relative flex-1 lg:w-64">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />

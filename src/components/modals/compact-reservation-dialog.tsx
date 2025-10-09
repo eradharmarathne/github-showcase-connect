@@ -435,8 +435,8 @@ export function CompactReservationDialog({
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose}>
-			<DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden flex flex-col">
+		<Dialog open={isOpen} onOpenChange={onClose} >
+			<DialogContent className="w-full min-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Calendar className="h-5 w-5" />
@@ -449,8 +449,8 @@ export function CompactReservationDialog({
 
 				<div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
 					{/* Left Side - Form Fields */}
-					<div className="lg:col-span-2 space-y-6">
-						<ScrollArea className="h-full pr-4">
+					<div className="lg:col-span-2 space-y-6 overflow-y-auto">
+						<ScrollArea className="h-full pr-4 py-12">
 							{loadingData ? (
 								<div className="flex items-center justify-center p-8">
 									<div className="text-muted-foreground">Loading...</div>
