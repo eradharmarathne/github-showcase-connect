@@ -1,10 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-	eachDayOfInterval,
-	endOfMonth,
-	format,
-	startOfMonth,
-} from "date-fns";
+import { eachDayOfInterval, endOfMonth, format, startOfMonth } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +59,12 @@ export function useFinancialChartData({
 			// Generate date range
 			const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
 
-			console.log("Chart date range:", format(startDate, "yyyy-MM-dd"), "to", format(endDate, "yyyy-MM-dd"));
+			console.log(
+				"Chart date range:",
+				format(startDate, "yyyy-MM-dd"),
+				"to",
+				format(endDate, "yyyy-MM-dd"),
+			);
 
 			// Fetch income data
 			const { data: incomeData, error: incomeError } = await supabase
@@ -91,7 +91,12 @@ export function useFinancialChartData({
 			if (expenseError) throw expenseError;
 
 			console.log("Fetched income:", incomeData?.length, "items");
-			console.log("Fetched expenses:", expenseData?.length, "items", expenseData);
+			console.log(
+				"Fetched expenses:",
+				expenseData?.length,
+				"items",
+				expenseData,
+			);
 
 			// Convert currencies and group by date
 			const chartData: ChartDataPoint[] = [];
@@ -123,7 +128,10 @@ export function useFinancialChartData({
 					expenseData?.filter((item) => item.date === dateStr) || [];
 
 				if (expensesForDate.length > 0) {
-					console.log(`Date ${dateStr}: found ${expensesForDate.length} expenses`, expensesForDate);
+					console.log(
+						`Date ${dateStr}: found ${expensesForDate.length} expenses`,
+						expensesForDate,
+					);
 				}
 
 				for (const item of expensesForDate) {

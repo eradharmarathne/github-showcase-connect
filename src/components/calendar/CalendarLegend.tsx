@@ -5,25 +5,29 @@ interface CalendarLegendProps {
 export function CalendarLegend({ className }: CalendarLegendProps) {
 	return (
 		<div className={className}>
-			<div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
-				<div className="flex items-center gap-1 sm:gap-2">
-					<div className="w-3 h-3 sm:w-4 sm:h-4 bg-green-500 rounded"></div>
+			<div className="flex flex-wrap gap-2 sm:gap-3 text-[9px] sm:text-[10px]">
+				<div className="flex items-center gap-1">
+					<div className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></div>
 					<span>Confirmed</span>
 				</div>
-				<div className="flex items-center gap-1 sm:gap-2">
-					<div className="w-3 h-3 sm:w-4 sm:h-4 bg-yellow-500 rounded"></div>
+				<div className="flex items-center gap-1">
+					<div className="w-2.5 h-2.5 bg-amber-500 rounded-sm"></div>
 					<span>Tentative</span>
 				</div>
-				<div className="flex items-center gap-1 sm:gap-2">
-					<div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-500 rounded"></div>
+				<div className="flex items-center gap-1">
+					<div className="w-2.5 h-2.5 bg-sky-500 rounded-sm"></div>
 					<span>Pending</span>
 				</div>
-				<div className="flex items-center gap-1 sm:gap-2">
-					<div className="w-3 h-3 sm:w-4 sm:h-4 bg-purple-500 rounded"></div>
+				<div className="flex items-center gap-1">
+					<div className="w-2.5 h-2.5 bg-violet-500 rounded-sm"></div>
 					<span>Checked In</span>
 				</div>
-				<div className="flex items-center gap-1 sm:gap-2">
-					<div className="w-3 h-3 sm:w-4 sm:h-4 bg-red-500 rounded"></div>
+				<div className="flex items-center gap-1">
+					<div className="w-2.5 h-2.5 bg-slate-400 rounded-sm"></div>
+					<span>Checked Out</span>
+				</div>
+				<div className="flex items-center gap-1">
+					<div className="w-2.5 h-2.5 bg-rose-500 rounded-sm"></div>
 					<span>Cancelled</span>
 				</div>
 			</div>

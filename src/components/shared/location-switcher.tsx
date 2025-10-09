@@ -1,5 +1,5 @@
 import { ChevronsUpDown, MapPin } from "lucide-react";
-
+import { useCallback } from "react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -15,13 +15,13 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import Logo from "../ui/logo";
 import { useLocationContext } from "@/context/LocationContext";
-import { useCallback } from "react";
+import Logo from "../ui/logo";
 
 export function LocationSwitcher() {
 	const { isMobile } = useSidebar();
-	const { selectedLocation, setSelectedLocation, locations } = useLocationContext();
+	const { selectedLocation, setSelectedLocation, locations } =
+		useLocationContext();
 
 	const activeLocation = locations.find((loc) => loc.id === selectedLocation);
 

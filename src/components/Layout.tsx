@@ -106,8 +106,7 @@ export function Layout() {
 
 	return (
 		<SidebarProvider>
-			<AppSidebar
-			/>
+			<AppSidebar />
 			<SidebarInset>
 				{/* Header */}
 				<header className="bg-card sticky w-full top-0 z-10 border-b">

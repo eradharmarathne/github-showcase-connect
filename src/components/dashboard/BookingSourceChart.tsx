@@ -1,4 +1,13 @@
-import { Plus, Calendar, Users, Phone, Mail, MapPin, DollarSign, CreditCard } from "lucide-react";
+import {
+	Calendar,
+	CreditCard,
+	DollarSign,
+	Mail,
+	MapPin,
+	Phone,
+	Plus,
+	Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -304,18 +313,17 @@ export function BookingSourceChart({
 											}}
 										/>
 										<span className="truncate text-xs">
-											{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}
+											{entry.source}: {entry.count} (
+											{entry.percentage.toFixed(1)}
 											%)
 										</span>
 									</div>
 								))}
 							</div>
 							<span className="text-xs text-muted-foreground">
-					{totalBookings} total bookings
-				</span>
+								{totalBookings} total bookings
+							</span>
 						</div>
-
-						
 					</div>
 
 					{/* Quick Action Shortcuts */}

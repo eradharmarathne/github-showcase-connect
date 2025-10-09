@@ -3,13 +3,12 @@ import {
 	differenceInDays,
 	eachDayOfInterval,
 	endOfDay,
-	endOfMonth,
 	format,
 	isSameDay,
 	isWithinInterval,
 	parseISO,
 	startOfDay,
-	startOfMonth,
+	addDays,
 } from "date-fns";
 import { useLocationContext } from "@/context/LocationContext";
 import { useTenant } from "@/hooks/useTenant";
@@ -19,9 +18,18 @@ import { CalendarLegend } from "./CalendarLegend";
 import { RoomRow } from "./RoomRow";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
-type Reservation = Database["public"]["Tables"]["reservations"]["Row"] & {
-	rooms: { room_number: string; room_type: string } | null;
-	locations: { name: string } | null;
+type Reservation = {
+	id: string;
+	room_id: string;
+	guest_name: string;
+	check_in_date: string;
+	check_out_date: string;
+	status: string;
+	total_amount: number;
+	currency: string;
+	adults: number;
+	children: number | null;
+	reservation_number: string;
 };
 
 interface BookingSpan {
@@ -74,26 +82,22 @@ export function TimelineView({
 		enabled: !!selectedLocation && !!tenant?.id,
 	});
 
-	// Fetch reservations
+	// Fetch reservations - optimized for 30-day view
 	const { data: reservations = [], isLoading: reservationsLoading } = useQuery({
 		queryKey: ["reservations", selectedLocation, tenant?.id, currentDate],
 		queryFn: async () => {
 			if (!selectedLocation || !tenant?.id) return [];
 
-			const monthStart = startOfMonth(currentDate);
-			const monthEnd = endOfMonth(currentDate);
+			const viewStart = startOfDay(currentDate);
+			const viewEnd = addDays(viewStart, 29);
 
-			const { data, error } = await supabase
+			const { data, error} = await supabase
 				.from("reservations")
-				.select(`
-					*,
-					rooms(room_number, room_type),
-					locations(name)
-				`)
+				.select("id, room_id, guest_name, check_in_date, check_out_date, status, total_amount, currency, adults, children, reservation_number")
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
 				.or(
-					`check_in_date.lte.${format(monthEnd, "yyyy-MM-dd")},check_out_date.gte.${format(monthStart, "yyyy-MM-dd")}`,
+					`check_in_date.lte.${format(viewEnd, "yyyy-MM-dd")},check_out_date.gte.${format(viewStart, "yyyy-MM-dd")}`,
 				)
 				.order("check_in_date", { ascending: true });
 
@@ -101,12 +105,13 @@ export function TimelineView({
 			return data || [];
 		},
 		enabled: !!selectedLocation && !!tenant?.id,
+		staleTime: 30000, // Cache for 30 seconds
 	});
 
-	// Generate calendar days for the month
-	const monthStart = startOfMonth(currentDate);
-	const monthEnd = endOfMonth(currentDate);
-	const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+	// Generate calendar days - 30 days from current date
+	const startDate = startOfDay(currentDate);
+	const endDate = addDays(startDate, 29); // 30 days total (0-29)
+	const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 
 	// Calculate booking span
 	const calculateBookingSpan = (
@@ -168,6 +173,16 @@ export function TimelineView({
 		return true;
 	});
 
+	// Group rooms by room_type
+	const groupedRooms = filteredRooms.reduce((acc, room) => {
+		const type = room.room_type || "Other";
+		if (!acc[type]) {
+			acc[type] = [];
+		}
+		acc[type].push(room);
+		return acc;
+	}, {} as Record<string, typeof filteredRooms>);
+
 	// Apply filters to reservations
 	const filteredReservations = reservations.filter((reservation) => {
 		// Search filter
@@ -175,9 +190,7 @@ export function TimelineView({
 			const searchLower = searchTerm.toLowerCase();
 			const matchesSearch =
 				reservation.guest_name.toLowerCase().includes(searchLower) ||
-				reservation.reservation_number.toLowerCase().includes(searchLower) ||
-				reservation.rooms?.room_number.toLowerCase().includes(searchLower) ||
-				reservation.rooms?.room_type.toLowerCase().includes(searchLower);
+				reservation.reservation_number.toLowerCase().includes(searchLower);
 
 			if (!matchesSearch) return false;
 		}
@@ -204,21 +217,25 @@ export function TimelineView({
 	}
 
 	return (
-		<div className="border rounded-lg overflow-hidden">
+		<div className="border rounded-lg overflow-hidden bg-background flex flex-col h-[calc(100vh-180px)] w-full">
 			{/* Calendar Header */}
-			<div className="border-b sticky top-0 z-20">
-				<div className="flex">
-					<div className="w-32 sm:w-48 p-2 sm:p-4 bg-gray-50 border-r border-gray-200 font-medium">
-						Room
+			<div className="border-b bg-muted/50 sticky top-0 z-20">
+				<div className="flex w-full">
+					{/* Room Column Header - Compact & Responsive */}
+					<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1.5 border-r font-semibold text-[10px] sm:text-xs flex items-center bg-muted/50">
+						Room/Type
 					</div>
-					<div className="flex-1 flex overflow-x-auto">
+					{/* Date Headers - Full width responsive */}
+					<div className="flex flex-1 bg-muted/50">
 						{calendarDays.map((day) => (
 							<div
 								key={day.toISOString()}
-								className="min-w-[48px] sm:min-w-[60px] p-1 sm:p-2 text-center border-r border-gray-200 bg-gray-50"
+								className="flex-1 min-w-[32px] sm:min-w-[40px] px-0.5 py-0.5 text-center border-r last:border-r-0"
 							>
-								<div className="text-xs font-medium">{format(day, "EEE")}</div>
-								<div className="text-xs sm:text-sm">{format(day, "dd")}</div>
+								<div className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-muted-foreground">
+									{format(day, "EEE")}
+								</div>
+								<div className="text-[9px] sm:text-[10px] md:text-xs font-semibold">{format(day, "dd")}</div>
 							</div>
 						))}
 					</div>
@@ -226,30 +243,43 @@ export function TimelineView({
 			</div>
 
 			{/* Room Rows */}
-			<div className="overflow-x-auto">
+			<div className="overflow-y-auto flex-1">
 				{filteredRooms.length === 0 ? (
-					<div className="p-8 text-center text-gray-500">
+					<div className="p-8 text-center text-muted-foreground">
 						No rooms available for the selected filters.
 					</div>
 				) : (
-					filteredRooms.map((room) => (
-						<RoomRow
-							key={room.id}
-							room={room}
-							calendarDays={calendarDays}
-							reservations={filteredReservations}
-							onBookingClick={onBookingClick}
-							onQuickBook={onQuickBook}
-							getStatusColor={getStatusColor}
-							getCurrencySymbol={getCurrencySymbol}
-							calculateBookingSpan={calculateBookingSpan}
-						/>
-					))
+					<div>
+						{Object.entries(groupedRooms).map(([roomType, roomsInGroup]) => (
+							<div key={roomType}>
+								{/* Room Type Category Header */}
+								<div className="bg-muted/80 border-b border-t px-2 py-1 z-10">
+									<div className="font-semibold text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wide">
+										{roomType}
+									</div>
+								</div>
+								{/* Rooms in this category */}
+								{roomsInGroup.map((room) => (
+									<RoomRow
+										key={room.id}
+										room={room}
+										calendarDays={calendarDays}
+										reservations={filteredReservations}
+										onBookingClick={onBookingClick}
+										onQuickBook={onQuickBook}
+										getStatusColor={getStatusColor}
+										getCurrencySymbol={getCurrencySymbol}
+										calculateBookingSpan={calculateBookingSpan}
+									/>
+								))}
+							</div>
+						))}
+					</div>
 				)}
 			</div>
 
 			{/* Legend */}
-			<CalendarLegend className="p-3 sm:p-4 bg-gray-50 border-t" />
+			<CalendarLegend className="p-2 sm:p-3 bg-muted/50 border-t" />
 		</div>
 	);
 }

@@ -24,8 +24,8 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
-import { AppSidebarSkeleton } from "@/components/skeleton/AppSidebarSkeleton";
 import { LocationSwitcher } from "@/components/shared/location-switcher";
+import { AppSidebarSkeleton } from "@/components/skeleton/AppSidebarSkeleton";
 import {
 	Sidebar,
 	SidebarContent,
@@ -37,8 +37,7 @@ import { useAuth } from "@/context/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useProfile } from "@/hooks/useProfile";
 
-
-export function AppSidebar( props: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { profile } = useProfile();
 	const { hasAnyPermission, loading } = usePermissions();
 	const location = useLocation();
@@ -157,8 +156,7 @@ export function AppSidebar( props: React.ComponentProps<typeof Sidebar>) {
 			data-testid="app-sidebar"
 		>
 			<SidebarHeader>
-				<LocationSwitcher
-				/>
+				<LocationSwitcher />
 			</SidebarHeader>
 			<SidebarContent>
 				{loading ? (

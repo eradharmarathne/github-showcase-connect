@@ -14,11 +14,11 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
 	ChartDataPoint,
 	useAvailableCurrencies,
 } from "@/hooks/useFinancialChartData";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FinancialChartContainerProps {
 	data: ChartDataPoint[];
@@ -53,7 +53,7 @@ export function FinancialChartContainer({
 		}));
 	}, [data]);
 
-	const  isMobile = useIsMobile();
+	const isMobile = useIsMobile();
 
 	return (
 		<div className="flex-1 flex items-center mt-8 px-4 border-t pt-4 justify-center min-h-0">

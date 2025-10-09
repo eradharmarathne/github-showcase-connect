@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { DashboardSkeleton } from "../skeleton";
 
 type Location = Tables<"locations">;
 
@@ -67,12 +68,7 @@ export function DashboardHeader({
 	}, [tenant?.id, onLocationsLoad]);
 
 	if (loading) {
-		return (
-			<DashboardHeaderSkeleton
-				hasIncomePermission={hasIncomePermission}
-				hasExpensePermission={hasExpensePermission}
-			/>
-		);
+		return <DashboardSkeleton />;
 	}
 	return (
 		<div className="flex flex-col space-y-4">

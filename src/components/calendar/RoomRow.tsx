@@ -5,9 +5,18 @@ import type { Database } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
-type Reservation = Database["public"]["Tables"]["reservations"]["Row"] & {
-	rooms: { room_number: string; room_type: string } | null;
-	locations: { name: string } | null;
+type Reservation = {
+	id: string;
+	room_id: string;
+	guest_name: string;
+	check_in_date: string;
+	check_out_date: string;
+	status: string;
+	total_amount: number;
+	currency: string;
+	adults: number;
+	children: number | null;
+	reservation_number: string;
 };
 
 interface BookingSpan {
@@ -52,24 +61,15 @@ export function RoomRow({
 		.filter((booking) => booking.span.isVisible);
 
 	return (
-		<div key={room.id} className="border-b border-gray-200">
-			{/* Room Header */}
-			<div className="flex items-center bg-gray-50 border-r border-gray-200">
-				<div className="w-32 sm:w-48 p-2 sm:p-4 font-medium truncate border-r border-gray-200">
-					<div className="text-sm font-semibold">{room.room_number}</div>
-					<div className="text-xs text-gray-500 truncate">{room.room_type}</div>
+		<div className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
+			<div className="flex w-full">
+				{/* Room Info Column - Compact & Responsive */}
+				<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1 border-r flex items-center">
+					<div className="font-medium text-[10px] sm:text-xs truncate">{room.room_number}</div>
 				</div>
-			</div>
 
-			{/* Room Calendar Row */}
-			<div className="flex">
-				<div className="w-32 sm:w-48 p-2 sm:p-4 bg-gray-50 border-r border-gray-200 flex items-center">
-					<span className="text-xs text-gray-600">
-						{getCurrencySymbol(room.currency)}
-						{room.base_price}/night
-					</span>
-				</div>
-				<div className="flex-1 flex">
+				{/* Calendar Grid - Full width responsive */}
+				<div className="flex flex-1 relative">
 					{calendarDays.map((day, dayIndex) => {
 						// Find booking that starts on this day
 						const bookingStartingToday = roomBookings.find(
@@ -83,76 +83,77 @@ export function RoomRow({
 								dayIndex < booking.span.startIndex + booking.span.spanDays,
 						);
 
+						const cellWidth = isMobile ? 32 : 40;
+
 						return (
 							<div
 								key={dayIndex}
 								className={cn(
-									"h-12 sm:h-16 border-r border-gray-200 relative flex items-center justify-center",
-									isOccupied && !bookingStartingToday && "bg-gray-50",
+									"flex-1 min-w-[32px] sm:min-w-[40px] h-8 sm:h-9 border-r last:border-r-0 relative flex items-center justify-center",
+									isOccupied && !bookingStartingToday && "bg-muted/20",
 								)}
 							>
 								{bookingStartingToday && (
 									<div
 										className={cn(
-											"absolute inset-0 rounded-lg text-white text-xs px-1 sm:px-2 cursor-pointer transition-all z-10 border border-white/20 flex flex-col justify-between overflow-hidden",
+											"absolute inset-[1px] rounded-sm cursor-pointer transition-all z-10 flex items-center justify-center overflow-visible group",
 											getStatusColor(bookingStartingToday.status),
 										)}
 										style={{
-											width: `calc(${bookingStartingToday.span.spanDays * 100}% + ${(bookingStartingToday.span.spanDays - 1) * 1}px)`,
-											minWidth: isMobile
-												? `${bookingStartingToday.span.spanDays * 48}px`
-												: `${bookingStartingToday.span.spanDays * 38}px`,
+											width: `calc(${bookingStartingToday.span.spanDays * 100}% + ${(bookingStartingToday.span.spanDays - 1) * cellWidth}px)`,
 										}}
 										onClick={() => onBookingClick(bookingStartingToday)}
-										title={`${bookingStartingToday.guest_name} - ${bookingStartingToday.status} (${format(parseISO(bookingStartingToday.check_in_date), "MMM dd")} - ${format(parseISO(bookingStartingToday.check_out_date), "MMM dd")})${bookingStartingToday.status === "tentative" || bookingStartingToday.status === "pending" ? " - Click to make payment" : ""}`}
 									>
-										<div className="font-semibold truncate text-xs py-1">
-											<span className="hidden sm:inline">
-												#{bookingStartingToday.reservation_number.slice(
-													-4,
-												)}{" "}
-											</span>
-											{isMobile
-												? bookingStartingToday.guest_name
-														.split(" ")[0]
-														.slice(0, 6)
-												: `${bookingStartingToday.guest_name.split(" ")[0]}`}
+										{/* Tooltip on hover - improved visibility */}
+										<div className="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 pointer-events-none">
+											<div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-xl p-3 text-xs min-w-[200px]">
+												<div className="font-semibold text-sm mb-2 text-foreground">{bookingStartingToday.guest_name}</div>
+												<div className="space-y-1">
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Check-in:</span>
+														<span className="font-medium">{format(parseISO(bookingStartingToday.check_in_date), "MMM dd, yyyy")}</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Check-out:</span>
+														<span className="font-medium">{format(parseISO(bookingStartingToday.check_out_date), "MMM dd, yyyy")}</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Status:</span>
+														<span className="font-medium capitalize">{bookingStartingToday.status.replace("_", " ")}</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Guests:</span>
+														<span className="font-medium">{bookingStartingToday.adults + (bookingStartingToday.children || 0)}</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Amount:</span>
+														<span className="font-medium">{getCurrencySymbol(bookingStartingToday.currency)}{bookingStartingToday.total_amount.toLocaleString()}</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Booking #:</span>
+														<span className="font-medium text-xs">{bookingStartingToday.reservation_number}</span>
+													</div>
+												</div>
+											</div>
 										</div>
-										{bookingStartingToday.span.spanDays > 2 && !isMobile && (
-											<div className="text-xs opacity-90 flex items-center gap-1 pb-1">
-												<span className="truncate">
-													{bookingStartingToday.guest_name
-														.split(" ")
-														.slice(1)
-														.join(" ")}
-												</span>
-												{(bookingStartingToday.status === "tentative" ||
-													bookingStartingToday.status === "pending") && (
-													<span className="text-yellow-200 font-bold">💳</span>
-												)}
-											</div>
-										)}
-										{bookingStartingToday.span.spanDays > 4 && !isMobile && (
-											<div className="text-xs opacity-75 pb-1">
-												{getCurrencySymbol(bookingStartingToday.currency)}
-												{bookingStartingToday.total_amount.toLocaleString()}
-											</div>
-										)}
-										{(bookingStartingToday.status === "tentative" ||
-											bookingStartingToday.status === "pending") &&
-											isMobile && (
-												<div className="text-yellow-200 text-xs">💳</div>
-											)}
+
+										{/* Compact content - just initials or dot for mobile */}
+										<div className="text-white text-[8px] sm:text-[9px] md:text-[10px] font-semibold truncate px-0.5">
+											{isMobile && bookingStartingToday.span.spanDays < 3
+												? "•"
+												: bookingStartingToday.guest_name.split(" ").map(n => n[0]).join("").slice(0, 3)
+											}
+										</div>
 									</div>
 								)}
 
 								{!isOccupied && (
 									<button
-										className="w-full h-full hover:bg-blue-50 transition-colors flex items-center justify-center group"
+										className="w-full h-full hover:bg-primary/10 transition-colors flex items-center justify-center group"
 										onClick={() => onQuickBook(room, day)}
 										title={`Book ${room.room_number} for ${format(day, "MMM dd, yyyy")}`}
 									>
-										<Plus className="size-3 sm:size-4 text-gray-300 group-hover:text-blue-500 transition-colors" />
+										<Plus className="size-3 text-muted-foreground/30 group-hover:text-primary group-hover:scale-125 transition-all" />
 									</button>
 								)}
 							</div>

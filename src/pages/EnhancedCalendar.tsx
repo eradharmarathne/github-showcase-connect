@@ -1,194 +1,104 @@
-import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import {
-	BookingDetailsDialog,
-	CalendarNavigation,
-	FullCalendarMonthView,
-	QuickBookDialog,
-} from "@/components/calendar";
-import { NewReservationDialog } from "@/components/NewReservationDialog";
+import { TimelineView } from "@/components/calendar/TimelineView";
 import { PermissionRoute } from "@/components/PermissionRoute";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import type { Database } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { addMonths, subMonths, format, startOfMonth } from "date-fns";
 import { getCurrencySymbol } from "@/utils/currency";
+import type { Database } from "@/integrations/supabase/types";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
-type Reservation = Database["public"]["Tables"]["reservations"]["Row"] & {
-	rooms: { room_number: string; room_type: string } | null;
-	locations: { name: string } | null;
-};
 
 export default function EnhancedCalendar() {
 	const { t } = useTranslation("common");
+	const navigate = useNavigate();
 	const [currentDate, setCurrentDate] = useState(new Date());
-	const [searchTerm, setSearchTerm] = useState("");
-	const [statusFilter, setStatusFilter] = useState("all");
-	const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
-	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-	const [selectedBooking, setSelectedBooking] = useState<Reservation | null>(
-		null,
-	);
-	const [isQuickBookDialogOpen, setIsQuickBookDialogOpen] = useState(false);
-	const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
-	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
-		useState(false);
 
 	// Status color helpers
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case "confirmed":
-				return "text-green-500 hover:text-green-600";
+				return "bg-emerald-500";
 			case "tentative":
-				return "text-yellow-500 hover:text-yellow-600";
+				return "bg-amber-500";
 			case "pending":
-				return "text-blue-500 hover:text-blue-600";
+				return "bg-sky-500";
 			case "checked_in":
-				return "text-purple-500 hover:text-purple-600";
+				return "bg-violet-500";
 			case "checked_out":
-				return "text-gray-500 hover:text-gray-600";
+				return "bg-slate-400";
 			case "cancelled":
-				return "text-red-500 hover:text-red-600";
+				return "bg-rose-500";
 			default:
-				return "text-gray-500 hover:text-gray-600";
+				return "bg-slate-400";
 		}
 	};
 
-	const getStatusBorderColor = (status: string) => {
-		switch (status) {
-			case "confirmed":
-				return "#10b981";
-			case "tentative":
-				return "#f59e0b";
-			case "pending":
-				return "#3b82f6";
-			case "checked_in":
-				return "#8b5cf6";
-			case "checked_out":
-				return "#6b7280";
-			case "cancelled":
-				return "#ef4444";
-			default:
-				return "#6b7280";
-		}
+	// Event handlers - Don't navigate, could show modal in future
+	const handleBookingClick = (booking: any) => {
+		// TODO: Show booking details in modal instead of navigating
+		console.log("Booking clicked:", booking);
 	};
 
-	// Event handlers
-	const handleBookingClick = (booking: Reservation) => {
-		setSelectedBooking(booking);
-		setIsBookingDetailsOpen(true);
+	const handleQuickBook = () => {
+		navigate("/reservations/compact");
 	};
 
-	const closeBookingDetailsDialog = () => {
-		setIsBookingDetailsOpen(false);
-		setSelectedBooking(null);
+	const handlePreviousMonth = () => {
+		setCurrentDate(subMonths(currentDate, 1));
 	};
 
-	const handleQuickBook = (room: Room, date: Date) => {
-		setSelectedRoom(room);
-		setSelectedDate(date);
-		setIsQuickBookDialogOpen(true);
+	const handleNextMonth = () => {
+		setCurrentDate(addMonths(currentDate, 1));
 	};
 
-	const closeQuickBookDialog = () => {
-		setIsQuickBookDialogOpen(false);
-		setSelectedRoom(null);
-		setSelectedDate(null);
+	const handleToday = () => {
+		setCurrentDate(new Date());
 	};
 
 	return (
 		<PermissionRoute permission={["access_calendar"]}>
-			<div className="space-y-6 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8">
-				{/* Filters */}
-				<div className="flex pt-3 flex-col sm:flex-row gap-4 items-start sm:items-center">
-					<div className="relative flex-1 max-w-sm">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
-						<Input
-							placeholder={t("calendar.search.placeholder")}
-							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							className="pl-10"
-						/>
+			<div className="space-y-4 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 pt-4">
+				{/* Navigation Header */}
+				<div className="flex items-center justify-between">
+					<div className="flex items-center gap-2">
+						<Button variant="outline" size="sm" onClick={handleToday}>
+							<CalendarIcon className="size-4 mr-2" />
+							Today
+						</Button>
+						<div className="flex items-center gap-1">
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={handlePreviousMonth}
+							>
+								<ChevronLeft className="size-4" />
+							</Button>
+							<Button variant="ghost" size="icon" onClick={handleNextMonth}>
+								<ChevronRight className="size-4" />
+							</Button>
+						</div>
+						<h2 className="text-lg font-semibold">
+							{format(startOfMonth(currentDate), "MMMM yyyy")}
+						</h2>
 					</div>
-					<Select value={statusFilter} onValueChange={setStatusFilter}>
-						<SelectTrigger className="w-full sm:w-48">
-							<SelectValue placeholder={t("calendar.search.filterByStatus")} />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">
-								{t("calendar.search.allStatuses")}
-							</SelectItem>
-							<SelectItem value="confirmed">
-								{t("calendar.status.confirmed")}
-							</SelectItem>
-							<SelectItem value="tentative">
-								{t("calendar.status.tentative")}
-							</SelectItem>
-							<SelectItem value="pending">
-								{t("calendar.status.pending")}
-							</SelectItem>
-							<SelectItem value="checked_in">
-								{t("calendar.status.checked_in")}
-							</SelectItem>
-							<SelectItem value="checked_out">
-								{t("calendar.status.checked_out")}
-							</SelectItem>
-							<SelectItem value="cancelled">
-								{t("calendar.status.cancelled")}
-							</SelectItem>
-						</SelectContent>
-					</Select>
+					<Button onClick={() => navigate("/reservations/compact")}>
+						New Reservation
+					</Button>
 				</div>
 
-				<CalendarNavigation
+				{/* Channel Manager Timeline View */}
+				<TimelineView
 					currentDate={currentDate}
-					onDateChange={setCurrentDate}
-				/>
-
-				<FullCalendarMonthView
-					currentDate={currentDate}
-					searchTerm={searchTerm}
-					statusFilter={statusFilter}
+					searchTerm=""
+					statusFilter="all"
 					roomFilter="all"
 					onBookingClick={handleBookingClick}
 					onQuickBook={handleQuickBook}
 					getStatusColor={getStatusColor}
-					getStatusBorderColor={getStatusBorderColor}
 					getCurrencySymbol={getCurrencySymbol}
-				/>
-
-				<QuickBookDialog
-					isOpen={isQuickBookDialogOpen}
-					onClose={closeQuickBookDialog}
-					onBook={() => setIsNewReservationDialogOpen(true)}
-					selectedRoom={selectedRoom}
-					selectedDate={selectedDate}
-				/>
-
-				<BookingDetailsDialog
-					reservation={selectedBooking}
-					isOpen={isBookingDetailsOpen}
-					onClose={closeBookingDetailsDialog}
-					getStatusColor={getStatusColor}
-					getStatusBorderColor={getStatusBorderColor}
-					getCurrencySymbol={getCurrencySymbol}
-				/>
-
-				<NewReservationDialog
-					isOpen={isNewReservationDialogOpen}
-					onClose={() => setIsNewReservationDialogOpen(false)}
-					onReservationCreated={() => {
-						setIsNewReservationDialogOpen(false);
-						// Refresh handled by React Query
-					}}
 				/>
 			</div>
 		</PermissionRoute>
