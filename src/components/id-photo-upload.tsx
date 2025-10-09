@@ -1,6 +1,6 @@
 import { Camera, FileImage, Loader2, Upload, X, ZoomIn } from "lucide-react";
 import { useRef, useState } from "react";
-import { SignedImage } from "@/components/SignedImage";
+import { SignedImage } from "@/components/signed-image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

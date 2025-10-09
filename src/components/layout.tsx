@@ -19,13 +19,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useLocationContext } from "@/context/location-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { TourHelpButton } from "./CustomTourHelpButton";
 import LanguageDropdown from "./dropdown-language";
 import ProfileDropdown from "./dropdown-profile";
-import FullscreenToggle from "./FullscreenToggle";
-import ProfileAvatarButton from "./ProfileAvatarButton";
-import ThemeSwitcher from "./ThemeSwitcher";
+import FullscreenToggle from "./fullscreen-toggle";
+import ProfileAvatarButton from "./profile-avatar-button";
 import { Button } from "./ui/button";
+import ThemeSwitcher from "./theme-switcher";
 
 export function Layout() {
 	const isMobile = useIsMobile();
@@ -131,7 +130,6 @@ export function Layout() {
 							</Breadcrumb>
 						</div>
 						<div className="flex items-center gap-1.5">
-							<TourHelpButton />
 							<FullscreenToggle />
 							<ThemeSwitcher />
 							<LanguageDropdown

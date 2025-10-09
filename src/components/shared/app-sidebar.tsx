@@ -1,16 +1,11 @@
 import {
 	BarChart3,
-	Bed,
 	Building,
 	Building2,
 	Calendar,
 	CreditCard,
-	DollarSign,
-	FolderOpen,
 	Home,
-	MapPin,
 	MinusCircle,
-	Percent,
 	Phone,
 	Wifi,
 } from "lucide-react";

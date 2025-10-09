@@ -216,31 +216,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		// THEN check for existing session
 		supabase.auth.getSession().then(async ({ data: { session } }) => {
-			console.log("Auth: Initial session check", { 
-				hasSession: !!session, 
-				userId: session?.user?.id,
-				email: session?.user?.email 
-			});
-			
 			setSession(session);
 			setUser(session?.user ?? null);
 
 			if (session?.user) {
 				// Fetch profile data for existing session
-				console.log("Auth: Fetching profile for existing session");
 				const profileData = await fetchProfile(session.user.id);
 
 				// If the profile has a tenant_id, fetch tenant and subscription data
 				if (profileData?.tenant_id) {
-					console.log("Auth: Fetching tenant and subscription data");
 					await fetchTenant(profileData.tenant_id);
 					await fetchSubscription(profileData.tenant_id);
-				} else {
-					console.log("Auth: No tenant_id in profile, user may need onboarding");
 				}
 			}
 
-			console.log("Auth: Setting loading to false");
 			setLoading(false);
 		});
 

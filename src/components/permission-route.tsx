@@ -1,4 +1,4 @@
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { Navigate, useLocation } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -25,11 +25,7 @@ export const PermissionRoute = ({
 	const location = useLocation();
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center min-h-[400px]">
-				<Loader2 className="size-8 animate-spin text-primary" />
-			</div>
-		);
+		return null;
 	}
 
 	if (!hasAnyPermission(permission)) {

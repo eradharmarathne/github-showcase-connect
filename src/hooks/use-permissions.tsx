@@ -12,23 +12,13 @@ export const usePermissions = () => {
 
 	useEffect(() => {
 		const fetchPermissions = async () => {
-			console.log("Permissions: fetchPermissions called", { 
-				hasUser: !!user, 
-				hasTenantId: !!profile?.tenant_id,
-				userId: user?.id,
-				tenantId: profile?.tenant_id 
-			});
-
 			if (!user || !profile?.tenant_id) {
-				console.log("Permissions: No user or tenant_id, setting loading to false");
 				setPermissions(null);
 				setLoading(false);
 				return;
 			}
 
 			try {
-				setLoading(true);
-				console.log("Permissions: Fetching permissions from database");
 				// Fetch user permissions with explicit tenant_id filter for RLS performance
 				const { data, error } = await supabase
 					.from("user_permissions")
@@ -42,31 +32,17 @@ export const usePermissions = () => {
 					console.error("Error fetching permissions:", error);
 					setPermissions(null);
 				} else {
-					console.log("Permissions: Successfully fetched permissions", { hasData: !!data });
 					setPermissions(data || null);
 				}
 			} catch (error) {
 				console.error("Exception fetching permissions:", error);
 				setPermissions(null);
 			} finally {
-				console.log("Permissions: Setting loading to false");
 				setLoading(false);
 			}
 		};
 
-		// Add a timeout to prevent infinite loading
-		const timeoutId = setTimeout(() => {
-			console.warn("Permissions loading timeout, setting loading to false");
-			setLoading(false);
-		}, 10000); // 10 seconds timeout
-
-		fetchPermissions().finally(() => {
-			clearTimeout(timeoutId);
-		});
-
-		return () => {
-			clearTimeout(timeoutId);
-		};
+		fetchPermissions();
 	}, [user, profile?.tenant_id]);
 
 	// Check if user is tenant owner (highest level access)
