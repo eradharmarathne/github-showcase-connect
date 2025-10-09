@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -31,12 +32,15 @@ export function ExpenseShortcuts({
 	accounts,
 	onQuickFill,
 }: ExpenseShortcutsProps) {
+	const { tenant } = useAuth();
 	const [todaysBookings, setTodaysBookings] = useState<Booking[]>([]);
 	const [usedShortcuts, setUsedShortcuts] = useState<Set<string>>(new Set());
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchTodaysBookings = async () => {
+			if (!tenant?.id) return;
+
 			try {
 				const today = format(new Date(), "yyyy-MM-dd");
 
@@ -47,6 +51,7 @@ export function ExpenseShortcuts({
             *,
             locations (*)
           `)
+					.eq("tenant_id", tenant.id)
 					.eq("location_id", locationId)
 					.lte("check_in", today)
 					.gt("check_out", today); // Check-out is after today (guests still here)
@@ -62,7 +67,7 @@ export function ExpenseShortcuts({
 		if (locationId) {
 			fetchTodaysBookings();
 		}
-	}, [locationId]);
+	}, [locationId, tenant?.id]);
 
 	const getAccountForExpense = (locationName: string): Account | undefined => {
 		// Look for accounts that contain location-specific identifiers

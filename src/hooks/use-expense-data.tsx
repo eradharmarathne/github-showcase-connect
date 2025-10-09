@@ -53,21 +53,21 @@ export const useExpenseData = (): UseExpenseDataReturn => {
 				.select("*")
 				.order("main_type");
 
-			// Fetch recent expenses based on location - simplified query
-			const expenseQuery = !selectedLocation
-				? supabase
-						.from("expenses")
-						.select("*")
-						.order("created_at", { ascending: false })
-						.limit(10)
-				: supabase
-						.from("expenses")
-						.select("*")
-						.eq("location_id", selectedLocation)
-						.order("created_at", { ascending: false })
-						.limit(10);
-
-			const [locationsRes, accountsRes, expenseTypesRes, expensesRes] =
+		// Fetch recent expenses based on location - with proper tenant and location filtering
+		const expenseQuery = !selectedLocation
+			? supabase
+					.from("expenses")
+					.select("*")
+					.eq("tenant_id", tenant.id)
+					.order("created_at", { ascending: false })
+					.limit(10)
+			: supabase
+					.from("expenses")
+					.select("*")
+					.eq("tenant_id", tenant.id)
+					.eq("location_id", selectedLocation)
+					.order("created_at", { ascending: false })
+					.limit(10);			const [locationsRes, accountsRes, expenseTypesRes, expensesRes] =
 				await Promise.all([
 					locationsQuery,
 					accountsQuery,
