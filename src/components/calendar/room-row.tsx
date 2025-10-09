@@ -65,7 +65,9 @@ export function RoomRow({
 			<div className="flex w-full">
 				{/* Room Info Column - Compact & Responsive */}
 				<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1 border-r flex items-center">
-					<div className="font-medium text-[10px] sm:text-xs truncate">{room.room_number}</div>
+					<div className="font-medium text-[10px] sm:text-xs truncate">
+						{room.room_number}
+					</div>
 				</div>
 
 				{/* Calendar Grid - Full width responsive */}
@@ -107,31 +109,65 @@ export function RoomRow({
 										{/* Tooltip on hover - improved visibility */}
 										<div className="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 pointer-events-none">
 											<div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-xl p-3 text-xs min-w-[200px]">
-												<div className="font-semibold text-sm mb-2 text-foreground">{bookingStartingToday.guest_name}</div>
+												<div className="font-semibold text-sm mb-2 text-foreground">
+													{bookingStartingToday.guest_name}
+												</div>
 												<div className="space-y-1">
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Check-in:</span>
-														<span className="font-medium">{format(parseISO(bookingStartingToday.check_in_date), "MMM dd, yyyy")}</span>
+														<span className="text-muted-foreground">
+															Check-in:
+														</span>
+														<span className="font-medium">
+															{format(
+																parseISO(bookingStartingToday.check_in_date),
+																"MMM dd, yyyy",
+															)}
+														</span>
 													</div>
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Check-out:</span>
-														<span className="font-medium">{format(parseISO(bookingStartingToday.check_out_date), "MMM dd, yyyy")}</span>
+														<span className="text-muted-foreground">
+															Check-out:
+														</span>
+														<span className="font-medium">
+															{format(
+																parseISO(bookingStartingToday.check_out_date),
+																"MMM dd, yyyy",
+															)}
+														</span>
 													</div>
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Status:</span>
-														<span className="font-medium capitalize">{bookingStartingToday.status.replace("_", " ")}</span>
+														<span className="text-muted-foreground">
+															Status:
+														</span>
+														<span className="font-medium capitalize">
+															{bookingStartingToday.status.replace("_", " ")}
+														</span>
 													</div>
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Guests:</span>
-														<span className="font-medium">{bookingStartingToday.adults + (bookingStartingToday.children || 0)}</span>
+														<span className="text-muted-foreground">
+															Guests:
+														</span>
+														<span className="font-medium">
+															{bookingStartingToday.adults +
+																(bookingStartingToday.children || 0)}
+														</span>
 													</div>
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Amount:</span>
-														<span className="font-medium">{getCurrencySymbol(bookingStartingToday.currency)}{bookingStartingToday.total_amount.toLocaleString()}</span>
+														<span className="text-muted-foreground">
+															Amount:
+														</span>
+														<span className="font-medium">
+															{getCurrencySymbol(bookingStartingToday.currency)}
+															{bookingStartingToday.total_amount.toLocaleString()}
+														</span>
 													</div>
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Booking #:</span>
-														<span className="font-medium text-xs">{bookingStartingToday.reservation_number}</span>
+														<span className="text-muted-foreground">
+															Booking #:
+														</span>
+														<span className="font-medium text-xs">
+															{bookingStartingToday.reservation_number}
+														</span>
 													</div>
 												</div>
 											</div>
@@ -141,8 +177,11 @@ export function RoomRow({
 										<div className="text-white text-[8px] sm:text-[9px] md:text-[10px] font-semibold truncate px-0.5">
 											{isMobile && bookingStartingToday.span.spanDays < 3
 												? "•"
-												: bookingStartingToday.guest_name.split(" ").map(n => n[0]).join("").slice(0, 3)
-											}
+												: bookingStartingToday.guest_name
+														.split(" ")
+														.map((n) => n[0])
+														.join("")
+														.slice(0, 3)}
 										</div>
 									</div>
 								)}

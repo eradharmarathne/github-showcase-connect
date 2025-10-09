@@ -20,8 +20,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/hooks/use-toast";
 import { useTenant } from "@/hooks/use-tenant";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Location } from "./types";
 

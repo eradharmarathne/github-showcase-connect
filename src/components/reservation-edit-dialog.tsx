@@ -20,11 +20,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocationContext } from "@/context/location-context";
+import { useProfile } from "@/hooks/use-profile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { OTPVerification } from "./otp-verification";
-import { useProfile } from "@/hooks/use-profile";
 
 interface Reservation {
 	id: string;

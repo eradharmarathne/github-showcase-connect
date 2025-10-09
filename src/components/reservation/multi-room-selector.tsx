@@ -14,11 +14,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useLocationContext } from "@/context/location-context";
 import { useRoomAvailability } from "@/hooks/use-room-availability";
+import { useToast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
-import { useLocationContext } from "@/context/location-context";
 
 type Room = Tables<"rooms">;
 
@@ -127,7 +127,6 @@ export function MultiRoomSelector({
 		const roomCurrency = selectedRoom.currency || "LKR";
 		let roomRate = selectedRoom.base_price || 0;
 		const tenantId = selectedRoom.tenant_id;
-		
 
 		// Convert room price to selection currency if they differ
 		if (roomCurrency !== selection.currency) {
@@ -137,7 +136,7 @@ export function MultiRoomSelector({
 					roomCurrency,
 					selection.currency,
 					tenantId,
-					selectedLocation
+					selectedLocation,
 				);
 			} catch (error) {
 				console.error("Currency conversion error:", error);
@@ -186,7 +185,7 @@ export function MultiRoomSelector({
 					roomCurrency,
 					newCurrency,
 					selectedRoom.tenant_id,
-					selectedLocation
+					selectedLocation,
 				);
 			} catch (error) {
 				console.error("Currency conversion error:", error);

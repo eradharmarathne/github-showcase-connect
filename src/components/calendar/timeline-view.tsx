@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
+	addDays,
 	differenceInDays,
 	eachDayOfInterval,
 	endOfDay,
@@ -8,14 +9,13 @@ import {
 	isWithinInterval,
 	parseISO,
 	startOfDay,
-	addDays,
 } from "date-fns";
 import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { TimelineViewSkeleton } from "../skeleton/timeline-view-skelton";
-import { RoomRow, CalendarLegend } from ".";
+import { CalendarLegend, RoomRow } from ".";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Reservation = {
@@ -91,9 +91,11 @@ export function TimelineView({
 			const viewStart = startOfDay(currentDate);
 			const viewEnd = addDays(viewStart, 29);
 
-			const { data, error} = await supabase
+			const { data, error } = await supabase
 				.from("reservations")
-				.select("id, room_id, guest_name, check_in_date, check_out_date, status, total_amount, currency, adults, children, reservation_number")
+				.select(
+					"id, room_id, guest_name, check_in_date, check_out_date, status, total_amount, currency, adults, children, reservation_number",
+				)
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
 				.or(
@@ -174,14 +176,17 @@ export function TimelineView({
 	});
 
 	// Group rooms by room_type
-	const groupedRooms = filteredRooms.reduce((acc, room) => {
-		const type = room.room_type || "Other";
-		if (!acc[type]) {
-			acc[type] = [];
-		}
-		acc[type].push(room);
-		return acc;
-	}, {} as Record<string, typeof filteredRooms>);
+	const groupedRooms = filteredRooms.reduce(
+		(acc, room) => {
+			const type = room.room_type || "Other";
+			if (!acc[type]) {
+				acc[type] = [];
+			}
+			acc[type].push(room);
+			return acc;
+		},
+		{} as Record<string, typeof filteredRooms>,
+	);
 
 	// Apply filters to reservations
 	const filteredReservations = reservations.filter((reservation) => {
@@ -226,7 +231,9 @@ export function TimelineView({
 								<div className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-muted-foreground">
 									{format(day, "EEE")}
 								</div>
-								<div className="text-[9px] sm:text-[10px] md:text-xs font-semibold">{format(day, "dd")}</div>
+								<div className="text-[9px] sm:text-[10px] md:text-xs font-semibold">
+									{format(day, "dd")}
+								</div>
 							</div>
 						))}
 					</div>

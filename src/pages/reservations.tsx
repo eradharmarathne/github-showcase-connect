@@ -1,24 +1,27 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useLocationContext } from "@/context/location-context";
-import { useTenant } from "@/hooks/use-tenant";
-import type { Database } from "@/integrations/supabase/types";
 import { NewReservationDialog } from "@/components/new-reservation-dialog";
 import { OTPVerification } from "@/components/otp-verification";
 import { AddIncomeDialog } from "@/components/reservation";
-import { ReservationEditDialog } from "@/components/reservation-edit-dialog";
 import { PaymentDialog } from "@/components/reservation/payment-dialog";
 import { PaymentsTable } from "@/components/reservation/payments-table";
 import { ReservationsDesktopTable } from "@/components/reservation/reservations-desktop-table";
 import { ReservationsFilters } from "@/components/reservation/reservations-filters";
 import { ReservationsHeader } from "@/components/reservation/reservations-header";
 import { ReservationsMobileCards } from "@/components/reservation/reservations-mobile-cards";
+import { ReservationEditDialog } from "@/components/reservation-edit-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { ViewReservationDialog } from "@/components/view-reservation-dialog";
+import { useLocationContext } from "@/context/location-context";
 import { useReservationFinancials } from "@/hooks/use-reservation-financials";
-import { useReservationsData, useIncomeData } from "@/hooks/use-reservations-data";
+import {
+	useIncomeData,
+	useReservationsData,
+} from "@/hooks/use-reservations-data";
+import { useTenant } from "@/hooks/use-tenant";
+import type { Database } from "@/integrations/supabase/types";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 
@@ -65,7 +68,7 @@ export default function Reservations() {
 		reservation: any;
 	} | null>(null);
 	const [showEditOTPVerification, setShowEditOTPVerification] = useState(false);
-	const accounts = null
+	const accounts = null;
 
 	// Event handlers
 	const handleViewReservation = (id: string) => {

@@ -1,13 +1,17 @@
+import { addMonths, format, startOfMonth, subMonths } from "date-fns";
+import {
+	Calendar as CalendarIcon,
+	ChevronLeft,
+	ChevronRight,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { TimelineView } from "@/components/calendar/timeline-view";
 import { PermissionRoute } from "@/components/permission-route";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
-import { addMonths, subMonths, format, startOfMonth } from "date-fns";
-import { getCurrencySymbol } from "@/utils/currency";
 import type { Database } from "@/integrations/supabase/types";
+import { getCurrencySymbol } from "@/utils/currency";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 
@@ -69,11 +73,7 @@ export default function EnhancedCalendar() {
 							Today
 						</Button>
 						<div className="flex items-center gap-1">
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={handlePreviousMonth}
-							>
+							<Button variant="ghost" size="icon" onClick={handlePreviousMonth}>
 								<ChevronLeft className="size-4" />
 							</Button>
 							<Button variant="ghost" size="icon" onClick={handleNextMonth}>

@@ -11,8 +11,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLocationContext } from "@/context/location-context";
-import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
+import { supabase } from "@/integrations/supabase/client";
 
 // Lazy load the form components
 const AddToBillForm = React.lazy(() =>

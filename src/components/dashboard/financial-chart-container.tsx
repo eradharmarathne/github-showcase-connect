@@ -14,11 +14,11 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
 	ChartDataPoint,
 	useAvailableCurrencies,
 } from "@/hooks/use-financial-chart-data";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface FinancialChartContainerProps {
 	data: ChartDataPoint[];

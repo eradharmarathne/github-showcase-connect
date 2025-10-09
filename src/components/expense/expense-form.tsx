@@ -5,15 +5,15 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocationContext } from "@/context/location-context";
-import { useToast } from "@/hooks/use-toast";
+import { useProfile } from "@/hooks/use-profile";
 import { useTenant } from "@/hooks/use-tenant";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 import { ExpenseCategories } from "./expense-categories";
 import { ExpenseDetails } from "./expense-details";
 import { ExpenseReceipt } from "./expense-receipt";
-import { useProfile } from "@/hooks/use-profile";
 
 type Account = Tables<"accounts">;
 type ExpenseType = Tables<"expense_types">;

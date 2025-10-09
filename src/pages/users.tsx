@@ -11,7 +11,10 @@ import {
 import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
 import { usePermissions } from "@/hooks/use-permissions";
-import { type User as UsersDataUser, useUsersData } from "@/hooks/use-users-data";
+import {
+	type User as UsersDataUser,
+	useUsersData,
+} from "@/hooks/use-users-data";
 
 export default function Users() {
 	const [showInviteDialog, setShowInviteDialog] = useState(false);

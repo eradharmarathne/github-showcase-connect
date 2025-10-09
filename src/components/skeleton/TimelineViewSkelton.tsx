@@ -16,7 +16,10 @@ export function TimelineViewSkeleton() {
 					</div>
 					<div className="flex flex-1 bg-muted/50">
 						{days.map((_, i) => (
-							<div key={i} className="flex-1 min-w-[32px] sm:min-w-[40px] px-0.5 py-0.5 text-center border-r last:border-r-0">
+							<div
+								key={i}
+								className="flex-1 min-w-[32px] sm:min-w-[40px] px-0.5 py-0.5 text-center border-r last:border-r-0"
+							>
 								<Skeleton className="h-3 w-8 mx-auto mb-1" />
 								<Skeleton className="h-3 w-6 mx-auto" />
 							</div>
@@ -41,7 +44,10 @@ export function TimelineViewSkeleton() {
 								</div>
 								<div className="flex flex-1">
 									{days.map((_, dIdx) => (
-										<div key={dIdx} className="flex-1 min-w-[32px] sm:min-w-[40px] px-0.5 py-2 border-r last:border-r-0">
+										<div
+											key={dIdx}
+											className="flex-1 min-w-[32px] sm:min-w-[40px] px-0.5 py-2 border-r last:border-r-0"
+										>
 											<Skeleton className="h-4 w-full" />
 										</div>
 									))}
