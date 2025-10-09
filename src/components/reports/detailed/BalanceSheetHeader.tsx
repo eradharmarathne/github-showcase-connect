@@ -1,5 +1,5 @@
 import { CreditCard, Download } from "lucide-react";
-import { CurrencySelector } from "@/components/CurrencySelector";
+import { CurrencySelector } from "@/components/currency-selector";
 import { Button } from "@/components/ui/button";
 import { type Currency } from "@/utils/currency";
 import { type AccountDetail } from "./AccountDetailsList";

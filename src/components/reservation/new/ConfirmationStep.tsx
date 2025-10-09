@@ -1,5 +1,5 @@
 import { Calendar, CheckCircle, CreditCard, User } from "lucide-react";
-import { type RoomSelection } from "@/components/reservation/MultiRoomSelector";
+import { type RoomSelection } from "@/components/reservation/multi-room-selector";
 import { type GuestData } from "./GuestInformationStep";
 import { type PaymentData } from "./PaymentStep";
 

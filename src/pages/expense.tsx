@@ -6,12 +6,12 @@ import {
 	ExpenseHistoryTable,
 	ExpenseShortcutsSection,
 } from "@/components/expense";
-import { ExpenseSkeleton } from "@/components/skeleton/ExpenseSkeleton";
+import { ExpenseSkeleton } from "@/components/skeleton/expense-skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useLocationContext } from "@/context/LocationContext";
-import { useExpenseData } from "@/hooks/useExpenseData";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useLocationContext } from "@/context/location-context";
+import { useExpenseData } from "@/hooks/use-expense-data";
+import { usePermissions } from "@/hooks/use-permissions";
 
 export default function Expense() {
 	const { t } = useTranslation();

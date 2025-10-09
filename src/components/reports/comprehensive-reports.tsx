@@ -5,8 +5,8 @@ import { ComprehensiveReportsSkeleton } from "@/components/reports";
 import { AccountDetails } from "@/components/reports/comprehensive/AccountDetails";
 import { FinancialSummaryCards } from "@/components/reports/comprehensive/FinancialSummaryCards";
 import { ReportFilters } from "@/components/reports/comprehensive/ReportFilters";
-import { useLocationContext } from "@/context/LocationContext";
-import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/location-context";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/currency";
 

@@ -6,10 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
 	useAvailableCurrencies,
 	useFinancialChartData,
-} from "@/hooks/useFinancialChartData";
-import { FinancialChartContainer } from "./FinancialChartContainer";
-import { FinancialChartControls } from "./FinancialChartControls";
-import { FinancialChartHeader } from "./FinancialChartHeader";
+} from "@/hooks/use-financial-chart-data";
+import { FinancialChartContainer } from "./financial-chart-container";
+import { FinancialChartControls } from "./financial-chart-controls";
+import { FinancialChartHeader } from "./financial-chart-header";
 
 export function FinancialChart() {
 	const [selectedCurrency, setSelectedCurrency] = React.useState("USD");

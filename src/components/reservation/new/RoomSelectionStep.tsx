@@ -1,7 +1,7 @@
 import {
 	MultiRoomSelector,
 	type RoomSelection,
-} from "@/components/reservation/MultiRoomSelector";
+} from "@/components/reservation/multi-room-selector";
 import { Tables } from "@/integrations/supabase/types";
 
 type Room = Tables<"rooms">;

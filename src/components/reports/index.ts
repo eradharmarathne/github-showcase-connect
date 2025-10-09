@@ -1,13 +1,13 @@
 // Main report components
 
-export { AccountsReportsSkeleton } from "../skeleton/AccountsReportsSkeleton";
-export { CommissionReportsSkeleton } from "../skeleton/CommissionReportsSkeleton";
+export { AccountsReportsSkeleton } from "../skeleton/accounts-reports-skeleton";
+export { CommissionReportsSkeleton } from "../skeleton/commission-reports-skeleton";
 // Skeleton components
-export { ComprehensiveReportsSkeleton } from "../skeleton/ComprehensiveReportsSkeleton";
-export { DetailedBalanceSheetSkeleton } from "../skeleton/DetailedBalanceSheetSkeleton";
-export { EnhancedFinancialReportsSkeleton } from "../skeleton/EnhancedFinancialReportsSkeleton";
-export { default as AccountsReports } from "./AccountsReports";
-export { default as CommissionReports } from "./CommissionReports";
-export { default as ComprehensiveReports } from "./ComprehensiveReports";
-export { default as DetailedBalanceSheet } from "./DetailedBalanceSheet";
-export { default as EnhancedFinancialReports } from "./EnhancedFinancialReports";
+export { ComprehensiveReportsSkeleton } from "../skeleton/comprehensive-reports-skeleton";
+export { DetailedBalanceSheetSkeleton } from "../skeleton/detailed-balance-sheet-skeleton";
+export { EnhancedFinancialReportsSkeleton } from "../skeleton/enhanced-financial-reports-skeleton";
+export { default as AccountsReports } from "./accounts-reports";
+export { default as CommissionReports } from "./commission-reports";
+export { default as ComprehensiveReports } from "./comprehensive-reports";
+export { default as DetailedBalanceSheet } from "./detailed-balance-sheet";
+export { default as EnhancedFinancialReports } from "./enhanced-financial-reports";

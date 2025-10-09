@@ -1,7 +1,7 @@
 import { Navigate } from "react-router";
-import { useAuth } from "@/context/AuthContext";
-import { useLocationContext } from "@/context/LocationContext";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/context/auth-context";
+import { useLocationContext } from "@/context/location-context";
+import { usePermissions } from "@/hooks/use-permissions";
 
 export const SmartRedirect = () => {
 	const { tenant, tenantLoading, profile, profileLoading } = useAuth();

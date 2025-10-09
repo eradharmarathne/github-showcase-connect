@@ -1,9 +1,9 @@
-export { AccountCard } from "./AccountCard";
-export { AccountForm } from "./AccountForm";
-export { AccountGrid } from "./AccountGrid";
-export { AccountSummaryCards } from "./AccountSummaryCards";
-export { AccountTransferForm } from "./AccountTransferForm";
+export { AccountCard } from "./account-card";
+export { AccountForm } from "./account-form";
+export { AccountGrid } from "./account-grid";
+export { AccountSummaryCards } from "./account-summary-cards";
+export { AccountTransferForm } from "./account-transfer-form";
 export {
 	RecentTransactions,
 	RecentTransactionsSkeleton,
-} from "./RecentTransactions";
+} from "./recent-transactions";

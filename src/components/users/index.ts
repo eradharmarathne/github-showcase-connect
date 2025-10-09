@@ -1,10 +1,10 @@
-export { EditUserDialog } from "./EditUserDialog";
-export { InviteMemberDialog } from "./InviteMemberDialog";
-export { PermissionMatrix } from "./PermissionMatrix";
+export { EditUserDialog } from "./edit-user-dialog";
+export { InviteMemberDialog } from "./invite-member-dialog";
+export { PermissionMatrix } from "./permission-matrix";
 export type {
 	InvitePermissions,
 	Location,
 	User,
 	UserPermissions,
 } from "./types";
-export { UsersList } from "./UsersList";
+export { UsersList } from "./users-list";

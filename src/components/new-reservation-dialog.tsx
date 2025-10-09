@@ -1,6 +1,6 @@
 import { Calendar, ChevronLeft, ChevronRight, Save, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { type RoomSelection } from "@/components/reservation/MultiRoomSelector";
+import { type RoomSelection } from "@/components/reservation/multi-room-selector";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -9,11 +9,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import { useToast } from "@/hooks/use-toast";
-import { useProfile } from "@/hooks/useProfile";
-import { useRoomAvailability } from "@/hooks/useRoomAvailability";
-import { useTenant } from "@/hooks/useTenant";
+import { useRoomAvailability } from "@/hooks/use-room-availability";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
@@ -25,6 +24,7 @@ import {
 import { PaymentData, PaymentStep } from "./reservation/new/PaymentStep";
 import { PricingStep } from "./reservation/new/PricingStep";
 import { RoomSelectionStep } from "./reservation/new/RoomSelectionStep";
+import { useProfile } from "@/hooks/use-profile";
 
 type Room = Tables<"rooms">;
 

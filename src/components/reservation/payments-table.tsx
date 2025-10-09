@@ -8,7 +8,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import { useIncomeData } from "@/hooks/use-reservations-data";
 
 type IncomeRecord = {

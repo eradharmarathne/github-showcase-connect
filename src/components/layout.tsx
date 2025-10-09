@@ -17,7 +17,7 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TourHelpButton } from "./CustomTourHelpButton";
 import LanguageDropdown from "./dropdown-language";

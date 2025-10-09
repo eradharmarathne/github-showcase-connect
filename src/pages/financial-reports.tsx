@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { FinancialReportsSkeleton } from "@/components/skeleton/FinancialReportsSkeleton";
+import { FinancialReportsSkeleton } from "@/components/skeleton/financial-reports-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +30,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrencySymbol } from "@/utils/currency";

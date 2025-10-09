@@ -10,13 +10,12 @@ import {
 	startOfDay,
 	addDays,
 } from "date-fns";
-import { useLocationContext } from "@/context/LocationContext";
-import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/location-context";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-import { CalendarLegend } from "./CalendarLegend";
-import { RoomRow } from "./RoomRow";
-import { TimelineViewSkeleton } from "@/components/skeleton/TimelineViewSkelton";
+import { TimelineViewSkeleton } from "../skeleton/timeline-view-skelton";
+import { RoomRow, CalendarLegend } from ".";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Reservation = {

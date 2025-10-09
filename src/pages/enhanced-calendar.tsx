@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { TimelineView } from "@/components/calendar/TimelineView";
-import { PermissionRoute } from "@/components/PermissionRoute";
+import { TimelineView } from "@/components/calendar/timeline-view";
+import { PermissionRoute } from "@/components/permission-route";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { addMonths, subMonths, format, startOfMonth } from "date-fns";

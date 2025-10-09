@@ -1,7 +1,7 @@
 // Components
 
-export { CompanyInfoStep } from "./CompanyInfoStep";
-export { CompletionStep } from "./CompletionStep";
+export { CompanyInfoStep } from "./company-info-step";
+export { CompletionStep } from "./completion-step";
 // Constants
 export {
 	COUNTRIES,
@@ -11,11 +11,11 @@ export {
 	ROOM_COUNT_OPTIONS,
 	STEPS,
 } from "./constants";
-export { FeaturesStep } from "./FeaturesStep";
-export { OnboardingNavigation } from "./OnboardingNavigation";
-export { OnboardingProgress } from "./OnboardingProgress";
-export { PlanSelectionStep } from "./PlanSelectionStep";
-export { PropertyDetailsStep } from "./PropertyDetailsStep";
+export { FeaturesStep } from "./features-step";
+export { OnboardingNavigation } from "./onboarding-navigation";
+export { OnboardingProgress } from "./onboarding-progress";
+export { PlanSelectionStep } from "./plan-selection-step";
+export { PropertyDetailsStep } from "./property-details-step";
 // Types
 export type {
 	OnboardingFormData,

@@ -1,4 +1,4 @@
-import { type RoomSelection } from "@/components/reservation/MultiRoomSelector";
+import { type RoomSelection } from "@/components/reservation/multi-room-selector";
 
 interface PricingStepProps {
 	roomSelections: RoomSelection[];

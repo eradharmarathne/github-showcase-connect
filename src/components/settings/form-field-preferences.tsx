@@ -1,6 +1,6 @@
 import { Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useFormFieldPreferences } from "@/hooks/useFormFieldPreferences";
+import { useFormFieldPreferences } from "@/hooks/use-form-field-preferences";
 
 export function FormFieldPreferences() {
 	const {

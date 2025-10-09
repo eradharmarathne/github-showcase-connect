@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useLocationContext } from "@/context/LocationContext";
+import { useAuth } from "@/context/auth-context";
+import { useLocationContext } from "@/context/location-context";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 

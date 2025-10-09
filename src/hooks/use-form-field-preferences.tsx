@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 

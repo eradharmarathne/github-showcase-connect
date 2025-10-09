@@ -6,8 +6,8 @@ import {
 	FinancialChart,
 	UpcomingBookings,
 } from "@/components/dashboard";
-import { useLocationContext } from "@/context/LocationContext";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useLocationContext } from "@/context/location-context";
+import { usePermissions } from "@/hooks/use-permissions";
 import { Tables } from "@/integrations/supabase/types";
 
 type Location = Tables<"locations">;

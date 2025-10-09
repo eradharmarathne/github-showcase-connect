@@ -1,25 +1,24 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { NewReservationDialog } from "@/components/NewReservationDialog";
-import { OTPVerification } from "@/components/OTPVerification";
-import { ReservationEditDialog } from "@/components/ReservationEditDialog";
-import { AddIncomeDialog } from "@/components/reservation/AddIncomeDialog";
-import { PaymentDialog } from "@/components/reservation/PaymentDialog";
-import { PaymentsTable } from "@/components/reservation/PaymentsTable";
-import { ReservationsDesktopTable } from "@/components/reservation/ReservationsDesktopTable";
-import { ReservationsFilters } from "@/components/reservation/ReservationsFilters";
-import { ReservationsHeader } from "@/components/reservation/ReservationsHeader";
-import { ReservationsMobileCards } from "@/components/reservation/ReservationsMobileCards";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { ViewReservationDialog } from "@/components/ViewReservationDialog";
-import { useLocationContext } from "@/context/LocationContext";
-import { useIncomeData } from "@/hooks/useIncomeData";
-import { useReservationFinancials } from "@/hooks/useReservationFinancials";
-import { useReservationsData } from "@/hooks/useReservationsData";
-import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/location-context";
+import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
+import { NewReservationDialog } from "@/components/new-reservation-dialog";
+import { OTPVerification } from "@/components/otp-verification";
+import { AddIncomeDialog } from "@/components/reservation";
+import { ReservationEditDialog } from "@/components/reservation-edit-dialog";
+import { PaymentDialog } from "@/components/reservation/payment-dialog";
+import { PaymentsTable } from "@/components/reservation/payments-table";
+import { ReservationsDesktopTable } from "@/components/reservation/reservations-desktop-table";
+import { ReservationsFilters } from "@/components/reservation/reservations-filters";
+import { ReservationsHeader } from "@/components/reservation/reservations-header";
+import { ReservationsMobileCards } from "@/components/reservation/reservations-mobile-cards";
+import { ViewReservationDialog } from "@/components/view-reservation-dialog";
+import { useReservationFinancials } from "@/hooks/use-reservation-financials";
+import { useReservationsData, useIncomeData } from "@/hooks/use-reservations-data";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 
@@ -28,7 +27,6 @@ export default function Reservations() {
 	const { locations } = useLocationContext();
 	const { refetch } = useReservationsData();
 	const { refetch: refetchFinancials } = useReservationFinancials();
-	const { accounts } = useIncomeData();
 	const { tenant } = useTenant();
 	const navigate = useNavigate();
 
@@ -67,6 +65,7 @@ export default function Reservations() {
 		reservation: any;
 	} | null>(null);
 	const [showEditOTPVerification, setShowEditOTPVerification] = useState(false);
+	const accounts = null
 
 	// Event handlers
 	const handleViewReservation = (id: string) => {

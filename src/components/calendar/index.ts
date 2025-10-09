@@ -1,3 +1,3 @@
-export { CalendarLegend } from "./CalendarLegend";
-export { RoomRow } from "./RoomRow";
-export { TimelineView } from "./TimelineView";
+export { CalendarLegend } from "./calendar-legend";
+export { RoomRow } from "./room-row";
+export { TimelineView } from "./timeline-view";

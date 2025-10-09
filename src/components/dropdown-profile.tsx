@@ -19,8 +19,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/context/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/context/auth-context";
+import { usePermissions } from "@/hooks/use-permissions";
 
 type Props = {
 	trigger: ReactNode;

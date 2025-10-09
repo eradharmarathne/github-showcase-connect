@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
 	type CurrencyOption,
 	useAvailableCurrencies,
-} from "@/hooks/useFinancialChartData";
+} from "@/hooks/use-financial-chart-data";
 
 interface FinancialChartHeaderProps {
 	selectedCurrency: string;

@@ -1,4 +1,4 @@
-import { useIncomeData } from "@/hooks/useReservationsData";
+import { useIncomeData } from "@/hooks/use-reservations-data";
 
 interface ReservationExpensesDisplayProps {
 	reservationId: string;

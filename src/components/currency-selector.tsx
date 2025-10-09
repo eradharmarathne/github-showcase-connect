@@ -9,8 +9,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useLocationContext } from "@/context/LocationContext";
-import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/location-context";
+import { useTenant } from "@/hooks/use-tenant";
 import type { CurrencyRate } from "@/utils/currency";
 import {
 	getCurrencyConversionSearchUrl,

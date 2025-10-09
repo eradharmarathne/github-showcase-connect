@@ -28,7 +28,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type User as UsersDataUser, useUsersData } from "@/hooks/useUsersData";
+import { type User as UsersDataUser, useUsersData } from "@/hooks/use-users-data";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UsersListProps {

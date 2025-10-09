@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { OTPVerification } from "@/components/OTPVerification";
-import { SignatureCapture } from "@/components/SignatureCapture";
+import { OTPVerification } from "@/components/otp-verification";
+import { SignatureCapture } from "@/components/signature-capture";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

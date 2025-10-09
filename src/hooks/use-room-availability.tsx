@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, isWithinInterval, parseISO } from "date-fns";
-import { useLocationContext } from "@/context/LocationContext";
-import { useTenant } from "@/hooks/useTenant";
+import { useLocationContext } from "@/context/location-context";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 
 interface UseRoomAvailabilityOptions {

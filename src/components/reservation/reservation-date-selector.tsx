@@ -10,7 +10,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { useRoomAvailability } from "@/hooks/useRoomAvailability";
+import { useRoomAvailability } from "@/hooks/use-room-availability";
 import { cn } from "@/lib/utils";
 
 interface ReservationDateSelectorProps {

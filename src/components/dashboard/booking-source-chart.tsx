@@ -20,7 +20,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 
 interface BookingSourceData {

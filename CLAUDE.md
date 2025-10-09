@@ -61,19 +61,19 @@ npx supabase gen types typescript --project-id "$PROJECT_REF" --schema public > 
 
 ### Auth & State Management Flow
 
-1. **AuthContext** (`src/context/AuthContext.tsx`)
+1. **AuthContext** (`src/context/auth-context.tsx`)
    - Manages Supabase auth session, user, profile, tenant, subscription
    - Provides: `user`, `profile`, `tenant`, `subscription`, `isOwner`, `hasActiveTrial`, `hasActiveSubscription`
    - Auto-creates profile on sign-in
    - Fetches tenant and subscription data when profile has `tenant_id`
 
-2. **LocationContext** (`src/context/LocationContext.tsx`)
+2. **LocationContext** (`src/context/location-context.tsx`)
    - Manages selected location within current tenant
    - Auto-selects first available location
    - Components must use `selectedLocation` to filter queries
    - Provides: `selectedLocation`, `setSelectedLocation`, `locations`, `getSelectedLocationData()`
 
-3. **Permission System** (`src/hooks/usePermissions.tsx`)
+3. **Permission System** (`src/hooks/use-permissions.tsx`)
    - Granular boolean permissions stored in `user_permissions` table
    - **Tenant Owner Bypass:** Users where `profile.id === tenant.owner_profile_id` bypass ALL permission checks
    - Permissions: `access_dashboard`, `access_income`, `access_expenses`, `access_reports`, `access_calendar`, `access_bookings`, `access_rooms`, `access_master_files`, `access_accounts`, `access_users`, `access_settings`, `access_booking_channels`

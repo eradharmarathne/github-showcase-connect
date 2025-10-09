@@ -1,8 +1,6 @@
 import {
 	Bed,
 	Building2,
-	ChevronDown,
-	ChevronRight,
 	MapPin,
 	Percent,
 	UserCheck,
@@ -11,14 +9,13 @@ import {
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
-import AgentsTab from "@/components/master-files/AgentsTab";
-import CommissionsTab from "@/components/master-files/CommissionsTab";
-import GuidesTab from "@/components/master-files/GuidesTab";
-import LocationsTab from "@/components/master-files/LocationsTab";
-import RoomsTab from "@/components/master-files/RoomsTab";
+import AgentsTab from "@/components/master-files/agents-tab";
+import CommissionsTab from "@/components/master-files/commissions-tab";
+import GuidesTab from "@/components/master-files/guides-tab";
+import LocationsTab from "@/components/master-files/locations-tab";
+import RoomsTab from "@/components/master-files/rooms-tab";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 
 export default function MasterFiles() {
 	const [searchParams, setSearchParams] = useSearchParams();

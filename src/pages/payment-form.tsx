@@ -2,7 +2,7 @@ import { format } from "date-fns";
 import { ArrowLeft, CreditCard, Save } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { CurrencySelector } from "@/components/CurrencySelector";
+import { CurrencySelector } from "@/components/currency-selector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,10 +15,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/context/AuthContext";
-import { useLocationContext } from "@/context/LocationContext";
+import { useAuth } from "@/context/auth-context";
+import { useLocationContext } from "@/context/location-context";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
@@ -243,6 +243,8 @@ export default function PaymentForm() {
 				payment_number: paymentNumber,
 				currency: formData.currency,
 				created_by: user?.id,
+				location_id: reservation.location_id,
+				tenant_id: tenant?.id,
 			};
 
 			const { error: paymentError } = await supabase

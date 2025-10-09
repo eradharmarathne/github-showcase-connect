@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useAvailableCurrencies } from "@/hooks/useFinancialChartData";
+import { useAvailableCurrencies } from "@/hooks/use-financial-chart-data";
 
 interface FinancialChartControlsProps {
 	totals: {

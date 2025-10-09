@@ -1,7 +1,7 @@
-import { type RoomSelection } from "@/components/reservation/MultiRoomSelector";
+import { type RoomSelection } from "@/components/reservation/multi-room-selector";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useFormFieldPreferences } from "@/hooks/useFormFieldPreferences";
+import { useFormFieldPreferences } from "@/hooks/use-form-field-preferences";
 
 interface PaymentData {
 	advance_amount: number;

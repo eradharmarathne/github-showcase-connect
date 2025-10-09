@@ -15,7 +15,7 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import Logo from "../ui/logo";
 
 export function LocationSwitcher() {

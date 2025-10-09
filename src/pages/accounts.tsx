@@ -9,13 +9,13 @@ import {
 	AccountTransferForm,
 	RecentTransactions,
 } from "@/components/accounts";
-import { AccountsSkeleton } from "@/components/skeleton/AccountsSkeleton";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { useTenant } from "@/hooks/use-tenant";
+import { AccountsSkeleton } from "@/components/skeleton";
 
 type Account = Tables<"accounts">;
 type AccountWithBalance = Account & { currentBalance: number };

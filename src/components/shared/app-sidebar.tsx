@@ -12,11 +12,6 @@ import {
 	MinusCircle,
 	Percent,
 	Phone,
-	PlusCircle,
-	Settings,
-	TrendingUp,
-	UserCheck,
-	Users,
 	Wifi,
 } from "lucide-react";
 import * as React from "react";
@@ -25,17 +20,15 @@ import { useLocation } from "react-router";
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { LocationSwitcher } from "@/components/shared/location-switcher";
-import { AppSidebarSkeleton } from "@/components/skeleton/AppSidebarSkeleton";
+import { AppSidebarSkeleton } from "@/components/skeleton/app-sidebar-skeleton";
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarHeader,
 	SidebarRail,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useProfile } from "@/hooks/useProfile";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useProfile } from "@/hooks/use-profile";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 	const { profile } = useProfile();

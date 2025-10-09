@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import { useToast } from "@/hooks/use-toast";
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { type Currency, convertCurrency } from "@/utils/currency";
 import type { AccountDetail } from "./AccountDetailsList";

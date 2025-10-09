@@ -1,41 +1,37 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { PermissionRoute } from "@/components/PermissionRoute";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { TourProvider } from "@/components/tour";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider } from "@/context/AuthContext";
-import { LocationProvider } from "@/context/LocationContext";
-import { ThemeProvider } from "@/context/ThemeContext";
-import "@/components/tour/tour-styles.css";
 import "./i18n";
-import BookingChannelsIntegration from "@/pages/BookingChannelsIntegration";
-import Reports from "@/pages/Reports";
-import { AuthRedirect } from "./components/AuthRedirect";
-import { Layout } from "./components/Layout";
-import { SmartRedirect } from "./components/SmartRedirect";
-import AccessDenied from "./pages/AccessDenied";
-import Accounts from "./pages/Accounts";
-import Auth from "./pages/Auth";
-import BillingError from "./pages/BillingError";
-import BillingSubscription from "./pages/BillingSubscription";
-import BillingSuccess from "./pages/BillingSuccess";
-import Dashboard from "./pages/Dashboard";
-import EnhancedCalendar from "./pages/EnhancedCalendar";
-import Expense from "./pages/Expense";
-import FinancialReports from "./pages/FinancialReports";
-import ForgotPassword from "./pages/ForgotPassword";
-import MasterFiles from "./pages/MasterFiles";
-import NotFound from "./pages/NotFound";
-import Onboarding from "./pages/Onboarding";
-import PaymentForm from "./pages/PaymentForm";
-import ReservationDetails from "./pages/ReservationDetails";
-import Reservations from "./pages/Reservations";
-import ResetPassword from "./pages/ResetPassword";
-import Settings from "./pages/Settings";
-import Users from "./pages/Users";
+import { Layout, Users, Settings } from "lucide-react";
+import { ThemeProvider } from "next-themes";
+import { AuthRedirect } from "./components/auth-redirect";
+import { PermissionRoute } from "./components/permission-route";
+import { ProtectedRoute } from "./components/protected-route";
+import { SmartRedirect } from "./components/smart-redirect";
+import AuthProvider from "./context/auth-context";
+import { LocationProvider } from "./context/location-context";
+import AccessDenied from "./pages/access-denied";
+import Accounts from "./pages/accounts";
+import Auth from "./pages/auth";
+import BillingError from "./pages/billing-error";
+import BillingSubscription from "./pages/billing-subscription";
+import BillingSuccess from "./pages/billing-success";
+import BookingChannelsIntegration from "./pages/booking-channels-integration";
+import Dashboard from "./pages/dashboard";
+import EnhancedCalendar from "./pages/enhanced-calendar";
+import Expense from "./pages/expense";
+import FinancialReports from "./pages/financial-reports";
+import ForgotPassword from "./pages/forgot-password";
+import MasterFiles from "./pages/master-files";
+import NotFound from "./pages/not-found";
+import Onboarding from "./pages/onboarding";
+import PaymentForm from "./pages/payment-form";
+import Reports from "./pages/reports";
+import ReservationDetails from "./pages/reservation-details";
+import Reservations from "./pages/reservations";
+import ResetPassword from "./pages/reset-password";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +44,6 @@ const App = () => (
 						<Toaster />
 						<Sonner />
 						<BrowserRouter>
-							<TourProvider>
 								<Routes>
 									<Route path="/" element={<AuthRedirect />} />
 									<Route path="/auth" element={<Auth />} />
@@ -328,7 +323,6 @@ const App = () => (
 									/>
 									<Route path="*" element={<NotFound />} />
 								</Routes>
-							</TourProvider>
 						</BrowserRouter>
 					</LocationProvider>
 				</AuthProvider>

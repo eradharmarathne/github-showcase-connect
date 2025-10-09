@@ -18,7 +18,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
 	ChartDataPoint,
 	useAvailableCurrencies,
-} from "@/hooks/useFinancialChartData";
+} from "@/hooks/use-financial-chart-data";
 
 interface FinancialChartContainerProps {
 	data: ChartDataPoint[];

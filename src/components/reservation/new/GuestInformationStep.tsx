@@ -9,7 +9,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useFormFieldPreferences } from "@/hooks/useFormFieldPreferences";
+import { useFormFieldPreferences } from "@/hooks/use-form-field-preferences";
 
 interface GuestData {
 	guest_name: string;

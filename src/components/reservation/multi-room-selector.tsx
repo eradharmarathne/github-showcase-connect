@@ -1,7 +1,7 @@
 import { addDays, format } from "date-fns";
 import { Calendar, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { CurrencySelector } from "@/components/CurrencySelector";
+import { CurrencySelector } from "@/components/currency-selector";
 import { ReservationDateSelector } from "@/components/reservation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,9 +15,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useRoomAvailability } from "@/hooks/useRoomAvailability";
+import { useRoomAvailability } from "@/hooks/use-room-availability";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
+import { useLocationContext } from "@/context/location-context";
 
 type Room = Tables<"rooms">;
 
@@ -52,6 +53,7 @@ export function MultiRoomSelector({
 
 	// Room availability checking
 	const { isRangeAvailable } = useRoomAvailability();
+	const { selectedLocation } = useLocationContext();
 
 	const generateId = useCallback(
 		() => `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -124,6 +126,8 @@ export function MultiRoomSelector({
 
 		const roomCurrency = selectedRoom.currency || "LKR";
 		let roomRate = selectedRoom.base_price || 0;
+		const tenantId = selectedRoom.tenant_id;
+		
 
 		// Convert room price to selection currency if they differ
 		if (roomCurrency !== selection.currency) {
@@ -132,6 +136,8 @@ export function MultiRoomSelector({
 					selectedRoom.base_price || 0,
 					roomCurrency,
 					selection.currency,
+					tenantId,
+					selectedLocation
 				);
 			} catch (error) {
 				console.error("Currency conversion error:", error);
@@ -179,6 +185,8 @@ export function MultiRoomSelector({
 					selectedRoom.base_price || 0,
 					roomCurrency,
 					newCurrency,
+					selectedRoom.tenant_id,
+					selectedLocation
 				);
 			} catch (error) {
 				console.error("Currency conversion error:", error);

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ReservationsListSkeleton } from "@/components/skeleton/ReservationsListSkeleton";
+import { ReservationsListSkeleton } from "@/components/skeleton/reservations-list-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,12 +21,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import {
 	type ReservationFinancial,
 	useReservationFinancials,
-} from "@/hooks/useReservationFinancials";
-import { useTenant } from "@/hooks/useTenant";
+} from "@/hooks/use-reservation-financials";
+import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 

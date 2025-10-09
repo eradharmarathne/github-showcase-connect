@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useLocationContext } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { useLocationContext } from "@/context/location-context";
+import { useAuth } from "@/context/auth-context";
 
 type Location = Tables<"locations">;
 type Account = Tables<"accounts">;

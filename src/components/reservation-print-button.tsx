@@ -1,12 +1,12 @@
 import { Printer } from "lucide-react";
 import React from "react";
-import { PrintableReservation } from "@/components/ReservationPrintableView";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth-context";
 import {
 	PrintableReservationData,
 	useReservationPrint,
-} from "@/hooks/useReservationPrint";
+} from "@/hooks/use-reservation-print";
+import { PrintableReservation } from "./reservation-printable-view";
 
 // Enhanced reservation type from ReservationsList - matches what Supabase returns
 type EnhancedReservation = {

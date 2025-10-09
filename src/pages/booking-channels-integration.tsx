@@ -17,7 +17,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { BookingChannelsSkeleton } from "@/components/skeleton/BookingChannelsSkeleton";
+import { BookingChannelsSkeleton } from "@/components/skeleton/booking-channels-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext } from "@/context/location-context";
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper functions

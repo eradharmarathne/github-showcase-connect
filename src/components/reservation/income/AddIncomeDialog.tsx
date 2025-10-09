@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useLocationContext } from "@/context/LocationContext";
-import { useProfile } from "@/hooks/useProfile";
+import { useLocationContext } from "@/context/location-context";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "@/hooks/use-profile";
 
 // Lazy load the form components
 const AddToBillForm = React.lazy(() =>

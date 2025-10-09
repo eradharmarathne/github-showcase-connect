@@ -13,7 +13,7 @@ import {
 	STEPS,
 } from "@/components/onboarding";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "@/lib/creem";

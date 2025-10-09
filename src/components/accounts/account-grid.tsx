@@ -1,5 +1,5 @@
 import { Tables } from "@/integrations/supabase/types";
-import { AccountCard } from "./AccountCard";
+import { AccountCard } from "./account-card";
 
 type Account = Tables<"accounts">;
 type AccountWithBalance = Account & { currentBalance: number };

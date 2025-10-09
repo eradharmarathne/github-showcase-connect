@@ -1,17 +1,17 @@
 import { Calendar, DollarSign, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ReservationsListSkeleton } from "@/components/skeleton/ReservationsListSkeleton";
+import { ReservationsListSkeleton } from "@/components/skeleton/reservations-list-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
-import { useLocationContext } from "@/context/LocationContext";
-import { useReservationPrint } from "@/hooks/useReservationPrint";
-import { useReservationsData } from "@/hooks/useReservationsData";
+import { useAuth } from "@/context/auth-context";
+import { useLocationContext } from "@/context/location-context";
+import { useReservationPrint } from "@/hooks/use-reservation-print";
+import { useReservationsData } from "@/hooks/use-reservations-data";
 import type { Database } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
-import { ReservationActions } from "./ReservationActions";
-import { ReservationExpensesDisplay } from "./ReservationExpensesDisplay";
+import { ReservationActions } from "./reservation-actions";
+import { ReservationExpensesDisplay } from "./reservation-expenses-display";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 

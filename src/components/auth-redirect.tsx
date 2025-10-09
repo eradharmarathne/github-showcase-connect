@@ -1,5 +1,5 @@
 import { Navigate } from "react-router";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/auth-context";
 
 export const AuthRedirect = () => {
 	const { user, loading } = useAuth();

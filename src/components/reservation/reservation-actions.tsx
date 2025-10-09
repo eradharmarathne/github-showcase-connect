@@ -7,7 +7,7 @@ import {
 	MoreHorizontal,
 	Printer,
 } from "lucide-react";
-import { OTPVerification } from "@/components/OTPVerification";
+import { OTPVerification } from "@/components/otp-verification";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
