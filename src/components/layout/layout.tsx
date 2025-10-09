@@ -19,12 +19,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useLocationContext } from "@/context/location-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import LanguageDropdown from "./dropdown-language";
-import ProfileDropdown from "./dropdown-profile";
-import FullscreenToggle from "./fullscreen-toggle";
-import ProfileAvatarButton from "./profile-avatar-button";
-import { Button } from "./ui/button";
-import ThemeSwitcher from "./theme-switcher";
+import LanguageDropdown from "@/components/common/dropdown-language";
+import ProfileDropdown from "@/components/common/dropdown-profile";
+import FullscreenToggle from "@/components/common/fullscreen-toggle";
+import ProfileAvatarButton from "@/components/common/profile-avatar-button";
+import { Button } from "@/components/ui/button";
+import ThemeSwitcher from "@/components/common/theme-switcher";
 
 export function Layout() {
 	const isMobile = useIsMobile();
