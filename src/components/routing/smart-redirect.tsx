@@ -4,16 +4,17 @@ import { useLocationContext } from "@/context/location-context";
 import { usePermissions } from "@/hooks/use-permissions";
 
 export const SmartRedirect = () => {
-	const { tenant, tenantLoading, profile, profileLoading } = useAuth();
+	const { tenant, tenantLoading, profile, profileLoading, user } = useAuth();
 	const { hasAnyPermission, loading } = usePermissions();
 	const { locations, loading: locationsLoading } = useLocationContext();
 
 	// Wait for all loading states to complete
-	if (loading || locationsLoading || tenantLoading || profileLoading) {
+	// Also wait for profile to be fully loaded when user exists
+	if (loading || locationsLoading || tenantLoading || profileLoading || (user && !profile)) {
 		return null;
 	}
 
-	console.log({ profile, tenant });
+	console.log({ profile, tenant, user });
 
 	// If user doesn't have a tenant_id in their profile, they need to complete onboarding
 	if (!profile?.tenant_id || !tenant) {

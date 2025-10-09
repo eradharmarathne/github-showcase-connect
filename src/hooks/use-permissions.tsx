@@ -13,18 +13,17 @@ export const usePermissions = () => {
 	useEffect(() => {
 		const fetchPermissions = async () => {
 			if (!user || !profile?.tenant_id) {
-				setPermissions(null);
-				setLoading(false);
+				console.log("usePermissions: Missing user or profile tenant_id", { user: !!user, profile: !!profile, tenant_id: profile?.tenant_id });
 				return;
 			}
 
 			try {
-				// Fetch user permissions with explicit tenant_id filter for RLS performance
+				setLoading(true);
 				const { data, error } = await supabase
 					.from("user_permissions")
 					.select("*")
 					.eq("user_id", user.id)
-					.eq("tenant_id", profile.tenant_id) // Explicit filter helps optimizer
+					.eq("tenant_id", profile.tenant_id)
 					.single();
 
 				if (error && error.code !== "PGRST116") {
@@ -32,6 +31,7 @@ export const usePermissions = () => {
 					console.error("Error fetching permissions:", error);
 					setPermissions(null);
 				} else {
+					console.log("usePermissions: Fetched permissions successfully", { data, isTenantOwner: profile?.id === tenant?.owner_profile_id });
 					setPermissions(data || null);
 				}
 			} catch (error) {
@@ -43,9 +43,7 @@ export const usePermissions = () => {
 		};
 
 		fetchPermissions();
-	}, [user, profile?.tenant_id]);
-
-	// Check if user is tenant owner (highest level access)
+	}, [user, profile, tenant?.owner_profile_id]);	// Check if user is tenant owner (highest level access)
 	const isTenantOwner = profile?.id === tenant?.owner_profile_id;
 
 	const hasPermission = (
