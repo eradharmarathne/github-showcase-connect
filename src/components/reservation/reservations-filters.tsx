@@ -1,7 +1,13 @@
-import { Calendar, MapPin, Search } from "lucide-react";
+import { Calendar, ChevronDown, MapPin, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CurrencySelector } from "@/components/common/currency-selector";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -30,6 +36,7 @@ interface ReservationsFiltersProps {
 	selectedCurrency: Currency;
 	onCurrencyChange: (currency: Currency) => void;
 	onNewReservation: () => void;
+	onNewCompactReservation?: () => void;
 }
 
 export function ReservationsFilters({
@@ -43,6 +50,7 @@ export function ReservationsFilters({
 	selectedCurrency,
 	onCurrencyChange,
 	onNewReservation,
+	onNewCompactReservation,
 }: ReservationsFiltersProps) {
 	const { t } = useTranslation();
 
@@ -111,14 +119,27 @@ export function ReservationsFilters({
 				/>
 			</div>
 
-			<Button
-				onClick={onNewReservation}
-				className="flex-shrink-0"
-				data-testid="add-reservation-btn"
-			>
-				<Calendar className="size-4 mr-2" />
-				{t("reservations.filters.newReservation")}
-			</Button>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button className="flex-shrink-0" data-testid="add-reservation-btn">
+						<Calendar className="size-4 mr-2" />
+						{t("reservations.filters.newReservation")}
+						<ChevronDown className="size-4 ml-2" />
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end">
+					{onNewCompactReservation && (
+						<DropdownMenuItem onClick={onNewCompactReservation}>
+							<Calendar className="size-4 mr-2" />
+							Quick Reservation
+						</DropdownMenuItem>
+					)}
+					<DropdownMenuItem onClick={onNewReservation}>
+						<Calendar className="size-4 mr-2" />
+						Full Reservation Form
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
 		</div>
 	);
 }

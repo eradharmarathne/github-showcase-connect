@@ -20,7 +20,7 @@ import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
 import { ReservationEditDialog } from "@/components/modals/reservation-edit-dialog";
 import { OTPVerification } from "@/components/auth/otp-verification";
-import { NewReservationDialog, ViewReservationDialog } from "@/components/modals";
+import { CompactReservationDialog, NewReservationDialog, ViewReservationDialog } from "@/components/modals";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 
@@ -40,6 +40,8 @@ export default function Reservations() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState("all");
 	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
+		useState(false);
+	const [isCompactReservationDialogOpen, setIsCompactReservationDialogOpen] =
 		useState(false);
 	const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 	const [viewingReservationId, setViewingReservationId] = useState<
@@ -401,6 +403,7 @@ export default function Reservations() {
 						onStatusFilterChange={setStatusFilter}
 						onCurrencyChange={setSelectedCurrency}
 						onNewReservation={() => setIsNewReservationDialogOpen(true)}
+						onNewCompactReservation={() => setIsCompactReservationDialogOpen(true)}
 					/>
 
 					<TabsContent value="reservations" className="space-y-4">
@@ -496,6 +499,15 @@ export default function Reservations() {
 				onReservationCreated={() => {
 					handleDataUpdate();
 					setIsNewReservationDialogOpen(false);
+				}}
+			/>
+
+			<CompactReservationDialog
+				isOpen={isCompactReservationDialogOpen}
+				onClose={() => setIsCompactReservationDialogOpen(false)}
+				onReservationCreated={() => {
+					handleDataUpdate();
+					setIsCompactReservationDialogOpen(false);
 				}}
 			/>
 
