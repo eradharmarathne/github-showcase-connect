@@ -3,6 +3,8 @@ import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Database } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import { ExternalBookingBlock } from "./external-booking-block";
+import type { ExternalBooking } from "./timeline-view";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Reservation = {
@@ -29,7 +31,8 @@ interface RoomRowProps {
 	room: Room;
 	calendarDays: Date[];
 	reservations: Reservation[];
-	onBookingClick: (booking: Reservation) => void;
+	externalBookings: ExternalBooking[];
+	onBookingClick: (booking: Reservation | ExternalBooking) => void;
 	onQuickBook: (room: Room, date: Date) => void;
 	getStatusColor: (status: string) => string;
 	getCurrencySymbol: (currency: string) => string;
@@ -43,6 +46,7 @@ export function RoomRow({
 	room,
 	calendarDays,
 	reservations,
+	externalBookings,
 	onBookingClick,
 	onQuickBook,
 	getStatusColor,
@@ -58,6 +62,29 @@ export function RoomRow({
 			...booking,
 			span: calculateBookingSpan(booking, calendarDays),
 		}))
+		.filter((booking) => booking.span.isVisible);
+
+	// Filter external bookings for this room
+	const roomExternalBookings = externalBookings
+		.filter((booking) => booking.room_id === room.id)
+		.map((booking) => {
+			// Convert external booking to match reservation format for span calculation
+			const fakeReservation = {
+				...booking,
+				room_id: booking.room_id || room.id,
+				check_in_date: booking.check_in,
+				check_out_date: booking.check_out,
+				total_amount: booking.total_amount || 0,
+				currency: booking.currency || "USD",
+				adults: booking.adults || 0,
+				children: booking.children || 0,
+				reservation_number: booking.external_id,
+			};
+			return {
+				...booking,
+				span: calculateBookingSpan(fakeReservation as any, calendarDays),
+			};
+		})
 		.filter((booking) => booking.span.isVisible);
 
 	return (
@@ -78,12 +105,23 @@ export function RoomRow({
 							(booking) => booking.span.startIndex === dayIndex,
 						);
 
-						// Check if this day is occupied by any booking
-						const isOccupied = roomBookings.some(
-							(booking) =>
-								dayIndex >= booking.span.startIndex &&
-								dayIndex < booking.span.startIndex + booking.span.spanDays,
+						// Find external booking that starts on this day
+						const externalBookingStartingToday = roomExternalBookings.find(
+							(booking) => booking.span.startIndex === dayIndex,
 						);
+
+						// Check if this day is occupied by any booking
+						const isOccupied =
+							roomBookings.some(
+								(booking) =>
+									dayIndex >= booking.span.startIndex &&
+									dayIndex < booking.span.startIndex + booking.span.spanDays,
+							) ||
+							roomExternalBookings.some(
+								(booking) =>
+									dayIndex >= booking.span.startIndex &&
+									dayIndex < booking.span.startIndex + booking.span.spanDays,
+							);
 
 						const cellWidth = isMobile ? 32 : 40;
 
@@ -95,6 +133,18 @@ export function RoomRow({
 									isOccupied && !bookingStartingToday && "bg-muted/20",
 								)}
 							>
+								{/* Render external bookings first (below direct bookings) */}
+								{externalBookingStartingToday && (
+									<ExternalBookingBlock
+										booking={externalBookingStartingToday}
+										startIndex={externalBookingStartingToday.span.startIndex}
+										spanDays={externalBookingStartingToday.span.spanDays}
+										getCurrencySymbol={getCurrencySymbol}
+										onClick={onBookingClick}
+									/>
+								)}
+
+								{/* Render direct bookings on top */}
 								{bookingStartingToday && (
 									<div
 										className={cn(

@@ -3,6 +3,7 @@ import {
 	Calendar as CalendarIcon,
 	ChevronLeft,
 	ChevronRight,
+	Filter,
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +11,14 @@ import { useNavigate } from "react-router";
 import { TimelineView } from "@/components/calendar/timeline-view";
 import { PermissionRoute } from "@/components/routing/permission-route";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuCheckboxItem,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { Database } from "@/integrations/supabase/types";
 import { getCurrencySymbol } from "@/utils/currency";
 
@@ -19,6 +28,12 @@ export default function EnhancedCalendar() {
 	const { t } = useTranslation("common");
 	const navigate = useNavigate();
 	const [currentDate, setCurrentDate] = useState(new Date());
+	const [showDirectBookings, setShowDirectBookings] = useState(true);
+	const [showBookingCom, setShowBookingCom] = useState(true);
+	const [showAirbnb, setShowAirbnb] = useState(true);
+	const [showExpedia, setShowExpedia] = useState(true);
+	const [showBeds24, setShowBeds24] = useState(true);
+	const [showOther, setShowOther] = useState(true);
 
 	// Status color helpers
 	const getStatusColor = (status: string) => {
@@ -66,7 +81,7 @@ export default function EnhancedCalendar() {
 		<PermissionRoute permission={["access_calendar"]}>
 			<div className="space-y-4 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 pt-4">
 				{/* Navigation Header */}
-				<div className="flex items-center justify-between">
+				<div className="flex items-center justify-between flex-wrap gap-2">
 					<div className="flex items-center gap-2">
 						<Button variant="outline" size="sm" onClick={handleToday}>
 							<CalendarIcon className="size-4 mr-2" />
@@ -83,6 +98,60 @@ export default function EnhancedCalendar() {
 						<h2 className="text-lg font-semibold">
 							{format(startOfMonth(currentDate), "MMMM yyyy")}
 						</h2>
+
+						{/* Booking Source Filter */}
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="outline" size="sm">
+									<Filter className="size-4 mr-2" />
+									Filter Sources
+								</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent align="start" className="w-56">
+								<DropdownMenuLabel>Booking Sources</DropdownMenuLabel>
+								<DropdownMenuSeparator />
+								<DropdownMenuCheckboxItem
+									checked={showDirectBookings}
+									onCheckedChange={setShowDirectBookings}
+								>
+									Direct Bookings
+								</DropdownMenuCheckboxItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuLabel className="text-xs text-muted-foreground">
+									Channel Bookings
+								</DropdownMenuLabel>
+								<DropdownMenuCheckboxItem
+									checked={showBookingCom}
+									onCheckedChange={setShowBookingCom}
+								>
+									🏛️ Booking.com
+								</DropdownMenuCheckboxItem>
+								<DropdownMenuCheckboxItem
+									checked={showAirbnb}
+									onCheckedChange={setShowAirbnb}
+								>
+									🏡 Airbnb
+								</DropdownMenuCheckboxItem>
+								<DropdownMenuCheckboxItem
+									checked={showExpedia}
+									onCheckedChange={setShowExpedia}
+								>
+									✈️ Expedia
+								</DropdownMenuCheckboxItem>
+								<DropdownMenuCheckboxItem
+									checked={showBeds24}
+									onCheckedChange={setShowBeds24}
+								>
+									🛏️ Beds24
+								</DropdownMenuCheckboxItem>
+								<DropdownMenuCheckboxItem
+									checked={showOther}
+									onCheckedChange={setShowOther}
+								>
+									🌐 Other
+								</DropdownMenuCheckboxItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 					</div>
 					<Button onClick={() => navigate("/reservations/compact")}>
 						New Reservation
@@ -95,6 +164,14 @@ export default function EnhancedCalendar() {
 					searchTerm=""
 					statusFilter="all"
 					roomFilter="all"
+					sourceFilters={{
+						direct: showDirectBookings,
+						booking_com: showBookingCom,
+						airbnb: showAirbnb,
+						expedia: showExpedia,
+						beds24: showBeds24,
+						other: showOther,
+					}}
 					onBookingClick={handleBookingClick}
 					onQuickBook={handleQuickBook}
 					getStatusColor={getStatusColor}

@@ -32,10 +32,36 @@ type Reservation = {
 	reservation_number: string;
 };
 
+export type ExternalBooking = {
+	id: string;
+	room_id: string | null;
+	external_id: string;
+	property_id: string;
+	source: string;
+	guest_name: string;
+	check_in: string;
+	check_out: string;
+	status: string;
+	total_amount: number | null;
+	currency: string | null;
+	adults: number | null;
+	children: number | null;
+	room_name: string | null;
+};
+
 interface BookingSpan {
 	startIndex: number;
 	spanDays: number;
 	isVisible: boolean;
+}
+
+interface SourceFilters {
+	direct: boolean;
+	booking_com: boolean;
+	airbnb: boolean;
+	expedia: boolean;
+	beds24: boolean;
+	other: boolean;
 }
 
 interface TimelineViewProps {
@@ -43,7 +69,8 @@ interface TimelineViewProps {
 	searchTerm: string;
 	statusFilter: string;
 	roomFilter: string;
-	onBookingClick: (booking: Reservation) => void;
+	sourceFilters?: SourceFilters;
+	onBookingClick: (booking: Reservation | ExternalBooking) => void;
 	onQuickBook: (room: Room, date: Date) => void;
 	getStatusColor: (status: string) => string;
 	getCurrencySymbol: (currency: string) => string;
@@ -54,6 +81,7 @@ export function TimelineView({
 	searchTerm,
 	statusFilter,
 	roomFilter,
+	sourceFilters,
 	onBookingClick,
 	onQuickBook,
 	getStatusColor,
@@ -109,6 +137,40 @@ export function TimelineView({
 		enabled: !!selectedLocation && !!tenant?.id,
 		staleTime: 30000, // Cache for 30 seconds
 	});
+
+	// Fetch external bookings (Booking.com, Airbnb, etc.)
+	const { data: externalBookings = [], isLoading: externalBookingsLoading } =
+		useQuery({
+			queryKey: [
+				"external_bookings",
+				selectedLocation,
+				tenant?.id,
+				currentDate,
+			],
+			queryFn: async () => {
+				if (!selectedLocation || !tenant?.id) return [];
+
+				const viewStart = startOfDay(currentDate);
+				const viewEnd = addDays(viewStart, 29);
+
+				const { data, error } = await supabase
+					.from("external_bookings")
+					.select(
+						"id, room_id, external_id, property_id, source, guest_name, check_in, check_out, status, total_amount, currency, adults, children, room_name",
+					)
+					.eq("tenant_id", tenant.id)
+					.eq("location_id", selectedLocation)
+					.or(
+						`check_in.lte.${format(viewEnd, "yyyy-MM-dd")},check_out.gte.${format(viewStart, "yyyy-MM-dd")}`,
+					)
+					.order("check_in", { ascending: true });
+
+				if (error) throw error;
+				return data || [];
+			},
+			enabled: !!selectedLocation && !!tenant?.id,
+			staleTime: 30000, // Cache for 30 seconds
+		});
 
 	// Generate calendar days - 30 days from current date
 	const startDate = startOfDay(currentDate);
@@ -190,6 +252,11 @@ export function TimelineView({
 
 	// Apply filters to reservations
 	const filteredReservations = reservations.filter((reservation) => {
+		// Source filter - hide direct bookings if disabled
+		if (sourceFilters && !sourceFilters.direct) {
+			return false;
+		}
+
 		// Search filter
 		if (searchTerm.trim()) {
 			const searchLower = searchTerm.toLowerCase();
@@ -208,7 +275,36 @@ export function TimelineView({
 		return true;
 	});
 
-	if (roomsLoading || reservationsLoading) {
+	// Apply filters to external bookings
+	const filteredExternalBookings = externalBookings.filter((booking) => {
+		// Source filter
+		if (sourceFilters) {
+			const source = booking.source.toLowerCase();
+			if (source === "booking_com" && !sourceFilters.booking_com) return false;
+			if (source === "airbnb" && !sourceFilters.airbnb) return false;
+			if (source === "expedia" && !sourceFilters.expedia) return false;
+			if (source === "beds24" && !sourceFilters.beds24) return false;
+			if (
+				!["booking_com", "airbnb", "expedia", "beds24"].includes(source) &&
+				!sourceFilters.other
+			)
+				return false;
+		}
+
+		// Search filter
+		if (searchTerm.trim()) {
+			const searchLower = searchTerm.toLowerCase();
+			const matchesSearch =
+				booking.guest_name.toLowerCase().includes(searchLower) ||
+				booking.external_id.toLowerCase().includes(searchLower);
+
+			if (!matchesSearch) return false;
+		}
+
+		return true;
+	});
+
+	if (roomsLoading || reservationsLoading || externalBookingsLoading) {
 		return <TimelineViewSkeleton />;
 	}
 
@@ -263,6 +359,7 @@ export function TimelineView({
 										room={room}
 										calendarDays={calendarDays}
 										reservations={filteredReservations}
+										externalBookings={filteredExternalBookings}
 										onBookingClick={onBookingClick}
 										onQuickBook={onQuickBook}
 										getStatusColor={getStatusColor}

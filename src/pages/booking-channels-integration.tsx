@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocationContext } from "@/context/location-context";
+import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper functions
@@ -129,6 +130,7 @@ interface SyncStats {
 export default function BookingChannelsIntegration() {
 	const { t } = useTranslation();
 	const { selectedLocation } = useLocationContext();
+	const { tenant } = useTenant();
 	const [bookings, setBookings] = useState<ExternalBooking[]>([]);
 	const [locations, setLocations] = useState<Location[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -148,6 +150,13 @@ export default function BookingChannelsIntegration() {
 	const [propertyMappings, setPropertyMappings] = useState<PropertyMapping[]>(
 		[],
 	);
+	const [propertyInputValues, setPropertyInputValues] = useState<
+		Record<string, string>
+	>({});
+	const [syncUrls, setSyncUrls] = useState<any[]>([]);
+	const [icalInputValues, setIcalInputValues] = useState<
+		Record<string, { url: string; source: string }>
+	>({});
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -181,6 +190,17 @@ export default function BookingChannelsIntegration() {
           `)
 					.eq("is_active", true);
 
+				// Fetch iCal sync URLs
+				const { data: syncUrlsData } = await supabase
+					.from("booking_sync_urls")
+					.select(`
+						*,
+						locations (id, name),
+						rooms (id, room_number)
+					`)
+					.eq("is_active", true)
+					.order("created_at", { ascending: false });
+
 				// Transform mappings data into the format expected by the component
 				const transformedMappings: PropertyMapping[] = [];
 				if (mappingsData) {
@@ -208,6 +228,7 @@ export default function BookingChannelsIntegration() {
 				setBookings(bookingsData || []);
 				setLocations(locationsData || []);
 				setPropertyMappings(transformedMappings);
+				setSyncUrls(syncUrlsData || []);
 
 				// Calculate stats
 				if (bookingsData) {
@@ -294,6 +315,17 @@ export default function BookingChannelsIntegration() {
         `)
 				.eq("is_active", true);
 
+			// Fetch iCal sync URLs
+			const { data: syncUrlsData } = await supabase
+				.from("booking_sync_urls")
+				.select(`
+					*,
+					locations (id, name),
+					rooms (id, room_number)
+				`)
+				.eq("is_active", true)
+				.order("created_at", { ascending: false });
+
 			// Transform mappings data into the format expected by the component
 			const transformedMappings: PropertyMapping[] = [];
 			if (mappingsData) {
@@ -321,6 +353,7 @@ export default function BookingChannelsIntegration() {
 			setBookings(bookingsData || []);
 			setLocations(locationsData || []);
 			setPropertyMappings(transformedMappings);
+			setSyncUrls(syncUrlsData || []);
 
 			// Calculate stats
 			if (bookingsData) {
@@ -576,6 +609,154 @@ export default function BookingChannelsIntegration() {
 	const openBookingDetails = (booking: ExternalBooking) => {
 		setSelectedBooking(booking);
 		setShowBookingDialog(true);
+	};
+
+	const addPropertyMapping = async (locationId: string) => {
+		const propertyName = propertyInputValues[locationId]?.trim();
+
+		if (!propertyName) {
+			toast.error("Please enter a property name");
+			return;
+		}
+
+		if (!tenant?.id) {
+			toast.error("Tenant not found");
+			return;
+		}
+
+		try {
+			const { error } = await supabase
+				.from("channel_property_mappings")
+				.insert({
+					tenant_id: tenant.id,
+					location_id: locationId,
+					channel_property_name: propertyName,
+					channel: "beds24",
+					is_active: true,
+				});
+
+			if (error) throw error;
+
+			toast.success("Property mapping added successfully");
+
+			// Clear input
+			setPropertyInputValues((prev) => ({
+				...prev,
+				[locationId]: "",
+			}));
+
+			// Refresh data
+			fetchData();
+		} catch (error: any) {
+			console.error("Error adding property mapping:", error);
+			toast.error(`Failed to add property mapping: ${error.message || "Unknown error"}`);
+		}
+	};
+
+	const addIcalSyncUrl = async (locationId: string) => {
+		const icalData = icalInputValues[locationId];
+
+		if (!icalData?.url?.trim()) {
+			toast.error("Please enter an iCal URL");
+			return;
+		}
+
+		if (!tenant?.id) {
+			toast.error("Tenant not found");
+			return;
+		}
+
+		// Validate URL format
+		try {
+			new URL(icalData.url);
+		} catch {
+			toast.error("Please enter a valid URL");
+			return;
+		}
+
+		try {
+			const { error } = await supabase.from("booking_sync_urls").insert({
+				tenant_id: tenant.id,
+				location_id: locationId,
+				ical_url: icalData.url.trim(),
+				source: icalData.source || "ical",
+				is_active: true,
+			});
+
+			if (error) throw error;
+
+			toast.success("iCal sync URL added successfully");
+
+			// Clear input
+			setIcalInputValues((prev) => ({
+				...prev,
+				[locationId]: { url: "", source: "ical" },
+			}));
+
+			// Refresh data
+			fetchData();
+		} catch (error: any) {
+			console.error("Error adding iCal sync URL:", error);
+			toast.error(
+				`Failed to add iCal sync URL: ${error.message || "Unknown error"}`,
+			);
+		}
+	};
+
+	const deleteSyncUrl = async (syncUrlId: string) => {
+		if (!confirm("Are you sure you want to delete this sync URL?")) {
+			return;
+		}
+
+		try {
+			const { error } = await supabase
+				.from("booking_sync_urls")
+				.update({ is_active: false })
+				.eq("id", syncUrlId);
+
+			if (error) throw error;
+
+			toast.success("Sync URL deleted successfully");
+			fetchData();
+		} catch (error: any) {
+			console.error("Error deleting sync URL:", error);
+			toast.error(
+				`Failed to delete sync URL: ${error.message || "Unknown error"}`,
+			);
+		}
+	};
+
+	const manualSyncIcal = async (syncUrlId: string) => {
+		setSyncing(true);
+		try {
+			const syncUrl = syncUrls.find((url) => url.id === syncUrlId);
+			if (!syncUrl) {
+				throw new Error("Sync URL not found");
+			}
+
+			const { data, error } = await supabase.functions.invoke("sync-ical", {
+				body: {
+					icalUrl: syncUrl.ical_url,
+					locationId: syncUrl.location_id,
+					source: syncUrl.source,
+					tenantId: tenant?.id,
+					propertyId: syncUrl.location_id,
+					roomId: syncUrl.room_id,
+				},
+			});
+
+			if (error) throw error;
+
+			toast.success(
+				`Successfully synced ${data.eventsCount || 0} bookings from ${syncUrl.source}`,
+			);
+			fetchData();
+		} catch (error: any) {
+			console.error("Error syncing iCal:", error);
+			toast.error(`Failed to sync iCal: ${error.message || "Unknown error"}`);
+		} finally {
+			setSyncing(false);
+		}
 	};
 
 	const filteredBookings = !selectedLocation
@@ -1238,10 +1419,21 @@ export default function BookingChannelsIntegration() {
 															id={`property-${location.id}`}
 															placeholder="e.g., Rusty Bunk Villa"
 															className="mt-1"
+															value={propertyInputValues[location.id] || ""}
+															onChange={(e) =>
+																setPropertyInputValues((prev) => ({
+																	...prev,
+																	[location.id]: e.target.value,
+																}))
+															}
 														/>
 													</div>
 													<div className="flex items-end">
-														<Button size="sm" className="w-full">
+														<Button
+															size="sm"
+															className="w-full"
+															onClick={() => addPropertyMapping(location.id)}
+														>
 															Add Property Mapping
 														</Button>
 													</div>
@@ -1251,6 +1443,184 @@ export default function BookingChannelsIntegration() {
 									);
 								})}
 							</div>
+
+							{/* iCal Sync Management Section */}
+							<Card>
+								<CardHeader>
+									<div className="flex items-center justify-between">
+										<div>
+											<CardTitle className="flex items-center gap-2">
+												<Calendar className="size-5" />
+												iCal Calendar Sync
+											</CardTitle>
+											<CardDescription>
+												Sync external calendar URLs from booking platforms
+											</CardDescription>
+										</div>
+									</div>
+								</CardHeader>
+								<CardContent className="space-y-6">
+									{/* iCal URLs Management */}
+									<div className="space-y-4">
+										{locations.map((location) => {
+											const locationSyncUrls = syncUrls.filter(
+												(url) => url.location_id === location.id,
+											);
+											return (
+												<Card
+													key={location.id}
+													className="border-l-4 border-l-blue-500"
+												>
+													<CardHeader className="pb-3">
+														<div className="flex items-center justify-between">
+															<CardTitle className="text-base md:text-lg lg:text-xl">
+																{location.name}
+															</CardTitle>
+															<Badge
+																variant={
+																	locationSyncUrls.length > 0 ? "default" : "secondary"
+																}
+															>
+																{locationSyncUrls.length > 0
+																	? `${locationSyncUrls.length} Sync URLs`
+																	: "No Sync URLs"}
+															</Badge>
+														</div>
+													</CardHeader>
+													<CardContent className="space-y-3">
+														<div className="grid grid-cols-1 gap-4">
+															{/* Add New Sync URL Form */}
+															<div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+																<div>
+																	<Label
+																		htmlFor={`ical-url-${location.id}`}
+																		className="text-sm"
+																	>
+																		iCal URL
+																	</Label>
+																	<Input
+																		id={`ical-url-${location.id}`}
+																		placeholder="https://ical.booking.com/..."
+																		className="mt-1"
+																		value={icalInputValues[location.id]?.url || ""}
+																		onChange={(e) =>
+																			setIcalInputValues((prev) => ({
+																				...prev,
+																				[location.id]: {
+																					...prev[location.id],
+																					url: e.target.value,
+																				},
+																			}))
+																		}
+																	/>
+																</div>
+																<div>
+																	<Label
+																		htmlFor={`source-${location.id}`}
+																		className="text-sm"
+																	>
+																		Source
+																	</Label>
+																	<select
+																		id={`source-${location.id}`}
+																		className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background"
+																		value={icalInputValues[location.id]?.source || "ical"}
+																		onChange={(e) =>
+																			setIcalInputValues((prev) => ({
+																				...prev,
+																				[location.id]: {
+																					...prev[location.id],
+																					source: e.target.value,
+																				},
+																			}))
+																		}
+																	>
+																		<option value="ical">iCal</option>
+																		<option value="booking_com">Booking.com</option>
+																		<option value="airbnb">Airbnb</option>
+																		<option value="expedia">Expedia</option>
+																		<option value="beds24">Beds24</option>
+																	</select>
+																</div>
+																<div className="flex items-end">
+																	<Button
+																		size="sm"
+																		className="w-full"
+																		onClick={() => addIcalSyncUrl(location.id)}
+																	>
+																		Add Sync URL
+																	</Button>
+																</div>
+															</div>
+
+															{/* Display Existing Sync URLs */}
+															{locationSyncUrls.length > 0 && (
+																<div className="space-y-2 mt-4">
+																	<Label className="text-sm font-medium">
+																		Active Sync URLs:
+																	</Label>
+																	<div className="space-y-2">
+																		{locationSyncUrls.map((syncUrl) => (
+																			<div
+																				key={syncUrl.id}
+																				className="flex items-center justify-between p-3 bg-muted rounded-lg"
+																			>
+																				<div className="flex-1 min-w-0">
+																					<div className="flex items-center gap-2 mb-1">
+																						<Badge className={getSourceColor(syncUrl.source)}>
+																							{syncUrl.source.replace("_", ".")}
+																						</Badge>
+																						{syncUrl.room_number && (
+																							<Badge variant="outline" className="text-xs">
+																								Room: {syncUrl.rooms?.room_number}
+																							</Badge>
+																						)}
+																					</div>
+																					<div className="text-xs text-muted-foreground truncate">
+																						{syncUrl.ical_url}
+																					</div>
+																					{syncUrl.last_synced_at && (
+																						<div className="text-xs text-muted-foreground mt-1">
+																							Last synced:{" "}
+																							{format(
+																								new Date(syncUrl.last_synced_at),
+																								"MMM dd, HH:mm",
+																							)}
+																						</div>
+																					)}
+																				</div>
+																				<div className="flex gap-2 ml-4">
+																					<Button
+																						size="sm"
+																						variant="outline"
+																						onClick={() => manualSyncIcal(syncUrl.id)}
+																						disabled={syncing}
+																					>
+																						<RefreshCw
+																							className={`size-4 ${syncing ? "animate-spin" : ""}`}
+																						/>
+																					</Button>
+																					<Button
+																						size="sm"
+																						variant="destructive"
+																						onClick={() => deleteSyncUrl(syncUrl.id)}
+																					>
+																						<AlertCircle className="size-4" />
+																					</Button>
+																				</div>
+																			</div>
+																		))}
+																	</div>
+																</div>
+															)}
+														</div>
+													</CardContent>
+												</Card>
+											);
+										})}
+									</div>
+								</CardContent>
+							</Card>
 
 							{/* API Setup Section */}
 							<Card className="border-dashed">

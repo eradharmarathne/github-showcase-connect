@@ -77,11 +77,15 @@ serve(async (req) => {
 	}
 
 	try {
-		const { icalUrl, locationId, source } = await req.json();
+		const { icalUrl, locationId, source, tenantId, propertyId, roomId } =
+			await req.json();
 
 		console.log("Fetching iCal from:", icalUrl);
 		console.log("Location ID:", locationId);
 		console.log("Source:", source);
+		console.log("Tenant ID:", tenantId);
+		console.log("Property ID:", propertyId);
+		console.log("Room ID:", roomId);
 
 		// Create Supabase client
 		const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -120,28 +124,33 @@ serve(async (req) => {
 					`Processing event: ${event.summary}, Check-in: ${event.dtstart} -> ${checkIn}, Check-out: ${event.dtend} -> ${checkOut}`,
 				);
 
+				// Generate a unique external ID based on the event details
+				const externalId = `ical-${source}-${event.dtstart}-${event.dtend}-${event.summary.replace(/[^a-zA-Z0-9]/g, "")}`;
+
 				// Check if booking already exists
 				const { data: existingBooking } = await supabase
-					.from("bookings")
+					.from("external_bookings")
 					.select("id")
-					.eq("guest_name", event.summary)
-					.eq("location_id", locationId)
-					.eq("check_in", checkIn)
+					.eq("external_id", externalId)
+					.eq("property_id", propertyId)
 					.single();
 
 				if (!existingBooking) {
 					const { error: insertError } = await supabase
-						.from("bookings")
+						.from("external_bookings")
 						.insert({
+							external_id: externalId,
 							guest_name: event.summary,
 							location_id: locationId,
+							property_id: propertyId,
+							room_id: roomId || null,
 							check_in: checkIn,
 							check_out: adjustedCheckOut,
 							total_amount: 0,
-							advance_amount: 0,
-							paid_amount: 0,
-							source: source || "booking_com",
+							source: source || "ical",
 							status: "confirmed",
+							tenant_id: tenantId,
+							last_synced_at: new Date().toISOString(),
 						});
 
 					if (insertError) {
@@ -149,6 +158,12 @@ serve(async (req) => {
 					} else {
 						syncedCount++;
 					}
+				} else {
+					// Update last_synced_at for existing booking
+					await supabase
+						.from("external_bookings")
+						.update({ last_synced_at: new Date().toISOString() })
+						.eq("id", existingBooking.id);
 				}
 			} catch (eventError) {
 				console.error("Error processing event:", eventError);

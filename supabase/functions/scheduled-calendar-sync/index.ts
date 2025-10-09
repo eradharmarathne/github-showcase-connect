@@ -21,103 +21,100 @@ serve(async (req) => {
 		const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-		// Get all active locations
-		const { data: locations, error: locationsError } = await supabase
-			.from("locations")
-			.select("*")
+		// Get all active booking sync URLs from database
+		const { data: syncUrls, error: syncUrlsError } = await supabase
+			.from("booking_sync_urls")
+			.select(
+				`
+				id,
+				ical_url,
+				location_id,
+				source,
+				tenant_id,
+				room_id,
+				is_active,
+				locations (
+					name,
+					is_active
+				)
+			`,
+			)
 			.eq("is_active", true);
 
-		if (locationsError) {
-			throw new Error(`Failed to fetch locations: ${locationsError.message}`);
+		if (syncUrlsError) {
+			throw new Error(
+				`Failed to fetch sync URLs: ${syncUrlsError.message}`,
+			);
 		}
 
-		if (!locations || locations.length === 0) {
-			throw new Error("No active locations found");
+		if (!syncUrls || syncUrls.length === 0) {
+			console.log("No active sync URLs found");
+			return new Response(
+				JSON.stringify({
+					success: true,
+					message: "No active sync URLs to process",
+					totalEvents: 0,
+					timestamp: new Date().toISOString(),
+				}),
+				{
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+					status: 200,
+				},
+			);
 		}
-
-		// Define calendar URLs for each location
-		const locationCalendars = {
-			"Rusty Bunk": {
-				booking:
-					"https://ical.booking.com/v1/export?t=1d0bea4b-1994-40ec-a9c9-8a718b6cb06a",
-				airbnb:
-					"https://www.airbnb.com/calendar/ical/963663195873805668.ics?s=3e54d971266f0be2e1d214dbfe0ab1e5",
-			},
-			"Asaliya Villa": {
-				booking: "", // Add Booking.com URL when available
-				airbnb:
-					"https://www.airbnb.com/calendar/ical/1066676694977135723.ics?s=a6ea559960438d00fac0cb39f01592e0",
-			},
-		};
 
 		let totalEvents = 0;
 		const syncResults = [];
 
-		console.log(`Syncing calendars for ${locations.length} locations...`);
+		console.log(`Syncing ${syncUrls.length} calendar URLs...`);
 
-		// Sync calendars for each location
-		for (const location of locations) {
-			const calendars = locationCalendars[location.name];
-			if (!calendars) {
+		// Sync each URL
+		for (const syncUrl of syncUrls) {
+			// Skip if location is inactive
+			if (!syncUrl.locations?.is_active) {
 				console.log(
-					`No calendar URLs configured for ${location.name}, skipping...`,
+					`Skipping ${syncUrl.source} sync for inactive location`,
 				);
 				continue;
 			}
 
-			console.log(`Syncing calendars for ${location.name}...`);
+			console.log(
+				`Syncing ${syncUrl.source} calendar for ${syncUrl.locations.name}...`,
+			);
 
-			let locationEvents = 0;
-			const locationSources = [];
+			const { data: syncResult, error: syncError } =
+				await supabase.functions.invoke("sync-ical", {
+					body: {
+						icalUrl: syncUrl.ical_url,
+						locationId: syncUrl.location_id,
+						source: syncUrl.source,
+						tenantId: syncUrl.tenant_id,
+						propertyId: syncUrl.location_id, // Use location_id as property_id
+						roomId: syncUrl.room_id,
+					},
+				});
 
-			// Sync Booking.com calendar if URL exists
-			if (calendars.booking) {
-				const { data: bookingResult, error: bookingError } =
-					await supabase.functions.invoke("sync-ical", {
-						body: {
-							icalUrl: calendars.booking,
-							locationId: location.id,
-							source: "booking_com",
-						},
-					});
-
-				if (bookingError) {
-					console.error(
-						`${location.name} Booking.com sync failed: ${bookingError.message}`,
-					);
-				} else if (bookingResult?.eventsCount) {
-					locationEvents += bookingResult.eventsCount;
-					locationSources.push(`${bookingResult.eventsCount} from Booking.com`);
-				}
+			if (syncError) {
+				console.error(
+					`${syncUrl.locations.name} ${syncUrl.source} sync failed: ${syncError.message}`,
+				);
+			} else if (syncResult?.eventsCount) {
+				const count = syncResult.eventsCount;
+				totalEvents += count;
+				syncResults.push(
+					`${syncUrl.locations.name}: ${count} from ${syncUrl.source}`,
+				);
 			}
 
-			// Sync Airbnb calendar if URL exists
-			if (calendars.airbnb) {
-				const { data: airbnbResult, error: airbnbError } =
-					await supabase.functions.invoke("sync-ical", {
-						body: {
-							icalUrl: calendars.airbnb,
-							locationId: location.id,
-							source: "airbnb",
-						},
-					});
+			// Update last_synced_at timestamp
+			await supabase
+				.from("booking_sync_urls")
+				.update({ last_synced_at: new Date().toISOString() })
+				.eq("id", syncUrl.id);
 
-				if (airbnbError) {
-					console.error(
-						`${location.name} Airbnb sync failed: ${airbnbError.message}`,
-					);
-				} else if (airbnbResult?.eventsCount) {
-					locationEvents += airbnbResult.eventsCount;
-					locationSources.push(`${airbnbResult.eventsCount} from Airbnb`);
-				}
-			}
-
-			if (locationEvents > 0) {
-				syncResults.push(`${location.name}: ${locationSources.join(", ")}`);
-				totalEvents += locationEvents;
-			}
-
-			console.log(`${location.name}: Synced ${locationEvents} bookings`);
+			console.log(
+				`${syncUrl.locations.name}: Synced ${syncResult?.eventsCount || 0} bookings from ${syncUrl.source}`,
+			);
 		}
 
 		const message =
