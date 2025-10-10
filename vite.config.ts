@@ -4,6 +4,11 @@ import vercel from "vite-plugin-vercel";
 
 export default {
   plugins: [react(), vercel()],
+  build: {
+    target: 'baseline-widely-available',
+    // Optional: Specify custom targets if needed
+    // target: ['chrome107', 'firefox104', 'safari16', 'edge107']
+  },
   server: {
     host: "::",
     port: 8080,
