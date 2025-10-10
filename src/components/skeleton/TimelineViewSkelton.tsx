@@ -33,7 +33,7 @@ export function TimelineViewSkeleton() {
 				{roomTypes.map((type, idx) => (
 					<div key={type}>
 						{/* Room Type Header */}
-						<div className="bg-muted/80 border-b border-t px-2 py-1 z-10">
+						<div className="bg-muted/80 border-b border-t px-2 py-1">
 							<Skeleton className="h-3 w-20" />
 						</div>
 						{/* Room Rows */}

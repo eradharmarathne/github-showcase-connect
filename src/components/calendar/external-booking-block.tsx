@@ -4,6 +4,7 @@ interface ExternalBookingBlockProps {
 	booking: ExternalBooking;
 	startIndex: number;
 	spanDays: number;
+	totalDays: number;
 	getCurrencySymbol: (currency: string) => string;
 	onClick: (booking: any) => void;
 }
@@ -61,6 +62,7 @@ export function ExternalBookingBlock({
 	booking,
 	startIndex,
 	spanDays,
+	totalDays,
 	getCurrencySymbol,
 	onClick,
 }: ExternalBookingBlockProps) {
@@ -79,10 +81,10 @@ export function ExternalBookingBlock({
 
 	return (
 		<div
-			className="absolute top-0 h-full px-0.5 py-1"
+			className="absolute top-0 bottom-0 flex items-center"
 			style={{
-				left: `${(startIndex / 30) * 100}%`,
-				width: `${(spanDays / 30) * 100}%`,
+				left: `${(startIndex / totalDays) * 100}%`,
+				right: `${100 - ((startIndex + spanDays) / totalDays) * 100}%`,
 			}}
 		>
 			<button
@@ -96,6 +98,9 @@ export function ExternalBookingBlock({
 					cursor-pointer
 					text-left
 				`}
+				style={{
+					backgroundImage: `repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays}))`,
+				}}
 				title={`${formatSourceName(booking.source)} - ${booking.guest_name}`}
 			>
 				{/* Channel indicator stripe */}

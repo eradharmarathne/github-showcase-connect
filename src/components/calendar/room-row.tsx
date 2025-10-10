@@ -3,6 +3,12 @@ import { Plus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { Database } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { ExternalBookingBlock } from "./external-booking-block";
 import type { ExternalBooking } from "./timeline-view";
 
@@ -88,17 +94,18 @@ export function RoomRow({
 		.filter((booking) => booking.span.isVisible);
 
 	return (
-		<div className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
-			<div className="flex w-full">
-				{/* Room Info Column - Compact & Responsive */}
-				<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1 border-r flex items-center">
-					<div className="font-medium text-[10px] sm:text-xs truncate">
-						{room.room_number}
+		<TooltipProvider>
+			<div className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
+				<div className="flex w-full">
+					{/* Room Info Column - Compact & Responsive */}
+					<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1 border-r flex items-center">
+						<div className="font-medium text-[10px] sm:text-xs truncate">
+							{room.room_number}
+						</div>
 					</div>
-				</div>
 
-				{/* Calendar Grid - Full width responsive */}
-				<div className="flex flex-1 relative">
+					{/* Calendar Grid - Full width responsive */}
+					<div className="flex flex-1 relative">
 					{calendarDays.map((day, dayIndex) => {
 						// Find booking that starts on this day
 						const bookingStartingToday = roomBookings.find(
@@ -139,6 +146,7 @@ export function RoomRow({
 										booking={externalBookingStartingToday}
 										startIndex={externalBookingStartingToday.span.startIndex}
 										spanDays={externalBookingStartingToday.span.spanDays}
+										totalDays={calendarDays.length}
 										getCurrencySymbol={getCurrencySymbol}
 										onClick={onBookingClick}
 									/>
@@ -146,94 +154,87 @@ export function RoomRow({
 
 								{/* Render direct bookings on top */}
 								{bookingStartingToday && (
-									<div
-										className={cn(
-											"absolute inset-[1px] rounded-sm cursor-pointer transition-all z-10 flex items-center justify-center overflow-visible group",
-											getStatusColor(bookingStartingToday.status),
-										)}
-										style={{
-											width: `calc(${bookingStartingToday.span.spanDays * 100}% + ${(bookingStartingToday.span.spanDays - 1) * cellWidth}px)`,
-										}}
-										onClick={() => onBookingClick(bookingStartingToday)}
-									>
-										{/* Tooltip on hover - improved visibility */}
-										<div className="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 z-40 pointer-events-none">
-											<div className="bg-popover text-popover-foreground border border-border rounded-lg shadow-xl p-3 text-xs min-w-[200px]">
-												<div className="font-semibold text-sm mb-2 text-foreground">
-													{bookingStartingToday.guest_name}
-												</div>
-												<div className="space-y-1">
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Check-in:
-														</span>
-														<span className="font-medium">
-															{format(
-																parseISO(bookingStartingToday.check_in_date),
-																"MMM dd, yyyy",
-															)}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Check-out:
-														</span>
-														<span className="font-medium">
-															{format(
-																parseISO(bookingStartingToday.check_out_date),
-																"MMM dd, yyyy",
-															)}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Status:
-														</span>
-														<span className="font-medium capitalize">
-															{bookingStartingToday.status.replace("_", " ")}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Guests:
-														</span>
-														<span className="font-medium">
-															{bookingStartingToday.adults +
-																(bookingStartingToday.children || 0)}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Amount:
-														</span>
-														<span className="font-medium">
-															{getCurrencySymbol(bookingStartingToday.currency)}
-															{bookingStartingToday.total_amount.toLocaleString()}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Booking #:
-														</span>
-														<span className="font-medium text-xs">
-															{bookingStartingToday.reservation_number}
-														</span>
-													</div>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<div
+												className={cn(
+													"absolute inset-y-[1px] left-[1px] rounded-sm cursor-pointer transition-all z-20 flex items-center justify-center overflow-hidden",
+													getStatusColor(bookingStartingToday.status),
+												)}
+												style={{
+													right: `${100 - (bookingStartingToday.span.spanDays * 100)}%`,
+													backgroundImage: "repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / " + bookingStartingToday.span.spanDays + " - 1px), rgba(0,0,0,0.05) calc(100% / " + bookingStartingToday.span.spanDays + " - 1px), rgba(0,0,0,0.05) calc(100% / " + bookingStartingToday.span.spanDays + "))",
+												}}
+												onClick={() => onBookingClick(bookingStartingToday)}
+											>
+												{/* Compact content - just initials or dot for mobile */}
+												<div className="text-white text-[8px] sm:text-[9px] md:text-[10px] font-semibold truncate px-0.5 relative z-10">
+													{isMobile && bookingStartingToday.span.spanDays < 3
+														? "•"
+														: bookingStartingToday.guest_name
+																.split(" ")
+																.map((n) => n[0])
+																.join("")
+																.slice(0, 3)}
 												</div>
 											</div>
-										</div>
-
-										{/* Compact content - just initials or dot for mobile */}
-										<div className="text-white text-[8px] sm:text-[9px] md:text-[10px] font-semibold truncate px-0.5">
-											{isMobile && bookingStartingToday.span.spanDays < 3
-												? "•"
-												: bookingStartingToday.guest_name
-														.split(" ")
-														.map((n) => n[0])
-														.join("")
-														.slice(0, 3)}
-										</div>
-									</div>
+										</TooltipTrigger>
+										<TooltipContent
+											side="top"
+											align="center"
+											className="p-3 text-xs min-w-[200px]"
+										>
+											<div className="font-semibold text-sm mb-2">
+												{bookingStartingToday.guest_name}
+											</div>
+											<div className="space-y-1">
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Check-in:</span>
+													<span className="font-medium">
+														{format(
+															parseISO(bookingStartingToday.check_in_date),
+															"MMM dd, yyyy",
+														)}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Check-out:</span>
+													<span className="font-medium">
+														{format(
+															parseISO(bookingStartingToday.check_out_date),
+															"MMM dd, yyyy",
+														)}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Status:</span>
+													<span className="font-medium capitalize">
+														{bookingStartingToday.status.replace("_", " ")}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Guests:</span>
+													<span className="font-medium">
+														{bookingStartingToday.adults +
+															(bookingStartingToday.children || 0)}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Amount:</span>
+													<span className="font-medium">
+														{getCurrencySymbol(bookingStartingToday.currency)}
+														{bookingStartingToday.total_amount.toLocaleString()}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Booking #:</span>
+													<span className="font-medium text-xs">
+														{bookingStartingToday.reservation_number}
+													</span>
+												</div>
+											</div>
+										</TooltipContent>
+									</Tooltip>
 								)}
 
 								{!isOccupied && (
@@ -248,8 +249,9 @@ export function RoomRow({
 							</div>
 						);
 					})}
+					</div>
 				</div>
 			</div>
-		</div>
+		</TooltipProvider>
 	);
 }
