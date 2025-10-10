@@ -27,6 +27,7 @@ dist-ssr
 .vercel
 prompts/
 prompts/**
+.env
 .env.local
 .env.*.local
 .env.development.local
