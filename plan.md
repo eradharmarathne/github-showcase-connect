@@ -1,270 +1,246 @@
-# Calendar Timeline & iCal Integration - Implementation Complete
+# iCal Integration Implementation Plan
 
-## ✅ ALL TASKS COMPLETED (Including Verification)
+## Current Status Summary
 
-### Implementation Summary
+### ✅ Completed Tasks (via Rube MCP)
+1. **Database Schema**: Added `room_id` and `is_active` columns to `booking_sync_urls` table
+2. **Edge Functions Updated**:
+   - `sync-ical`: Modified to use `external_bookings` table and support new parameters (tenant_id, property_id, room_id)
+   - `scheduled-calendar-sync`: Updated to query database instead of hardcoded URLs
+3. **TypeScript Types**: Regenerated from Supabase schema
+4. **UI Implementation**: Added complete iCal sync management UI in booking-channels-integration page
+   - Form inputs wired to state
+   - Add/Delete/Manual sync functionality
+   - Display existing sync URLs with badges
+   - Last synced timestamps
 
-This document tracks the implementation of iCal integration and calendar timeline visual enhancements for the CheckingCheckout hospitality ERP system.
+### 🔄 Partially Complete
+5. **Calendar Styling**: iCal legend entry added to `calendar-legend.tsx` (teal color)
+   - ✅ Legend entry added
+   - ❌ Source color not yet added to `external-booking-block.tsx`
+   - ❌ Source filter not yet added to `timeline-view.tsx` and `enhanced-calendar.tsx`
 
----
-
-## Completed Features
-
-### 1. ✅ iCal Integration (Database & Backend)
-- **Database Schema**: Added `room_id` and `is_active` columns to `booking_sync_urls` table
-- **Edge Functions**:
-  - `sync-ical`: Modified to use `external_bookings` table with tenant_id, property_id, room_id support
-  - `scheduled-calendar-sync`: Updated to query database instead of hardcoded URLs
-- **TypeScript Types**: Regenerated from Supabase schema
-- **UI Management**: Complete iCal sync management in booking-channels-integration page
-
-### 2. ✅ iCal Calendar Display & Filtering
-- **Color Scheme**: iCal bookings display with teal styling (bg-teal-100, border-teal-400, text-teal-800, icon 📅)
-- **Source Filtering**: Independent iCal filter toggle in calendar view
-- **TypeScript Safety**: SourceFilters interface includes `ical: boolean`
-- **Filter Logic**: iCal bookings handled separately from "other" sources
-
-### 3. ✅ Calendar Timeline Visual Enhancements
-
-#### Rhombus-Shaped Edges
-- **Implementation**: CSS clip-path polygon creates pointed left/right edges
-- **Polygon Points**:
-  ```css
-  clip-path: polygon(
-    0 0,              /* Top-left */
-    6px 50%,          /* Left point (indent) */
-    0 100%,           /* Bottom-left */
-    calc(100% - 6px) 100%,  /* Bottom-right */
-    100% 50%,         /* Right point (protrusion) */
-    calc(100% - 6px) 0      /* Top-right */
-  );
-  ```
-- **Visual Effect**: Creates Hostaway-style booking blocks with sharp pointed edges
-
-#### Guest Details Display
-- **Multi-day bookings (≥2 days)**: Shows "Guest Name • (X guests)"
-- **Single-day bookings**: Shows dot "•" only
-- **Guest Count**: Combines adults + children
-- **Examples**:
-  - Direct: `John Smith • (3 guests)`
-  - Booking.com: `🏛️ Jane Doe • (2 guests)`
-  - Airbnb: `🏡 Bob Johnson • (4 guests)`
-
-#### Smart Positioning & Spacing
-- **Check-in**: Bookings start at 20-50% of the check-in day cell
-- **Check-out**: Bookings end at 50% of the check-out day cell
-- **Benefit**: Consecutive bookings (checkout = check-in same day) show clear visible gap
-- **Example**:
-  - Booking A: Oct 13-20 (ends at 50% of Oct 20)
-  - Booking B: Oct 20-30 (starts at 50% of Oct 20)
-  - **Result**: Clear 50% gap visible between bookings on Oct 20
-
-#### Day-by-Day Visual Separation
-- **Implementation**: Repeating linear gradient creates subtle vertical stripes
-- **Effect**: Each day within a booking is visually distinguishable
-- **Gradient**: `repeating-linear-gradient(90deg, transparent, rgba(0,0,0,0.05))`
+### ⏳ Pending Tasks
+6. **Add iCal source handling to calendar components**
+7. **Migrate existing hardcoded URLs to database**
 
 ---
 
-## Files Modified
+## Implementation Plan
 
-### Calendar Components
-1. **`src/components/calendar/external-booking-block.tsx`**
-   - Lines 44-50: Added iCal color case to `getSourceColor()`
-   - Lines 86-87: Updated positioning (`left: calc(...% + 50%)`, `right: calc(...% + 50%)`)
-   - Lines 102-109: Added rhombus clip-path
-   - Lines 120-138: Updated content to show guest name + count
+### Task 6: Complete iCal Source Styling and Filtering
 
-2. **`src/components/calendar/room-row.tsx`**
-   - Lines 165-166: Updated positioning (`left: "20%"`, `right: calc(...% + 50%)`)
-   - Lines 167-174: Added rhombus clip-path
-   - Lines 180-189: Updated content to show guest name + count with capitalize
+#### 6.1 Add iCal Color to `external-booking-block.tsx`
+**File**: `/Users/kalana/dev/netronk/app.checkingcheckout.com/src/components/calendar/external-booking-block.tsx`
 
-3. **`src/components/calendar/timeline-view.tsx`**
-   - Line 64: Added `ical: boolean` to SourceFilters interface
-   - Line 229: Added iCal filter check in `filteredExternalBookings`
-   - Line 231: Updated source array to include "ical"
+**Current State**: The `getSourceColor()` function handles `booking_com`, `airbnb`, `expedia`, `beds24`, and a default case.
 
-### UI Pages
-4. **`src/pages/enhanced-calendar.tsx`**
-   - Line 36: Added `showIcal` state
-   - Lines 148-153: Added iCal checkbox to filter dropdown
-   - Line 180: Added `ical: showIcal` to sourceFilters prop
-
----
-
-## Technical Implementation Details
-
-### CSS Clip-Path for Rhombus Edges
-```css
-clipPath: `polygon(
-  0 0,                      /* Top-left corner (flat) */
-  6px 50%,                  /* Left rhombus point (6px indent) */
-  0 100%,                   /* Bottom-left corner (flat) */
-  calc(100% - 6px) 100%,    /* Bottom-right (before point) */
-  100% 50%,                 /* Right rhombus point (6px protrusion) */
-  calc(100% - 6px) 0        /* Top-right (before point) */
-)`
-```
-
-### Positioning Formula
-- **Direct bookings**: `left: "20%"`, `right: calc(${100 - (spanDays * 100)}% + 50%)`
-- **External bookings**: `left: calc(${(startIndex / totalDays) * 100}% + 50%)`, `right: calc(${100 - ((startIndex + spanDays) / totalDays) * 100}% + 50%)`
-
-### Guest Count Display Logic
+**Changes Needed**:
 ```typescript
-{spanDays >= 2 ? (
-  <>
-    <span className="truncate">{guest_name}</span>
-    <span className="shrink-0">• ({adults + children} {adults + children === 1 ? "guest" : "guests"})</span>
-  </>
-) : (
-  <span>•</span>
-)}
+// In getSourceColor() function, add case before default:
+case "ical":
+  return {
+    bg: "bg-teal-100",
+    border: "border-teal-400",
+    text: "text-teal-800",
+    icon: "📅",
+  };
 ```
 
----
-
-## ✅ Complete: Task 7 - Migrate Hardcoded URLs
-
-### Status: Not Applicable - No Migration Needed
-
-**Verification Completed**: Searched entire codebase for hardcoded iCal URLs:
-- ❌ No hardcoded URLs found in frontend components
-- ❌ No hardcoded URLs found in Edge Functions
-- ✅ `scheduled-calendar-sync` correctly queries `booking_sync_urls` table
-- ✅ `sync-ical` receives URLs as parameters from database
-- ✅ Only URL mentions are in documentation and UI placeholders
-
-**Conclusion**: The implementation was done correctly from the start - all iCal URLs are managed through the database via the Booking Channels UI. No migration required.
-
-**For New iCal URLs**: Users can add them via:
-1. Navigate to Booking Channels → Settings → iCal Calendar Sync
-2. Click "Add iCal URL"
-3. Enter the iCal URL
-4. Select the source (Booking.com/Airbnb/Other)
-5. Map to appropriate room (optional)
-6. Save
-7. Test manual sync
-8. Verify bookings appear in calendar with correct styling
+**Why**: This ensures iCal bookings display with consistent teal styling matching the legend.
 
 ---
 
-## Database Schema (No Changes Required)
+#### 6.2 Update Source Filters in `timeline-view.tsx`
+**File**: `/Users/kalana/dev/netronk/app.checkingcheckout.com/src/components/calendar/timeline-view.tsx`
 
-All calendar enhancements are UI-only. Existing schema is sufficient:
+**Current State**:
+- Line 277-290: `filteredExternalBookings` filter only checks `booking_com`, `airbnb`, `expedia`, `beds24`
+- iCal bookings would fall into the "other" category
 
-### `external_bookings` Table
-- Stores all external channel bookings (Booking.com, Airbnb, Expedia, Beds24, iCal)
-- `source` column: enum value for channel type ("ical" for iCal bookings)
-- `room_id`: nullable FK to rooms (supports unmapped bookings)
-- `guest_name`, `check_in`, `check_out`, `adults`, `children`: display fields
+**Changes Needed**:
+```typescript
+// Update filteredExternalBookings filter logic (around line 277-290)
+const filteredExternalBookings = externalBookings.filter((booking) => {
+  if (sourceFilters) {
+    const source = booking.source.toLowerCase();
+    if (source === "booking_com" && !sourceFilters.booking_com) return false;
+    if (source === "airbnb" && !sourceFilters.airbnb) return false;
+    if (source === "expedia" && !sourceFilters.expedia) return false;
+    if (source === "beds24" && !sourceFilters.beds24) return false;
+    if (source === "ical" && !sourceFilters.ical) return false; // ADD THIS
+    if (
+      !["booking_com", "airbnb", "expedia", "beds24", "ical"].includes(source) && // UPDATE THIS
+      !sourceFilters.other
+    )
+      return false;
+  }
+  // ... rest of filter logic
+});
+```
 
-### `booking_sync_urls` Table
-- Stores iCal subscription URLs
-- `room_id`: optional room mapping
-- `is_active`: soft delete flag
-- `last_synced_at`: timestamp tracking
+**Why**: Allows users to filter iCal bookings separately from "other" sources.
+
+---
+
+#### 6.3 Add iCal Filter Option in `enhanced-calendar.tsx`
+**File**: `/Users/kalana/dev/netronk/app.checkingcheckout.com/src/pages/enhanced-calendar.tsx`
+
+**Current State**:
+- Lines 31-36: State for filter toggles (missing `showIcal`)
+- Lines 167-174: `sourceFilters` prop passed to TimelineView (missing `ical` key)
+- Lines 103-154: Filter dropdown menu (missing iCal checkbox)
+
+**Changes Needed**:
+
+1. Add state (after line 36):
+```typescript
+const [showIcal, setShowIcal] = useState(true);
+```
+
+2. Add to sourceFilters prop (update lines 167-174):
+```typescript
+sourceFilters={{
+  direct: showDirectBookings,
+  booking_com: showBookingCom,
+  airbnb: showAirbnb,
+  expedia: showExpedia,
+  beds24: showBeds24,
+  ical: showIcal, // ADD THIS
+  other: showOther,
+}}
+```
+
+3. Add checkbox in dropdown (after line 146):
+```tsx
+<DropdownMenuCheckboxItem
+  checked={showIcal}
+  onCheckedChange={setShowIcal}
+>
+  📅 iCal
+</DropdownMenuCheckboxItem>
+```
+
+**Why**: Provides UI control to show/hide iCal bookings in the calendar view.
+
+---
+
+#### 6.4 Update TypeScript Interface in `timeline-view.tsx`
+**File**: `/Users/kalana/dev/netronk/app.checkingcheckout.com/src/components/calendar/timeline-view.tsx`
+
+**Current State**: Lines 58-65 define `SourceFilters` interface without `ical` property.
+
+**Changes Needed**:
+```typescript
+interface SourceFilters {
+  direct: boolean;
+  booking_com: boolean;
+  airbnb: boolean;
+  expedia: boolean;
+  beds24: boolean;
+  ical: boolean; // ADD THIS
+  other: boolean;
+}
+```
+
+**Why**: Maintains TypeScript type safety for the new filter option.
+
+---
+
+### Task 7: Migrate Existing Hardcoded URLs to Database
+
+**Context**: The previous `scheduled-calendar-sync` implementation may have had hardcoded URLs that are no longer being synced after database migration.
+
+**Investigation Steps**:
+1. Check git history for previous hardcoded URLs in `scheduled-calendar-sync/index.ts`
+2. Review any existing iCal URLs in environment variables or config files
+3. Identify all URLs that need migration
+
+**Migration Steps**:
+1. Create a migration script or use Supabase SQL editor to insert existing URLs:
+```sql
+-- Example migration SQL
+INSERT INTO booking_sync_urls (tenant_id, location_id, ical_url, source, is_active)
+VALUES
+  ('tenant-uuid', 'location-uuid', 'https://ical.booking.com/...', 'booking_com', true),
+  ('tenant-uuid', 'location-uuid', 'https://airbnb.com/calendar/ical/...', 'airbnb', true);
+```
+
+2. Test each URL by triggering manual sync via UI
+3. Verify bookings are imported correctly
+4. Remove any old hardcoded URLs from codebase
+
+**Alternative Approach**: If no hardcoded URLs existed, this task can be marked as "Not Applicable" after verification.
 
 ---
 
 ## Testing Checklist
 
-### Visual Testing
-- [x] iCal bookings display with teal color scheme
-- [x] Booking blocks have rhombus/pointed edges (not square)
-- [x] Guest name + guest count displays correctly
-- [x] Single-day bookings show only a dot
-- [x] Consecutive bookings show visible gap
-- [x] Day-by-day stripes visible within multi-day bookings
+### Unit Testing
+- [ ] Calendar legend displays iCal entry with teal color
+- [ ] iCal bookings render with teal styling in timeline
+- [ ] iCal filter toggle works in enhanced calendar
+- [ ] iCal bookings filtered correctly when toggle is off
 
-### Functional Testing
-- [x] iCal filter toggle works independently
-- [x] Direct bookings filter toggle works
-- [x] All channel filters (Booking.com, Airbnb, Expedia, Beds24, iCal, Other) work
-- [ ] Manual iCal sync imports bookings correctly
-- [ ] Scheduled iCal sync runs successfully (cron test)
-- [ ] Room mapping for iCal bookings works
-- [ ] Unmapped iCal bookings show warning indicator
+### Integration Testing
+- [ ] Add new iCal URL via UI
+- [ ] Trigger manual sync for iCal URL
+- [ ] Verify bookings appear in `external_bookings` table
+- [ ] Verify bookings display on calendar with correct styling
+- [ ] Delete sync URL (soft delete with `is_active = false`)
+- [ ] Verify deleted URL no longer syncs
 
 ### Edge Cases
-- [x] Multiple bookings on same day (different rooms) - handled correctly
-- [x] Consecutive bookings (checkout = check-in same day) - clear gap visible
-- [x] Overlapping bookings (actual overlap, not consecutive) - stacked properly
-- [ ] iCal URL with invalid/expired content - error handling
-- [ ] Multiple iCal URLs for same location - all sync correctly
+- [ ] Multiple iCal URLs for same location
+- [ ] iCal URL with invalid/expired content
+- [ ] iCal bookings overlapping with direct bookings
+- [ ] Room mapping for iCal bookings (room_id nullable)
+- [ ] Scheduled sync runs successfully (test cron trigger)
+
+---
+
+## Files to Modify
+
+1. **`src/components/calendar/external-booking-block.tsx`** (Lines 12-51)
+   - Add iCal case to `getSourceColor()` function
+
+2. **`src/components/calendar/timeline-view.tsx`** (Lines 58-65, 277-290)
+   - Update `SourceFilters` interface to include `ical: boolean`
+   - Update `filteredExternalBookings` filter logic to handle iCal source
+
+3. **`src/pages/enhanced-calendar.tsx`** (Lines 31-36, 103-154, 167-174)
+   - Add `showIcal` state
+   - Add iCal checkbox to filter dropdown
+   - Add `ical` to `sourceFilters` prop
+
+4. **Migration (Optional)**: `supabase/migrations/` or SQL editor
+   - Only if existing hardcoded URLs need to be migrated
 
 ---
 
 ## Success Criteria
 
-✅ **Visual**: iCal bookings display with teal color, rhombus edges, guest details
+✅ **Visual**: iCal bookings display with teal color (bg-teal-100, border-teal-400)
 ✅ **Functional**: Users can add/edit/delete iCal sync URLs via UI
 ✅ **Filtering**: iCal filter toggle works independently in calendar
-✅ **Positioning**: Bookings show clear gaps when consecutive (same-day checkout/check-in)
-✅ **Responsive**: Single-day bookings show dot, multi-day show full details
+✅ **Sync**: Manual and scheduled syncs import iCal bookings correctly
+✅ **Data Integrity**: All bookings have correct `source`, `tenant_id`, `location_id`
 ✅ **Type Safety**: No TypeScript errors after changes
-⏳ **Sync**: Manual and scheduled syncs import iCal bookings correctly (pending test)
-⏳ **Migration**: Existing URLs migrated to database (if applicable)
 
 ---
 
 ## Rollback Plan
 
 If issues occur:
-1. **Visual issues only**: Revert calendar component changes (room-row.tsx, external-booking-block.tsx)
-2. **Filter issues**: Revert enhanced-calendar.tsx and timeline-view.tsx changes
-3. **Backend issues**: Database schema and Edge Functions are backward compatible, can remain
+1. Revert changes to calendar components (keep UI and Edge Functions)
+2. iCal bookings will still be imported but styled as "other" (gray)
+3. Database schema and Edge Functions are safe to keep (backward compatible)
 
 ---
 
-## Color Scheme Reference
+## Notes
 
-### Booking Sources
-- **Direct**: Status-based colors (emerald, amber, violet, etc.)
-- **Booking.com**: Blue (bg-blue-100, border-blue-400, text-blue-800) 🏛️
-- **Airbnb**: Pink (bg-pink-100, border-pink-400, text-pink-800) 🏡
-- **Expedia**: Yellow (bg-yellow-100, border-yellow-400, text-yellow-800) ✈️
-- **Beds24**: Purple (bg-purple-100, border-purple-400, text-purple-800) 🛏️
-- **iCal**: Teal (bg-teal-100, border-teal-400, text-teal-800) 📅
-- **Other**: Gray (bg-gray-100, border-gray-400, text-gray-800) 🌐
-
----
-
-## Performance Notes
-
-- **Query Optimization**: External bookings fetch uses 30-second cache (staleTime: 30000)
-- **Render Optimization**: Booking span calculation cached per booking
-- **CSS Performance**: clip-path is hardware-accelerated, performs well
-- **Responsive**: Font sizes and spacing adjust based on viewport
-
----
-
-## Future Enhancements (Out of Scope)
-
-- [ ] Drag-and-drop to move bookings between rooms
-- [ ] Click-and-drag to extend booking duration
-- [ ] Color-coded status indicators on booking blocks
-- [ ] Mini calendar view within tooltip
-- [ ] Print-friendly calendar export
-- [ ] Bulk room mapping for iCal bookings
-
----
-
-## Documentation
-
-**For Users**:
-- iCal sync setup guide: See Booking Channels → iCal Calendar Sync
-- Filter bookings: Use "Filter Sources" dropdown in calendar header
-- View booking details: Click any booking block for tooltip
-
-**For Developers**:
-- Calendar components: `/src/components/calendar/`
-- Booking data types: `/src/components/calendar/timeline-view.tsx` (ExternalBooking, Reservation)
-- Edge Functions: `/supabase/functions/sync-ical/`, `/supabase/functions/scheduled-calendar-sync/`
-- Database schema: Supabase dashboard → Database → external_bookings, booking_sync_urls
-
----
-
-**Implementation Date**: October 2025
-**Status**: ✅ ALL TASKS COMPLETE
+- **Color Choice**: Teal was chosen to distinguish iCal from other channels (blue=booking.com, pink=airbnb, yellow=expedia, purple=beds24)
+- **Source Standardization**: Ensure sync-ical function uses lowercase "ical" as source value
+- **Performance**: Current implementation fetches external bookings with 30-second cache (staleTime: 30000)
+- **Room Mapping**: iCal bookings support optional `room_id` - unmapped bookings show warning icon

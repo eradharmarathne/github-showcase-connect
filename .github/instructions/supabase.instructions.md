@@ -235,7 +235,7 @@ project-root/
 
 ### 7.2. Build Configuration
 
-*   Use a build tool like vite.
+*   Use a build tool like Webpack or Parcel to bundle your code.
 *   Configure your build tool to optimize for production.
 *   Use environment variables to configure your application.
 
