@@ -158,24 +158,34 @@ export function RoomRow({
 										<TooltipTrigger asChild>
 											<div
 												className={cn(
-													"absolute inset-y-[1px] left-[1px] rounded-sm cursor-pointer transition-all z-20 flex items-center justify-center overflow-hidden",
+													"absolute inset-y-[2px] cursor-pointer transition-all z-20 flex items-center justify-center overflow-visible",
 													getStatusColor(bookingStartingToday.status),
 												)}
 												style={{
-													right: `${100 - (bookingStartingToday.span.spanDays * 100)}%`,
+													left: "20%",
+													right: `calc(${100 - (bookingStartingToday.span.spanDays * 100)}% + 50%)`,
+													clipPath: `polygon(
+														0 0,
+														6px 50%,
+														0 100%,
+														calc(100% - 6px) 100%,
+														100% 50%,
+														calc(100% - 6px) 0
+													)`,
 													backgroundImage: "repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / " + bookingStartingToday.span.spanDays + " - 1px), rgba(0,0,0,0.05) calc(100% / " + bookingStartingToday.span.spanDays + " - 1px), rgba(0,0,0,0.05) calc(100% / " + bookingStartingToday.span.spanDays + "))",
 												}}
 												onClick={() => onBookingClick(bookingStartingToday)}
 											>
-												{/* Compact content - just initials or dot for mobile */}
-												<div className="text-white text-[8px] sm:text-[9px] md:text-[10px] font-semibold truncate px-0.5 relative z-10">
-													{isMobile && bookingStartingToday.span.spanDays < 3
-														? "•"
-														: bookingStartingToday.guest_name
-																.split(" ")
-																.map((n) => n[0])
-																.join("")
-																.slice(0, 3)}
+												{/* Booking details - guest name and count */}
+												<div className="text-white capitalize text-[9px] sm:text-[10px] font-semibold truncate px-1 relative z-10 flex items-center gap-1">
+													{bookingStartingToday.span.spanDays >= 2 ? (
+														<>
+															<span className="truncate">{bookingStartingToday.guest_name}</span>
+															<span className="shrink-0">• ({bookingStartingToday.adults + (bookingStartingToday.children || 0)} {bookingStartingToday.adults + (bookingStartingToday.children || 0) === 1 ? "guest" : "guests"})</span>
+														</>
+													) : (
+														<span>•</span>
+													)}
 												</div>
 											</div>
 										</TooltipTrigger>

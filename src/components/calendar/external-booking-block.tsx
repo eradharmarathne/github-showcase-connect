@@ -18,42 +18,42 @@ const getSourceColor = (source: string) => {
 				bg: "bg-blue-100",
 				border: "border-blue-400",
 				text: "text-blue-800",
-				icon: "\ud83c\udfdb\ufe0f",
+				icon: "🏛️",
 			};
 		case "airbnb":
 			return {
 				bg: "bg-pink-100",
 				border: "border-pink-400",
 				text: "text-pink-800",
-				icon: "\ud83c\udfe1",
+				icon: "🏡",
 			};
 		case "expedia":
 			return {
 				bg: "bg-yellow-100",
 				border: "border-yellow-400",
 				text: "text-yellow-800",
-				icon: "\u2708\ufe0f",
+				icon: "✈️",
 			};
 		case "beds24":
 			return {
 				bg: "bg-purple-100",
 				border: "border-purple-400",
 				text: "text-purple-800",
-				icon: "\ud83d\udecf\ufe0f",
+				icon: "🛏️",
 			};
 		case "ical":
 			return {
 				bg: "bg-teal-100",
 				border: "border-teal-400",
 				text: "text-teal-800",
-				icon: "\ud83d\udcc5",
+				icon: "📅",
 			};
 		default:
 			return {
 				bg: "bg-gray-100",
 				border: "border-gray-400",
 				text: "text-gray-800",
-				icon: "\ud83c\udf10",
+				icon: "🌐",
 			};
 	}
 };
@@ -81,24 +81,32 @@ export function ExternalBookingBlock({
 
 	return (
 		<div
-			className="absolute top-0 bottom-0 flex items-center"
+			className="absolute inset-y-[2px] flex items-center"
 			style={{
-				left: `${(startIndex / totalDays) * 100}%`,
-				right: `${100 - ((startIndex + spanDays) / totalDays) * 100}%`,
+				left: `calc(${(startIndex / totalDays) * 100}% + 50%)`,
+				right: `calc(${100 - ((startIndex + spanDays) / totalDays) * 100}% + 50%)`,
 			}}
 		>
 			<button
 				type="button"
 				onClick={() => onClick(booking)}
 				className={`
-					w-full h-full rounded-md border-2 ${colors.border} ${colors.bg}
+					w-full h-full border-2 ${colors.border} ${colors.bg}
 					flex flex-col justify-center px-1 sm:px-1.5
 					hover:opacity-80 transition-opacity
-					relative overflow-hidden
+					relative overflow-visible
 					cursor-pointer
 					text-left
 				`}
 				style={{
+					clipPath: `polygon(
+						0 0,
+						6px 50%,
+						0 100%,
+						calc(100% - 6px) 100%,
+						100% 50%,
+						calc(100% - 6px) 0
+					)`,
 					backgroundImage: `repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays}))`,
 				}}
 				title={`${formatSourceName(booking.source)} - ${booking.guest_name}`}
@@ -108,30 +116,25 @@ export function ExternalBookingBlock({
 					className={`absolute top-0 left-0 right-0 h-0.5 ${colors.border.replace("border-", "bg-")}`}
 				/>
 
-				{/* Booking details */}
-				<div className="flex items-center gap-0.5 sm:gap-1">
-					<span className="text-[8px] sm:text-[9px]" title={formatSourceName(booking.source)}>
-						{colors.icon}
-					</span>
-					<span
-						className={`${colors.text} text-[8px] sm:text-[9px] md:text-[10px] font-semibold truncate flex-1`}
-					>
-						{booking.guest_name}
-					</span>
-				</div>
-
-				{spanDays >= 3 && (
-					<>
-						<div className={`${colors.text} text-[7px] sm:text-[8px] truncate`}>
-							{getCurrencySymbol(currency)}
-							{amount.toLocaleString()}
-						</div>
-						{spanDays >= 4 && (
-							<div className={`${colors.text} text-[7px] sm:text-[8px]`}>
-								{adults}A {children > 0 && `${children}C`}
-							</div>
-						)}
-					</>
+				{/* Booking details - guest name and guest count */}
+				{spanDays >= 2 ? (
+					<div className="flex items-center gap-1 w-full">
+						<span className="text-[8px] sm:text-[9px]" title={formatSourceName(booking.source)}>
+							{colors.icon}
+						</span>
+						<span
+							className={`${colors.text} text-[9px] sm:text-[10px] font-semibold truncate flex-1`}
+						>
+							{booking.guest_name}
+						</span>
+						<span className={`${colors.text} text-[9px] sm:text-[10px] font-semibold shrink-0`}>
+							• ({adults + children} {adults + children === 1 ? "guest" : "guests"})
+						</span>
+					</div>
+				) : (
+					<div className="flex items-center justify-center">
+						<span className={`${colors.text} text-[9px]`}>•</span>
+					</div>
 				)}
 
 				{/* Unmapped indicator */}
@@ -140,7 +143,7 @@ export function ExternalBookingBlock({
 						className="absolute bottom-0 right-0 bg-yellow-400 text-[6px] sm:text-[7px] px-0.5 rounded-tl"
 						title="Room not mapped"
 					>
-						\u26a0\ufe0f
+						⚠️
 					</div>
 				)}
 			</button>
