@@ -33,6 +33,7 @@ export default function EnhancedCalendar() {
 	const [showAirbnb, setShowAirbnb] = useState(true);
 	const [showExpedia, setShowExpedia] = useState(true);
 	const [showBeds24, setShowBeds24] = useState(true);
+	const [showIcal, setShowIcal] = useState(true);
 	const [showOther, setShowOther] = useState(true);
 
 	// Status color helpers
@@ -145,6 +146,12 @@ export default function EnhancedCalendar() {
 									🛏️ Beds24
 								</DropdownMenuCheckboxItem>
 								<DropdownMenuCheckboxItem
+									checked={showIcal}
+									onCheckedChange={setShowIcal}
+								>
+									📅 iCal
+								</DropdownMenuCheckboxItem>
+								<DropdownMenuCheckboxItem
 									checked={showOther}
 									onCheckedChange={setShowOther}
 								>
@@ -170,6 +177,7 @@ export default function EnhancedCalendar() {
 						airbnb: showAirbnb,
 						expedia: showExpedia,
 						beds24: showBeds24,
+						ical: showIcal,
 						other: showOther,
 					}}
 					onBookingClick={handleBookingClick}

@@ -61,6 +61,7 @@ interface SourceFilters {
 	airbnb: boolean;
 	expedia: boolean;
 	beds24: boolean;
+	ical: boolean;
 	other: boolean;
 }
 
@@ -282,8 +283,9 @@ export function TimelineView({
 			if (source === "airbnb" && !sourceFilters.airbnb) return false;
 			if (source === "expedia" && !sourceFilters.expedia) return false;
 			if (source === "beds24" && !sourceFilters.beds24) return false;
+			if (source === "ical" && !sourceFilters.ical) return false;
 			if (
-				!["booking_com", "airbnb", "expedia", "beds24"].includes(source) &&
+				!["booking_com", "airbnb", "expedia", "beds24", "ical"].includes(source) &&
 				!sourceFilters.other
 			)
 				return false;

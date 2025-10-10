@@ -40,6 +40,13 @@ const getSourceColor = (source: string) => {
 				text: "text-purple-800",
 				icon: "\ud83d\udecf\ufe0f",
 			};
+		case "ical":
+			return {
+				bg: "bg-teal-100",
+				border: "border-teal-400",
+				text: "text-teal-800",
+				icon: "\ud83d\udcc5",
+			};
 		default:
 			return {
 				bg: "bg-gray-100",
