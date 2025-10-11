@@ -16,6 +16,7 @@ import { NewReservationDialog } from "@/components/modals";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookingSourceChartSkeleton } from "@/components/skeleton/booking-source-chart-skeleton";
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -84,66 +85,10 @@ export function BookingSourceChart({
 }: BookingSourceChartProps) {
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
-	const navigate = useNavigate();
 	const [sourceData, setSourceData] = useState<BookingSourceData[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [totalBookings, setTotalBookings] = useState(0);
-	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
-		useState(false);
-
-	// Keyboard shortcut handlers
-	useEffect(() => {
-		const handleKeyPress = (event: KeyboardEvent) => {
-			if (event.ctrlKey || event.metaKey) {
-				switch (event.key) {
-					case "n":
-						event.preventDefault();
-						setIsNewReservationDialogOpen(true);
-						break;
-					case "c":
-						event.preventDefault();
-						navigate("/calendar");
-						break;
-					case "r":
-						event.preventDefault();
-						navigate("/reservations");
-						break;
-					case "i":
-						event.preventDefault();
-						navigate("/income");
-						break;
-					case "e":
-						event.preventDefault();
-						navigate("/expense");
-						break;
-				}
-			}
-		};
-
-		document.addEventListener("keydown", handleKeyPress);
-		return () => document.removeEventListener("keydown", handleKeyPress);
-	}, [navigate]);
-
 	// Shortcut action handlers
-	const handleQuickAction = (action: string) => {
-		switch (action) {
-			case "new-reservation":
-				setIsNewReservationDialogOpen(true);
-				break;
-			case "calendar":
-				navigate("/calendar");
-				break;
-			case "reservations":
-				navigate("/reservations");
-				break;
-			case "income":
-				navigate("/income");
-				break;
-			case "expense":
-				navigate("/expense");
-				break;
-		}
-	};
 
 	useEffect(() => {
 		const fetchBookingSourceData = async () => {
@@ -221,20 +166,7 @@ export function BookingSourceChart({
 	}, [selectedLocation, selectedMonth, tenant?.id]);
 
 	if (loading) {
-		return (
-			<Card className="bg-card border">
-				<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-					<CardTitle className="text-sm font-medium">
-						{t("dashboard.bookingSources.title")}
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="h-[400px] flex items-center justify-center">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-					</div>
-				</CardContent>
-			</Card>
-		);
+		return <BookingSourceChartSkeleton />;
 	}
 
 	if (sourceData.length === 0) {
@@ -255,152 +187,79 @@ export function BookingSourceChart({
 	}
 
 	return (
-		<Card className="bg-card border">
+		<Card className="bg-card border w-fit h-fit">
 			<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 				<CardTitle className="text-sm font-medium">
 					Booking Sources & Quick Actions
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="grid grid-cols-1 sm:grid-cols-2">
-					<div className="flex py-4 sm:py-8 justify-center flex-col sm:flex-row flex-1 min-h-[300px]">
-						<ChartContainer
-							config={{}}
-							className="mx-auto aspect-square h-[220px]"
-						>
-							<PieChart>
-								<Pie
-									data={sourceData}
-									cx="50%"
-									cy="50%"
-									innerRadius={50}
-									outerRadius={90}
-									paddingAngle={2}
-									dataKey="count"
-								>
-									{sourceData.map((entry, index) => (
-										<Cell
-											key={`cell-${index}`}
-											fill={
-												SOURCE_COLORS[entry.source] ||
-												FALLBACK_COLORS[index % FALLBACK_COLORS.length]
-											}
-										/>
-									))}
-								</Pie>
-								<ChartTooltip
-									content={
-										<ChartTooltipContent
-											labelFormatter={(value) => value}
-											formatter={(value, name, entry) => [
-												`${entry.payload.count} bookings (${entry.payload.percentage.toFixed(1)}%)`,
-												entry.payload.source,
-											]}
-										/>
-									}
-								/>
-							</PieChart>
-						</ChartContainer>
-
-						{/* Legend */}
-						<div className="mt-2 flex-1">
-							<div className="grid grid-cols-1 gap-1 text-xs">
+				<div className="flex justify-center flex-col flex-1">
+					<ChartContainer
+						config={{}}
+						className="mx-auto aspect-square h-[220px]"
+					>
+						<PieChart>
+							<Pie
+								data={sourceData}
+								cx="50%"
+								cy="50%"
+								innerRadius={50}
+								outerRadius={90}
+								paddingAngle={2}
+								dataKey="count"
+							>
 								{sourceData.map((entry, index) => (
-									<div key={entry.source} className="flex items-center gap-2">
-										<div
-											className="w-2 h-2 rounded-full flex-shrink-0"
-											style={{
-												backgroundColor:
-													SOURCE_COLORS[entry.source] ||
-													FALLBACK_COLORS[index % FALLBACK_COLORS.length],
-											}}
-										/>
-										<span className="truncate text-xs">
-											{entry.source}: {entry.count} (
-											{entry.percentage.toFixed(1)}
-											%)
-										</span>
-									</div>
+									<Cell
+										key={`cell-${index}`}
+										fill={
+											SOURCE_COLORS[entry.source] ||
+											FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+										}
+									/>
 								))}
-							</div>
-							<span className="text-xs text-muted-foreground">
-								{totalBookings} total bookings
-							</span>
-						</div>
-					</div>
+							</Pie>
+							<ChartTooltip
+								content={
+									<ChartTooltipContent
+										labelFormatter={(value) => value}
+										formatter={(value, name, entry) => [
+											`${entry.payload.count} bookings (${entry.payload.percentage.toFixed(1)}%)`,
+											entry.payload.source,
+										]}
+									/>
+								}
+							/>
+						</PieChart>
+					</ChartContainer>
 
-					{/* Quick Action Shortcuts */}
-					<div className="mt-4 pt-4 border-t">
-						<div className="flex flex-col gap-2">
-							<div className="flex items-center justify-between mb-2">
-								<span className="text-xs font-medium text-muted-foreground">
-									Quick Actions
-								</span>
-								<Badge variant="outline" className="text-xs">
-									Ctrl/Cmd + Key
-								</Badge>
-							</div>
-							<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => handleQuickAction("new-reservation")}
-									className="justify-start text-xs h-8"
-								>
-									<Plus className="w-3 h-3 mr-2" />
-									New Reservation (N)
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => handleQuickAction("calendar")}
-									className="justify-start text-xs h-8"
-								>
-									<Calendar className="w-3 h-3 mr-2" />
-									Calendar (C)
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => handleQuickAction("reservations")}
-									className="justify-start text-xs h-8"
-								>
-									<Users className="w-3 h-3 mr-2" />
-									Reservations (R)
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => handleQuickAction("income")}
-									className="justify-start text-xs h-8"
-								>
-									<DollarSign className="w-3 h-3 mr-2" />
-									Add Income (I)
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={() => handleQuickAction("expense")}
-									className="justify-start text-xs h-8"
-								>
-									<CreditCard className="w-3 h-3 mr-2" />
-									Add Expense (E)
-								</Button>
-							</div>
+					{/* Legend */}
+					<div className="mt-2 flex-1">
+						<div className="grid grid-cols-1 gap-1 text-xs">
+							{sourceData.map((entry, index) => (
+								<div key={entry.source} className="flex items-center gap-2">
+									<div
+										className="w-2 h-2 rounded-full flex-shrink-0"
+										style={{
+											backgroundColor:
+												SOURCE_COLORS[entry.source] ||
+												FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+										}}
+									/>
+									<span className="truncate text-xs">
+										{entry.source}: {entry.count} (
+										{entry.percentage.toFixed(1)}
+										%)
+									</span>
+								</div>
+							))}
 						</div>
+						<span className="text-xs text-muted-foreground">
+							{totalBookings} total bookings
+						</span>
 					</div>
 				</div>
 			</CardContent>
-
-			{/* New Reservation Dialog */}
-			<NewReservationDialog
-				isOpen={isNewReservationDialogOpen}
-				onClose={() => setIsNewReservationDialogOpen(false)}
-				onReservationCreated={() => {
-					setIsNewReservationDialogOpen(false);
-					// Data will be refreshed automatically by parent component
-				}}
-			/>
 		</Card>
 	);
 }

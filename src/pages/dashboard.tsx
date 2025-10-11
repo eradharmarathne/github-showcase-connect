@@ -22,23 +22,18 @@ export default function Dashboard() {
 		<div className="min-h-screen">
 			<div className="space-y-6 w-full pb-20 sm:pb-8 lg:space-y-8 animate-fade-in p-4 sm:p-6 lg:p-8 max-w-[1920px] mx-auto">
 				{/* Header with Filters */}
-				<div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 border border-primary/20">
-					<DashboardHeader
-						selectedLocation={selectedLocation}
-						selectedMonth={selectedMonth}
-						setSelectedMonth={setSelectedMonth}
-						hasIncomePermission={hasAnyPermission(["access_income"])}
-						hasExpensePermission={hasAnyPermission(["access_expenses"])}
-						onLocationsLoad={setLocations}
-					/>
-				</div>
+				<DashboardHeader />
 
 				{/* Income & Expense Chart */}
-				<div className="w-full">
+				<div className="w-full flex gap-4">
 					<IncomeExpenseChart
 						selectedLocation={selectedLocation}
 						selectedMonth={selectedMonth}
 						locations={locations}
+					/>
+					<BookingSourceChart
+						selectedLocation={selectedLocation}
+						selectedMonth={selectedMonth}
 					/>
 				</div>
 
@@ -56,14 +51,6 @@ export default function Dashboard() {
 							hasCalendarPermission={hasAnyPermission(["access_calendar"])}
 						/>
 					</div>
-				</div>
-
-				{/* Booking Source Chart */}
-				<div className="w-full">
-					<BookingSourceChart
-						selectedLocation={selectedLocation}
-						selectedMonth={selectedMonth}
-					/>
 				</div>
 			</div>
 		</div>

@@ -10,6 +10,7 @@ import {
 	YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { IncomeExpenseChartSkeleton } from "@/components/skeleton/income-expense-chart-skeleton";
 import {
 	ChartConfig,
 	ChartContainer,
@@ -26,6 +27,7 @@ import {
 	getCurrencySymbol,
 	getDisplayCurrency,
 } from "@/utils/currency";
+import { BookingSourceChart } from "./booking-source-chart";
 
 type Location = Tables<"locations">;
 
@@ -219,30 +221,7 @@ export function IncomeExpenseChart({
 	}, [selectedLocation, selectedMonth, tenant?.id, displayCurrency]);
 
 	if (loading) {
-		return (
-			<div className="space-y-4">
-				{/* Summary Cards */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-					{[1, 2, 3].map((i) => (
-						<Card key={i} className="bg-card border">
-							<CardHeader className="pb-2">
-								<div className="h-4 bg-muted rounded animate-pulse" />
-							</CardHeader>
-							<CardContent>
-								<div className="h-8 bg-muted rounded animate-pulse mb-2" />
-								<div className="h-3 bg-muted rounded animate-pulse w-3/4" />
-							</CardContent>
-						</Card>
-					))}
-				</div>
-				{/* Chart */}
-				<Card className="bg-card border">
-					<CardContent className="pt-4 sm:pt-6">
-						<div className="h-[300px] bg-muted rounded animate-pulse" />
-					</CardContent>
-				</Card>
-			</div>
-		);
+		return <IncomeExpenseChartSkeleton />;
 	}
 
 	const locationName = selectedLocation
@@ -251,7 +230,7 @@ export function IncomeExpenseChart({
 		: t("dashboard.chart.allLocations");
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 w-full flex-1">
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 				<Card className="bg-card border">
@@ -309,7 +288,7 @@ export function IncomeExpenseChart({
 			{/* Chart */}
 			<Card className="bg-card border">
 				<CardHeader>
-					<CardTitle className="text-base md:text-lg lg:text-xl font-semibold">
+					<CardTitle className="text-base md:text-lg lg:text-xl xl:text-2xl font-semibold">
 						{t("dashboard.chart.incomeVsExpenses")}
 					</CardTitle>
 					<p className="text-sm text-muted-foreground">
@@ -345,13 +324,6 @@ export function IncomeExpenseChart({
 										day: "numeric",
 									});
 								}}
-							/>
-							<YAxis
-								tickLine={false}
-								axisLine={false}
-								tickFormatter={(value) =>
-									`${getCurrencySymbol(displayCurrency)} ${Math.abs(value).toLocaleString()}`
-								}
 							/>
 							<ReferenceLine
 								y={0}
