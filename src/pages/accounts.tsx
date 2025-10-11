@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+	AccountDeleteDialog,
 	AccountForm,
 	AccountGrid,
 	AccountSummaryCards,
@@ -28,7 +29,12 @@ export default function Accounts() {
 
 	const [showAddDialog, setShowAddDialog] = useState(false);
 	const [showTransferDialog, setShowTransferDialog] = useState(false);
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+	const [deletingAccount, setDeletingAccount] = useState<{
+		id: string;
+		name: string;
+	} | null>(null);
 
 	// Fetch accounts and map current_balance to currentBalance for component compatibility
 	const {
@@ -85,12 +91,117 @@ export default function Accounts() {
 		});
 	};
 
-	const handleAccountDeleted = (accountId: string) => {
-		queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
-		toast({
-			title: t("common.success"),
-			description: t("accounts.form.messages.deleteSuccess"),
-		});
+	const handleAccountDeleted = async (accountId: string) => {
+		// Find the account to get its name
+		const account = accountsWithBalances.find((acc) => acc.id === accountId);
+		if (!account) {
+			toast({
+				title: t("common.error"),
+				description: "Account not found",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		try {
+			// First check if account has any related transactions using our RPC function
+			const { data: transactionCheck, error: checkError } = await supabase.rpc(
+				"check_account_transactions",
+				{
+					account_id: accountId,
+					tenant_id: tenant?.id,
+				},
+			);
+
+			if (checkError) {
+				console.error("Error checking account transactions:", checkError);
+				toast({
+					title: t("common.error"),
+					description: "Error checking account transactions. Please try again.",
+					variant: "destructive",
+				});
+				return;
+			}
+
+			// Parse the JSON response
+			const result =
+				typeof transactionCheck === "string"
+					? JSON.parse(transactionCheck)
+					: transactionCheck;
+
+			if (result?.error) {
+				toast({
+					title: t("common.error"),
+					description: result.error,
+					variant: "destructive",
+				});
+				return;
+			}
+
+			if (result?.has_transactions) {
+				const counts = result.transaction_counts;
+				const details = [];
+				if (counts.income > 0)
+					details.push(`${counts.income} income transactions`);
+				if (counts.expenses > 0)
+					details.push(`${counts.expenses} expense transactions`);
+				if (counts.transfers > 0)
+					details.push(`${counts.transfers} transfer transactions`);
+
+				toast({
+					title: t("common.error"),
+					description: `Cannot delete account "${result.account_name}". It has ${details.join(", ")}. Please remove all transactions first.`,
+					variant: "destructive",
+				});
+				return;
+			}
+
+			// Show confirmation dialog
+			setDeletingAccount({ id: accountId, name: account.name });
+			setShowDeleteDialog(true);
+		} catch (error) {
+			console.error("Error preparing account deletion:", error);
+			toast({
+				title: t("common.error"),
+				description:
+					"An error occurred while checking the account. Please try again.",
+				variant: "destructive",
+			});
+		}
+	};
+
+	const handleConfirmDeleteAccount = async () => {
+		if (!deletingAccount) return;
+
+		try {
+			// Proceed with deletion
+			const { error: deleteError } = await supabase
+				.from("accounts")
+				.delete()
+				.eq("id", deletingAccount.id)
+				.eq("tenant_id", tenant?.id);
+
+			if (deleteError) {
+				throw deleteError;
+			}
+
+			queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
+			queryClient.invalidateQueries({ queryKey: ["accounts"] });
+			toast({
+				title: t("common.success"),
+				description: `Account "${deletingAccount.name}" has been successfully deleted.`,
+			});
+		} catch (error) {
+			console.error("Error deleting account:", error);
+			toast({
+				title: t("common.error"),
+				description:
+					"An error occurred while deleting the account. Please try again.",
+				variant: "destructive",
+			});
+		} finally {
+			setDeletingAccount(null);
+		}
 	};
 
 	const handleTransferCompleted = () => {
@@ -186,6 +297,14 @@ export default function Accounts() {
 					({ currentBalance, ...account }) => account,
 				)}
 				onTransferCompleted={handleTransferCompleted}
+			/>
+
+			{/* Delete Confirmation Dialog */}
+			<AccountDeleteDialog
+				open={showDeleteDialog}
+				onOpenChange={setShowDeleteDialog}
+				accountName={deletingAccount?.name || ""}
+				onConfirm={handleConfirmDeleteAccount}
 			/>
 		</div>
 	);

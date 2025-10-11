@@ -889,6 +889,12 @@
         "deleteError": "Failed to delete account"
       }
     },
+    "deleteDialog": {
+      "title": "Delete Account",
+      "description": "Are you sure you want to delete the account \"{{accountName}}\"?",
+      "warning": "This action cannot be undone.",
+      "confirm": "Delete Account"
+    },
     "transfer": {
       "title": "Transfer Money",
       "fromAccount": "From Account",

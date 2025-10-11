@@ -2634,6 +2634,10 @@ export type Database = {
 					| { p_token: string };
 				Returns: boolean;
 			};
+			check_account_transactions: {
+				Args: { account_id: string; tenant_id: string };
+				Returns: Json;
+			};
 			clear_location_bookings: {
 				Args: { p_location_id: string };
 				Returns: Json;
