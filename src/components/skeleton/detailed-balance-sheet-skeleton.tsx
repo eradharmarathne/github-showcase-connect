@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DetailedBalanceSheetSkeleton() {
@@ -20,11 +19,11 @@ export function DetailedBalanceSheetSkeleton() {
 			</div>
 
 			{/* Account Summary Skeleton */}
-			<Card className="bg-muted/20">
-				<CardHeader>
+			<div className="bg-muted/20">
+				<div className="p-6">
 					<Skeleton className="h-6 w-32" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
 						{Array.from({ length: 4 }).map((_, i) => (
 							<div key={i}>
@@ -33,15 +32,15 @@ export function DetailedBalanceSheetSkeleton() {
 							</div>
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Transaction History Skeleton */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-5 w-56" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="space-y-2 max-h-96 overflow-y-auto">
 						{Array.from({ length: 8 }).map((_, i) => (
 							<div
@@ -66,16 +65,16 @@ export function DetailedBalanceSheetSkeleton() {
 							</div>
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Account Details Skeleton */}
 			<div>
 				<Skeleton className="h-6 w-32 mb-4" />
 				<div className="space-y-4">
 					{Array.from({ length: 3 }).map((_, i) => (
-						<Card key={i} className="border-l-2 sm:border-l-4 border-l-primary">
-							<CardHeader className="pb-3">
+						<div key={i} className="border-l-2 sm:border-l-4 border-l-primary">
+							<div className="pb-3">
 								<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
 									<div>
 										<Skeleton className="h-5 w-32 mb-2" />
@@ -89,8 +88,8 @@ export function DetailedBalanceSheetSkeleton() {
 										<Skeleton className="h-6 w-20" />
 									</div>
 								</div>
-							</CardHeader>
-							<CardContent>
+							</div>
+							<div className="p-6 pt-0">
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 									{Array.from({ length: 4 }).map((_, j) => (
 										<div key={j} className="text-center">
@@ -124,8 +123,8 @@ export function DetailedBalanceSheetSkeleton() {
 										))}
 									</div>
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					))}
 				</div>
 			</div>

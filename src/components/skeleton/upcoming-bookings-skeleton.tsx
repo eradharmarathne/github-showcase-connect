@@ -1,6 +1,5 @@
 import { Calendar, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface UpcomingBookingsSkeletonProps {
@@ -11,20 +10,20 @@ export function UpcomingBookingsSkeleton({
 	hasCalendarPermission,
 }: UpcomingBookingsSkeletonProps) {
 	return (
-		<Card className="bg-card border">
-			<CardHeader className="flex flex-row items-center justify-between">
-				<CardTitle className="flex items-center gap-2">
+		<div className="bg-card border rounded-lg">
+			<div className="flex flex-row items-center justify-between p-6">
+				<div className="flex items-center gap-2 text-lg font-semibold">
 					<Calendar className="size-5 text-primary" />
-					Upcoming Bookings
-				</CardTitle>
+					<span>Upcoming Bookings</span>
+				</div>
 				{hasCalendarPermission && (
 					<Button variant="outline" size="sm" disabled>
 						<Eye className="size-4" />
 						View All
 					</Button>
 				)}
-			</CardHeader>
-			<CardContent className="space-y-3 lg:space-y-4">
+			</div>
+			<div className="p-6 pt-0 space-y-3 lg:space-y-4">
 				{/* Generate 3 booking skeleton items */}
 				{Array.from({ length: 3 }).map((_, index) => (
 					<div
@@ -49,7 +48,7 @@ export function UpcomingBookingsSkeleton({
 						</div>
 					</div>
 				))}
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	);
 }

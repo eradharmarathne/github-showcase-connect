@@ -13,9 +13,7 @@ export function AppLoadingWrapper({ children }: AppLoadingWrapperProps) {
 	const isLoading = loading || (profileLoading && tenantLoading);
 
 	if (isLoading) {
-		return (
-			<AnimatedLoadingScreen message="Loading..." showLogo={true} />
-		);
+		return <AnimatedLoadingScreen message="Loading..." showLogo={true} />;
 	}
 
 	return <>{children}</>;

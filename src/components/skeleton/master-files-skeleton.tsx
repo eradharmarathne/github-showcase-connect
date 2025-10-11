@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -29,18 +28,18 @@ export function MasterFilesSkeleton() {
 				</TabsList>
 
 				<TabsContent value="locations" className="space-y-4">
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<div className="flex justify-between items-center">
 								<Skeleton className="h-6 w-20" />
 								<Skeleton className="h-10 w-32" />
 							</div>
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 								{Array.from({ length: 6 }).map((_, index) => (
-									<Card key={index}>
-										<CardContent className="p-4 space-y-3">
+									<div key={index}>
+										<div className="p-4 space-y-3">
 											<div className="flex justify-between items-start">
 												<Skeleton className="h-5 w-32" />
 												<Skeleton className="h-6 w-16 rounded-full" />
@@ -54,24 +53,24 @@ export function MasterFilesSkeleton() {
 												<Skeleton className="h-8 w-8" />
 												<Skeleton className="h-8 w-8" />
 											</div>
-										</CardContent>
-									</Card>
+										</div>
+									</div>
 								))}
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</TabsContent>
 
 				{["rooms", "agents", "guides", "commissions"].map((tab) => (
 					<TabsContent key={tab} value={tab} className="space-y-4">
-						<Card>
-							<CardHeader>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<div className="flex justify-between items-center">
 									<Skeleton className="h-6 w-32" />
 									<Skeleton className="h-10 w-28" />
 								</div>
-							</CardHeader>
-							<CardContent>
+							</div>
+							<div className="p-6 pt-0">
 								{tab === "rooms" ? (
 									<div className="space-y-3">
 										{Array.from({ length: 8 }).map((_, index) => (
@@ -97,8 +96,8 @@ export function MasterFilesSkeleton() {
 								) : (
 									<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 										{Array.from({ length: 6 }).map((_, index) => (
-											<Card key={index}>
-												<CardContent className="p-4 space-y-3">
+											<div key={index}>
+												<div className="p-4 space-y-3">
 													<div className="flex justify-between items-start">
 														<Skeleton className="h-5 w-32" />
 														<Skeleton className="h-6 w-16 rounded-full" />
@@ -112,13 +111,13 @@ export function MasterFilesSkeleton() {
 														<Skeleton className="h-8 w-8" />
 														<Skeleton className="h-8 w-8" />
 													</div>
-												</CardContent>
-											</Card>
+												</div>
+											</div>
 										))}
 									</div>
 								)}
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					</TabsContent>
 				))}
 			</Tabs>

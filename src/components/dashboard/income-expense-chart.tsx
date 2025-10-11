@@ -9,8 +9,8 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IncomeExpenseChartSkeleton } from "@/components/skeleton/income-expense-chart-skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	ChartConfig,
 	ChartContainer,

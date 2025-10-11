@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -24,16 +23,16 @@ export function BookingChannelsSkeleton() {
 			{/* Stats Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 				{Array.from({ length: 4 }).map((_, index) => (
-					<Card key={index}>
-						<CardHeader className="flex items-center justify-between pb-2">
+					<div key={index}>
+						<div className="flex items-center justify-between pb-2">
 							<Skeleton className="h-4 w-24" />
 							<Skeleton className="h-4 w-4 rounded-full" />
-						</CardHeader>
-						<CardContent className="space-y-2">
+						</div>
+						<div className="space-y-2">
 							<Skeleton className="h-8 w-24" />
 							<Skeleton className="h-3 w-32" />
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				))}
 			</div>
 
@@ -45,28 +44,28 @@ export function BookingChannelsSkeleton() {
 			</div>
 
 			{/* Location Filter */}
-			<Card>
-				<CardHeader>
-					<CardTitle>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
+					<div className="text-lg font-semibold">
 						<Skeleton className="h-5 w-44" />
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
+					</div>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="flex flex-wrap gap-2">
 						{Array.from({ length: 4 }).map((_, index) => (
 							<Skeleton key={index} className="h-9 w-36 rounded-full" />
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Bookings Table */}
-			<Card>
-				<CardHeader className="space-y-2">
+			<div className="border rounded-lg bg-card">
+				<div className="space-y-2">
 					<Skeleton className="h-6 w-48" />
 					<Skeleton className="h-4 w-64" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="overflow-x-auto">
 						<Table>
 							<TableHeader>
@@ -116,16 +115,16 @@ export function BookingChannelsSkeleton() {
 							</TableBody>
 						</Table>
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Analytics Preview */}
-			<Card>
-				<CardHeader className="space-y-2">
+			<div className="border rounded-lg bg-card">
+				<div className="space-y-2">
 					<Skeleton className="h-6 w-40" />
 					<Skeleton className="h-4 w-64" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 						{Array.from({ length: 2 }).map((_, columnIndex) => (
 							<div key={columnIndex} className="space-y-3">
@@ -142,23 +141,23 @@ export function BookingChannelsSkeleton() {
 							</div>
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Settings Preview */}
-			<Card>
-				<CardHeader className="space-y-2">
+			<div className="border rounded-lg bg-card">
+				<div className="space-y-2">
 					<Skeleton className="h-6 w-56" />
 					<Skeleton className="h-4 w-72" />
-				</CardHeader>
-				<CardContent className="space-y-5">
+				</div>
+				<div className="space-y-5">
 					{Array.from({ length: 3 }).map((_, index) => (
-						<Card key={index} className="border-l-4 border-l-primary/40">
-							<CardHeader className="flex items-center justify-between pb-3">
+						<div key={index} className="border-l-4 border-l-primary/40">
+							<div className="flex items-center justify-between pb-3">
 								<Skeleton className="h-5 w-40" />
 								<Skeleton className="h-6 w-24 rounded-full" />
-							</CardHeader>
-							<CardContent className="space-y-3">
+							</div>
+							<div className="space-y-3">
 								<div className="flex flex-wrap gap-2">
 									{Array.from({ length: 4 }).map((_, badgeIndex) => (
 										<Skeleton
@@ -171,8 +170,8 @@ export function BookingChannelsSkeleton() {
 									<Skeleton className="h-10 w-full" />
 									<Skeleton className="h-10 w-full" />
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					))}
 
 					<div className="border border-dashed rounded-lg p-4 space-y-4">
@@ -194,8 +193,8 @@ export function BookingChannelsSkeleton() {
 							<Skeleton className="h-10 w-full md:w-48" />
 						</div>
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }

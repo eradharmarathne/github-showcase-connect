@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function CalendarSkeleton() {
@@ -24,8 +23,8 @@ export function CalendarSkeleton() {
 			</div>
 
 			{/* Calendar Grid */}
-			<Card>
-				<CardContent className="p-0">
+			<div className="border rounded-lg bg-card">
+				<div className="p-0">
 					{/* Calendar Header */}
 					<div className="grid grid-cols-7 border-b">
 						{Array.from({ length: 7 }).map((_, index) => (
@@ -56,17 +55,17 @@ export function CalendarSkeleton() {
 							))}
 						</div>
 					))}
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Legend */}
-			<Card>
-				<CardHeader>
-					<CardTitle>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
+					<div className="text-lg font-semibold mb-4">
 						<Skeleton className="h-5 w-16" />
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
+					</div>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="flex flex-wrap gap-4">
 						{Array.from({ length: 6 }).map((_, index) => (
 							<div key={index} className="flex items-center gap-2">
@@ -75,8 +74,8 @@ export function CalendarSkeleton() {
 							</div>
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }

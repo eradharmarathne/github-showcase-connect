@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -20,13 +19,13 @@ export function ReservationsListSkeleton() {
 				<div className="space-y-4">
 					{/* Desktop Table View Skeleton */}
 					<div className="hidden lg:block">
-						<Card>
-							<CardHeader>
-								<CardTitle className="px-4">
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
+								<div className="px-4">
 									<Skeleton className="h-6 w-24" />
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
+								</div>
+							</div>
+							<div className="p-6 pt-0">
 								<Table>
 									<TableHeader>
 										<TableRow>
@@ -89,15 +88,15 @@ export function ReservationsListSkeleton() {
 										))}
 									</TableBody>
 								</Table>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					</div>
 
 					{/* Mobile Card View Skeleton */}
 					<div className="lg:hidden grid gap-4">
 						{Array.from({ length: 6 }).map((_, index) => (
-							<Card key={index} className="w-full">
-								<CardContent className="p-4">
+							<div key={index} className="w-full">
+								<div className="p-4">
 									<div className="flex justify-between items-start mb-3">
 										<div className="space-y-1">
 											<Skeleton className="h-4 w-24" />
@@ -131,8 +130,8 @@ export function ReservationsListSkeleton() {
 										<Skeleton className="h-8 w-12" />
 										<Skeleton className="h-8 w-12" />
 									</div>
-								</CardContent>
-							</Card>
+								</div>
+							</div>
 						))}
 					</div>
 				</div>

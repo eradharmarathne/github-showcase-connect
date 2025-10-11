@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AccountsReportsSkeleton() {
@@ -7,28 +6,28 @@ export function AccountsReportsSkeleton() {
 			{/* Account Summary Cards Skeleton */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 				{Array.from({ length: 4 }).map((_, i) => (
-					<Card key={i}>
-						<CardHeader className="pb-2">
+					<div key={i}>
+						<div className="pb-2">
 							<div className="flex items-center gap-2">
 								<Skeleton className="h-4 w-4 rounded" />
 								<Skeleton className="h-4 w-28" />
 							</div>
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<Skeleton className="h-8 w-24 mb-1" />
 							<Skeleton className="h-3 w-16" />
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				))}
 			</div>
 
 			{/* Account Transactions Table Skeleton */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-40" />
 					<Skeleton className="h-4 w-56" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="space-y-4">
 						{/* Table Header */}
 						<div className="grid grid-cols-6 gap-4 pb-2 border-b">
@@ -54,18 +53,18 @@ export function AccountsReportsSkeleton() {
 							</div>
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Account Balance Chart Skeleton */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-44" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<Skeleton className="h-64 w-full" />
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }

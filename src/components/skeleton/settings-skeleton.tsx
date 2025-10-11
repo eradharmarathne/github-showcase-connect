@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -30,11 +29,11 @@ export function SettingsSkeleton() {
 
 				<TabsContent value="general" className="space-y-4">
 					{/* Company Information */}
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-36" />
-						</CardHeader>
-						<CardContent className="space-y-4">
+						</div>
+						<div className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 								<div className="space-y-2">
 									<Skeleton className="h-4 w-24" />
@@ -58,15 +57,15 @@ export function SettingsSkeleton() {
 								<Skeleton className="h-20 w-full" />
 							</div>
 							<Skeleton className="h-10 w-32" />
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 
 					{/* Preferences */}
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-24" />
-						</CardHeader>
-						<CardContent className="space-y-4">
+						</div>
+						<div className="space-y-4">
 							<div className="flex items-center justify-between">
 								<div className="space-y-1">
 									<Skeleton className="h-4 w-32" />
@@ -88,17 +87,17 @@ export function SettingsSkeleton() {
 								</div>
 								<Skeleton className="h-6 w-10" />
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</TabsContent>
 
 				{["notifications", "security", "billing"].map((tab) => (
 					<TabsContent key={tab} value={tab} className="space-y-4">
-						<Card>
-							<CardHeader>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<Skeleton className="h-6 w-48" />
-							</CardHeader>
-							<CardContent className="space-y-4">
+							</div>
+							<div className="space-y-4">
 								{Array.from({ length: 5 }).map((_, index) => (
 									<div
 										key={index}
@@ -112,8 +111,8 @@ export function SettingsSkeleton() {
 									</div>
 								))}
 								<Skeleton className="h-10 w-32" />
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					</TabsContent>
 				))}
 			</Tabs>

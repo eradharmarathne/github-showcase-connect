@@ -13,10 +13,10 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Cell, Pie, PieChart } from "recharts";
 import { NewReservationDialog } from "@/components/modals";
+import { BookingSourceChartSkeleton } from "@/components/skeleton/booking-source-chart-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookingSourceChartSkeleton } from "@/components/skeleton/booking-source-chart-skeleton";
 import {
 	ChartContainer,
 	ChartTooltip,
@@ -247,8 +247,7 @@ export function BookingSourceChart({
 										}}
 									/>
 									<span className="truncate text-xs">
-										{entry.source}: {entry.count} (
-										{entry.percentage.toFixed(1)}
+										{entry.source}: {entry.count} ({entry.percentage.toFixed(1)}
 										%)
 									</span>
 								</div>

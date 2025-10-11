@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -15,14 +14,14 @@ export function FinancialReportsSkeleton() {
 			</div>
 
 			{/* Report Filters */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex text-base md:text-lg lg:text-xl items-center gap-2">
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
+					<div className="flex text-base md:text-lg lg:text-xl items-center gap-2">
 						<Skeleton className="h-5 w-5" />
 						<Skeleton className="h-6 w-32" />
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
+					</div>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 						<div>
 							<Skeleton className="h-4 w-24 mb-2" />
@@ -40,14 +39,14 @@ export function FinancialReportsSkeleton() {
 							<Skeleton className="h-10 w-full" />
 						</div>
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 				{/* Total Income Card */}
-				<Card className="bg-card border relative">
-					<CardContent className="p-6">
+				<div className="bg-card border relative">
+					<div className="p-6">
 						<div className="flex items-center justify-between">
 							<div>
 								<Skeleton className="h-4 w-24 mb-2" />
@@ -56,12 +55,12 @@ export function FinancialReportsSkeleton() {
 							</div>
 							<Skeleton className="h-5 w-5" />
 						</div>
-					</CardContent>
-				</Card>
+					</div>
+				</div>
 
 				{/* Total Expenses Card */}
-				<Card className="bg-card border relative">
-					<CardContent className="p-6">
+				<div className="bg-card border relative">
+					<div className="p-6">
 						<div className="flex items-center justify-between">
 							<div>
 								<Skeleton className="h-4 w-28 mb-2" />
@@ -70,12 +69,12 @@ export function FinancialReportsSkeleton() {
 							</div>
 							<Skeleton className="h-5 w-5" />
 						</div>
-					</CardContent>
-				</Card>
+					</div>
+				</div>
 
 				{/* Net Profit Card */}
-				<Card className="bg-card border relative">
-					<CardContent className="p-6">
+				<div className="bg-card border relative">
+					<div className="p-6">
 						<div className="flex items-center justify-between">
 							<div>
 								<Skeleton className="h-4 w-20 mb-2" />
@@ -84,8 +83,8 @@ export function FinancialReportsSkeleton() {
 							</div>
 							<Skeleton className="h-5 w-5" />
 						</div>
-					</CardContent>
-				</Card>
+					</div>
+				</div>
 			</div>
 
 			{/* Report Tabs */}
@@ -110,11 +109,11 @@ export function FinancialReportsSkeleton() {
 
 				<TabsContent value="summary" className="space-y-6">
 					{/* Income by Type */}
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-32" />
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="space-y-4">
 								{Array.from({ length: 5 }).map((_, i) => (
 									<div key={i} className="flex justify-between items-center">
@@ -123,15 +122,15 @@ export function FinancialReportsSkeleton() {
 									</div>
 								))}
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 
 					{/* Expenses by Category */}
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-40" />
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="space-y-4">
 								{Array.from({ length: 5 }).map((_, i) => (
 									<div key={i} className="flex justify-between items-center">
@@ -140,16 +139,16 @@ export function FinancialReportsSkeleton() {
 									</div>
 								))}
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="profit-loss" className="space-y-6">
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-48" />
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="space-y-4">
 								{Array.from({ length: 8 }).map((_, i) => (
 									<div
@@ -161,17 +160,17 @@ export function FinancialReportsSkeleton() {
 									</div>
 								))}
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="balance-sheet" className="space-y-6">
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-						<Card>
-							<CardHeader>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<Skeleton className="h-6 w-24" />
-							</CardHeader>
-							<CardContent>
+							</div>
+							<div className="p-6 pt-0">
 								<div className="space-y-4">
 									{Array.from({ length: 6 }).map((_, i) => (
 										<div key={i} className="flex justify-between items-center">
@@ -180,14 +179,14 @@ export function FinancialReportsSkeleton() {
 										</div>
 									))}
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
-						<Card>
-							<CardHeader>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<Skeleton className="h-6 w-32" />
-							</CardHeader>
-							<CardContent>
+							</div>
+							<div className="p-6 pt-0">
 								<div className="space-y-4">
 									{Array.from({ length: 6 }).map((_, i) => (
 										<div key={i} className="flex justify-between items-center">
@@ -196,8 +195,8 @@ export function FinancialReportsSkeleton() {
 										</div>
 									))}
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					</div>
 				</TabsContent>
 			</Tabs>

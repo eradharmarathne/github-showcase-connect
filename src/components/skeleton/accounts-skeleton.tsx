@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -16,30 +15,30 @@ export function AccountsSkeleton() {
 
 			{/* Summary Cards */}
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<Card>
-					<CardHeader className="pb-2">
+				<div className="border rounded-lg bg-card">
+					<div className="pb-2">
 						<Skeleton className="h-4 w-24" />
-					</CardHeader>
-					<CardContent>
+					</div>
+					<div className="p-6 pt-0">
 						<Skeleton className="h-8 w-32" />
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader className="pb-2">
+					</div>
+				</div>
+				<div className="border rounded-lg bg-card">
+					<div className="pb-2">
 						<Skeleton className="h-4 w-28" />
-					</CardHeader>
-					<CardContent>
+					</div>
+					<div className="p-6 pt-0">
 						<Skeleton className="h-8 w-28" />
-					</CardContent>
-				</Card>
-				<Card>
-					<CardHeader className="pb-2">
+					</div>
+				</div>
+				<div className="border rounded-lg bg-card">
+					<div className="pb-2">
 						<Skeleton className="h-4 w-32" />
-					</CardHeader>
-					<CardContent>
+					</div>
+					<div className="p-6 pt-0">
 						<Skeleton className="h-8 w-36" />
-					</CardContent>
-				</Card>
+					</div>
+				</div>
 			</div>
 
 			{/* Accounts Tabs */}
@@ -57,14 +56,14 @@ export function AccountsSkeleton() {
 					{/* Accounts Grid */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						{Array.from({ length: 6 }).map((_, index) => (
-							<Card key={index}>
-								<CardHeader className="pb-2">
+							<div key={index}>
+								<div className="pb-2">
 									<div className="flex items-center justify-between">
 										<Skeleton className="h-5 w-32" />
 										<Skeleton className="h-6 w-12 rounded-full" />
 									</div>
-								</CardHeader>
-								<CardContent className="space-y-2">
+								</div>
+								<div className="space-y-2">
 									<div className="flex justify-between items-center">
 										<Skeleton className="h-4 w-16" />
 										<Skeleton className="h-6 w-24" />
@@ -74,18 +73,18 @@ export function AccountsSkeleton() {
 										<Skeleton className="h-8 w-8" />
 										<Skeleton className="h-8 w-8" />
 									</div>
-								</CardContent>
-							</Card>
+								</div>
+							</div>
 						))}
 					</div>
 				</TabsContent>
 
 				<TabsContent value="transactions" className="space-y-4">
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-40" />
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="space-y-3">
 								{Array.from({ length: 8 }).map((_, index) => (
 									<div
@@ -106,8 +105,8 @@ export function AccountsSkeleton() {
 									</div>
 								))}
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</TabsContent>
 			</Tabs>
 		</div>

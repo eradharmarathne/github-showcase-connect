@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -17,8 +16,8 @@ export function ReportsSkeleton() {
 			{/* Stats Cards */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
 				{Array.from({ length: 4 }).map((_, index) => (
-					<Card key={index} className="bg-card border">
-						<CardContent className="p-3 lg:p-6">
+					<div key={index} className="bg-card border">
+						<div className="p-3 lg:p-6">
 							<div className="space-y-2">
 								<Skeleton className="h-4 w-24" />
 								<div className="flex items-center gap-2">
@@ -26,8 +25,8 @@ export function ReportsSkeleton() {
 									<Skeleton className="h-8 w-20" />
 								</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				))}
 			</div>
 
@@ -53,11 +52,11 @@ export function ReportsSkeleton() {
 
 				<TabsContent value="comprehensive" className="space-y-4">
 					{/* Filters */}
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-28" />
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 								<div className="space-y-2">
 									<Skeleton className="h-4 w-20" />
@@ -75,24 +74,24 @@ export function ReportsSkeleton() {
 									<Skeleton className="h-10 w-32" />
 								</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 
 					{/* Chart and Table */}
 					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-						<Card>
-							<CardHeader>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<Skeleton className="h-6 w-28" />
-							</CardHeader>
-							<CardContent>
+							</div>
+							<div className="p-6 pt-0">
 								<Skeleton className="h-64 w-full" />
-							</CardContent>
-						</Card>
-						<Card>
-							<CardHeader>
+							</div>
+						</div>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<Skeleton className="h-6 w-28" />
-							</CardHeader>
-							<CardContent className="space-y-3">
+							</div>
+							<div className="space-y-3">
 								{Array.from({ length: 6 }).map((_, index) => (
 									<div
 										key={index}
@@ -102,16 +101,16 @@ export function ReportsSkeleton() {
 										<Skeleton className="h-4 w-20" />
 									</div>
 								))}
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					</div>
 
 					{/* Data Table */}
-					<Card>
-						<CardHeader>
+					<div className="border rounded-lg bg-card">
+						<div className="p-6">
 							<Skeleton className="h-6 w-36" />
-						</CardHeader>
-						<CardContent>
+						</div>
+						<div className="p-6 pt-0">
 							<div className="space-y-3">
 								{Array.from({ length: 10 }).map((_, index) => (
 									<div
@@ -126,21 +125,21 @@ export function ReportsSkeleton() {
 									</div>
 								))}
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</TabsContent>
 
 				{/* Other tabs content skeletons */}
 				{["financial", "accounts", "commissions", "balance"].map((tab) => (
 					<TabsContent key={tab} value={tab} className="space-y-4">
-						<Card>
-							<CardHeader>
+						<div className="border rounded-lg bg-card">
+							<div className="p-6">
 								<Skeleton className="h-6 w-48" />
-							</CardHeader>
-							<CardContent>
+							</div>
+							<div className="p-6 pt-0">
 								<Skeleton className="h-96 w-full" />
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 					</TabsContent>
 				))}
 			</Tabs>

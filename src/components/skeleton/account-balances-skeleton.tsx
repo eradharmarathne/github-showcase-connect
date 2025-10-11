@@ -1,17 +1,16 @@
 import { DollarSign } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AccountBalancesSkeleton() {
 	return (
-		<Card className="bg-card border">
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
+		<div className="bg-card border rounded-lg">
+			<div className="p-6">
+				<div className="flex items-center gap-2 mb-6">
 					<DollarSign className="size-5 text-primary" />
-					Account Balances
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-3 lg:space-y-4">
+					<span className="text-lg font-semibold">Account Balances</span>
+				</div>
+			</div>
+			<div className="p-6 pt-0 space-y-3 lg:space-y-4">
 				{/* Generate 3 account skeleton items */}
 				{Array.from({ length: 3 }).map((_, index) => (
 					<div
@@ -28,7 +27,7 @@ export function AccountBalancesSkeleton() {
 						</div>
 					</div>
 				))}
-			</CardContent>
-		</Card>
+			</div>
+		</div>
 	);
 }

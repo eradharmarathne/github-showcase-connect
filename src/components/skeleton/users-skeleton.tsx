@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -19,11 +18,11 @@ export function UsersSkeleton() {
 			</div>
 
 			{/* Users Table */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-28" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<Table>
 						<TableHeader>
 							<TableRow>
@@ -82,15 +81,15 @@ export function UsersSkeleton() {
 							))}
 						</TableBody>
 					</Table>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Permissions Matrix */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-32" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="space-y-4">
 						{Array.from({ length: 5 }).map((_, userIndex) => (
 							<div key={userIndex} className="p-4 border rounded-lg">
@@ -109,8 +108,8 @@ export function UsersSkeleton() {
 							</div>
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }

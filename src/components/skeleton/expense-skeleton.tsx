@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -16,11 +15,11 @@ export function ExpenseSkeleton() {
 			<Skeleton className="h-8 w-64" />
 
 			{/* Expense Form Card */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-32" />
-				</CardHeader>
-				<CardContent className="space-y-4">
+				</div>
+				<div className="p-6 pt-0 space-y-4">
 					{/* Form Grid */}
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 						<div className="space-y-2">
@@ -55,29 +54,29 @@ export function ExpenseSkeleton() {
 					</div>
 					{/* Submit button */}
 					<Skeleton className="h-10 w-32" />
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Expense Shortcuts */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-40" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
 						{Array.from({ length: 12 }).map((_, index) => (
 							<Skeleton key={index} className="h-16 w-full" />
 						))}
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Recent Expenses */}
-			<Card>
-				<CardHeader>
+			<div className="border rounded-lg bg-card">
+				<div className="p-6">
 					<Skeleton className="h-6 w-32" />
-				</CardHeader>
-				<CardContent>
+				</div>
+				<div className="p-6 pt-0">
 					<Table>
 						<TableHeader>
 							<TableRow>
@@ -120,8 +119,8 @@ export function ExpenseSkeleton() {
 							))}
 						</TableBody>
 					</Table>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }
