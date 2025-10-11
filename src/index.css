@@ -279,3 +279,47 @@ All colors MUST be HSL.
     font-family: "IBM Plex Sans Variable", sans-serif;
   }
 }
+
+/* Custom animations for loading screen */
+@keyframes slide-right {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-right-fast {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-slide-right {
+  animation: slide-right 2s ease-in-out infinite;
+}
+
+.animate-slide-right-fast {
+  animation: slide-right-fast 1.5s ease-in-out infinite;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}

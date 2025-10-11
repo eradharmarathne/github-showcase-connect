@@ -1,4 +1,6 @@
 export { AirbnbDatePicker } from "./airbnb-date-picker";
+export { AnimatedLoadingScreen } from "./animated-loading-screen";
+export { AppLoadingWrapper } from "./app-loading-wrapper";
 export { BookingShortcuts } from "./booking-shortcuts";
 export { CurrencySelector } from "./currency-selector";
 export { default as DropdownLanguage } from "./dropdown-language";

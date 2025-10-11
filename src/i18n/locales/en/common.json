@@ -584,6 +584,7 @@
   },
   "common": {
     "loading": "Loading...",
+    "pleaseWait": "Please wait while we load your data",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
