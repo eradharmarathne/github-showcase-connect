@@ -15,7 +15,7 @@ type Account = {
 };
 
 interface AccountSelectorProps {
-	accounts: Account[];
+	accounts: Account[] | null;
 	selectedAccountId: string;
 	onAccountChange: (accountId: string) => void;
 	required?: boolean;
@@ -38,6 +38,7 @@ export function AccountSelector({
 				value={selectedAccountId}
 				onValueChange={onAccountChange}
 				required={required}
+				disabled={!accounts || accounts.length === 0}
 			>
 				<SelectTrigger>
 					<SelectValue
@@ -45,11 +46,17 @@ export function AccountSelector({
 					/>
 				</SelectTrigger>
 				<SelectContent>
-					{accounts.map((account) => (
-						<SelectItem key={account.id} value={account.id}>
-							{account.name} ({account.currency})
+					{accounts && accounts.length > 0 ? (
+						accounts.map((account) => (
+							<SelectItem key={account.id} value={account.id}>
+								{account.name} ({account.currency})
+							</SelectItem>
+						))
+					) : (
+						<SelectItem value="" disabled>
+							{accounts === null ? t("common.loading") : "No accounts available"}
 						</SelectItem>
-					))}
+					)}
 				</SelectContent>
 			</Select>
 			<p className="text-sm text-gray-600 mt-1">
