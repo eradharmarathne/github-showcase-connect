@@ -135,8 +135,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 	};
 
-	// These functions only depend on stable setter functions, safe to omit from dependencies
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Functions only depend on stable setters
 	useEffect(() => {
 		const subscription = supabase.auth.onAuthStateChange(
 			async (event, session) => {

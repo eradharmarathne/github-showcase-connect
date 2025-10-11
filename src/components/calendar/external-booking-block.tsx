@@ -119,7 +119,10 @@ export function ExternalBookingBlock({
 				{/* Booking details - guest name and guest count */}
 				{spanDays >= 2 ? (
 					<div className="flex items-center gap-1 w-full">
-						<span className="text-[8px] sm:text-[9px]" title={formatSourceName(booking.source)}>
+						<span
+							className="text-[8px] sm:text-[9px]"
+							title={formatSourceName(booking.source)}
+						>
 							{colors.icon}
 						</span>
 						<span
@@ -127,8 +130,11 @@ export function ExternalBookingBlock({
 						>
 							{booking.guest_name}
 						</span>
-						<span className={`${colors.text} text-[9px] sm:text-[10px] font-semibold shrink-0`}>
-							• ({adults + children} {adults + children === 1 ? "guest" : "guests"})
+						<span
+							className={`${colors.text} text-[9px] sm:text-[10px] font-semibold shrink-0`}
+						>
+							• ({adults + children}{" "}
+							{adults + children === 1 ? "guest" : "guests"})
 						</span>
 					</div>
 				) : (

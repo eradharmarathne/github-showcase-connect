@@ -161,7 +161,8 @@
     "newReservation": "New Reservation",
     "newPayment": "New Payment",
     "addExpense": "Add Expense",
-    "verifyPhone": "Verify Phone"
+    "verifyPhone": "Verify Phone",
+    "reviews": "Reviews"
   },
   "breadcrumb": {
     "home": "Home"

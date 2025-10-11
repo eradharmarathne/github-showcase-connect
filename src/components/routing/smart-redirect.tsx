@@ -10,7 +10,13 @@ export const SmartRedirect = () => {
 
 	// Wait for all loading states to complete
 	// Also wait for profile to be fully loaded when user exists
-	if (loading || locationsLoading || tenantLoading || profileLoading || (user && !profile)) {
+	if (
+		loading ||
+		locationsLoading ||
+		tenantLoading ||
+		profileLoading ||
+		(user && !profile)
+	) {
 		return null;
 	}
 

@@ -112,7 +112,6 @@ export default function EnhancedFinancialReports() {
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: fetchData and fetchAvailableCurrencies are stable functions
 	useEffect(() => {
 		if (tenant?.id) {
 			const loadInitialData = async () => {
@@ -122,7 +121,6 @@ export default function EnhancedFinancialReports() {
 		}
 	}, [tenant?.id]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: fetchData is a stable function
 	useEffect(() => {
 		if (tenant?.id && selectedLocation) {
 			fetchData();

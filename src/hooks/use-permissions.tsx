@@ -13,7 +13,11 @@ export const usePermissions = () => {
 	useEffect(() => {
 		const fetchPermissions = async () => {
 			if (!user || !profile?.tenant_id) {
-				console.log("usePermissions: Missing user or profile tenant_id", { user: !!user, profile: !!profile, tenant_id: profile?.tenant_id });
+				console.log("usePermissions: Missing user or profile tenant_id", {
+					user: !!user,
+					profile: !!profile,
+					tenant_id: profile?.tenant_id,
+				});
 				return;
 			}
 
@@ -31,7 +35,10 @@ export const usePermissions = () => {
 					console.error("Error fetching permissions:", error);
 					setPermissions(null);
 				} else {
-					console.log("usePermissions: Fetched permissions successfully", { data, isTenantOwner: profile?.id === tenant?.owner_profile_id });
+					console.log("usePermissions: Fetched permissions successfully", {
+						data,
+						isTenantOwner: profile?.id === tenant?.owner_profile_id,
+					});
 					setPermissions(data || null);
 				}
 			} catch (error) {
@@ -43,7 +50,7 @@ export const usePermissions = () => {
 		};
 
 		fetchPermissions();
-	}, [user, profile, tenant?.owner_profile_id]);	// Check if user is tenant owner (highest level access)
+	}, [user, profile, tenant?.owner_profile_id]); // Check if user is tenant owner (highest level access)
 	const isTenantOwner = profile?.id === tenant?.owner_profile_id;
 
 	const hasPermission = (

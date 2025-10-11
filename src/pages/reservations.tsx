@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
+import { OTPVerification } from "@/components/auth/otp-verification";
+import {
+	CompactReservationDialog,
+	NewReservationDialog,
+	ViewReservationDialog,
+} from "@/components/modals";
+import { ReservationEditDialog } from "@/components/modals/reservation-edit-dialog";
 import { AddIncomeDialog } from "@/components/reservation";
 import { PaymentDialog } from "@/components/reservation/payment-dialog";
 import { PaymentsTable } from "@/components/reservation/payments-table";
@@ -18,9 +25,6 @@ import {
 } from "@/hooks/use-reservations-data";
 import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
-import { ReservationEditDialog } from "@/components/modals/reservation-edit-dialog";
-import { OTPVerification } from "@/components/auth/otp-verification";
-import { CompactReservationDialog, NewReservationDialog, ViewReservationDialog } from "@/components/modals";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 
@@ -403,7 +407,9 @@ export default function Reservations() {
 						onStatusFilterChange={setStatusFilter}
 						onCurrencyChange={setSelectedCurrency}
 						onNewReservation={() => setIsNewReservationDialogOpen(true)}
-						onNewCompactReservation={() => setIsCompactReservationDialogOpen(true)}
+						onNewCompactReservation={() =>
+							setIsCompactReservationDialogOpen(true)
+						}
 					/>
 
 					<TabsContent value="reservations" className="space-y-4">

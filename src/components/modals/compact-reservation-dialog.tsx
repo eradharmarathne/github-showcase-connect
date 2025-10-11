@@ -33,8 +33,8 @@ import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { convertCurrency } from "@/utils/currency";
 import { cn } from "@/lib/utils";
+import { convertCurrency } from "@/utils/currency";
 
 type Room = Tables<"rooms">;
 type Currency = "LKR" | "USD" | "EUR" | "GBP";
@@ -95,12 +95,19 @@ export function CompactReservationDialog({
 	const { isDateAvailable, isRangeAvailable } = useRoomAvailability();
 
 	// Check permissions - user must have booking access
-	const canCreateReservation = hasAnyPermission(["access_bookings", "access_calendar"]);
+	const canCreateReservation = hasAnyPermission([
+		"access_bookings",
+		"access_calendar",
+	]);
 
 	const [submitting, setSubmitting] = useState(false);
 	const [rooms, setRooms] = useState<Room[]>([]);
-	const [agents, setAgents] = useState<Array<{ id: string; name: string; tenant_id: string }>>([]);
-	const [guides, setGuides] = useState<Array<{ id: string; name: string; tenant_id: string }>>([]);
+	const [agents, setAgents] = useState<
+		Array<{ id: string; name: string; tenant_id: string }>
+	>([]);
+	const [guides, setGuides] = useState<
+		Array<{ id: string; name: string; tenant_id: string }>
+	>([]);
 	const [loadingData, setLoadingData] = useState(false);
 
 	// Form state
@@ -114,7 +121,9 @@ export function CompactReservationDialog({
 		guest_id_number: "",
 		room_id: preSelectedRoomId || "",
 		check_in_date: defaultCheckIn ? format(defaultCheckIn, "yyyy-MM-dd") : "",
-		check_out_date: defaultCheckOut ? format(defaultCheckOut, "yyyy-MM-dd") : "",
+		check_out_date: defaultCheckOut
+			? format(defaultCheckOut, "yyyy-MM-dd")
+			: "",
 		adults: 1,
 		children: 0,
 		arrival_time: "",
@@ -129,13 +138,20 @@ export function CompactReservationDialog({
 
 	// Calendar state
 	const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-		defaultCheckIn || undefined
+		defaultCheckIn || undefined,
 	);
 	const [isSelectingCheckOut, setIsSelectingCheckOut] = useState(false);
 
-	const checkInDate = formData.check_in_date ? parseISO(formData.check_in_date) : undefined;
-	const checkOutDate = formData.check_out_date ? parseISO(formData.check_out_date) : undefined;
-	const nights = checkInDate && checkOutDate ? differenceInDays(checkOutDate, checkInDate) : 0;
+	const checkInDate = formData.check_in_date
+		? parseISO(formData.check_in_date)
+		: undefined;
+	const checkOutDate = formData.check_out_date
+		? parseISO(formData.check_out_date)
+		: undefined;
+	const nights =
+		checkInDate && checkOutDate
+			? differenceInDays(checkOutDate, checkInDate)
+			: 0;
 	const totalAmount = formData.room_rate * nights;
 
 	// Load required data
@@ -193,19 +209,19 @@ export function CompactReservationDialog({
 	// Update room rate when room changes
 	useEffect(() => {
 		if (formData.room_id) {
-			const selectedRoom = rooms.find(room => room.id === formData.room_id);
+			const selectedRoom = rooms.find((room) => room.id === formData.room_id);
 			if (selectedRoom) {
-				setFormData(prev => ({
+				setFormData((prev) => ({
 					...prev,
 					room_rate: selectedRoom.base_price || 0,
-					currency: selectedRoom.currency as Currency || "LKR",
+					currency: (selectedRoom.currency as Currency) || "LKR",
 				}));
 			}
 		}
 	}, [formData.room_id, rooms]);
 
 	const handleFieldChange = (field: keyof ReservationFormData, value: any) => {
-		setFormData(prev => ({ ...prev, [field]: value }));
+		setFormData((prev) => ({ ...prev, [field]: value }));
 	};
 
 	const handleCalendarSelect = (date: Date | undefined) => {
@@ -213,7 +229,7 @@ export function CompactReservationDialog({
 
 		if (!isSelectingCheckOut) {
 			// Selecting check-in date
-			setFormData(prev => ({
+			setFormData((prev) => ({
 				...prev,
 				check_in_date: format(date, "yyyy-MM-dd"),
 				check_out_date: "", // Clear check-out when check-in changes
@@ -223,7 +239,7 @@ export function CompactReservationDialog({
 		} else {
 			// Selecting check-out date
 			if (checkInDate && date > checkInDate) {
-				setFormData(prev => ({
+				setFormData((prev) => ({
 					...prev,
 					check_out_date: format(date, "yyyy-MM-dd"),
 				}));
@@ -246,7 +262,7 @@ export function CompactReservationDialog({
 	const isCalendarDateDisabled = (date: Date) => {
 		const today = new Date();
 		today.setHours(0, 0, 0, 0);
-		
+
 		// Disable past dates
 		if (date < today) return true;
 
@@ -311,9 +327,12 @@ export function CompactReservationDialog({
 
 	const generateReservationNumber = async (): Promise<string> => {
 		try {
-			const { data, error } = await supabase.rpc("generate_reservation_number", {
-				p_tenant_id: tenant?.id,
-			});
+			const { data, error } = await supabase.rpc(
+				"generate_reservation_number",
+				{
+					p_tenant_id: tenant?.id,
+				},
+			);
 
 			if (error) throw error;
 			return data || `RES${Date.now()}`;
@@ -324,7 +343,8 @@ export function CompactReservationDialog({
 	};
 
 	const handleSubmit = async () => {
-		if (!validateForm() || !tenant?.id || !profile?.id || !selectedLocation) return;
+		if (!validateForm() || !tenant?.id || !profile?.id || !selectedLocation)
+			return;
 
 		setSubmitting(true);
 
@@ -400,7 +420,9 @@ export function CompactReservationDialog({
 			guest_id_number: "",
 			room_id: preSelectedRoomId || "",
 			check_in_date: defaultCheckIn ? format(defaultCheckIn, "yyyy-MM-dd") : "",
-			check_out_date: defaultCheckOut ? format(defaultCheckOut, "yyyy-MM-dd") : "",
+			check_out_date: defaultCheckOut
+				? format(defaultCheckOut, "yyyy-MM-dd")
+				: "",
 			adults: 1,
 			children: 0,
 			arrival_time: "",
@@ -435,7 +457,7 @@ export function CompactReservationDialog({
 	}
 
 	return (
-		<Dialog open={isOpen} onOpenChange={onClose} >
+		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="w-full min-w-[90vw] max-h-[95vh] overflow-hidden flex flex-col">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
@@ -471,7 +493,9 @@ export function CompactReservationDialog({
 													<Label>Guest Name *</Label>
 													<Input
 														value={formData.guest_name}
-														onChange={(e) => handleFieldChange("guest_name", e.target.value)}
+														onChange={(e) =>
+															handleFieldChange("guest_name", e.target.value)
+														}
 														placeholder="Enter guest name"
 														required
 													/>
@@ -483,7 +507,9 @@ export function CompactReservationDialog({
 														<Input
 															type="email"
 															value={formData.guest_email}
-															onChange={(e) => handleFieldChange("guest_email", e.target.value)}
+															onChange={(e) =>
+																handleFieldChange("guest_email", e.target.value)
+															}
 															placeholder="Enter email"
 														/>
 													</div>
@@ -496,7 +522,9 @@ export function CompactReservationDialog({
 															defaultCountry="LK"
 															international
 															value={formData.guest_phone}
-															onChange={(value) => handleFieldChange("guest_phone", value || "")}
+															onChange={(value) =>
+																handleFieldChange("guest_phone", value || "")
+															}
 															placeholder="Enter phone number"
 														/>
 													</div>
@@ -507,18 +535,29 @@ export function CompactReservationDialog({
 														<Label>Nationality</Label>
 														<Input
 															value={formData.guest_nationality}
-															onChange={(e) => handleFieldChange("guest_nationality", e.target.value)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"guest_nationality",
+																	e.target.value,
+																)
+															}
 															placeholder="Enter nationality"
 														/>
 													</div>
 												)}
 
-												{fieldPreferences?.show_guest_passport_number !== false && (
+												{fieldPreferences?.show_guest_passport_number !==
+													false && (
 													<div>
 														<Label>Passport Number</Label>
 														<Input
 															value={formData.guest_passport_number}
-															onChange={(e) => handleFieldChange("guest_passport_number", e.target.value)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"guest_passport_number",
+																	e.target.value,
+																)
+															}
 															placeholder="Enter passport number"
 														/>
 													</div>
@@ -529,7 +568,12 @@ export function CompactReservationDialog({
 														<Label>ID Number</Label>
 														<Input
 															value={formData.guest_id_number}
-															onChange={(e) => handleFieldChange("guest_id_number", e.target.value)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"guest_id_number",
+																	e.target.value,
+																)
+															}
 															placeholder="Enter ID number"
 														/>
 													</div>
@@ -540,7 +584,12 @@ export function CompactReservationDialog({
 														<Label>Address</Label>
 														<Textarea
 															value={formData.guest_address}
-															onChange={(e) => handleFieldChange("guest_address", e.target.value)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"guest_address",
+																	e.target.value,
+																)
+															}
 															placeholder="Enter address"
 															rows={2}
 														/>
@@ -564,7 +613,9 @@ export function CompactReservationDialog({
 													<Label>Room *</Label>
 													<Select
 														value={formData.room_id}
-														onValueChange={(value) => handleFieldChange("room_id", value)}
+														onValueChange={(value) =>
+															handleFieldChange("room_id", value)
+														}
 													>
 														<SelectTrigger>
 															<SelectValue placeholder="Select a room" />
@@ -572,7 +623,8 @@ export function CompactReservationDialog({
 														<SelectContent>
 															{rooms.map((room) => (
 																<SelectItem key={room.id} value={room.id}>
-																	{room.room_number} - {room.room_type} ({room.currency} {room.base_price})
+																	{room.room_number} - {room.room_type} (
+																	{room.currency} {room.base_price})
 																</SelectItem>
 															))}
 														</SelectContent>
@@ -584,7 +636,9 @@ export function CompactReservationDialog({
 													<Input
 														type="date"
 														value={formData.check_in_date}
-														onChange={(e) => handleFieldChange("check_in_date", e.target.value)}
+														onChange={(e) =>
+															handleFieldChange("check_in_date", e.target.value)
+														}
 														min={format(new Date(), "yyyy-MM-dd")}
 													/>
 												</div>
@@ -594,8 +648,16 @@ export function CompactReservationDialog({
 													<Input
 														type="date"
 														value={formData.check_out_date}
-														onChange={(e) => handleFieldChange("check_out_date", e.target.value)}
-														min={formData.check_in_date || format(addDays(new Date(), 1), "yyyy-MM-dd")}
+														onChange={(e) =>
+															handleFieldChange(
+																"check_out_date",
+																e.target.value,
+															)
+														}
+														min={
+															formData.check_in_date ||
+															format(addDays(new Date(), 1), "yyyy-MM-dd")
+														}
 													/>
 												</div>
 
@@ -606,7 +668,12 @@ export function CompactReservationDialog({
 															type="number"
 															min="1"
 															value={formData.adults}
-															onChange={(e) => handleFieldChange("adults", parseInt(e.target.value) || 1)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"adults",
+																	parseInt(e.target.value) || 1,
+																)
+															}
 														/>
 													</div>
 												)}
@@ -618,7 +685,12 @@ export function CompactReservationDialog({
 															type="number"
 															min="0"
 															value={formData.children}
-															onChange={(e) => handleFieldChange("children", parseInt(e.target.value) || 0)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"children",
+																	parseInt(e.target.value) || 0,
+																)
+															}
 														/>
 													</div>
 												)}
@@ -629,7 +701,12 @@ export function CompactReservationDialog({
 														<Input
 															type="time"
 															value={formData.arrival_time}
-															onChange={(e) => handleFieldChange("arrival_time", e.target.value)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"arrival_time",
+																	e.target.value,
+																)
+															}
 														/>
 													</div>
 												)}
@@ -639,7 +716,9 @@ export function CompactReservationDialog({
 														<Label>Booking Source</Label>
 														<Select
 															value={formData.booking_source}
-															onValueChange={(value) => handleFieldChange("booking_source", value)}
+															onValueChange={(value) =>
+																handleFieldChange("booking_source", value)
+															}
 														>
 															<SelectTrigger>
 																<SelectValue />
@@ -647,7 +726,9 @@ export function CompactReservationDialog({
 															<SelectContent>
 																<SelectItem value="direct">Direct</SelectItem>
 																<SelectItem value="airbnb">Airbnb</SelectItem>
-																<SelectItem value="booking_com">Booking.com</SelectItem>
+																<SelectItem value="booking_com">
+																	Booking.com
+																</SelectItem>
 																<SelectItem value="expedia">Expedia</SelectItem>
 																<SelectItem value="agoda">Agoda</SelectItem>
 																<SelectItem value="beds24">Beds24</SelectItem>
@@ -662,47 +743,53 @@ export function CompactReservationDialog({
 													</div>
 												)}
 
-												{fieldPreferences?.show_guide !== false && guides.length > 0 && (
-													<div>
-														<Label>Guide</Label>
-														<Select
-															value={formData.guide_id}
-															onValueChange={(value) => handleFieldChange("guide_id", value)}
-														>
-															<SelectTrigger>
-																<SelectValue placeholder="Select guide" />
-															</SelectTrigger>
-															<SelectContent>
-																{guides.map((guide) => (
-																	<SelectItem key={guide.id} value={guide.id}>
-																		{guide.name}
-																	</SelectItem>
-																))}
-															</SelectContent>
-														</Select>
-													</div>
-												)}
+												{fieldPreferences?.show_guide !== false &&
+													guides.length > 0 && (
+														<div>
+															<Label>Guide</Label>
+															<Select
+																value={formData.guide_id}
+																onValueChange={(value) =>
+																	handleFieldChange("guide_id", value)
+																}
+															>
+																<SelectTrigger>
+																	<SelectValue placeholder="Select guide" />
+																</SelectTrigger>
+																<SelectContent>
+																	{guides.map((guide) => (
+																		<SelectItem key={guide.id} value={guide.id}>
+																			{guide.name}
+																		</SelectItem>
+																	))}
+																</SelectContent>
+															</Select>
+														</div>
+													)}
 
-												{fieldPreferences?.show_agent !== false && agents.length > 0 && (
-													<div>
-														<Label>Agent</Label>
-														<Select
-															value={formData.agent_id}
-															onValueChange={(value) => handleFieldChange("agent_id", value)}
-														>
-															<SelectTrigger>
-																<SelectValue placeholder="Select agent" />
-															</SelectTrigger>
-															<SelectContent>
-																{agents.map((agent) => (
-																	<SelectItem key={agent.id} value={agent.id}>
-																		{agent.name}
-																	</SelectItem>
-																))}
-															</SelectContent>
-														</Select>
-													</div>
-												)}
+												{fieldPreferences?.show_agent !== false &&
+													agents.length > 0 && (
+														<div>
+															<Label>Agent</Label>
+															<Select
+																value={formData.agent_id}
+																onValueChange={(value) =>
+																	handleFieldChange("agent_id", value)
+																}
+															>
+																<SelectTrigger>
+																	<SelectValue placeholder="Select agent" />
+																</SelectTrigger>
+																<SelectContent>
+																	{agents.map((agent) => (
+																		<SelectItem key={agent.id} value={agent.id}>
+																			{agent.name}
+																		</SelectItem>
+																	))}
+																</SelectContent>
+															</Select>
+														</div>
+													)}
 											</div>
 
 											{fieldPreferences?.show_special_requests !== false && (
@@ -710,7 +797,12 @@ export function CompactReservationDialog({
 													<Label>Special Requests</Label>
 													<Textarea
 														value={formData.special_requests}
-														onChange={(e) => handleFieldChange("special_requests", e.target.value)}
+														onChange={(e) =>
+															handleFieldChange(
+																"special_requests",
+																e.target.value,
+															)
+														}
 														placeholder="Any special requests or notes"
 														rows={2}
 													/>
@@ -733,7 +825,12 @@ export function CompactReservationDialog({
 														min="0"
 														step="0.01"
 														value={formData.room_rate}
-														onChange={(e) => handleFieldChange("room_rate", parseFloat(e.target.value) || 0)}
+														onChange={(e) =>
+															handleFieldChange(
+																"room_rate",
+																parseFloat(e.target.value) || 0,
+															)
+														}
 													/>
 												</div>
 
@@ -741,7 +838,9 @@ export function CompactReservationDialog({
 													<Label>Currency</Label>
 													<CurrencySelector
 														currency={formData.currency}
-														onCurrencyChange={(value) => handleFieldChange("currency", value)}
+														onCurrencyChange={(value) =>
+															handleFieldChange("currency", value)
+														}
 													/>
 												</div>
 
@@ -753,7 +852,12 @@ export function CompactReservationDialog({
 															min="0"
 															step="0.01"
 															value={formData.advance_amount}
-															onChange={(e) => handleFieldChange("advance_amount", parseFloat(e.target.value) || 0)}
+															onChange={(e) =>
+																handleFieldChange(
+																	"advance_amount",
+																	parseFloat(e.target.value) || 0,
+																)
+															}
 														/>
 													</div>
 												)}
@@ -767,16 +871,25 @@ export function CompactReservationDialog({
 													</div>
 													<div className="flex justify-between items-center text-sm">
 														<span>Rate per night:</span>
-														<span className="font-medium">{formData.currency} {formData.room_rate}</span>
+														<span className="font-medium">
+															{formData.currency} {formData.room_rate}
+														</span>
 													</div>
 													<div className="flex justify-between items-center font-semibold border-t pt-2 mt-2">
 														<span>Total Amount:</span>
-														<span>{formData.currency} {totalAmount.toFixed(2)}</span>
+														<span>
+															{formData.currency} {totalAmount.toFixed(2)}
+														</span>
 													</div>
 													{formData.advance_amount > 0 && (
 														<div className="flex justify-between items-center text-sm text-muted-foreground">
 															<span>Balance:</span>
-															<span>{formData.currency} {(totalAmount - formData.advance_amount).toFixed(2)}</span>
+															<span>
+																{formData.currency}{" "}
+																{(
+																	totalAmount - formData.advance_amount
+																).toFixed(2)}
+															</span>
 														</div>
 													)}
 												</div>
@@ -793,7 +906,9 @@ export function CompactReservationDialog({
 						<Card className="h-full">
 							<CardHeader>
 								<CardTitle className="text-lg">
-									{!isSelectingCheckOut ? "Select Check-in Date" : "Select Check-out Date"}
+									{!isSelectingCheckOut
+										? "Select Check-in Date"
+										: "Select Check-out Date"}
 								</CardTitle>
 								{isSelectingCheckOut && checkInDate && (
 									<div className="text-sm text-muted-foreground">
@@ -810,10 +925,13 @@ export function CompactReservationDialog({
 									modifiers={{
 										checkIn: checkInDate ? [checkInDate] : [],
 										checkOut: checkOutDate ? [checkOutDate] : [],
-										range: checkInDate && checkOutDate ? {
-											from: checkInDate,
-											to: checkOutDate,
-										} : undefined,
+										range:
+											checkInDate && checkOutDate
+												? {
+														from: checkInDate,
+														to: checkOutDate,
+													}
+												: undefined,
 									}}
 									modifiersClassNames={{
 										checkIn: "bg-blue-500 text-white",
@@ -849,10 +967,14 @@ export function CompactReservationDialog({
 
 								{checkInDate && checkOutDate && (
 									<div className="mt-4 p-3 bg-muted rounded-lg">
-										<div className="text-sm font-medium mb-2">Selected Dates</div>
+										<div className="text-sm font-medium mb-2">
+											Selected Dates
+										</div>
 										<div className="space-y-1 text-xs">
 											<div>Check-in: {format(checkInDate, "MMM dd, yyyy")}</div>
-											<div>Check-out: {format(checkOutDate, "MMM dd, yyyy")}</div>
+											<div>
+												Check-out: {format(checkOutDate, "MMM dd, yyyy")}
+											</div>
 											<div className="font-medium">Nights: {nights}</div>
 										</div>
 										<Button
@@ -873,7 +995,8 @@ export function CompactReservationDialog({
 				{/* Footer */}
 				<div className="flex items-center justify-between pt-4 border-t">
 					<div className="text-sm text-muted-foreground">
-						{nights > 0 && `${nights} night${nights > 1 ? 's' : ''} • Total: ${formData.currency} ${totalAmount.toFixed(2)}`}
+						{nights > 0 &&
+							`${nights} night${nights > 1 ? "s" : ""} • Total: ${formData.currency} ${totalAmount.toFixed(2)}`}
 					</div>
 					<div className="flex gap-2">
 						<Button variant="outline" onClick={onClose}>

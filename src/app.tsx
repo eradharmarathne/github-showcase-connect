@@ -7,6 +7,10 @@ import "./i18n";
 import { Users } from "lucide-react";
 import { ThemeProvider } from "next-themes";
 import { AuthRedirect } from "./components/auth/auth-redirect";
+import { Layout } from "./components/layout/layout";
+import { PermissionRoute } from "./components/routing/permission-route";
+import { ProtectedRoute } from "./components/routing/protected-route";
+import { SmartRedirect } from "./components/routing/smart-redirect";
 import AuthProvider from "./context/auth-context";
 import { LocationProvider } from "./context/location-context";
 import AccessDenied from "./pages/access-denied";
@@ -21,6 +25,7 @@ import EnhancedCalendar from "./pages/enhanced-calendar";
 import Expense from "./pages/expense";
 import FinancialReports from "./pages/financial-reports";
 import ForgotPassword from "./pages/forgot-password";
+import GoogleIntegrationSettings from "./pages/google-integration-settings";
 import MasterFiles from "./pages/master-files";
 import NotFound from "./pages/not-found";
 import Onboarding from "./pages/onboarding";
@@ -29,10 +34,7 @@ import Reports from "./pages/reports";
 import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
-import { Layout } from "./components/layout/layout";
-import { PermissionRoute } from "./components/routing/permission-route";
-import { SmartRedirect } from "./components/routing/smart-redirect";
-import { ProtectedRoute } from "./components/routing/protected-route";
+import Reviews from "./pages/reviews";
 import Settings from "./pages/settings";
 
 const queryClient = new QueryClient();
@@ -121,6 +123,23 @@ const App = () => (
 										element={
 											<PermissionRoute permission={["access_booking_channels"]}>
 												<BookingChannelsIntegration />
+											</PermissionRoute>
+										}
+									/>
+								</Route>
+								<Route
+									path="/reviews"
+									element={
+										<ProtectedRoute>
+											<Layout />
+										</ProtectedRoute>
+									}
+								>
+									<Route
+										index
+										element={
+											<PermissionRoute permission={["access_reviews"]}>
+												<Reviews />
 											</PermissionRoute>
 										}
 									/>
@@ -291,6 +310,23 @@ const App = () => (
 										element={
 											<PermissionRoute permission={["access_settings"]}>
 												<Settings />
+											</PermissionRoute>
+										}
+									/>
+								</Route>
+								<Route
+									path="/settings/google-integration"
+									element={
+										<ProtectedRoute>
+											<Layout />
+										</ProtectedRoute>
+									}
+								>
+									<Route
+										index
+										element={
+											<PermissionRoute permission={["access_settings"]}>
+												<GoogleIntegrationSettings />
 											</PermissionRoute>
 										}
 									/>

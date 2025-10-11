@@ -1,6 +1,11 @@
 import { LanguagesIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router";
+import LanguageDropdown from "@/components/common/dropdown-language";
+import ProfileDropdown from "@/components/common/dropdown-profile";
+import FullscreenToggle from "@/components/common/fullscreen-toggle";
+import ProfileAvatarButton from "@/components/common/profile-avatar-button";
+import ThemeSwitcher from "@/components/common/theme-switcher";
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import {
 	Breadcrumb,
@@ -10,6 +15,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -19,12 +25,6 @@ import {
 } from "@/components/ui/sidebar";
 import { useLocationContext } from "@/context/location-context";
 import { useIsMobile } from "@/hooks/use-mobile";
-import LanguageDropdown from "@/components/common/dropdown-language";
-import ProfileDropdown from "@/components/common/dropdown-profile";
-import FullscreenToggle from "@/components/common/fullscreen-toggle";
-import ProfileAvatarButton from "@/components/common/profile-avatar-button";
-import { Button } from "@/components/ui/button";
-import ThemeSwitcher from "@/components/common/theme-switcher";
 
 export function Layout() {
 	const isMobile = useIsMobile();

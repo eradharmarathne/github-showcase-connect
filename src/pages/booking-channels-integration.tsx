@@ -649,7 +649,9 @@ export default function BookingChannelsIntegration() {
 			fetchData();
 		} catch (error: any) {
 			console.error("Error adding property mapping:", error);
-			toast.error(`Failed to add property mapping: ${error.message || "Unknown error"}`);
+			toast.error(
+				`Failed to add property mapping: ${error.message || "Unknown error"}`,
+			);
 		}
 	};
 
@@ -1478,7 +1480,9 @@ export default function BookingChannelsIntegration() {
 															</CardTitle>
 															<Badge
 																variant={
-																	locationSyncUrls.length > 0 ? "default" : "secondary"
+																	locationSyncUrls.length > 0
+																		? "default"
+																		: "secondary"
 																}
 															>
 																{locationSyncUrls.length > 0
@@ -1502,7 +1506,9 @@ export default function BookingChannelsIntegration() {
 																		id={`ical-url-${location.id}`}
 																		placeholder="https://ical.booking.com/..."
 																		className="mt-1"
-																		value={icalInputValues[location.id]?.url || ""}
+																		value={
+																			icalInputValues[location.id]?.url || ""
+																		}
 																		onChange={(e) =>
 																			setIcalInputValues((prev) => ({
 																				...prev,
@@ -1524,7 +1530,10 @@ export default function BookingChannelsIntegration() {
 																	<select
 																		id={`source-${location.id}`}
 																		className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background"
-																		value={icalInputValues[location.id]?.source || "ical"}
+																		value={
+																			icalInputValues[location.id]?.source ||
+																			"ical"
+																		}
 																		onChange={(e) =>
 																			setIcalInputValues((prev) => ({
 																				...prev,
@@ -1536,7 +1545,9 @@ export default function BookingChannelsIntegration() {
 																		}
 																	>
 																		<option value="ical">iCal</option>
-																		<option value="booking_com">Booking.com</option>
+																		<option value="booking_com">
+																			Booking.com
+																		</option>
 																		<option value="airbnb">Airbnb</option>
 																		<option value="expedia">Expedia</option>
 																		<option value="beds24">Beds24</option>
@@ -1567,12 +1578,20 @@ export default function BookingChannelsIntegration() {
 																			>
 																				<div className="flex-1 min-w-0">
 																					<div className="flex items-center gap-2 mb-1">
-																						<Badge className={getSourceColor(syncUrl.source)}>
+																						<Badge
+																							className={getSourceColor(
+																								syncUrl.source,
+																							)}
+																						>
 																							{syncUrl.source.replace("_", ".")}
 																						</Badge>
 																						{syncUrl.room_number && (
-																							<Badge variant="outline" className="text-xs">
-																								Room: {syncUrl.rooms?.room_number}
+																							<Badge
+																								variant="outline"
+																								className="text-xs"
+																							>
+																								Room:{" "}
+																								{syncUrl.rooms?.room_number}
 																							</Badge>
 																						)}
 																					</div>
@@ -1583,7 +1602,9 @@ export default function BookingChannelsIntegration() {
 																						<div className="text-xs text-muted-foreground mt-1">
 																							Last synced:{" "}
 																							{format(
-																								new Date(syncUrl.last_synced_at),
+																								new Date(
+																									syncUrl.last_synced_at,
+																								),
 																								"MMM dd, HH:mm",
 																							)}
 																						</div>
@@ -1593,7 +1614,9 @@ export default function BookingChannelsIntegration() {
 																					<Button
 																						size="sm"
 																						variant="outline"
-																						onClick={() => manualSyncIcal(syncUrl.id)}
+																						onClick={() =>
+																							manualSyncIcal(syncUrl.id)
+																						}
 																						disabled={syncing}
 																					>
 																						<RefreshCw
@@ -1603,7 +1626,9 @@ export default function BookingChannelsIntegration() {
 																					<Button
 																						size="sm"
 																						variant="destructive"
-																						onClick={() => deleteSyncUrl(syncUrl.id)}
+																						onClick={() =>
+																							deleteSyncUrl(syncUrl.id)
+																						}
 																					>
 																						<AlertCircle className="size-4" />
 																					</Button>

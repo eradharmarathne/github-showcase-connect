@@ -114,7 +114,7 @@ export default function FinancialReports() {
 				.select("amount, main_type, date, accounts(currency)");
 
 			incomeQuery = incomeQuery.eq("location_id", selectedLocation);
-			expenseQuery = expenseQuery.eq("location_id", selectedLocation)
+			expenseQuery = expenseQuery.eq("location_id", selectedLocation);
 
 			// Apply date filters
 			if (selectedMonth !== "all") {

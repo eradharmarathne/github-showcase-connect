@@ -7,6 +7,7 @@ import {
 	Home,
 	MinusCircle,
 	Phone,
+	Star,
 	Wifi,
 } from "lucide-react";
 import * as React from "react";
@@ -92,6 +93,16 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 				url: "/booking-channels",
 				icon: Wifi,
 				isActive: location.pathname === "/booking-channels",
+			});
+		}
+
+		// Reviews
+		if (hasAnyPermission(["access_reviews"])) {
+			items.push({
+				title: t("navigation.reviews"),
+				url: "/reviews",
+				icon: Star,
+				isActive: location.pathname === "/reviews",
 			});
 		}
 
