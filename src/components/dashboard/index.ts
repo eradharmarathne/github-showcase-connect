@@ -7,5 +7,6 @@ export { AccountBalances } from "./account-balances";
 export { BookingSourceChart } from "./booking-source-chart";
 export { DashboardHeader } from "./dashboard-header";
 export { FinancialChart } from "./financial-chart";
+export { IncomeExpenseChart } from "./income-expense-chart";
 export { SummaryCards } from "./summary-cards";
 export { UpcomingBookings } from "./upcoming-bookings";

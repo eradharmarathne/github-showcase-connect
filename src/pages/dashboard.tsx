@@ -3,7 +3,7 @@ import {
 	AccountBalances,
 	BookingSourceChart,
 	DashboardHeader,
-	FinancialChart,
+	IncomeExpenseChart,
 	UpcomingBookings,
 } from "@/components/dashboard";
 import { useLocationContext } from "@/context/location-context";
@@ -35,7 +35,11 @@ export default function Dashboard() {
 
 				{/* Income & Expense Chart */}
 				<div className="w-full">
-					<FinancialChart />
+					<IncomeExpenseChart
+						selectedLocation={selectedLocation}
+						selectedMonth={selectedMonth}
+						locations={locations}
+					/>
 				</div>
 
 				{/* Account Balances and Upcoming Bookings - Responsive Layout */}
@@ -52,6 +56,14 @@ export default function Dashboard() {
 							hasCalendarPermission={hasAnyPermission(["access_calendar"])}
 						/>
 					</div>
+				</div>
+
+				{/* Booking Source Chart */}
+				<div className="w-full">
+					<BookingSourceChart
+						selectedLocation={selectedLocation}
+						selectedMonth={selectedMonth}
+					/>
 				</div>
 			</div>
 		</div>
