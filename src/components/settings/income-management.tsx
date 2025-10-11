@@ -17,8 +17,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { IncomeType } from "./types";
+import { useProfile } from "@/hooks/use-profile";
 
 export function IncomeManagement() {
+	const { profile } = useProfile();
 	const [incomeTypes, setIncomeTypes] = useState<IncomeType[]>([]);
 	const [newIncomeType, setNewIncomeType] = useState("");
 	const [incomeTypeToDelete, setIncomeTypeToDelete] = useState<string | null>(
@@ -30,6 +32,7 @@ export function IncomeManagement() {
 		const { data, error } = await supabase
 			.from("income_types")
 			.select("*")
+			.eq("tenant_id", profile?.tenant_id)
 			.order("type_name");
 
 		if (error) {
@@ -60,8 +63,8 @@ export function IncomeManagement() {
 
 		const { error } = await supabase
 			.from("income_types")
-			.insert([{ type_name: newIncomeType.trim() }]);
-
+			.insert([{ type_name: newIncomeType.trim(), tenant_id: profile?.tenant_id }]);
+			
 		if (error) {
 			console.error("Error adding income type:", error);
 			toast({

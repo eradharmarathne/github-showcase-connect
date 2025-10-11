@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { AccountSelector } from "./shared/AccountSelector";
 import { AmountInput } from "./shared/AmountInput";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -234,8 +236,7 @@ export function ImmediatePaymentForm({
 					placeholder={t("income.addDialog.form.notePlaceholder")}
 				/>
 			</div>
-
-			<div>
+			{incomeTypes ? (<div>
 				<Label htmlFor="income_type_id">
 					{t("income.addDialog.form.incomeType")}
 				</Label>
@@ -258,7 +259,14 @@ export function ImmediatePaymentForm({
 						))}
 					</SelectContent>
 				</Select>
-			</div>
+			</div>) : (
+				<Alert className="w-full">
+					<AlertTriangle className="size-4" />
+					<AlertDescription className="text-start">
+						Add income types in <a href="/settings" className="text-blue-600">settings.</a>
+					</AlertDescription>
+				</Alert>
+			)}
 
 			<AccountSelector
 				accounts={accounts}

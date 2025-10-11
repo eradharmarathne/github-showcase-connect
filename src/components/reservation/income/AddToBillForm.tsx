@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AmountInput } from "./shared/AmountInput";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -168,25 +170,33 @@ export function AddToBillForm({
 				<Label htmlFor="income_type_id">
 					{t("income.addDialog.form.incomeType")}
 				</Label>
-				<Select
-					value={formData.income_type_id || undefined}
-					onValueChange={(value) =>
-						setFormData((prev) => ({ ...prev, income_type_id: value }))
-					}
-				>
-					<SelectTrigger>
-						<SelectValue
-							placeholder={t("income.addDialog.form.incomeTypePlaceholder")}
-						/>
-					</SelectTrigger>
-					<SelectContent>
-						{incomeTypes && incomeTypes.map((type) => (
-							<SelectItem key={type.id} value={type.id}>
-								{type.type_name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
+				{!incomeTypes ? (
+					<Alert className="w-full">
+						<AlertTriangle className="size-4" />
+						<AlertDescription className="text-start">
+							Add income types in <a href="/settings" className="text-blue-600">settings.</a>
+						</AlertDescription>
+					</Alert>
+				) : (
+					<Select
+						value={formData.income_type_id || undefined}
+						onValueChange={(value) =>
+							setFormData((prev) => ({ ...prev, income_type_id: value }))
+						}
+					>
+						<SelectTrigger>
+							<SelectValue
+								placeholder={t("income.addDialog.form.incomeTypePlaceholder")}
+							/>
+						</SelectTrigger>
+						<SelectContent>
+							{incomeTypes && incomeTypes.map((type) => (
+								<SelectItem key={type.id} value={type.id}>
+									{type.type_name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>)}
 			</div>
 
 			<div className="p-4 bg-blue-50 rounded-md">

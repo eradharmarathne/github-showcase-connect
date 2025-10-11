@@ -13,18 +13,9 @@ import { Switch } from "@/components/ui/switch";
 import { useLocationContext } from "@/context/location-context";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/integrations/supabase/client";
-
-// Lazy load the form components
-const AddToBillForm = React.lazy(() =>
-	import("./AddToBillForm").then((module) => ({
-		default: module.AddToBillForm,
-	})),
-);
-const ImmediatePaymentForm = React.lazy(() =>
-	import("./ImmediatePaymentForm").then((module) => ({
-		default: module.ImmediatePaymentForm,
-	})),
-);
+import { AddToBillForm } from "./AddToBillForm";
+import { ImmediatePaymentForm } from "./ImmediatePaymentForm";
+import { redirect } from "react-router";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -63,25 +54,29 @@ export function AddIncomeDialog({
 	const [displayedReservationAmount, setDisplayedReservationAmount] =
 		useState<number>(0);
 
-	const fetchIncomeTypes = useCallback(async () => {
-		try {
-			const { data, error } = await supabase
-				.from("income_types")
-				.select("*")
-				.eq("tenant_id", profile?.tenant_id)
-				.order("type_name", { ascending: true });
-			if (error) throw error;
-			setIncomeTypes(data || []);
-		} catch (error) {
-			console.error("Error fetching income types:", error);
-		}
-	}, [profile?.tenant_id]);
+
 
 	useEffect(() => {
+		const fetchIncomeTypes = async () => {
+			try {
+				console.log("Fetching income types for tenant:", profile?.tenant_id);
+				const { data, error } = await supabase
+					.from("income_types")
+					.select("*")
+					.eq("tenant_id", profile?.tenant_id)
+					.order("type_name", { ascending: true });
+				if (error) throw error;
+				console.log("Fetched income types:", data);
+				setIncomeTypes(data || []);
+			} catch (error) {
+				console.error("Error fetching income types:", error);
+			}
+		};
 		if (profile?.tenant_id && isOpen) {
 			fetchIncomeTypes();
 		}
-	}, [profile?.tenant_id, fetchIncomeTypes, isOpen]);
+		// Do not return a redirect here; handle navigation in a different effect or in the render logic.
+	}, [profile?.tenant_id, isOpen, supabase, profile, setIncomeTypes]);
 
 	useEffect(() => {
 		if (selectedReservation) {
