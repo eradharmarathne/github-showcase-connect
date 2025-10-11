@@ -67,7 +67,7 @@ export function PaymentDialog({
 
 	const [formData, setFormData] = useState({
 		payment_type: "room_payment",
-		payment_method: "",
+		payment_method: "cash",
 		amount: initialAmount,
 		account_id: "",
 		notes: "",
@@ -222,6 +222,18 @@ export function PaymentDialog({
 		}
 	}, [reservation, initialCurrency, initialAmount, tenant?.id]);
 
+	// Set default account when accounts are loaded
+	useEffect(() => {
+		if (accounts.length > 0 && formData.currency && (!formData.account_id || formData.account_id === "")) {
+			const compatibleAccountsForCurrency = accounts.filter(
+				(account) => account.currency === formData.currency,
+			);
+			if (compatibleAccountsForCurrency.length > 0) {
+				setFormData((prev) => ({ ...prev, account_id: compatibleAccountsForCurrency[0].id }));
+			}
+		}
+	}, [accounts, formData.currency, formData.account_id]);
+
 	// Handle currency change with automatic amount conversion
 	const handleCurrencyChange = async (newCurrency: string) => {
 		try {
@@ -353,7 +365,7 @@ export function PaymentDialog({
 	const resetForm = () => {
 		setFormData({
 			payment_type: "room_payment",
-			payment_method: "",
+			payment_method: "cash",
 			amount: initialAmount,
 			account_id: "",
 			notes: "",
@@ -475,7 +487,7 @@ export function PaymentDialog({
 								<div>
 									<Label htmlFor="payment_method">Payment Method</Label>
 									<Select
-										value={formData.payment_method}
+										value={formData.payment_method || undefined}
 										onValueChange={(value) =>
 											setFormData({ ...formData, payment_method: value })
 										}
@@ -528,7 +540,7 @@ export function PaymentDialog({
 								<div>
 									<Label htmlFor="account_id">Account</Label>
 									<Select
-										value={formData.account_id}
+										value={formData.account_id || undefined}
 										onValueChange={(value) =>
 											setFormData({ ...formData, account_id: value })
 										}

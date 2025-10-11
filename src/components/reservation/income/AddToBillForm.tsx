@@ -70,7 +70,7 @@ export function AddToBillForm({
 		note:
 			t("income.addDialog.reservationInfo.reservation") +
 			` ${reservation.reservation_number}`,
-		income_type_id: "",
+		income_type_id: incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
 	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -169,7 +169,7 @@ export function AddToBillForm({
 					{t("income.addDialog.form.incomeType")}
 				</Label>
 				<Select
-					value={formData.income_type_id}
+					value={formData.income_type_id || undefined}
 					onValueChange={(value) =>
 						setFormData((prev) => ({ ...prev, income_type_id: value }))
 					}
@@ -180,7 +180,7 @@ export function AddToBillForm({
 						/>
 					</SelectTrigger>
 					<SelectContent>
-						{incomeTypes.map((type) => (
+						{incomeTypes && incomeTypes.map((type) => (
 							<SelectItem key={type.id} value={type.id}>
 								{type.type_name}
 							</SelectItem>

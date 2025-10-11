@@ -15,7 +15,7 @@ type Account = {
 };
 
 interface AccountSelectorProps {
-	accounts: Account[] | null;
+	accounts: Account[];
 	selectedAccountId: string;
 	onAccountChange: (accountId: string) => void;
 	required?: boolean;
@@ -35,10 +35,9 @@ export function AccountSelector({
 				{t("income.addDialog.form.accountRequired")}
 			</Label>
 			<Select
-				value={selectedAccountId}
+				value={selectedAccountId || undefined}
 				onValueChange={onAccountChange}
 				required={required}
-				disabled={!accounts || accounts.length === 0}
 			>
 				<SelectTrigger>
 					<SelectValue
@@ -46,17 +45,11 @@ export function AccountSelector({
 					/>
 				</SelectTrigger>
 				<SelectContent>
-					{accounts && accounts.length > 0 ? (
-						accounts.map((account) => (
-							<SelectItem key={account.id} value={account.id}>
-								{account.name} ({account.currency})
-							</SelectItem>
-						))
-					) : (
-						<SelectItem value="" disabled>
-							{accounts === null ? t("common.loading") : "No accounts available"}
+					{accounts && accounts.map((account) => (
+						<SelectItem key={account.id} value={account.id}>
+							{account.name} ({account.currency})
 						</SelectItem>
-					)}
+					))}
 				</SelectContent>
 			</Select>
 			<p className="text-sm text-gray-600 mt-1">

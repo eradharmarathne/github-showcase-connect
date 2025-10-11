@@ -50,7 +50,7 @@ export default function PaymentForm() {
 
 	const [formData, setFormData] = useState({
 		payment_type: "room_payment",
-		payment_method: "",
+		payment_method: "cash",
 		amount: initialAmount,
 		account_id: "",
 		notes: "",
@@ -176,9 +176,16 @@ export default function PaymentForm() {
 	}, [reservationId, tenant?.id, fetchReservationAndAccounts]);
 
 	useEffect(() => {
-		// Filter accounts based on selected currency
-		setFormData((prev) => ({ ...prev, account_id: "" }));
-	}, []);
+		// Set default account when accounts are loaded and currency is set
+		if (accounts.length > 0 && formData.currency && (!formData.account_id || formData.account_id === "")) {
+			const compatibleAccountsForCurrency = accounts.filter(
+				(account) => account.currency === formData.currency,
+			);
+			if (compatibleAccountsForCurrency.length > 0) {
+				setFormData((prev) => ({ ...prev, account_id: compatibleAccountsForCurrency[0].id }));
+			}
+		}
+	}, [accounts, formData.currency, formData.account_id]);
 
 	const handleCurrencyChange = async (newCurrency: string) => {
 		if (!reservation) return;
@@ -195,11 +202,16 @@ export default function PaymentForm() {
 				);
 			}
 
+			// Find compatible accounts for the new currency
+			const compatibleAccountsForCurrency = accounts.filter(
+				(account) => account.currency === newCurrency,
+			);
+
 			setFormData((prev) => ({
 				...prev,
 				currency: newCurrency as any,
 				amount: newAmount,
-				account_id: "", // Reset account selection
+				account_id: compatibleAccountsForCurrency.length > 0 ? compatibleAccountsForCurrency[0].id : "", // Reset account selection
 			}));
 		} catch (error) {
 			console.error("Currency conversion failed:", error);
@@ -208,10 +220,16 @@ export default function PaymentForm() {
 				description: "Using original amount. Please adjust manually if needed.",
 				variant: "destructive",
 			});
+			
+			// Find compatible accounts for the new currency
+			const compatibleAccountsForCurrency = accounts.filter(
+				(account) => account.currency === newCurrency,
+			);
+
 			setFormData((prev) => ({
 				...prev,
 				currency: newCurrency as any,
-				account_id: "",
+				account_id: compatibleAccountsForCurrency.length > 0 ? compatibleAccountsForCurrency[0].id : "",
 			}));
 		}
 	};
@@ -625,7 +643,7 @@ export default function PaymentForm() {
 							<div>
 								<Label>Payment Method *</Label>
 								<Select
-									value={formData.payment_method}
+									value={formData.payment_method || undefined}
 									onValueChange={(value) =>
 										setFormData((prev) => ({ ...prev, payment_method: value }))
 									}
@@ -675,7 +693,7 @@ export default function PaymentForm() {
 						<div>
 							<Label>Account *</Label>
 							<Select
-								value={formData.account_id}
+								value={formData.account_id || undefined}
 								onValueChange={(value) =>
 									setFormData((prev) => ({ ...prev, account_id: value }))
 								}

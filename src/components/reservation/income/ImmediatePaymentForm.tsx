@@ -77,8 +77,8 @@ export function ImmediatePaymentForm({
 		note:
 			t("income.addDialog.reservationInfo.reservation") +
 			` ${reservation.reservation_number}`,
-		account_id: "",
-		income_type_id: "",
+		account_id: accounts && accounts.length > 0 ? accounts[0].id : "",
+		income_type_id: incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
 		payment_method: "cash",
 	});
 
@@ -240,7 +240,7 @@ export function ImmediatePaymentForm({
 					{t("income.addDialog.form.incomeType")}
 				</Label>
 				<Select
-					value={formData.income_type_id}
+					value={formData.income_type_id || undefined}
 					onValueChange={(value) =>
 						setFormData((prev) => ({ ...prev, income_type_id: value }))
 					}
@@ -251,7 +251,7 @@ export function ImmediatePaymentForm({
 						/>
 					</SelectTrigger>
 					<SelectContent>
-						{incomeTypes.map((type) => (
+						{incomeTypes && incomeTypes.map((type) => (
 							<SelectItem key={type.id} value={type.id}>
 								{type.type_name}
 							</SelectItem>
