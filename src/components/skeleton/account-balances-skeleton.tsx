@@ -7,7 +7,7 @@ export function AccountBalancesSkeleton() {
 			<div className="p-6">
 				<div className="flex items-center gap-2 mb-6">
 					<DollarSign className="size-5 text-primary" />
-					<span className="text-lg font-semibold">Account Balances</span>
+					<Skeleton className="h-5 w-32" />
 				</div>
 			</div>
 			<div className="p-6 pt-0 space-y-3 lg:space-y-4">

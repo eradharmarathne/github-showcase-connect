@@ -14,12 +14,12 @@ export function UpcomingBookingsSkeleton({
 			<div className="flex flex-row items-center justify-between p-6">
 				<div className="flex items-center gap-2 text-lg font-semibold">
 					<Calendar className="size-5 text-primary" />
-					<span>Upcoming Bookings</span>
+					<Skeleton className="h-5 w-36" />
 				</div>
 				{hasCalendarPermission && (
 					<Button variant="outline" size="sm" disabled>
 						<Eye className="size-4" />
-						View All
+						<Skeleton className="h-4 w-16" />
 					</Button>
 				)}
 			</div>
