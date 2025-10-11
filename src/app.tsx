@@ -34,7 +34,6 @@ import Reports from "./pages/reports";
 import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
-import Reviews from "./pages/reviews";
 import Settings from "./pages/settings";
 
 const queryClient = new QueryClient();
@@ -127,23 +126,6 @@ const App = () => (
 										}
 									/>
 								</Route>
-								{/* <Route
-									path="/reviews"
-									element={
-										<ProtectedRoute>
-											<Layout />
-										</ProtectedRoute>
-									}
-								>
-									<Route
-										index
-										element={
-											<PermissionRoute permission={["access_reviews"]}>
-												<Reviews />
-											</PermissionRoute>
-										}
-									/>
-								</Route> */}
 								<Route
 									path="/master-files"
 									element={
