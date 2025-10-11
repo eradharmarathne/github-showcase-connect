@@ -4,8 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./i18n";
-import { Users } from "lucide-react";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/context/theme-context";
 import { AuthRedirect } from "./components/auth/auth-redirect";
 import { Layout } from "./components/layout/layout";
 import { PermissionRoute } from "./components/routing/permission-route";
@@ -35,6 +34,8 @@ import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
 import Settings from "./pages/settings";
+import Users from "./pages/users";
+import Design from "./pages/design";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
 							<Routes>
 								<Route path="/" element={<AuthRedirect />} />
 								<Route path="/auth" element={<Auth />} />
+								<Route path="/ui" element={<Design />} />
 								<Route
 									path="/auth/forgot-password"
 									element={<ForgotPassword />}

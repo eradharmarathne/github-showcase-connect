@@ -9,7 +9,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": { "recommended": false },
-		"includes": ["**", "!dist", "**", "!dist", "!node_modules", "!supabase"]
+		"includes": ["**", "!dist", "!node_modules", "!supabase"]
 	},
 	"javascript": { "formatter": { "quoteStyle": "double" } },
 	"assist": {
