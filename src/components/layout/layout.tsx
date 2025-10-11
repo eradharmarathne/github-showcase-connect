@@ -43,8 +43,6 @@ export function Layout() {
 				return t("pageTitle.calendar");
 			case "/reservations":
 				return t("pageTitle.reservations");
-			case "/reservations/compact":
-				return t("pageTitle.quickBooking");
 			case "/expense":
 				return t("pageTitle.expense");
 			case "/accounts":

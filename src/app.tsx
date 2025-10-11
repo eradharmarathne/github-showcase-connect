@@ -20,6 +20,7 @@ import BillingSubscription from "./pages/billing-subscription";
 import BillingSuccess from "./pages/billing-success";
 import BookingChannelsIntegration from "./pages/booking-channels-integration";
 import Dashboard from "./pages/dashboard";
+import Design from "./pages/design";
 import EnhancedCalendar from "./pages/enhanced-calendar";
 import Expense from "./pages/expense";
 import FinancialReports from "./pages/financial-reports";
@@ -35,7 +36,6 @@ import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
 import Settings from "./pages/settings";
 import Users from "./pages/users";
-import Design from "./pages/design";
 
 const queryClient = new QueryClient();
 

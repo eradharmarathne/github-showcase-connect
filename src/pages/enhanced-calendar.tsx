@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { TimelineView } from "@/components/calendar/timeline-view";
+import { NewReservationDialog } from "@/components/modals";
 import { PermissionRoute } from "@/components/routing/permission-route";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,8 @@ export default function EnhancedCalendar() {
 	const [showBeds24, setShowBeds24] = useState(true);
 	const [showIcal, setShowIcal] = useState(true);
 	const [showOther, setShowOther] = useState(true);
+	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
+		useState(false);
 
 	// Status color helpers
 	const getStatusColor = (status: string) => {
@@ -63,7 +66,7 @@ export default function EnhancedCalendar() {
 	};
 
 	const handleQuickBook = () => {
-		navigate("/reservations/compact");
+		setIsNewReservationDialogOpen(true);
 	};
 
 	const handlePreviousMonth = () => {
@@ -160,7 +163,7 @@ export default function EnhancedCalendar() {
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>
-					<Button onClick={() => navigate("/reservations/compact")}>
+					<Button onClick={() => setIsNewReservationDialogOpen(true)}>
 						New Reservation
 					</Button>
 				</div>
@@ -186,6 +189,16 @@ export default function EnhancedCalendar() {
 					getCurrencySymbol={getCurrencySymbol}
 				/>
 			</div>
+
+			{/* New Reservation Dialog */}
+			<NewReservationDialog
+				isOpen={isNewReservationDialogOpen}
+				onClose={() => setIsNewReservationDialogOpen(false)}
+				onReservationCreated={() => {
+					setIsNewReservationDialogOpen(false);
+					// Refresh calendar data if needed
+				}}
+			/>
 		</PermissionRoute>
 	);
 }

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Cell, Pie, PieChart } from "recharts";
+import { NewReservationDialog } from "@/components/modals";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,6 +88,8 @@ export function BookingSourceChart({
 	const [sourceData, setSourceData] = useState<BookingSourceData[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [totalBookings, setTotalBookings] = useState(0);
+	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
+		useState(false);
 
 	// Keyboard shortcut handlers
 	useEffect(() => {
@@ -95,7 +98,7 @@ export function BookingSourceChart({
 				switch (event.key) {
 					case "n":
 						event.preventDefault();
-						navigate("/reservations/new");
+						setIsNewReservationDialogOpen(true);
 						break;
 					case "c":
 						event.preventDefault();
@@ -125,7 +128,7 @@ export function BookingSourceChart({
 	const handleQuickAction = (action: string) => {
 		switch (action) {
 			case "new-reservation":
-				navigate("/reservations/new");
+				setIsNewReservationDialogOpen(true);
 				break;
 			case "calendar":
 				navigate("/calendar");
@@ -388,6 +391,16 @@ export function BookingSourceChart({
 					</div>
 				</div>
 			</CardContent>
+
+			{/* New Reservation Dialog */}
+			<NewReservationDialog
+				isOpen={isNewReservationDialogOpen}
+				onClose={() => setIsNewReservationDialogOpen(false)}
+				onReservationCreated={() => {
+					setIsNewReservationDialogOpen(false);
+					// Data will be refreshed automatically by parent component
+				}}
+			/>
 		</Card>
 	);
 }
