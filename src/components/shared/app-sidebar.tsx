@@ -97,14 +97,14 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 		}
 
 		// Reviews
-		if (hasAnyPermission(["access_reviews"])) {
-			items.push({
-				title: t("navigation.reviews"),
-				url: "/reviews",
-				icon: Star,
-				isActive: location.pathname === "/reviews",
-			});
-		}
+		// if (hasAnyPermission(["access_reviews"])) {
+		// 	items.push({
+		// 		title: t("navigation.reviews"),
+		// 		url: "/reviews",
+		// 		icon: Star,
+		// 		isActive: location.pathname === "/reviews",
+		// 	});
+		// }
 
 		// Reports with sub-items
 		if (hasAnyPermission(["access_reports"])) {

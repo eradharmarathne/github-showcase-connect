@@ -127,7 +127,7 @@ const App = () => (
 										}
 									/>
 								</Route>
-								<Route
+								{/* <Route
 									path="/reviews"
 									element={
 										<ProtectedRoute>
@@ -143,7 +143,7 @@ const App = () => (
 											</PermissionRoute>
 										}
 									/>
-								</Route>
+								</Route> */}
 								<Route
 									path="/master-files"
 									element={
