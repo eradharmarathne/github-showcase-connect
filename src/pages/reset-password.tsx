@@ -1,6 +1,6 @@
 import { CheckCircle, Eye, EyeOff, Lock } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,36 +18,21 @@ export default function ResetPassword() {
 	const [isValidToken, setIsValidToken] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 
-	const [searchParams] = useSearchParams();
 	const navigate = useNavigate();
 	const { toast } = useToast();
 
 	useEffect(() => {
-		const verifyToken = async () => {
-			const tokenHash = searchParams.get("token_hash");
-			const type = searchParams.get("type");
-
-			if (!tokenHash || type !== "recovery") {
-				toast({
-					title: "Invalid Reset Link",
-					description: "This password reset link is invalid or has expired.",
-					variant: "destructive",
-				});
-				navigate("/auth/forgot-password");
-				return;
-			}
-
+		const checkSession = async () => {
 			try {
-				const { error } = await supabase.auth.verifyOtp({
-					token_hash: tokenHash,
-					type: "recovery",
-				});
+				// Check if user has an active session
+				// The token was already verified in auth.tsx before redirecting here
+				const { data: { session }, error } = await supabase.auth.getSession();
 
-				if (error) {
-					console.error("Token verification failed:", error);
+				if (error || !session) {
+					console.error("No active session found:", error);
 					toast({
 						title: "Invalid Reset Link",
-						description: "This password reset link is invalid or has expired.",
+						description: "This password reset link is invalid or has expired. Please request a new one.",
 						variant: "destructive",
 					});
 					navigate("/auth/forgot-password");
@@ -55,7 +40,7 @@ export default function ResetPassword() {
 					setIsValidToken(true);
 				}
 			} catch (error) {
-				console.error("Exception during token verification:", error);
+				console.error("Exception during session check:", error);
 				toast({
 					title: "Error",
 					description: "Failed to verify reset link. Please try again.",
@@ -67,8 +52,8 @@ export default function ResetPassword() {
 			}
 		};
 
-		verifyToken();
-	}, [searchParams, navigate, toast]);
+		checkSession();
+	}, [navigate, toast]);
 
 	const validatePassword = (password: string): string | null => {
 		if (password.length < 6) {

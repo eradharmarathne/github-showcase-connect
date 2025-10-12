@@ -27,10 +27,36 @@ export default function Auth() {
 			const type = searchParams.get("type");
 
 			if (tokenHash && type === "recovery") {
-				// Redirect to reset password page with the token
-				navigate(`/auth/reset-password?token_hash=${tokenHash}&type=recovery`, {
-					replace: true,
-				});
+				// Verify the recovery token and establish a session
+				try {
+					const { error } = await supabase.auth.verifyOtp({
+						token_hash: tokenHash,
+						type: "recovery",
+					});
+
+					if (error) {
+						console.error("Recovery token verification failed:", error);
+						toast({
+							title: "Invalid Reset Link",
+							description: "This password reset link is invalid or has expired.",
+							variant: "destructive",
+						});
+						navigate("/auth/forgot-password", { replace: true });
+						return;
+					}
+
+					// Token verified successfully, redirect to reset password page
+					// Do not pass token_hash in URL as it's already been consumed
+					navigate("/auth/reset-password", { replace: true });
+				} catch (error) {
+					console.error("Exception during recovery token verification:", error);
+					toast({
+						title: "Error",
+						description: "Failed to verify reset link. Please try again.",
+						variant: "destructive",
+					});
+					navigate("/auth/forgot-password", { replace: true });
+				}
 				return;
 			}
 
