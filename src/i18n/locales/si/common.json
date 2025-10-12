@@ -39,8 +39,8 @@
     }
   },
   "calendar": {
-    "title": "Reservation Calendar",
-    "subtitle": "Room-based calendar view with external bookings",
+    "title": "දිනදර්ශනය",
+    "subtitle": "කාමර මූලික දිනදර්ශන දර්ශනය සහ බාහිර වෙන්කරණ",
     "viewMode": {
       "timeline": "Timeline",
       "list": "List",

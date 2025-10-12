@@ -4,8 +4,8 @@ import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { type Currency, convertCurrency } from "@/utils/currency";
-import type { AccountDetail } from "./AccountDetailsList";
-import type { TransactionWithBalance } from "./TransactionHistoryCard";
+import type { AccountDetail } from "../components/reports/detailed/AccountDetailsList";
+import type { TransactionWithBalance } from "../components/reports/detailed/TransactionHistoryCard";
 
 export function useAccountData(baseCurrency: Currency) {
 	const { toast } = useToast();

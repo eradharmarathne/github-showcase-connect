@@ -13,7 +13,7 @@ import {
 	TransactionHistoryCard,
 	type TransactionWithBalance,
 } from "./detailed/TransactionHistoryCard";
-import { useAccountData } from "./detailed/useAccountData";
+import { useAccountData } from "../../hooks/use-account-data";
 
 export default function DetailedBalanceSheet() {
 	const [accounts, setAccounts] = useState<AccountDetail[]>([]);
