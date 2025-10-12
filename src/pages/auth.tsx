@@ -159,7 +159,7 @@ export default function Auth() {
 	return (
 		<div className="min-h-screen w-full fixed overflow-y-auto flex flex-col sm:flex-row items-center justify-center bg-background">
 			<aside
-				className="h-full lg:h-screen flex-1 sm:overflow-hidden"
+				className="hidden sm:flex lg:h-screen flex-1 sm:overflow-hidden"
 				aria-label="Product showcase"
 			>
 				<div className="flex size-full items-center justify-center bg-linear-to-br from-blue-400 to-blue-600 p-4 sm:p-8 lg:p-16 dark:from-blue-600 dark:to-blue-500">

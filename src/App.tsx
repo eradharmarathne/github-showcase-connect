@@ -22,7 +22,7 @@ import BillingSuccess from "./pages/billing-success";
 import BookingChannelsIntegration from "./pages/booking-channels-integration";
 import Dashboard from "./pages/dashboard";
 import Design from "./pages/design";
-import EnhancedCalendar from "./pages/enhanced-calendar";
+import Calendar from "./pages/calendar";
 import Expense from "./pages/expense";
 import FinancialReports from "./pages/financial-reports";
 import ForgotPassword from "./pages/forgot-password";
@@ -108,7 +108,7 @@ const App = () => (
 											index
 											element={
 												<PermissionRoute permission={["access_calendar"]}>
-													<EnhancedCalendar />
+													<Calendar />
 												</PermissionRoute>
 											}
 										/>

@@ -25,7 +25,7 @@ import { getCurrencySymbol } from "@/utils/currency";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 
-export default function EnhancedCalendar() {
+export default function Calendar() {
 	const { t } = useTranslation("common");
 	const navigate = useNavigate();
 	const [currentDate, setCurrentDate] = useState(new Date());
