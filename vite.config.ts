@@ -10,12 +10,12 @@ export default {
     proxy: {
       // Proxy Creem.io API requests to handle CORS
       '/api/creem': {
-        target: 'https://test-api.creem.io',
+        target: 'https://api.creem.io',
         changeOrigin: true,
         rewrite: (path: string) => path.replace(/^\/api\/creem/, ''),
         secure: true,
         headers: {
-          'Origin': 'https://test-api.creem.io'
+          'Origin': 'https://api.creem.io'
         }
       },
       // Proxy Resend API requests to handle CORS

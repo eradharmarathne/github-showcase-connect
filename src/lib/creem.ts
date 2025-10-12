@@ -20,7 +20,7 @@ export const creem = new Creem({
 	// Use proxy in development to avoid CORS issues, direct API in production
 	serverURL: import.meta.env.DEV
 		? `${window.location.origin}/api/creem`
-		: "https://test-api.creem.io",
+		: "https://api.creem.io",
 });
 
 // Helper function to create a checkout session using proper Creem.io API format
@@ -61,7 +61,7 @@ export const createCheckoutSession = async (params: {
 		// Use direct API call instead of SDK to ensure success_url is properly passed
 		const apiUrl = import.meta.env.DEV
 			? `${window.location.origin}/api/creem/v1/checkouts`
-			: "https://test-api.creem.io/v1/checkouts";
+			: "https://api.creem.io/v1/checkouts";
 
 		const requestBody = {
 			product_id: params.product_id,
