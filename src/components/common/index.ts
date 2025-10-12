@@ -5,7 +5,6 @@ export { BookingShortcuts } from "./booking-shortcuts";
 export { CurrencySelector } from "./currency-selector";
 export { default as DropdownLanguage } from "./dropdown-language";
 export { default as DropdownProfile } from "./dropdown-profile";
-export { ExpenseShortcuts } from "./expense-shortcuts";
 export { default as FullscreenToggle } from "./fullscreen-toggle";
 export { LanguageSwitcher } from "./language-switcher";
 export { PricingDisplay } from "./pricing-display";

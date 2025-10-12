@@ -4,7 +4,6 @@ import { Link } from "react-router";
 import {
 	ExpenseForm,
 	ExpenseHistoryTable,
-	ExpenseShortcutsSection,
 } from "@/components/expense";
 import { ExpenseSkeleton } from "@/components/skeleton/expense-skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -78,15 +77,6 @@ export default function Expense() {
 				expenseTypes={expenseTypes}
 				onSuccess={refetch}
 			/>
-
-			{/* Expense Shortcuts */}
-			{selectedLocation && (
-				<ExpenseShortcutsSection
-					locationId={selectedLocation}
-					accounts={accounts}
-					onQuickFill={handleQuickFill}
-				/>
-			)}
 
 			{/* Recent Expenses */}
 			<ExpenseHistoryTable expenses={recentExpenses} accounts={accounts} />
