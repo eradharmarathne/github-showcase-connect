@@ -52,13 +52,13 @@ serve(async (req) => {
     }
 
     // Prepare request body for Creem API
+    // Note: Creem API only accepts success_url, not error_url or cancel_url
     const creemRequestBody: any = {
       product_id,
     };
 
     if (success_url) creemRequestBody.success_url = success_url;
-    if (error_url) creemRequestBody.error_url = error_url;
-    if (cancel_url) creemRequestBody.cancel_url = cancel_url;
+    // error_url and cancel_url are not accepted by Creem API - removed
     if (request_id) creemRequestBody.request_id = request_id;
     if (metadata) creemRequestBody.metadata = metadata;
     if (customer) creemRequestBody.customer = customer;
