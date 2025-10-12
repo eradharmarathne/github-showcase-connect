@@ -108,7 +108,7 @@ export default function Calendar() {
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" size="sm">
 									<Filter className="size-4 mr-2" />
-									Filter Sources
+									<span className="hidden sm:flex">Filter Sources</span>
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="start" className="w-56">
