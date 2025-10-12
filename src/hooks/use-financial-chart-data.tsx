@@ -155,9 +155,6 @@ export function useFinancialChartData({
 				totalExpenses += dayExpenses;
 			}
 
-			console.log("Final chart data points:", chartData.length);
-			console.log("Total expenses:", totalExpenses);
-
 			return {
 				data: chartData,
 				totals: {

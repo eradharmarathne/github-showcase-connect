@@ -24,19 +24,6 @@ export default function Expense() {
 		refetch,
 	} = useExpenseData();
 
-	const handleQuickFill = (data: {
-		mainCategory: string;
-		subCategory: string;
-		amount: string;
-		accountId: string;
-		date: string;
-		note: string;
-	}) => {
-		// This would typically update form state in the ExpenseForm component
-		// For now, we'll let the ExpenseForm handle this internally
-		console.log("Quick fill data:", data);
-	};
-
 	if (loading) {
 		return <ExpenseSkeleton />;
 	}

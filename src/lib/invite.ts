@@ -56,8 +56,6 @@ export const addUserToLocation = async (
 	params: AddUserToLocationParams,
 ): Promise<AddUserToLocationResult> => {
 	try {
-		console.log("Adding user to location:", params);
-
 		// First check if user exists in profiles using regular client (RLS allows this)
 		const { data: existingProfile, error: profileError } = await supabase
 			.from("profiles")
@@ -79,7 +77,6 @@ export const addUserToLocation = async (
 
 		if (existingProfile) {
 			// User exists - update tenant if needed and add location access
-			console.log("User already exists, adding location access");
 			userId = existingProfile.id;
 			userCreated = false;
 
@@ -105,7 +102,6 @@ export const addUserToLocation = async (
 			}
 		} else {
 			// User doesn't exist in profiles - check if auth user exists
-			console.log("No profile found, checking if auth user exists");
 
 			// Get admin client only for auth operations
 			const adminClient = createAdminClient();
@@ -133,7 +129,6 @@ export const addUserToLocation = async (
 
 			if (existingAuthUser) {
 				// Auth user exists but no profile - create profile using regular client
-				console.log("Auth user exists, creating profile");
 				userId = existingAuthUser.id;
 				userCreated = false;
 
@@ -158,7 +153,6 @@ export const addUserToLocation = async (
 				}
 			} else {
 				// User doesn't exist at all - create new user account
-				console.log("Creating new user account");
 
 				password = generateSecurePassword();
 
@@ -262,7 +256,6 @@ export const addUserToLocation = async (
 		try {
 			if (userCreated && password) {
 				// New user - send credentials
-				console.log("Sending credentials to new user");
 				const { error: emailError } = await supabase.functions.invoke(
 					"send-user-credentials",
 					{
@@ -282,7 +275,6 @@ export const addUserToLocation = async (
 				}
 			} else {
 				// Existing user - send location access notification
-				console.log("Sending location access notification to existing user");
 				const { error: emailError } = await supabase.functions.invoke(
 					"send-user-credentials",
 					{

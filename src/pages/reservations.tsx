@@ -80,7 +80,6 @@ export default function Reservations() {
 	useEffect(() => {
 		async function loadAccountDetails() {
 			const result = await fetchAccountDetails();
-			console.log("Fetched account details:", result);
 			if (result) {
 				setAccounts(result.accounts);
 			}

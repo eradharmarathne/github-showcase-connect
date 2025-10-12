@@ -4,19 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 
 const VITE_CREEM_API_KEY = import.meta.env.VITE_CREEM_API_KEY;
 
-if (!VITE_CREEM_API_KEY) {
-	console.warn(
-		"VITE_CREEM_API_KEY is not set. Creem.io integration will not work.",
-	);
-} else {
-	console.log("Creem API key configured:", {
-		hasKey: !!VITE_CREEM_API_KEY,
-		keyPrefix: VITE_CREEM_API_KEY.substring(0, 10) + "...",
-		isTestKey: VITE_CREEM_API_KEY.startsWith("creem_test_"),
-		isLiveKey: VITE_CREEM_API_KEY.startsWith("creem_live_"),
-	});
-}
-
 export const creem = new Creem({
 	// Use proxy in development to avoid CORS issues, direct API in production
 	serverURL: import.meta.env.DEV
@@ -45,14 +32,6 @@ export const createCheckoutSession = async (params: {
 			throw new Error("product_id is required");
 		}
 
-		console.log("Creating checkout session with params:", {
-			productId: params.product_id,
-			units: params.units || 1,
-			discountCode: params.discountCode,
-			customer: params.customer,
-			successUrl: params.success_url,
-		});
-
 		// Use Supabase Edge Function to proxy the request and avoid CORS issues
 		const { data, error } = await supabase.functions.invoke(
 			"create-creem-checkout",
@@ -65,8 +44,6 @@ export const createCheckoutSession = async (params: {
 			console.error("Edge Function Error:", error);
 			throw new Error(`Edge Function Error: ${error.message}`);
 		}
-
-		console.log("Checkout session created via Edge Function:", data);
 
 		// Return in the same format as before
 		return {

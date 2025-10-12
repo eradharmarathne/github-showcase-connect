@@ -69,7 +69,6 @@ function parseICalData(icalData: string): ICalEvent[] {
 }
 
 serve(async (req) => {
-	console.log("iCal sync function called");
 
 	// Handle CORS preflight requests
 	if (req.method === "OPTIONS") {

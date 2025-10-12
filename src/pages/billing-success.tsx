@@ -42,13 +42,6 @@ export default function BillingSuccess() {
 				// );
 
 				// For now, we'll skip signature validation in demo mode
-				console.log("Processing successful payment:", {
-					checkoutId,
-					orderId,
-					customerId,
-					subscriptionId,
-					productId,
-				});
 
 				// Update or create subscription record
 				if (subscriptionId && customerId && tenant) {

@@ -251,11 +251,8 @@ export default function BookingChannelsIntegration() {
 				);
 
 				if (error) {
-					console.error("Error syncing booking channel data:", error);
 					toast.error("Failed to sync booking channel data");
 				} else {
-					console.log("Booking channel sync response:", data);
-					toast.success("Booking channel data synced successfully");
 					// Refresh the data after sync
 					fetchData();
 				}
@@ -404,10 +401,8 @@ export default function BookingChannelsIntegration() {
 			);
 
 			if (error) {
-				console.error("Error syncing booking channel data:", error);
 				toast.error(t("bookingChannels.messages.syncError"));
 			} else {
-				console.log("Booking channel sync response:", data);
 				toast.success(t("bookingChannels.messages.syncSuccess"));
 				// Refresh the data after sync
 				fetchData();
@@ -435,7 +430,6 @@ export default function BookingChannelsIntegration() {
 			if (data && data.success) {
 				toast.success(t("bookingChannels.messages.tokenExchangeSuccess"));
 				toast.info(t("bookingChannels.messages.tokenExchangeInfo"));
-				console.log("Refresh token:", data.data.refreshToken);
 				setSetupMode(false);
 			} else {
 				throw new Error(data.error || "Token exchange failed");
@@ -462,9 +456,6 @@ export default function BookingChannelsIntegration() {
 				loc.name.toLowerCase().includes("rusty"),
 			);
 			if (rustyLocation) {
-				console.log(
-					`Forcing booking ${booking.external_id} with Room 609309 to ${rustyLocation.name}`,
-				);
 				return rustyLocation;
 			}
 		}
@@ -477,17 +468,6 @@ export default function BookingChannelsIntegration() {
 			booking.raw_data?.referer, // Check referer for Airbnb
 		].filter(Boolean);
 
-		console.log(
-			"Booking external_id:",
-			booking.external_id,
-			"Property names to check:",
-			possiblePropertyNames,
-		);
-		console.log(
-			"Raw data keys:",
-			booking.raw_data ? Object.keys(booking.raw_data) : "no raw_data",
-		);
-
 		for (const mapping of propertyMappings) {
 			for (const propertyName of possiblePropertyNames) {
 				if (
@@ -499,13 +479,10 @@ export default function BookingChannelsIntegration() {
 							prop === propertyName,
 					)
 				) {
-					console.log("Matched booking to location:", mapping.locationName);
 					return locations.find((loc) => loc.id === mapping.locationId) || null;
 				}
 			}
 		}
-
-		console.log("No mapping found, using fallback location");
 		// Fallback to existing location mapping
 		if (booking.location) {
 			return (
