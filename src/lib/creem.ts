@@ -1,5 +1,6 @@
 import { Creem } from "creem";
 import { SDKValidationError } from "creem/models/errors";
+import { supabase } from "@/integrations/supabase/client";
 
 const VITE_CREEM_API_KEY = import.meta.env.VITE_CREEM_API_KEY;
 
@@ -23,7 +24,7 @@ export const creem = new Creem({
 		: "https://api.creem.io",
 });
 
-// Helper function to create a checkout session using proper Creem.io API format
+// Helper function to create a checkout session using Supabase Edge Function proxy
 export const createCheckoutSession = async (params: {
 	product_id: string;
 	success_url?: string;
@@ -38,10 +39,6 @@ export const createCheckoutSession = async (params: {
 	units?: number;
 	discountCode?: string;
 }) => {
-	if (!VITE_CREEM_API_KEY) {
-		throw new Error("Creem API key is not configured");
-	}
-
 	try {
 		// Validate required parameters
 		if (!params.product_id) {
@@ -54,57 +51,27 @@ export const createCheckoutSession = async (params: {
 			discountCode: params.discountCode,
 			customer: params.customer,
 			successUrl: params.success_url,
-			hasApiKey: !!VITE_CREEM_API_KEY,
-			apiKeyLength: VITE_CREEM_API_KEY?.length,
 		});
 
-		// Use direct API call instead of SDK to ensure success_url is properly passed
-		const apiUrl = import.meta.env.DEV
-			? `${window.location.origin}/api/creem/v1/checkouts`
-			: "https://api.creem.io/v1/checkouts";
-
-		const requestBody = {
-			product_id: params.product_id,
-			...(params.success_url && { success_url: params.success_url }),
-			...(params.request_id && { request_id: params.request_id }),
-			...(params.units && { units: params.units }),
-			...(params.discountCode && { discount_code: params.discountCode }),
-			...(params.customer && { customer: params.customer }),
-			...(params.metadata && { metadata: params.metadata }),
-		};
-
-		console.log("API Request:", {
-			url: apiUrl,
-			body: requestBody,
-		});
-
-		const response = await fetch(apiUrl, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				"x-api-key": VITE_CREEM_API_KEY,
-				accept: "application/json",
+		// Use Supabase Edge Function to proxy the request and avoid CORS issues
+		const { data, error } = await supabase.functions.invoke(
+			"create-creem-checkout",
+			{
+				body: params,
 			},
-			body: JSON.stringify(requestBody),
-		});
+		);
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			console.error("Creem API Error:", {
-				status: response.status,
-				statusText: response.statusText,
-				body: errorText,
-			});
-			throw new Error(`Creem API Error: ${response.status} - ${errorText}`);
+		if (error) {
+			console.error("Edge Function Error:", error);
+			throw new Error(`Edge Function Error: ${error.message}`);
 		}
 
-		const result = await response.json();
-		console.log("Checkout session created:", result);
+		console.log("Checkout session created via Edge Function:", data);
 
-		// Return in the same format as the SDK would
+		// Return in the same format as before
 		return {
-			checkoutUrl: result.checkout_url || result.url,
-			...result,
+			checkoutUrl: data.checkout_url || data.url,
+			...data,
 		};
 	} catch (error) {
 		console.error("Failed to create checkout session:", error);
