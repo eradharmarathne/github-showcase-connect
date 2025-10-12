@@ -7,7 +7,7 @@ export interface UploadResult {
 }
 
 /**
- * Upload a file to Supabase storage and return the public URL
+ * Upload a file to Supabase storage via Edge Function (handles authentication and RLS)
  */
 export async function uploadReceiptFile(
 	file: File,
@@ -15,36 +15,44 @@ export async function uploadReceiptFile(
 	expenseId?: string,
 ): Promise<UploadResult> {
 	try {
-		// Create a unique filename
-		const fileExt = file.name.split(".").pop();
-		const timestamp = Date.now();
-		const randomId = Math.random().toString(36).substring(2);
-		const fileName = `${tenantId}/${timestamp}-${randomId}.${fileExt}`;
-
-		// Upload to the receipts bucket
-		const { data, error } = await supabase.storage
-			.from("receipts")
-			.upload(fileName, file, {
-				cacheControl: "3600",
-				upsert: false,
-			});
-
-		if (error) {
-			console.error("Upload error:", error);
+		// Get the current session token
+		const { data: { session } } = await supabase.auth.getSession();
+		if (!session?.access_token) {
 			return {
 				success: false,
-				error: error.message,
+				error: "Authentication required",
 			};
 		}
 
-		// Get the public URL
-		const {
-			data: { publicUrl },
-		} = supabase.storage.from("receipts").getPublicUrl(data.path);
+		// Create FormData for the Edge Function
+		const formData = new FormData();
+		formData.append("file", file);
+		if (expenseId) {
+			formData.append("expenseId", expenseId);
+		}
+
+		// Call the Edge Function
+		const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+		const response = await fetch(`${supabaseUrl}/functions/v1/upload-receipt`, {
+			method: "POST",
+			headers: {
+				Authorization: `Bearer ${session.access_token}`,
+			},
+			body: formData,
+		});
+
+		const result = await response.json();
+
+		if (!response.ok) {
+			return {
+				success: false,
+				error: result.error || `HTTP ${response.status}`,
+			};
+		}
 
 		return {
 			success: true,
-			url: publicUrl,
+			url: result.url,
 		};
 	} catch (error) {
 		console.error("Upload exception:", error);
@@ -56,18 +64,36 @@ export async function uploadReceiptFile(
 }
 
 /**
- * Delete a file from Supabase storage
+ * Delete a file from Supabase storage via Edge Function
  */
-export async function deleteReceiptFile(filePath: string): Promise<boolean> {
+export async function deleteReceiptFile(fileUrl: string): Promise<boolean> {
 	try {
-		const { error } = await supabase.storage.from("receipts").remove([filePath]);
-
-		if (error) {
-			console.error("Delete error:", error);
+		// Get the current session token
+		const { data: { session } } = await supabase.auth.getSession();
+		if (!session?.access_token) {
+			console.error("Authentication required for file deletion");
 			return false;
 		}
 
-		return true;
+		// Call the Edge Function for deletion
+		const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+		const response = await fetch(`${supabaseUrl}/functions/v1/upload-receipt`, {
+			method: "DELETE",
+			headers: {
+				Authorization: `Bearer ${session.access_token}`,
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ fileUrl }),
+		});
+
+		const result = await response.json();
+
+		if (!response.ok) {
+			console.error("Delete error:", result.error);
+			return false;
+		}
+
+		return result.success;
 	} catch (error) {
 		console.error("Delete exception:", error);
 		return false;
