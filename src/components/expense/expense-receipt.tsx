@@ -1,12 +1,15 @@
-import { FileText, Upload, X } from "lucide-react";
+import { FileText, Upload, X, Eye, Download } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
-import { uploadReceiptFile, deleteReceiptFile, updateExpenseReceipts } from "@/lib/receipt-upload";
+import { uploadReceiptFile, deleteReceiptFile } from "@/utils/receipt-upload";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReceiptFile {
 	file: File;
@@ -15,6 +18,7 @@ interface ReceiptFile {
 	url?: string; // Supabase storage URL after upload
 	uploading?: boolean;
 	uploaded?: boolean;
+	uploadProgress?: number; // Upload progress percentage
 }
 
 interface ExpenseReceiptProps {
@@ -52,7 +56,7 @@ export function ExpenseReceipt({
 		// Mark file as uploading
 		const updatedReceipts = receipts.map(r => 
 			r.id === receiptFile.id 
-				? { ...r, uploading: true }
+				? { ...r, uploading: true, uploadProgress: 0 }
 				: r
 		);
 		onReceiptsChange(updatedReceipts);
@@ -60,11 +64,19 @@ export function ExpenseReceipt({
 		try {
 			const result = await uploadReceiptFile(
 				receiptFile.file,
-				profile.tenant_id,
-				expenseId
+				expenseId,
+				(progress) => {
+					// Update progress in real-time
+					const progressReceipts = receipts.map(r => 
+						r.id === receiptFile.id 
+							? { ...r, uploadProgress: progress }
+							: r
+					);
+					onReceiptsChange(progressReceipts);
+				}
 			);
 
-			if (result.success && result.url) {
+			if (result.url) {
 				// Mark file as uploaded and store URL
 				const uploadedReceipts = receipts.map(r => 
 					r.id === receiptFile.id 
@@ -72,7 +84,8 @@ export function ExpenseReceipt({
 							...r, 
 							uploading: false, 
 							uploaded: true, 
-							url: result.url 
+							url: result.url,
+							uploadProgress: 100
 						}
 						: r
 				);
@@ -87,33 +100,19 @@ export function ExpenseReceipt({
 					title: "Success",
 					description: "Receipt uploaded successfully",
 				});
-			} else {
-				// Mark upload as failed
-				const failedReceipts = receipts.map(r => 
-					r.id === receiptFile.id 
-						? { ...r, uploading: false }
-						: r
-				);
-				onReceiptsChange(failedReceipts);
-
-				toast({
-					title: "Upload failed",
-					description: result.error || "Failed to upload receipt",
-					variant: "destructive",
-				});
 			}
 		} catch (error) {
 			// Mark upload as failed
 			const failedReceipts = receipts.map(r => 
 				r.id === receiptFile.id 
-					? { ...r, uploading: false }
+					? { ...r, uploading: false, uploadProgress: 0 }
 					: r
 			);
 			onReceiptsChange(failedReceipts);
 
 			toast({
-				title: "Upload error",
-				description: "An unexpected error occurred during upload",
+				title: "Upload failed",
+				description: error instanceof Error ? error.message : "Failed to upload receipt",
 				variant: "destructive",
 			});
 		}
@@ -126,12 +125,23 @@ export function ExpenseReceipt({
 			.filter(r => r.uploaded && r.url)
 			.map(r => r.url!);
 
-		const result = await updateExpenseReceipts(expenseId, uploadedUrls);
-		
-		if (!result.success) {
+		try {
+			const { error } = await supabase
+				.from('expenses')
+				.update({ receipt_attachments: uploadedUrls })
+				.eq('id', expenseId);
+			
+			if (error) {
+				toast({
+					title: "Database error",
+					description: "Failed to update expense record",
+					variant: "destructive",
+				});
+			}
+		} catch (error) {
 			toast({
 				title: "Database error",
-				description: result.error || "Failed to update expense record",
+				description: "Failed to update expense record",
 				variant: "destructive",
 			});
 		}
@@ -302,22 +312,24 @@ export function ExpenseReceipt({
 						<p className="text-sm font-medium">
 							Attached Files ({receipts.length}/{maxFiles})
 						</p>
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+						<div className="grid grid-cols-1 gap-3">
 							{receipts.map((receipt) => (
 								<div
 									key={receipt.id}
-									className="flex items-center space-x-2 p-2 border rounded-lg"
+									className="flex items-center space-x-3 p-3 border rounded-lg bg-card"
 								>
 									{receipt.preview ? (
 										<img
 											src={receipt.preview}
 											alt={receipt.file.name}
-											className="w-10 h-10 object-cover rounded"
+											className="w-12 h-12 object-cover rounded border"
 										/>
 									) : (
-										<FileText className="w-10 h-10 text-muted-foreground" />
+										<div className="w-12 h-12 bg-muted rounded border flex items-center justify-center">
+											<FileText className="w-6 h-6 text-muted-foreground" />
+										</div>
 									)}
-									<div className="flex-1 min-w-0">
+									<div className="flex-1 min-w-0 space-y-1">
 										<p className="text-sm font-medium truncate">
 											{receipt.file.name}
 										</p>
@@ -326,26 +338,105 @@ export function ExpenseReceipt({
 												{(receipt.file.size / 1024 / 1024).toFixed(2)} MB
 											</p>
 											{receipt.uploading && (
-												<span className="text-xs text-blue-600">Uploading...</span>
+												<span className="text-xs text-blue-600">
+													Uploading... {receipt.uploadProgress || 0}%
+												</span>
 											)}
 											{receipt.uploaded && (
-												<span className="text-xs text-green-600">✓ Uploaded</span>
+												<span className="text-xs text-green-600 flex items-center">
+													✓ Uploaded
+												</span>
 											)}
 											{!receipt.uploading && !receipt.uploaded && autoUpload && (
 												<span className="text-xs text-yellow-600">Pending</span>
 											)}
 										</div>
+										{/* Progress Bar */}
+										{receipt.uploading && (
+											<Progress 
+												value={receipt.uploadProgress || 0} 
+												className="h-2 w-full"
+											/>
+										)}
 									</div>
-									<div className="flex items-center space-x-2">
+									<div className="flex items-center space-x-1">
+										{/* View Document Button */}
+										{receipt.uploaded && receipt.url && (
+											<Dialog>
+												<DialogTrigger asChild>
+													<Button
+														type="button"
+														variant="ghost"
+														size="sm"
+														title="View document"
+													>
+														<Eye className="w-4 h-4" />
+													</Button>
+												</DialogTrigger>
+												<DialogContent className="max-w-4xl max-h-[90vh]">
+													<DialogHeader>
+														<DialogTitle>{receipt.file.name}</DialogTitle>
+													</DialogHeader>
+													<div className="flex-1 overflow-auto">
+														{receipt.file.type === 'application/pdf' ? (
+															<iframe
+																src={receipt.url}
+																className="w-full h-[70vh] border rounded"
+																title={receipt.file.name}
+															/>
+														) : receipt.file.type.startsWith('image/') ? (
+															<img
+																src={receipt.url}
+																alt={receipt.file.name}
+																className="max-w-full h-auto mx-auto"
+															/>
+														) : (
+															<div className="p-8 text-center">
+																<FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+																<p className="text-muted-foreground">
+																	Preview not available for this file type
+																</p>
+																<Button asChild className="mt-4">
+																	<a href={receipt.url} download={receipt.file.name}>
+																		<Download className="w-4 h-4 mr-2" />
+																		Download File
+																	</a>
+																</Button>
+															</div>
+														)}
+													</div>
+												</DialogContent>
+											</Dialog>
+										)}
+										
+										{/* Download Button */}
+										{receipt.uploaded && receipt.url && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												asChild
+												title="Download"
+											>
+												<a href={receipt.url} download={receipt.file.name}>
+													<Download className="w-4 h-4" />
+												</a>
+											</Button>
+										)}
+										
+										{/* Remove Button */}
 										<Button
 											type="button"
 											variant="ghost"
 											size="sm"
 											onClick={() => handleRemoveReceipt(receipt.id)}
 											disabled={receipt.uploading}
+											title="Remove"
 										>
 											<X className="w-4 h-4" />
 										</Button>
+										
+										{/* Manual Upload Button */}
 										{!autoUpload && !receipt.uploaded && !receipt.uploading && (
 											<Button
 												type="button"
