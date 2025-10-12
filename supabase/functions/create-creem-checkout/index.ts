@@ -12,6 +12,9 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  console.log('Edge Function called with method:', req.method);
+  console.log('Headers:', Object.fromEntries(req.headers.entries()));
+
   if (req.method !== 'POST') {
     return new Response('Method not allowed', {
       status: 405,
@@ -20,10 +23,18 @@ serve(async (req) => {
   }
 
   try {
-    const { product_id, success_url, error_url, cancel_url, request_id, metadata, customer, units, discountCode } = await req.json();
+    const requestBody = await req.json();
+    console.log('Received request body:', JSON.stringify(requestBody, null, 2));
+
+    const { product_id, success_url, error_url, cancel_url, request_id, metadata, customer, units, discountCode } = requestBody;
+
+    console.log('Extracted product_id:', product_id);
+    console.log('Extracted success_url:', success_url);
+    console.log('Extracted customer:', customer);
 
     // Validate required parameters
     if (!product_id) {
+      console.log('product_id is missing or empty');
       return new Response(JSON.stringify({ error: 'product_id is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -41,22 +52,22 @@ serve(async (req) => {
     }
 
     // Prepare request body for Creem API
-    const requestBody: any = {
+    const creemRequestBody: any = {
       product_id,
     };
 
-    if (success_url) requestBody.success_url = success_url;
-    if (error_url) requestBody.error_url = error_url;
-    if (cancel_url) requestBody.cancel_url = cancel_url;
-    if (request_id) requestBody.request_id = request_id;
-    if (metadata) requestBody.metadata = metadata;
-    if (customer) requestBody.customer = customer;
-    if (units) requestBody.units = units;
-    if (discountCode) requestBody.discount_code = discountCode;
+    if (success_url) creemRequestBody.success_url = success_url;
+    if (error_url) creemRequestBody.error_url = error_url;
+    if (cancel_url) creemRequestBody.cancel_url = cancel_url;
+    if (request_id) creemRequestBody.request_id = request_id;
+    if (metadata) creemRequestBody.metadata = metadata;
+    if (customer) creemRequestBody.customer = customer;
+    if (units) creemRequestBody.units = units;
+    if (discountCode) creemRequestBody.discount_code = discountCode;
 
     console.log('Proxying request to Creem API:', {
       url: 'https://api.creem.io/v1/checkouts',
-      body: requestBody,
+      body: creemRequestBody,
     });
 
     // Make request to Creem API
@@ -67,7 +78,7 @@ serve(async (req) => {
         'x-api-key': CREEM_API_KEY,
         'accept': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(creemRequestBody),
     });
 
     const responseData = await response.json();
