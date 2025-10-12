@@ -1,15 +1,21 @@
-import { FileText, Upload, X, Eye, Download } from "lucide-react";
+import { Download, Eye, FileText, Upload, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
 import { useProfile } from "@/hooks/use-profile";
-import { uploadReceiptFile, deleteReceiptFile } from "@/utils/receipt-upload";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { deleteReceiptFile, uploadReceiptFile } from "@/utils/receipt-upload";
 
 interface ReceiptFile {
 	file: File;
@@ -54,10 +60,10 @@ export function ExpenseReceipt({
 		}
 
 		// Mark file as uploading
-		const updatedReceipts = receipts.map(r => 
-			r.id === receiptFile.id 
+		const updatedReceipts = receipts.map((r) =>
+			r.id === receiptFile.id
 				? { ...r, uploading: true, uploadProgress: 0 }
-				: r
+				: r,
 		);
 		onReceiptsChange(updatedReceipts);
 
@@ -67,27 +73,25 @@ export function ExpenseReceipt({
 				expenseId,
 				(progress) => {
 					// Update progress in real-time
-					const progressReceipts = receipts.map(r => 
-						r.id === receiptFile.id 
-							? { ...r, uploadProgress: progress }
-							: r
+					const progressReceipts = receipts.map((r) =>
+						r.id === receiptFile.id ? { ...r, uploadProgress: progress } : r,
 					);
 					onReceiptsChange(progressReceipts);
-				}
+				},
 			);
 
 			if (result.url) {
 				// Mark file as uploaded and store URL
-				const uploadedReceipts = receipts.map(r => 
-					r.id === receiptFile.id 
-						? { 
-							...r, 
-							uploading: false, 
-							uploaded: true, 
-							url: result.url,
-							uploadProgress: 100
-						}
-						: r
+				const uploadedReceipts = receipts.map((r) =>
+					r.id === receiptFile.id
+						? {
+								...r,
+								uploading: false,
+								uploaded: true,
+								url: result.url,
+								uploadProgress: 100,
+							}
+						: r,
 				);
 				onReceiptsChange(uploadedReceipts);
 
@@ -103,16 +107,17 @@ export function ExpenseReceipt({
 			}
 		} catch (error) {
 			// Mark upload as failed
-			const failedReceipts = receipts.map(r => 
-				r.id === receiptFile.id 
+			const failedReceipts = receipts.map((r) =>
+				r.id === receiptFile.id
 					? { ...r, uploading: false, uploadProgress: 0 }
-					: r
+					: r,
 			);
 			onReceiptsChange(failedReceipts);
 
 			toast({
 				title: "Upload failed",
-				description: error instanceof Error ? error.message : "Failed to upload receipt",
+				description:
+					error instanceof Error ? error.message : "Failed to upload receipt",
 				variant: "destructive",
 			});
 		}
@@ -122,15 +127,15 @@ export function ExpenseReceipt({
 		if (!expenseId) return;
 
 		const uploadedUrls = currentReceipts
-			.filter(r => r.uploaded && r.url)
-			.map(r => r.url!);
+			.filter((r) => r.uploaded && r.url)
+			.map((r) => r.url!);
 
 		try {
 			const { error } = await supabase
-				.from('expenses')
+				.from("expenses")
 				.update({ receipt_attachments: uploadedUrls })
-				.eq('id', expenseId);
-			
+				.eq("id", expenseId);
+
 			if (error) {
 				toast({
 					title: "Database error",
@@ -205,7 +210,7 @@ export function ExpenseReceipt({
 
 			// Auto-upload if enabled
 			if (autoUpload) {
-				newReceipts.forEach(receipt => {
+				newReceipts.forEach((receipt) => {
 					uploadFile(receipt);
 				});
 			}
@@ -213,13 +218,13 @@ export function ExpenseReceipt({
 	};
 
 	const handleRemoveReceipt = async (id: string) => {
-		const receiptToRemove = receipts.find(r => r.id === id);
+		const receiptToRemove = receipts.find((r) => r.id === id);
 		if (receiptToRemove?.url) {
 			// Delete from Supabase storage if it was uploaded
 			try {
 				await deleteReceiptFile(receiptToRemove.url);
 			} catch (error) {
-				console.error('Failed to delete file from storage:', error);
+				console.error("Failed to delete file from storage:", error);
 			}
 		}
 
@@ -347,14 +352,18 @@ export function ExpenseReceipt({
 													✓ Uploaded
 												</span>
 											)}
-											{!receipt.uploading && !receipt.uploaded && autoUpload && (
-												<span className="text-xs text-yellow-600">Pending</span>
-											)}
+											{!receipt.uploading &&
+												!receipt.uploaded &&
+												autoUpload && (
+													<span className="text-xs text-yellow-600">
+														Pending
+													</span>
+												)}
 										</div>
 										{/* Progress Bar */}
 										{receipt.uploading && (
-											<Progress 
-												value={receipt.uploadProgress || 0} 
+											<Progress
+												value={receipt.uploadProgress || 0}
 												className="h-2 w-full"
 											/>
 										)}
@@ -378,13 +387,13 @@ export function ExpenseReceipt({
 														<DialogTitle>{receipt.file.name}</DialogTitle>
 													</DialogHeader>
 													<div className="flex-1 overflow-auto">
-														{receipt.file.type === 'application/pdf' ? (
+														{receipt.file.type === "application/pdf" ? (
 															<iframe
 																src={receipt.url}
 																className="w-full h-[70vh] border rounded"
 																title={receipt.file.name}
 															/>
-														) : receipt.file.type.startsWith('image/') ? (
+														) : receipt.file.type.startsWith("image/") ? (
 															<img
 																src={receipt.url}
 																alt={receipt.file.name}
@@ -397,7 +406,10 @@ export function ExpenseReceipt({
 																	Preview not available for this file type
 																</p>
 																<Button asChild className="mt-4">
-																	<a href={receipt.url} download={receipt.file.name}>
+																	<a
+																		href={receipt.url}
+																		download={receipt.file.name}
+																	>
 																		<Download className="w-4 h-4 mr-2" />
 																		Download File
 																	</a>
@@ -408,7 +420,7 @@ export function ExpenseReceipt({
 												</DialogContent>
 											</Dialog>
 										)}
-										
+
 										{/* Download Button */}
 										{receipt.uploaded && receipt.url && (
 											<Button
@@ -423,7 +435,7 @@ export function ExpenseReceipt({
 												</a>
 											</Button>
 										)}
-										
+
 										{/* Remove Button */}
 										<Button
 											type="button"
@@ -435,7 +447,7 @@ export function ExpenseReceipt({
 										>
 											<X className="w-4 h-4" />
 										</Button>
-										
+
 										{/* Manual Upload Button */}
 										{!autoUpload && !receipt.uploaded && !receipt.uploading && (
 											<Button

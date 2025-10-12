@@ -1,5 +1,7 @@
+import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,8 +17,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { AccountSelector } from "./shared/AccountSelector";
 import { AmountInput } from "./shared/AmountInput";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -80,7 +80,8 @@ export function ImmediatePaymentForm({
 			t("income.addDialog.reservationInfo.reservation") +
 			` ${reservation.reservation_number}`,
 		account_id: accounts && accounts.length > 0 ? accounts[0].id : "",
-		income_type_id: incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
+		income_type_id:
+			incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
 		payment_method: "cash",
 	});
 
@@ -213,34 +214,40 @@ export function ImmediatePaymentForm({
 				</p>
 			</div>
 
-			{incomeTypes ? (<div>
-				<Label htmlFor="income_type_id">
-					{t("income.addDialog.form.incomeType")}
-				</Label>
-				<Select
-					value={formData.income_type_id || undefined}
-					onValueChange={(value) =>
-						setFormData((prev) => ({ ...prev, income_type_id: value }))
-					}
-				>
-					<SelectTrigger>
-						<SelectValue
-							placeholder={t("income.addDialog.form.incomeTypePlaceholder")}
-						/>
-					</SelectTrigger>
-					<SelectContent>
-						{incomeTypes && incomeTypes.map((type) => (
-							<SelectItem key={type.id} value={type.id}>
-								{type.type_name}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			</div>) : (
+			{incomeTypes ? (
+				<div>
+					<Label htmlFor="income_type_id">
+						{t("income.addDialog.form.incomeType")}
+					</Label>
+					<Select
+						value={formData.income_type_id || undefined}
+						onValueChange={(value) =>
+							setFormData((prev) => ({ ...prev, income_type_id: value }))
+						}
+					>
+						<SelectTrigger>
+							<SelectValue
+								placeholder={t("income.addDialog.form.incomeTypePlaceholder")}
+							/>
+						</SelectTrigger>
+						<SelectContent>
+							{incomeTypes &&
+								incomeTypes.map((type) => (
+									<SelectItem key={type.id} value={type.id}>
+										{type.type_name}
+									</SelectItem>
+								))}
+						</SelectContent>
+					</Select>
+				</div>
+			) : (
 				<Alert className="w-full">
 					<AlertTriangle className="size-4" />
 					<AlertDescription className="text-start">
-						Add income types in <a href="/settings" className="text-blue-600">settings.</a>
+						Add income types in{" "}
+						<a href="/settings" className="text-blue-600">
+							settings.
+						</a>
 					</AlertDescription>
 				</Alert>
 			)}

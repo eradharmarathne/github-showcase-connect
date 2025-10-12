@@ -177,12 +177,19 @@ export default function PaymentForm() {
 
 	useEffect(() => {
 		// Set default account when accounts are loaded and currency is set
-		if (accounts.length > 0 && formData.currency && (!formData.account_id || formData.account_id === "")) {
+		if (
+			accounts.length > 0 &&
+			formData.currency &&
+			(!formData.account_id || formData.account_id === "")
+		) {
 			const compatibleAccountsForCurrency = accounts.filter(
 				(account) => account.currency === formData.currency,
 			);
 			if (compatibleAccountsForCurrency.length > 0) {
-				setFormData((prev) => ({ ...prev, account_id: compatibleAccountsForCurrency[0].id }));
+				setFormData((prev) => ({
+					...prev,
+					account_id: compatibleAccountsForCurrency[0].id,
+				}));
 			}
 		}
 	}, [accounts, formData.currency, formData.account_id]);
@@ -211,7 +218,10 @@ export default function PaymentForm() {
 				...prev,
 				currency: newCurrency as any,
 				amount: newAmount,
-				account_id: compatibleAccountsForCurrency.length > 0 ? compatibleAccountsForCurrency[0].id : "", // Reset account selection
+				account_id:
+					compatibleAccountsForCurrency.length > 0
+						? compatibleAccountsForCurrency[0].id
+						: "", // Reset account selection
 			}));
 		} catch (error) {
 			console.error("Currency conversion failed:", error);
@@ -220,7 +230,7 @@ export default function PaymentForm() {
 				description: "Using original amount. Please adjust manually if needed.",
 				variant: "destructive",
 			});
-			
+
 			// Find compatible accounts for the new currency
 			const compatibleAccountsForCurrency = accounts.filter(
 				(account) => account.currency === newCurrency,
@@ -229,7 +239,10 @@ export default function PaymentForm() {
 			setFormData((prev) => ({
 				...prev,
 				currency: newCurrency as any,
-				account_id: compatibleAccountsForCurrency.length > 0 ? compatibleAccountsForCurrency[0].id : "",
+				account_id:
+					compatibleAccountsForCurrency.length > 0
+						? compatibleAccountsForCurrency[0].id
+						: "",
 			}));
 		}
 	};

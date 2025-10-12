@@ -25,7 +25,7 @@ export default function Dashboard() {
 				<DashboardHeader />
 
 				{/* Income & Expense Chart */}
-				<div className="w-full flex gap-4">
+				<div className="w-full flex flex-col sm:flex-row gap-4">
 					<IncomeExpenseChart
 						selectedLocation={selectedLocation}
 						selectedMonth={selectedMonth}

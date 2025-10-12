@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { redirect } from "react-router";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -15,7 +16,6 @@ import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/integrations/supabase/client";
 import { AddToBillForm } from "./AddToBillForm";
 import { ImmediatePaymentForm } from "./ImmediatePaymentForm";
-import { redirect } from "react-router";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -53,8 +53,6 @@ export function AddIncomeDialog({
 	const [baseCurrency, setBaseCurrency] = useState<string>("LKR");
 	const [displayedReservationAmount, setDisplayedReservationAmount] =
 		useState<number>(0);
-
-
 
 	useEffect(() => {
 		const fetchIncomeTypes = async () => {

@@ -16,7 +16,9 @@ export async function uploadReceiptFile(
 ): Promise<UploadResult> {
 	try {
 		// Get the current session token
-		const { data: { session } } = await supabase.auth.getSession();
+		const {
+			data: { session },
+		} = await supabase.auth.getSession();
 		if (!session?.access_token) {
 			return {
 				success: false,
@@ -69,7 +71,9 @@ export async function uploadReceiptFile(
 export async function deleteReceiptFile(fileUrl: string): Promise<boolean> {
 	try {
 		// Get the current session token
-		const { data: { session } } = await supabase.auth.getSession();
+		const {
+			data: { session },
+		} = await supabase.auth.getSession();
 		if (!session?.access_token) {
 			console.error("Authentication required for file deletion");
 			return false;

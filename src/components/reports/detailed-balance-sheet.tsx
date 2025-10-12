@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { type Currency } from "@/utils/currency";
+import { useAccountData } from "../../hooks/use-account-data";
 import {
 	type AccountDetail,
 	AccountDetailsList,
@@ -13,7 +14,6 @@ import {
 	TransactionHistoryCard,
 	type TransactionWithBalance,
 } from "./detailed/TransactionHistoryCard";
-import { useAccountData } from "../../hooks/use-account-data";
 
 export default function DetailedBalanceSheet() {
 	const [accounts, setAccounts] = useState<AccountDetail[]>([]);

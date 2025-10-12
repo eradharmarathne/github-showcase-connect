@@ -1,5 +1,7 @@
+import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,8 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AmountInput } from "./shared/AmountInput";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
 
 type Database = any;
 type Reservation = Database["public"]["Tables"]["reservations"]["Row"];
@@ -72,7 +72,8 @@ export function AddToBillForm({
 		note:
 			t("income.addDialog.reservationInfo.reservation") +
 			` ${reservation.reservation_number}`,
-		income_type_id: incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
+		income_type_id:
+			incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
 	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -150,7 +151,10 @@ export function AddToBillForm({
 					<Alert className="w-full">
 						<AlertTriangle className="size-4" />
 						<AlertDescription className="text-start">
-							Add income types in <a href="/settings" className="text-blue-600">settings.</a>
+							Add income types in{" "}
+							<a href="/settings" className="text-blue-600">
+								settings.
+							</a>
 						</AlertDescription>
 					</Alert>
 				) : (
@@ -166,13 +170,15 @@ export function AddToBillForm({
 							/>
 						</SelectTrigger>
 						<SelectContent>
-							{incomeTypes && incomeTypes.map((type) => (
-								<SelectItem key={type.id} value={type.id}>
-									{type.type_name}
-								</SelectItem>
-							))}
+							{incomeTypes &&
+								incomeTypes.map((type) => (
+									<SelectItem key={type.id} value={type.id}>
+										{type.type_name}
+									</SelectItem>
+								))}
 						</SelectContent>
-					</Select>)}
+					</Select>
+				)}
 			</div>
 
 			<AmountInput

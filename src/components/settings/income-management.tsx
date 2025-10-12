@@ -14,10 +14,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useProfile } from "@/hooks/use-profile";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { IncomeType } from "./types";
-import { useProfile } from "@/hooks/use-profile";
 
 export function IncomeManagement() {
 	const { profile } = useProfile();
@@ -63,8 +63,10 @@ export function IncomeManagement() {
 
 		const { error } = await supabase
 			.from("income_types")
-			.insert([{ type_name: newIncomeType.trim(), tenant_id: profile?.tenant_id }]);
-			
+			.insert([
+				{ type_name: newIncomeType.trim(), tenant_id: profile?.tenant_id },
+			]);
+
 		if (error) {
 			console.error("Error adding income type:", error);
 			toast({

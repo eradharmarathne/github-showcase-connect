@@ -224,12 +224,19 @@ export function PaymentDialog({
 
 	// Set default account when accounts are loaded
 	useEffect(() => {
-		if (accounts.length > 0 && formData.currency && (!formData.account_id || formData.account_id === "")) {
+		if (
+			accounts.length > 0 &&
+			formData.currency &&
+			(!formData.account_id || formData.account_id === "")
+		) {
 			const compatibleAccountsForCurrency = accounts.filter(
 				(account) => account.currency === formData.currency,
 			);
 			if (compatibleAccountsForCurrency.length > 0) {
-				setFormData((prev) => ({ ...prev, account_id: compatibleAccountsForCurrency[0].id }));
+				setFormData((prev) => ({
+					...prev,
+					account_id: compatibleAccountsForCurrency[0].id,
+				}));
 			}
 		}
 	}, [accounts, formData.currency, formData.account_id]);

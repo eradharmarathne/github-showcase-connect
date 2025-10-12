@@ -75,7 +75,10 @@ export async function uploadReceiptFile(
 			});
 
 			// Configure and send request
-			xhr.open("POST", `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-receipt`);
+			xhr.open(
+				"POST",
+				`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-receipt`,
+			);
 			xhr.setRequestHeader("Authorization", `Bearer ${session.access_token}`);
 			xhr.timeout = 60000; // 60 seconds timeout
 			xhr.send(formData);

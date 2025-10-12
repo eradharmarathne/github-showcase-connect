@@ -17,7 +17,12 @@ export function UpcomingBookingsSkeleton({
 					<Skeleton className="h-4 sm:h-5 w-28 sm:w-36" />
 				</div>
 				{hasCalendarPermission && (
-					<Button variant="outline" size="sm" disabled className="hidden sm:flex">
+					<Button
+						variant="outline"
+						size="sm"
+						disabled
+						className="hidden sm:flex"
+					>
 						<Eye className="size-4" />
 						<Skeleton className="h-4 w-16" />
 					</Button>

@@ -18,6 +18,7 @@ import { ReservationsMobileCards } from "@/components/reservation/reservations-m
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useLocationContext } from "@/context/location-context";
+import { useAccountData } from "@/hooks/use-account-data";
 import { useReservationFinancials } from "@/hooks/use-reservation-financials";
 import {
 	useIncomeData,
@@ -25,7 +26,6 @@ import {
 } from "@/hooks/use-reservations-data";
 import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
-import { useAccountData } from "@/hooks/use-account-data";
 
 type Currency = Database["public"]["Enums"]["currency_type"];
 
@@ -259,17 +259,18 @@ export default function Reservations() {
 						<td style="padding: 8px 0; text-align: center;">${reservation.selectedCurrency || reservation.currency} ${reservation.room_rate}</td>
 						<td style="padding: 8px 0; text-align: right; font-weight: bold;">${reservation.selectedCurrency || reservation.currency} ${reservation.convertedAmounts?.roomAmount?.toFixed(2) || reservation.total_amount || reservation.room_rate * reservation.nights}</td>
 					</tr>
-					${reservation.convertedAmounts?.expensesAmount &&
-				reservation.convertedAmounts.expensesAmount > 0
-				? `
+					${
+						reservation.convertedAmounts?.expensesAmount &&
+						reservation.convertedAmounts.expensesAmount > 0
+							? `
 					<tr style="background-color: #f9f9f9;">
 						<td style="padding: 8px 0;">Additional Expenses & Services</td>
 						<td style="padding: 8px 0; text-align: center;">-</td>
 						<td style="padding: 8px 0; text-align: right; font-weight: bold;">${reservation.selectedCurrency || reservation.currency} ${reservation.convertedAmounts.expensesAmount.toFixed(2)}</td>
 					</tr>
 					`
-				: ""
-			}
+							: ""
+					}
 					<tr style="border-top: 1px solid #ccc;">
 						<td style="padding: 8px 0; font-weight: bold;">SUBTOTAL</td>
 						<td style="padding: 8px 0;"></td>
@@ -287,8 +288,9 @@ export default function Reservations() {
 					</tr>
 				</table>
 
-				${reservation.special_requests
-				? `
+				${
+					reservation.special_requests
+						? `
 				<!-- Special Requests -->
 				<table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
 					<tr style="border-bottom: 1px solid #000;">
@@ -299,8 +301,8 @@ export default function Reservations() {
 					</tr>
 				</table>
 				`
-				: ""
-			}
+						: ""
+				}
 
 				<!-- Footer -->
 				<div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; text-align: center; font-size: 10px;">
