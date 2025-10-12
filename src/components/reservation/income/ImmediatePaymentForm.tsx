@@ -213,29 +213,6 @@ export function ImmediatePaymentForm({
 				</p>
 			</div>
 
-			<AmountInput
-				amount={formData.amount}
-				currency={formData.currency}
-				onAmountChange={handleAmountChange}
-				onCurrencyChange={handleCurrencyChange}
-				tenantId={tenantId}
-				locationId={locationId}
-				baseAmount={baseAmount}
-				baseCurrency={baseCurrency}
-				onDisplayedReservationAmountChange={onDisplayedReservationAmountChange}
-			/>
-
-			<div>
-				<Label htmlFor="note">{t("income.addDialog.form.note")}</Label>
-				<Textarea
-					id="note"
-					value={formData.note}
-					onChange={(e) =>
-						setFormData((prev) => ({ ...prev, note: e.target.value }))
-					}
-					placeholder={t("income.addDialog.form.notePlaceholder")}
-				/>
-			</div>
 			{incomeTypes ? (<div>
 				<Label htmlFor="income_type_id">
 					{t("income.addDialog.form.incomeType")}
@@ -267,6 +244,30 @@ export function ImmediatePaymentForm({
 					</AlertDescription>
 				</Alert>
 			)}
+
+			<AmountInput
+				amount={formData.amount}
+				currency={formData.currency}
+				onAmountChange={handleAmountChange}
+				onCurrencyChange={handleCurrencyChange}
+				tenantId={tenantId}
+				locationId={locationId}
+				baseAmount={baseAmount}
+				baseCurrency={baseCurrency}
+				onDisplayedReservationAmountChange={onDisplayedReservationAmountChange}
+			/>
+
+			<div>
+				<Label htmlFor="note">{t("income.addDialog.form.note")}</Label>
+				<Textarea
+					id="note"
+					value={formData.note}
+					onChange={(e) =>
+						setFormData((prev) => ({ ...prev, note: e.target.value }))
+					}
+					placeholder={t("income.addDialog.form.notePlaceholder")}
+				/>
+			</div>
 
 			<AccountSelector
 				accounts={accounts}

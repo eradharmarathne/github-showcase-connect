@@ -142,30 +142,6 @@ export function AddToBillForm({
 				</p>
 			</div>
 
-			<AmountInput
-				amount={formData.amount}
-				currency={formData.currency}
-				onAmountChange={handleAmountChange}
-				onCurrencyChange={handleCurrencyChange}
-				tenantId={tenantId}
-				locationId={locationId}
-				baseAmount={baseAmount}
-				baseCurrency={baseCurrency}
-				onDisplayedReservationAmountChange={onDisplayedReservationAmountChange}
-			/>
-
-			<div>
-				<Label htmlFor="note">{t("income.addDialog.form.note")}</Label>
-				<Textarea
-					id="note"
-					value={formData.note}
-					onChange={(e) =>
-						setFormData((prev) => ({ ...prev, note: e.target.value }))
-					}
-					placeholder={t("income.addDialog.form.notePlaceholder")}
-				/>
-			</div>
-
 			<div>
 				<Label htmlFor="income_type_id">
 					{t("income.addDialog.form.incomeType")}
@@ -197,6 +173,30 @@ export function AddToBillForm({
 							))}
 						</SelectContent>
 					</Select>)}
+			</div>
+
+			<AmountInput
+				amount={formData.amount}
+				currency={formData.currency}
+				onAmountChange={handleAmountChange}
+				onCurrencyChange={handleCurrencyChange}
+				tenantId={tenantId}
+				locationId={locationId}
+				baseAmount={baseAmount}
+				baseCurrency={baseCurrency}
+				onDisplayedReservationAmountChange={onDisplayedReservationAmountChange}
+			/>
+
+			<div>
+				<Label htmlFor="note">{t("income.addDialog.form.note")}</Label>
+				<Textarea
+					id="note"
+					value={formData.note}
+					onChange={(e) =>
+						setFormData((prev) => ({ ...prev, note: e.target.value }))
+					}
+					placeholder={t("income.addDialog.form.notePlaceholder")}
+				/>
 			</div>
 
 			<div className="p-4 bg-blue-50 rounded-md">

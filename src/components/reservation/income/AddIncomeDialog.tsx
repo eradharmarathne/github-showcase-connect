@@ -106,7 +106,7 @@ export function AddIncomeDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="max-w-2xl">
+			<DialogContent className="max-w-2xl sm:max-w-4xl lg:max-w-5xl overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>{t("income.addDialog.title")}</DialogTitle>
 					<DialogDescription>
