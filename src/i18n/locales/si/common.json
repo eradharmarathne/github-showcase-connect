@@ -42,42 +42,42 @@
     "title": "දිනදර්ශනය",
     "subtitle": "කාමර මූලික දිනදර්ශන දර්ශනය සහ බාහිර වෙන්කරණ",
     "viewMode": {
-      "timeline": "Timeline",
-      "list": "List",
-      "label": "Mode: {{mode}}"
+      "timeline": "කාලරේඛාව",
+      "list": "ලැයිස්තුව",
+      "label": "ප්‍රදර්ශන මාදිලිය: {{mode}}"
     },
     "timeline": {
-      "title": "Calendar Timeline",
-      "weekOverview": "Week Overview"
+      "title": "කාලරේඛා දිනදර්ශනය",
+      "weekOverview": "සතියේ සාරාංශය"
     },
     "roomInfo": {
-      "roomVilla": "Room / Villa",
-      "typeLocation": "Type & Location",
-      "external": "External"
+      "roomVilla": "කාමරය / විලා",
+      "typeLocation": "වර්ගය සහ ස්ථානය",
+      "external": "බාහිර"
     },
     "booking": {
-      "addBooking": "Add booking",
-      "guestsLabel": "Guests",
-      "guestsCount": "{{count}} guests",
-      "bookingDetails": "Booking Details #{{id}}",
-      "guestInformation": "Guest Information",
-      "guestName": "Guest Name",
-      "email": "Email",
-      "phone": "Phone",
-      "adultsLabel": "{{count}} adults",
-      "childrenLabel": "{{count}} children",
-      "notAvailable": "Not available",
-      "unknownGuest": "Unknown Guest"
+      "addBooking": "වෙන්කරණය එක් කරන්න",
+      "guestsLabel": "අමුත්තන්",
+      "guestsCount": "අමුත්තන් {{count}}",
+      "bookingDetails": "වෙන්කරණ විස්තර #{{id}}",
+      "guestInformation": "අමුත්තාගේ තොරතුරු",
+      "guestName": "අමුත්තාගේ නම",
+      "email": "ඊමේල්",
+      "phone": "දුරකථන",
+      "adultsLabel": "වැඩිහිටියන් {{count}}",
+      "childrenLabel": "ළමයින් {{count}}",
+      "notAvailable": "ලබා ගත නොහැක",
+      "unknownGuest": "නොදන්නා අමුත්තා"
     },
     "stay": {
-      "stayInformation": "Stay Information",
-      "checkIn": "Check-in",
-      "checkOut": "Check-out",
-      "nights": "Nights",
-      "bookingDate": "Booking Date"
+      "stayInformation": "නවාතැන් තොරතුරු",
+      "checkIn": "පැමිණීම",
+      "checkOut": "පිටවීම",
+      "nights": "රාත්‍රී",
+      "bookingDate": "වෙන්කරණ දිනය"
     },
     "property": {
-      "propertyInformation": "Property Information",
+      "propertyInformation": "දේපළ තොරතුරු",
       "location": "Location",
       "room": "Room",
       "unknownLocation": "Unknown Location",
