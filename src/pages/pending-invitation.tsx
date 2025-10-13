@@ -12,110 +12,55 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
+import { useInvitations } from "@/hooks/use-invitations";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
-
-interface PendingInvitation {
-	id: string;
-	tenant_id: string;
-	email: string;
-	role: string;
-	permissions: Record<string, boolean>;
-	location_id: string | null;
-	invited_by: string | null;
-	created_at: string;
-	expires_at: string;
-	tenant_name?: string;
-	location_name?: string;
-}
 
 export default function PendingInvitation() {
 	const { user, profile, refreshProfile, refreshTenant } = useAuth();
 	const navigate = useNavigate();
-	const [invitations, setInvitations] = useState<PendingInvitation[]>([]);
-	const [loading, setLoading] = useState(true);
+	const { invitations, loading, error, refetch } = useInvitations();
 	const [accepting, setAccepting] = useState<string | null>(null);
-	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (!user || !profile) return;
+		console.log("🎫 [PENDING-INVITATION] Component mounted/updated:", {
+			hasUser: !!user,
+			hasProfile: !!profile,
+			profileTenantId: profile?.tenant_id,
+			invitationsCount: invitations.length,
+		});
+
+		if (!user || !profile) {
+			console.log("⏳ [PENDING-INVITATION] Waiting for user and profile...");
+			return;
+		}
 
 		// If user already has tenant_id, redirect to dashboard
 		if (profile.tenant_id) {
+			console.log(
+				"✅ [PENDING-INVITATION] User already has tenant_id, redirecting to dashboard",
+			);
 			navigate("/dashboard", { replace: true });
 			return;
 		}
 
-		fetchPendingInvitations();
-	}, [user, profile, navigate]);
-
-	const fetchPendingInvitations = async () => {
-		if (!user?.email) return;
-
-		try {
-			setLoading(true);
-			setError(null);
-
-			// Fetch pending invitations for this user's email
-			const { data, error: fetchError } = await supabase
-				.from("user_invitations")
-				.select(`
-					id,
-					tenant_id,
-					email,
-					role,
-					permissions,
-					location_id,
-					invited_by,
-					created_at,
-					expires_at,
-					tenants!inner(name),
-					locations(name)
-				`)
-				.eq("email", user.email)
-				.is("accepted_at", null)
-				.gt("expires_at", new Date().toISOString())
-				.order("created_at", { ascending: false });
-
-			if (fetchError) {
-				console.error("Error fetching invitations:", fetchError);
-				setError("Failed to load invitations. Please try again.");
-				return;
-			}
-
-			// Transform the data
-			const transformedData: PendingInvitation[] = (data || []).map((inv: any) => ({
-				id: inv.id,
-				tenant_id: inv.tenant_id,
-				email: inv.email,
-				role: inv.role,
-				permissions: inv.permissions || {},
-				location_id: inv.location_id,
-				invited_by: inv.invited_by,
-				created_at: inv.created_at,
-				expires_at: inv.expires_at,
-				tenant_name: inv.tenants?.name,
-				location_name: inv.locations?.name,
-			}));
-
-			setInvitations(transformedData);
-
-			// If no invitations found, show appropriate message
-			if (transformedData.length === 0) {
-				setError(
-					"No pending invitations found. Please contact your organization administrator.",
-				);
-			}
-		} catch (err) {
-			console.error("Exception fetching invitations:", err);
-			setError("An unexpected error occurred. Please try again.");
-		} finally {
-			setLoading(false);
+		// If no invitations and not loading, redirect to onboarding
+		if (!loading && invitations.length === 0) {
+			console.log(
+				"🚀 [PENDING-INVITATION] No invitations found, redirecting to onboarding",
+			);
+			navigate("/onboarding", { replace: true });
 		}
-	};
+	}, [user, profile, navigate, invitations.length, loading]);
 
-	const acceptInvitation = async (invitation: PendingInvitation) => {
+	const acceptInvitation = async (invitation: typeof invitations[0]) => {
 		if (!user || !profile) return;
+
+		console.log("🎯 [PENDING-INVITATION] Accepting invitation:", {
+			invitationId: invitation.id,
+			tenantId: invitation.tenant_id,
+			tenantName: invitation.tenant_name,
+		});
 
 		setAccepting(invitation.id);
 		setError(null);
@@ -185,18 +130,21 @@ export default function PendingInvitation() {
 				// Don't fail if marking accepted fails - user is already added
 			}
 
+			console.log("🔄 [PENDING-INVITATION] Refreshing profile and tenant data...");
 			// Refresh profile and tenant data
 			await refreshProfile();
 			await refreshTenant();
 
+			console.log("🎉 [PENDING-INVITATION] Invitation accepted successfully!");
 			toast.success(`Successfully joined ${invitation.tenant_name}!`);
 
 			// Redirect to dashboard
 			setTimeout(() => {
+				console.log("➡️ [PENDING-INVITATION] Redirecting to dashboard...");
 				navigate("/dashboard", { replace: true });
 			}, 1000);
 		} catch (err) {
-			console.error("Exception accepting invitation:", err);
+			console.error("❌ [PENDING-INVITATION] Exception accepting invitation:", err);
 			toast.error("An unexpected error occurred. Please try again.");
 		} finally {
 			setAccepting(null);
@@ -238,30 +186,6 @@ export default function PendingInvitation() {
 							<AlertTitle>Error</AlertTitle>
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
-					)}
-
-					{invitations.length === 0 && !error && (
-						<Alert>
-							<AlertCircle className="h-4 w-4" />
-							<AlertTitle>No Pending Invitations</AlertTitle>
-							<AlertDescription>
-								You don't have any pending invitations at the moment. If you believe this is
-								an error, please contact your organization administrator. Alternatively, you can
-								create your own organization.
-							</AlertDescription>
-						</Alert>
-					)}
-
-					{invitations.length === 0 && !error && (
-						<div className="flex justify-center pt-4">
-							<Button
-								onClick={() => navigate("/onboarding")}
-								disabled={accepting !== null}
-								variant="default"
-							>
-								Create New Organization
-							</Button>
-						</div>
 					)}
 
 					{invitations.map((invitation) => (
@@ -309,7 +233,7 @@ export default function PendingInvitation() {
 					<div className="flex justify-between items-center pt-4">
 						<Button
 							variant="outline"
-							onClick={fetchPendingInvitations}
+							onClick={refetch}
 							disabled={loading || accepting !== null}
 						>
 							<RefreshCw className="mr-2 h-4 w-4" />

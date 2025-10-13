@@ -47,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [tenantLoading, setTenantLoading] = useState(false);
 
 	const fetchProfile = async (userId: string) => {
+		console.log("🔍 [AUTH] Fetching profile for user:", userId);
 		setProfileLoading(true);
 		try {
 			const { data, error } = await supabase
@@ -56,14 +57,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				.single();
 
 			if (error) {
-				console.error("Error fetching profile:", error);
+				console.error("❌ [AUTH] Error fetching profile:", error);
 				return null;
 			}
 
+			console.log("✅ [AUTH] Profile fetched:", {
+				id: data.id,
+				email: data.email,
+				tenant_id: data.tenant_id,
+				tenant_role: data.tenant_role,
+			});
 			setProfile(data);
 			return data;
 		} catch (error) {
-			console.error("Exception fetching profile:", error);
+			console.error("❌ [AUTH] Exception fetching profile:", error);
 			return null;
 		} finally {
 			setProfileLoading(false);
@@ -71,6 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const fetchTenant = async (tenantId: string) => {
+		console.log("🏢 [AUTH] Fetching tenant:", tenantId);
 		setTenantLoading(true);
 		try {
 			const { data, error } = await supabase
@@ -80,14 +88,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				.single();
 
 			if (error) {
-				console.error("Error fetching tenant:", error);
+				console.error("❌ [AUTH] Error fetching tenant:", error);
 				return null;
 			}
 
+			console.log("✅ [AUTH] Tenant fetched:", {
+				id: data.id,
+				name: data.name,
+				onboarding_completed: data.onboarding_completed,
+			});
 			setTenant(data);
 			return data;
 		} catch (error) {
-			console.error("Exception fetching tenant:", error);
+			console.error("❌ [AUTH] Exception fetching tenant:", error);
 			return null;
 		} finally {
 			setTenantLoading(false);
@@ -148,52 +161,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				}
 
 				if (event === "SIGNED_IN" && session?.user) {
+					console.log("🔐 [AUTH] SIGNED_IN event for:", session.user.email);
 					// Only create/update profile if we don't already have one for this user
 					if (!profile || profile.id !== session.user.id) {
 						// Small delay to ensure the auth state is fully set
 						setTimeout(async () => {
 							try {
 								console.log(
-									"Creating/updating profile for user:",
+									"📝 [AUTH] Checking profile for user:",
 									session.user.email,
 								);
 
-								// Create or update profile
-								const profileData = {
-									id: session.user.id,
-									email: session.user.email!,
-									name:
-										session.user.user_metadata?.name ||
-										session.user.user_metadata?.full_name ||
-										session.user.email!,
-								};
+								// First, try to fetch the existing profile (trigger might have created it)
+								let profileData = await fetchProfile(session.user.id);
 
-								// Create profile - use upsert to handle existing profiles gracefully
-								const { error: profileError } = await supabase
-									.from("profiles")
-									.upsert(profileData, {
-										onConflict: "id",
-									});
+								// If profile doesn't exist, create it (fallback)
+								if (!profileData) {
+									console.log("🆕 [AUTH] Profile not found, creating new profile...");
 
-								if (profileError) {
-									console.error(
-										"Error creating/updating profile:",
-										profileError,
-									);
+									const newProfileData = {
+										id: session.user.id,
+										email: session.user.email!,
+										name:
+											session.user.user_metadata?.name ||
+											session.user.user_metadata?.full_name ||
+											session.user.email!.split("@")[0],
+									};
+
+									// Insert profile (don't use upsert to avoid conflicts)
+									const { error: profileError } = await supabase
+										.from("profiles")
+										.insert(newProfileData);
+
+									if (profileError) {
+										console.error(
+											"❌ [AUTH] Error creating profile:",
+											profileError,
+										);
+										// If error is duplicate, that's okay - fetch it instead
+										if (profileError.code === "23505") {
+											console.log(
+												"ℹ️ [AUTH] Profile already exists, fetching...",
+											);
+											profileData = await fetchProfile(session.user.id);
+										}
+									} else {
+										console.log(
+											"✅ [AUTH] Profile created successfully for:",
+											session.user.email,
+										);
+										// Fetch the newly created profile
+										profileData = await fetchProfile(session.user.id);
+									}
 								} else {
 									console.log(
-										"Profile created/updated successfully for:",
+										"✅ [AUTH] Profile already exists for:",
 										session.user.email,
 									);
+								}
 
-									// Fetch the profile data after creation/update
-									const profileData = await fetchProfile(session.user.id);
-
-									// If the profile has a tenant_id, fetch tenant and subscription data
-									if (profileData?.tenant_id) {
-										await fetchTenant(profileData.tenant_id);
-										await fetchSubscription(profileData.tenant_id);
-									}
+								// If the profile has a tenant_id, fetch tenant and subscription data
+								if (profileData?.tenant_id) {
+									console.log(
+										"🔄 [AUTH] Profile has tenant_id, fetching tenant data...",
+									);
+									await fetchTenant(profileData.tenant_id);
+									await fetchSubscription(profileData.tenant_id);
+								} else {
+									console.warn(
+										"⚠️ [AUTH] Profile has NO tenant_id - user will be redirected to pending-invitation",
+									);
 								}
 							} catch (err) {
 								console.error("Exception during profile creation:", err);

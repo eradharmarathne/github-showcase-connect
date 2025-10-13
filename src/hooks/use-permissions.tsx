@@ -12,12 +12,17 @@ export const usePermissions = () => {
 
 	useEffect(() => {
 		const fetchPermissions = async () => {
+			// If no user or no tenant_id, set loading to false immediately
 			if (!user || !profile?.tenant_id) {
+				console.log("⚠️ [PERMISSIONS] No user or tenant_id, skipping permissions fetch");
+				setPermissions(null);
+				setLoading(false);
 				return;
 			}
 
 			try {
 				setLoading(true);
+				console.log("🔍 [PERMISSIONS] Fetching permissions for user:", user.id);
 				const { data, error } = await supabase
 					.from("user_permissions")
 					.select("*")
@@ -27,13 +32,14 @@ export const usePermissions = () => {
 
 				if (error && error.code !== "PGRST116") {
 					// PGRST116 = no rows returned
-					console.error("Error fetching permissions:", error);
+					console.error("❌ [PERMISSIONS] Error fetching permissions:", error);
 					setPermissions(null);
 				} else {
+					console.log("✅ [PERMISSIONS] Permissions fetched:", data);
 					setPermissions(data || null);
 				}
 			} catch (error) {
-				console.error("Exception fetching permissions:", error);
+				console.error("❌ [PERMISSIONS] Exception fetching permissions:", error);
 				setPermissions(null);
 			} finally {
 				setLoading(false);

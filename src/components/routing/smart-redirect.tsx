@@ -1,12 +1,26 @@
 import { Navigate } from "react-router";
 import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
+import { useInvitations } from "@/hooks/use-invitations";
 import { usePermissions } from "@/hooks/use-permissions";
 
 export const SmartRedirect = () => {
 	const { tenant, tenantLoading, profile, profileLoading, user } = useAuth();
 	const { hasAnyPermission, loading } = usePermissions();
-	const { locations, loading: locationsLoading } = useLocationContext();
+	const { loading: locationsLoading } = useLocationContext();
+	const { hasInvitations, loading: invitationsLoading } = useInvitations();
+
+	console.log("🔀 [REDIRECT] SmartRedirect rendering:", {
+		loading,
+		locationsLoading,
+		tenantLoading,
+		profileLoading,
+		invitationsLoading,
+		hasUser: !!user,
+		hasProfile: !!profile,
+		hasTenant: !!tenant,
+		hasInvitations,
+	});
 
 	// Wait for all loading states to complete
 	// Also wait for profile to be fully loaded when user exists
@@ -15,26 +29,55 @@ export const SmartRedirect = () => {
 		locationsLoading ||
 		tenantLoading ||
 		profileLoading ||
+		invitationsLoading ||
 		(user && !profile)
 	) {
+		console.log("⏳ [REDIRECT] Still loading, waiting...");
 		return null;
 	}
 
-	console.log({ profile, tenant, user });
+	console.log("📊 [REDIRECT] All data loaded:", {
+		profile: profile
+			? {
+					id: profile.id,
+					email: profile.email,
+					tenant_id: profile.tenant_id,
+					tenant_role: profile.tenant_role,
+				}
+			: null,
+		tenant: tenant
+			? {
+					id: tenant.id,
+					name: tenant.name,
+					onboarding_completed: tenant.onboarding_completed,
+				}
+			: null,
+		user: user ? { id: user.id, email: user.email } : null,
+		hasInvitations,
+	});
 
-	// If user doesn't have a tenant_id in their profile, check for pending invitations first
+	// If user doesn't have a tenant_id in their profile, check for pending invitations
 	if (!profile?.tenant_id || !tenant) {
-		// Redirect to pending invitations page - they might be an invited user
-		return <Navigate to="/pending-invitation" replace />;
+		if (hasInvitations) {
+			console.log("🎫 [REDIRECT] No tenant_id but has invitations - redirecting to /pending-invitation");
+			return <Navigate to="/pending-invitation" replace />;
+		}
+
+		console.log("🚀 [REDIRECT] No tenant_id and no invitations - redirecting to /onboarding");
+		return <Navigate to="/onboarding" replace />;
 	}
 
 	// If tenant hasn't completed onboarding, redirect to onboarding
 	if (!tenant.onboarding_completed) {
+		console.log("🚨 [REDIRECT] Tenant onboarding not completed - redirecting to /onboarding");
 		return <Navigate to="/onboarding" replace />;
 	}
 
+	console.log("✅ [REDIRECT] Tenant valid, checking permissions...");
+
 	// Redirect to the first page the user has access to
 	if (hasAnyPermission(["access_dashboard"])) {
+		console.log("➡️ [REDIRECT] Redirecting to /dashboard");
 		return <Navigate to="/dashboard" replace />;
 	} else if (hasAnyPermission(["access_calendar"])) {
 		return <Navigate to="/calendar" replace />;

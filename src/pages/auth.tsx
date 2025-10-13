@@ -101,8 +101,9 @@ export default function Auth() {
 	// Handle redirect after successful authentication
 	useEffect(() => {
 		if (user && !submitting) {
+			console.log("✅ [AUTH-PAGE] User authenticated, redirecting to smart-redirect");
 			// User is authenticated, redirect to smart redirect for proper routing
-			navigate("/dashboard", { replace: true });
+			navigate("/smart-redirect", { replace: true });
 		}
 	}, [user, navigate, submitting]);
 

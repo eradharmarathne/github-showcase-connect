@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import {
 	CompanyInfoStep,
 	CompletionStep,
@@ -15,8 +15,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { usePaymentStatus } from "@/hooks/use-payment-status";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "@/lib/creem";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
 
 export default function Onboarding() {
 	const [currentStep, setCurrentStep] = useState(1);
@@ -25,6 +28,8 @@ export default function Onboarding() {
 	const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 	const [processingPayment, setProcessingPayment] = useState(false);
 	const [hasExistingTenant, setHasExistingTenant] = useState(false);
+	const [pendingTenantId, setPendingTenantId] = useState<string | null>(null);
+	const [awaitingPayment, setAwaitingPayment] = useState(false);
 	const [formData, setFormData] = useState<OnboardingFormData>({
 		// Company Info
 		companyName: "",
@@ -51,6 +56,11 @@ export default function Onboarding() {
 	const navigate = useNavigate();
 	const { toast } = useToast();
 	const { user, profile, tenant } = useAuth();
+	const [searchParams] = useSearchParams();
+	const { status: paymentStatus, isVerified, isFailed } = usePaymentStatus({
+		tenantId: pendingTenantId,
+		enabled: awaitingPayment,
+	});
 
 	useEffect(() => {
 		if (!user) {
@@ -101,6 +111,38 @@ export default function Onboarding() {
 			navigate("/dashboard");
 		}
 	}, [hasExistingTenant, navigate]);
+
+	// Handle payment verification
+	useEffect(() => {
+		if (isVerified && pendingTenantId) {
+			console.log("✅ [ONBOARDING] Payment verified, completing onboarding...");
+			toast({
+				title: "Payment Verified! 🎉",
+				description: "Your payment has been confirmed. Setting up your account...",
+			});
+
+			// Mark tenant as onboarding complete
+			supabase
+				.from("tenants")
+				.update({ onboarding_completed: true })
+				.eq("id", pendingTenantId)
+				.then(() => {
+					setTimeout(() => {
+						navigate("/dashboard", { replace: true });
+					}, 2000);
+				});
+		} else if (isFailed && pendingTenantId) {
+			console.error("❌ [ONBOARDING] Payment verification failed or timed out");
+			toast({
+				title: "Payment Verification Failed",
+				description:
+					"We couldn't verify your payment. Please try again or contact support.",
+				variant: "destructive",
+			});
+			setAwaitingPayment(false);
+			setPendingTenantId(null);
+		}
+	}, [isVerified, isFailed, pendingTenantId, navigate, toast]);
 
 	// Early return for users with existing tenant - don't render onboarding UI
 	if (hasExistingTenant) {
@@ -155,8 +197,9 @@ export default function Onboarding() {
 		try {
 			setProcessingPayment(true);
 
-			// First complete the tenant setup (this creates tenant, location, and permissions)
-			await completeOnboarding();
+			// ✅ SECURE: Create tenant with "pending_payment" status BEFORE payment
+			const tenantId = await createPendingPaymentTenant();
+			setPendingTenantId(tenantId);
 
 			const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 			if (!selectedPlan?.product_id) {
@@ -166,24 +209,31 @@ export default function Onboarding() {
 			// Create checkout session with Creem
 			const checkoutSession = await createCheckoutSession({
 				product_id: selectedPlan.product_id,
-				success_url: `${window.location.origin}/billing/success?plan_id=${selectedPlanId}&source=onboarding`,
-				error_url: `${window.location.origin}/billing/error?source=onboarding`,
+				success_url: `${window.location.origin}/onboarding?payment_status=checking&tenant_id=${tenantId}`,
 				cancel_url: `${window.location.origin}/onboarding`,
 				customer: {
 					email: user?.email,
 				},
 				metadata: {
-					tenant_id: formData.companyName
-						.toLowerCase()
-						.replace(/[^a-z0-9]/g, "-"),
+					tenant_id: tenantId,
+					user_id: user!.id,
 					plan_id: selectedPlanId,
-					onboarding: "true",
+					source: "onboarding",
+					timestamp: new Date().toISOString(),
 				},
 			});
 
-			// Redirect to Creem checkout
+			// ✅ SECURE: Open Creem in NEW TAB (user stays on onboarding)
 			if (checkoutSession.checkoutUrl) {
-				window.location.href = checkoutSession.checkoutUrl;
+				window.open(checkoutSession.checkoutUrl, "_blank");
+
+				// Start awaiting payment verification
+				setAwaitingPayment(true);
+
+				toast({
+					title: "Payment Window Opened",
+					description: "Complete your payment in the new tab. We'll verify it automatically.",
+				});
 			} else {
 				throw new Error("No checkout URL received from Creem");
 			}
@@ -196,6 +246,151 @@ export default function Onboarding() {
 			});
 		} finally {
 			setProcessingPayment(false);
+		}
+	};
+
+	const createPendingPaymentTenant = async (): Promise<string> => {
+		try {
+			setLoading(true);
+
+			// Generate collision-resistant slug with client-side logic
+			const generateUniqueSlug = async (name: string): Promise<string> => {
+				const baseSlug =
+					name
+						.toLowerCase()
+						.replace(/[^a-z0-9\s-]/g, "")
+						.replace(/\s+/g, "-")
+						.replace(/-+/g, "-")
+						.trim() || "tenant";
+
+				// Check if base slug exists
+				const { data: existing } = await supabase
+					.from("tenants")
+					.select("slug")
+					.eq("slug", baseSlug)
+					.limit(1);
+
+				if (!existing || existing.length === 0) {
+					return baseSlug;
+				}
+
+				// Find the next available slug with counter
+				let counter = 2;
+				let candidateSlug = `${baseSlug}-${counter}`;
+
+				while (true) {
+					const { data: existingCandidate } = await supabase
+						.from("tenants")
+						.select("slug")
+						.eq("slug", candidateSlug)
+						.limit(1);
+
+					if (!existingCandidate || existingCandidate.length === 0) {
+						return candidateSlug;
+					}
+
+					counter++;
+					candidateSlug = `${baseSlug}-${counter}`;
+				}
+			};
+
+			const slug = await generateUniqueSlug(formData.companyName);
+
+			// ✅ SECURE: Create tenant with "pending_payment" status
+			const { data: tenant, error: tenantError } = await supabase
+				.from("tenants")
+				.insert({
+					name: formData.companyName,
+					slug: slug,
+					hotel_name: formData.companyName,
+					hotel_email: formData.email,
+					hotel_phone: formData.phone,
+					hotel_address: formData.address,
+					hotel_timezone: formData.timezone || "UTC",
+					owner_profile_id: user!.id,
+					onboarding_completed: false, // Not completed until payment verified
+					subscription_status: "pending_payment", // ✅ Waiting for payment
+				})
+				.select()
+				.single();
+
+			if (tenantError) throw tenantError;
+
+			// Update user profile with tenant_id
+			const { error: profileError } = await supabase
+				.from("profiles")
+				.update({
+					tenant_id: tenant.id,
+					role: "admin",
+				})
+				.eq("id", user!.id);
+
+			if (profileError) throw profileError;
+
+			// Create default location for the tenant
+			const { data: location, error: locationError } = await supabase
+				.from("locations")
+				.insert({
+					name: formData.companyName,
+					tenant_id: tenant.id,
+					is_active: true,
+					property_type: formData.propertyType,
+				})
+				.select()
+				.single();
+
+			if (locationError) throw locationError;
+
+			// Create user permissions for the new location
+			const { error: permissionsError } = await supabase
+				.from("user_permissions")
+				.insert([
+					{
+						user_id: user.id,
+						tenant_id: tenant.id,
+						location_id: location.id,
+						tenant_role: "tenant_admin",
+						is_tenant_admin: true,
+						access_dashboard: true,
+						access_income: true,
+						access_expenses: true,
+						access_reports: true,
+						access_calendar: true,
+						access_bookings: true,
+						access_rooms: true,
+						access_master_files: true,
+						access_accounts: true,
+						access_users: true,
+						access_settings: true,
+						access_booking_channels: true,
+					},
+				]);
+			if (permissionsError) throw permissionsError;
+
+			// Create pending subscription record
+			const { error: subscriptionError } = await supabase
+				.from("subscriptions")
+				.insert({
+					tenant_id: tenant.id,
+					plan_id: selectedPlanId || "professional",
+					status: "incomplete", // Will be updated by webhook
+				});
+
+			if (subscriptionError) throw subscriptionError;
+
+			console.log("✅ [ONBOARDING] Created pending tenant:", tenant.id);
+
+			return tenant.id;
+		} catch (error: any) {
+			console.error("Pending tenant creation error:", error);
+			toast({
+				title: "Setup Error",
+				description: error.message || "Failed to create tenant. Please try again.",
+				variant: "destructive",
+			});
+			throw error;
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -260,8 +455,8 @@ export default function Onboarding() {
 					owner_profile_id: user!.id,
 					onboarding_completed: true,
 					trial_ends_at: new Date(
-						Date.now() + 7 * 24 * 60 * 60 * 1000,
-					).toISOString(), // 7 days trial
+						Date.now() + 14 * 24 * 60 * 60 * 1000,
+					).toISOString(), // 14 days trial
 					subscription_status: "trial",
 				})
 				.select()
@@ -330,10 +525,10 @@ export default function Onboarding() {
 					status: "trialing",
 					current_period_start: new Date().toISOString(),
 					current_period_end: new Date(
-						Date.now() + 7 * 24 * 60 * 60 * 1000,
+						Date.now() + 14 * 24 * 60 * 60 * 1000,
 					).toISOString(),
 					trial_end: new Date(
-						Date.now() + 7 * 24 * 60 * 60 * 1000,
+						Date.now() + 14 * 24 * 60 * 60 * 1000,
 					).toISOString(),
 				});
 
@@ -341,7 +536,7 @@ export default function Onboarding() {
 
 			toast({
 				title: "Welcome aboard! 🎉",
-				description: `Your ${formData.companyName} account has been set up successfully. You're on a 7-day free trial!`,
+				description: `Your ${formData.companyName} account has been set up successfully. You're on a 14-day free trial!`,
 			});
 
 			// Don't redirect here - let the calling function handle the next step
@@ -450,6 +645,40 @@ export default function Onboarding() {
 					currentStep={currentStep}
 					totalSteps={STEPS.length}
 				/>
+
+				{/* Payment Verification Status */}
+				{awaitingPayment && (
+					<Alert className="mb-4">
+						{paymentStatus === "pending" && (
+							<>
+								<Loader2 className="h-4 w-4 animate-spin" />
+								<AlertTitle>Waiting for Payment Verification...</AlertTitle>
+								<AlertDescription>
+									Please complete your payment in the new tab. We're monitoring for
+									confirmation and will update automatically.
+								</AlertDescription>
+							</>
+						)}
+						{paymentStatus === "verified" && (
+							<>
+								<CheckCircle className="h-4 w-4 text-green-600" />
+								<AlertTitle>Payment Verified!</AlertTitle>
+								<AlertDescription>
+									Your payment has been confirmed. Setting up your account...
+								</AlertDescription>
+							</>
+						)}
+						{(paymentStatus === "failed" || paymentStatus === "timeout") && (
+							<>
+								<XCircle className="h-4 w-4 text-red-600" />
+								<AlertTitle>Payment Verification Failed</AlertTitle>
+								<AlertDescription>
+									We couldn't verify your payment. Please try again or contact support.
+								</AlertDescription>
+							</>
+						)}
+					</Alert>
+				)}
 
 				{/* Main Content */}
 				<Card className="bg-card border">

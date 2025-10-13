@@ -1,9 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Webhook } from "https://esm.sh/svix@1.15.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-creem-signature',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, svix-id, svix-timestamp, svix-signature',
 };
 
 serve(async (req) => {
@@ -18,19 +19,49 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Verify the webhook signature (optional but recommended for security)
-    const signature = req.headers.get('x-creem-signature');
+    // Get Svix webhook secret
+    const SVIX_WEBHOOK_SECRET = Deno.env.get('SVIX_WEBHOOK_SECRET');
+    if (!SVIX_WEBHOOK_SECRET) {
+      console.error('❌ SVIX_WEBHOOK_SECRET environment variable not set');
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    // Get payload and headers for Svix verification
     const payload = await req.text();
-    
-    console.log('Received Creem webhook:', {
-      signature,
+    const svixId = req.headers.get('svix-id');
+    const svixTimestamp = req.headers.get('svix-timestamp');
+    const svixSignature = req.headers.get('svix-signature');
+
+    console.log('📨 Received webhook:', {
+      svixId,
+      svixTimestamp,
+      hasSignature: !!svixSignature,
       payloadLength: payload.length,
-      headers: Object.fromEntries(req.headers.entries())
     });
 
-    // Parse the webhook payload
-    const event = JSON.parse(payload);
-    console.log('Webhook event:', event);
+    // Verify webhook signature with Svix
+    const wh = new Webhook(SVIX_WEBHOOK_SECRET);
+    let event;
+
+    try {
+      event = wh.verify(payload, {
+        'svix-id': svixId || '',
+        'svix-timestamp': svixTimestamp || '',
+        'svix-signature': svixSignature || '',
+      });
+      console.log('✅ Webhook signature verified successfully');
+    } catch (err) {
+      console.error('❌ Webhook signature verification failed:', err.message);
+      return new Response(
+        JSON.stringify({ error: 'Invalid webhook signature' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    console.log('📋 Processing webhook event:', event.type);
 
     // Handle different Creem webhook events
     switch (event.type) {
@@ -79,44 +110,96 @@ serve(async (req) => {
 });
 
 async function handleCheckoutCompleted(supabase: any, data: any) {
-  console.log('Handling checkout completed:', data);
-  
+  console.log('🎉 Handling checkout completed:', data);
+
   // Extract customer and subscription information
-  const { customer_id, subscription_id, metadata } = data;
-  
-  if (metadata?.tenant_id) {
-    // Update the subscription in our database
+  const { customer_id, subscription_id, metadata, id: checkout_id } = data;
+
+  // Validate required metadata
+  if (!metadata?.tenant_id || !metadata?.user_id) {
+    console.error('❌ Missing required metadata (tenant_id or user_id):', metadata);
+    throw new Error('Invalid webhook metadata');
+  }
+
+  console.log('✅ Metadata validated:', { tenant_id: metadata.tenant_id, user_id: metadata.user_id });
+
+  // 1. Update payment attempt record
+  const { error: paymentError } = await supabase
+    .from('payment_attempts')
+    .update({
+      status: 'completed',
+      creem_order_id: checkout_id,
+      completed_at: new Date().toISOString(),
+    })
+    .eq('checkout_session_id', checkout_id);
+
+  if (paymentError) {
+    console.warn('⚠️ Could not update payment_attempts (table may not exist yet):', paymentError);
+  }
+
+  // 2. Update tenant status from pending_payment to active
+  const { error: tenantError } = await supabase
+    .from('tenants')
+    .update({
+      subscription_status: 'active',
+      trial_ends_at: null, // Clear trial if paying immediately
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', metadata.tenant_id)
+    .eq('subscription_status', 'pending_payment'); // Only update if still pending
+
+  if (tenantError) {
+    console.error('❌ Error updating tenant status:', tenantError);
+    throw tenantError;
+  }
+
+  // 3. Update or create subscription record
+  const { data: existingSub, error: fetchError } = await supabase
+    .from('subscriptions')
+    .select('id')
+    .eq('tenant_id', metadata.tenant_id)
+    .maybeSingle();
+
+  if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('❌ Error fetching existing subscription:', fetchError);
+    throw fetchError;
+  }
+
+  const subscriptionData = {
+    tenant_id: metadata.tenant_id,
+    creem_customer_id: customer_id,
+    creem_subscription_id: subscription_id,
+    status: 'active',
+    plan_id: metadata.plan_id || 'professional',
+    current_period_start: new Date().toISOString(),
+    current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  if (existingSub) {
+    // Update existing subscription
     const { error: updateError } = await supabase
       .from('subscriptions')
-      .update({
-        creem_customer_id: customer_id,
-        creem_subscription_id: subscription_id,
-        status: 'active',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('tenant_id', metadata.tenant_id);
+      .update(subscriptionData)
+      .eq('id', existingSub.id);
 
     if (updateError) {
-      console.error('Error updating subscription:', updateError);
+      console.error('❌ Error updating subscription:', updateError);
       throw updateError;
     }
+  } else {
+    // Create new subscription
+    const { error: insertError } = await supabase
+      .from('subscriptions')
+      .insert(subscriptionData);
 
-    // Update tenant status
-    const { error: tenantError } = await supabase
-      .from('tenants')
-      .update({
-        subscription_status: 'active',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', metadata.tenant_id);
-
-    if (tenantError) {
-      console.error('Error updating tenant:', tenantError);
-      throw tenantError;
+    if (insertError) {
+      console.error('❌ Error creating subscription:', insertError);
+      throw insertError;
     }
-
-    console.log('Successfully updated subscription and tenant status');
   }
+
+  console.log('✅ Successfully processed payment for tenant:', metadata.tenant_id);
 }
 
 async function handleSubscriptionCreated(supabase: any, data: any) {
