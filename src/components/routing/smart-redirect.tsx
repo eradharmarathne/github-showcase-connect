@@ -22,9 +22,10 @@ export const SmartRedirect = () => {
 
 	console.log({ profile, tenant, user });
 
-	// If user doesn't have a tenant_id in their profile, they need to complete onboarding
+	// If user doesn't have a tenant_id in their profile, check for pending invitations first
 	if (!profile?.tenant_id || !tenant) {
-		return <Navigate to="/onboarding" replace />;
+		// Redirect to pending invitations page - they might be an invited user
+		return <Navigate to="/pending-invitation" replace />;
 	}
 
 	// If tenant hasn't completed onboarding, redirect to onboarding

@@ -31,6 +31,7 @@ import MasterFiles from "./pages/master-files";
 import NotFound from "./pages/not-found";
 import Onboarding from "./pages/onboarding";
 import PaymentForm from "./pages/payment-form";
+import PendingInvitation from "./pages/pending-invitation";
 import Reports from "./pages/reports";
 import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
@@ -61,6 +62,14 @@ const App = () => (
 									<Route
 										path="/auth/reset-password"
 										element={<ResetPassword />}
+									/>
+									<Route
+										path="/pending-invitation"
+										element={
+											<ProtectedRoute>
+												<PendingInvitation />
+											</ProtectedRoute>
+										}
 									/>
 									<Route
 										path="/onboarding"
