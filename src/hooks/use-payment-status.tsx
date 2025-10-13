@@ -58,9 +58,21 @@ export const usePaymentStatus = ({
 					return true; // Stop polling
 				}
 
-				// Check for payment failure
-				if (tenantData?.subscription_status === "payment_failed") {
-					console.log("❌ [PAYMENT-STATUS] Payment failed");
+				// If tenant is in trial status (not pending_payment), also consider it verified
+				// This handles the case where user already has a subscription
+				if (tenantData?.subscription_status === "trial") {
+					console.log("ℹ️ [PAYMENT-STATUS] Tenant already in trial status");
+					setStatus("verified");
+					return true; // Stop polling
+				}
+
+				// Check for payment failure or other terminal states that should stop polling
+				if (
+					tenantData?.subscription_status === "payment_failed" ||
+					tenantData?.subscription_status === "cancelled" ||
+					tenantData?.subscription_status === "expired"
+				) {
+					console.log("❌ [PAYMENT-STATUS] Payment failed or subscription in terminal state:", tenantData.subscription_status);
 					setStatus("failed");
 					return true; // Stop polling
 				}

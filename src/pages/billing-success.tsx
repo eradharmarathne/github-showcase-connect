@@ -1,182 +1,66 @@
-import { ArrowRight, CheckCircle, CreditCard, Crown } from "lucide-react";
+import { ArrowRight, CheckCircle, CreditCard, Crown, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/auth-context";
+import { usePaymentStatus } from "@/hooks/use-payment-status";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function BillingSuccess() {
 	const navigate = useNavigate();
 	const { toast } = useToast();
 	const [searchParams] = useSearchParams();
-	const { tenant } = useAuth();
+	const { tenant, refreshTenant } = useAuth();
 
-	const [loading, setLoading] = useState(true);
-	const [processed, setProcessed] = useState(false);
 	const [redirectCountdown, setRedirectCountdown] = useState(5);
 
 	// Get URL parameters from Creem.io callback
 	const checkoutId = searchParams.get("checkout_id");
 	const orderId = searchParams.get("order_id");
-	const customerId = searchParams.get("customer_id");
-	const subscriptionId = searchParams.get("subscription_id");
-	const productId = searchParams.get("product_id");
-	const signature = searchParams.get("signature");
-	const source = searchParams.get("source"); // 'onboarding' or 'billing'
 	const redirectTo = searchParams.get("redirect_to"); // 'billing' for dashboard billing redirect
+	const source = searchParams.get("source"); // 'onboarding' or 'billing'
 
+	// ✅ SECURE: Use polling to wait for webhook verification
+	const { status: paymentStatus, isVerified, isFailed, isTimeout } = usePaymentStatus({
+		tenantId: tenant?.id || null,
+		enabled: !!checkoutId && !!tenant,
+		timeoutMinutes: 10,
+		pollIntervalSeconds: 3,
+	});
+
+	// Handle successful payment verification
 	useEffect(() => {
-		const processSuccessfulPayment = async () => {
-			if (processed) return;
+		if (isVerified) {
+			console.log("✅ [BILLING-SUCCESS] Payment verified via webhook");
 
-			setLoading(true);
-			try {
-				// TODO: Verify the signature with your webhook secret
-				// This is important for security to ensure the callback is genuine
-				// const isValid = await validateWebhookSignature(
-				//   searchParams.toString(),
-				//   signature || '',
-				//   WEBHOOK_SECRET
-				// );
+			// Refresh tenant data to get updated subscription status
+			refreshTenant();
 
-				// For now, we'll skip signature validation in demo mode
-
-				// Update or create subscription record
-				if (subscriptionId && customerId && tenant) {
-					// First, get the correct plan_id by mapping from product_id
-					const { data: planData, error: planError } = await supabase
-						.from("plans")
-						.select("id, name, product_id")
-						.eq("product_id", productId)
-						.single();
-
-					if (planError) {
-						console.error(
-							"Error finding plan for product_id:",
-							productId,
-							planError,
-						);
-						// Fallback to starter plan if we can't find the plan
-						toast({
-							title: "Warning",
-							description:
-								"Could not find matching plan. Using starter plan as fallback.",
-							variant: "destructive",
-						});
-					}
-
-					const correctPlanId = planData?.id || "starter";
-					console.log(
-						`Mapping product_id ${productId} to plan_id ${correctPlanId}`,
-					);
-
-					const subscriptionData = {
-						tenant_id: tenant.id,
-						status: "active" as const,
-						plan_id: correctPlanId, // Use the correctly mapped plan_id
-						creem_customer_id: customerId,
-						creem_subscription_id: subscriptionId,
-						current_period_start: new Date().toISOString(),
-						// Set end date based on plan (you might want to get this from Creem API)
-						current_period_end: new Date(
-							Date.now() + 30 * 24 * 60 * 60 * 1000,
-						).toISOString(), // 30 days
-					};
-
-					// Check if subscription already exists for this tenant
-					const { data: existingSubscription, error: fetchError } =
-						await supabase
-							.from("subscriptions")
-							.select("*")
-							.eq("tenant_id", tenant.id)
-							.maybeSingle(); // Use maybeSingle to avoid error when no results
-
-					if (fetchError) {
-						console.error("Error fetching existing subscription:", fetchError);
-						throw fetchError;
-					}
-
-					let subscriptionResult;
-					if (existingSubscription) {
-						// Update existing subscription
-						subscriptionResult = await supabase
-							.from("subscriptions")
-							.update(subscriptionData)
-							.eq("id", existingSubscription.id)
-							.select()
-							.single();
-					} else {
-						// Create new subscription - plan_id is already in subscriptionData
-						subscriptionResult = await supabase
-							.from("subscriptions")
-							.insert(subscriptionData)
-							.select()
-							.single();
-					}
-
-					if (subscriptionResult.error) {
-						console.error(
-							"Error updating/creating subscription:",
-							subscriptionResult.error,
-						);
-						throw subscriptionResult.error;
-					}
-
-					// Update tenant subscription status
-					const { error: tenantUpdateError } = await supabase
-						.from("tenants")
-						.update({
-							subscription_status: "active" as const,
-							trial_ends_at: null, // Clear trial end date
-						})
-						.eq("id", tenant.id);
-
-					if (tenantUpdateError) {
-						console.error("Error updating tenant:", tenantUpdateError);
-						throw tenantUpdateError;
-					}
-
-					toast({
-						title: "Payment Successful!",
-						description: "Your subscription has been activated successfully.",
-					});
-
-					setProcessed(true);
-				}
-			} catch (error) {
-				console.error("Error processing payment:", error);
-				toast({
-					title: "Processing Error",
-					description:
-						"Payment was successful, but there was an issue updating your account. Please contact support.",
-					variant: "destructive",
-				});
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		if (checkoutId && tenant) {
-			processSuccessfulPayment();
-		} else {
-			setLoading(false);
+			toast({
+				title: "Payment Successful! 🎉",
+				description: "Your subscription has been activated successfully.",
+			});
 		}
-	}, [
-		checkoutId,
-		tenant,
-		processed,
-		orderId,
-		customerId,
-		subscriptionId,
-		productId,
-		toast,
-	]);
+	}, [isVerified, refreshTenant, toast]);
+
+	// Handle payment failure
+	useEffect(() => {
+		if (isFailed || isTimeout) {
+			console.error("❌ [BILLING-SUCCESS] Payment verification failed or timed out");
+			toast({
+				title: "Payment Verification Issue",
+				description:
+					"We couldn't verify your payment automatically. Please check your billing page or contact support if you were charged.",
+				variant: "destructive",
+			});
+		}
+	}, [isFailed, isTimeout, toast]);
 
 	// Auto-redirect countdown effect for billing payments
 	useEffect(() => {
-		if (!loading && redirectTo === "billing" && redirectCountdown > 0) {
+		if (isVerified && redirectTo === "billing" && redirectCountdown > 0) {
 			const timer = setTimeout(() => {
 				if (redirectCountdown === 1) {
 					navigate("/billing");
@@ -187,12 +71,28 @@ export default function BillingSuccess() {
 
 			return () => clearTimeout(timer);
 		}
-	}, [loading, redirectTo, redirectCountdown, navigate]);
+	}, [isVerified, redirectTo, redirectCountdown, navigate]);
 
-	if (loading) {
-		return null;
+	// Show loading state while waiting for tenant
+	if (!tenant) {
+		return (
+			<div className="min-h-screen flex items-center justify-center p-4">
+				<Card className="w-full max-w-md">
+					<CardHeader className="text-center">
+						<CardTitle className="flex items-center justify-center gap-2">
+							<Loader2 className="size-6 animate-spin" />
+							Loading...
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="text-center">
+						<p className="text-muted-foreground">Please wait...</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
 	}
 
+	// Invalid payment link (no checkout_id)
 	if (!checkoutId) {
 		return (
 			<div className="min-h-screen flex items-center justify-center p-4">
@@ -212,6 +112,118 @@ export default function BillingSuccess() {
 		);
 	}
 
+	// Waiting for webhook verification
+	if (paymentStatus === "pending") {
+		return (
+			<div className="min-h-screen flex items-center justify-center p-4">
+				<Card className="w-full max-w-md">
+					<CardHeader className="text-center">
+						<CardTitle className="flex items-center justify-center gap-2">
+							<Loader2 className="size-8 animate-spin text-blue-600" />
+							Verifying Payment...
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="text-center space-y-6">
+						<Alert>
+							<Loader2 className="h-4 w-4 animate-spin" />
+							<AlertTitle>Processing Your Payment</AlertTitle>
+							<AlertDescription>
+								We're verifying your payment with our secure payment processor.
+								This usually takes just a few seconds.
+							</AlertDescription>
+						</Alert>
+
+						<div className="bg-muted p-4 rounded-lg text-sm">
+							<p className="text-muted-foreground">
+								Please don't close this page. We're confirming your payment
+								details...
+							</p>
+						</div>
+
+						{orderId && (
+							<div className="bg-muted p-3 rounded-lg text-xs">
+								<p>
+									<strong>Order ID:</strong> {orderId}
+								</p>
+								<p>
+									<strong>Checkout ID:</strong> {checkoutId}
+								</p>
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	// Payment verification failed
+	if (isFailed || isTimeout) {
+		return (
+			<div className="min-h-screen flex items-center justify-center p-4">
+				<Card className="w-full max-w-md">
+					<CardHeader className="text-center">
+						<CardTitle className="flex items-center justify-center gap-2 text-red-600">
+							<XCircle className="size-8" />
+							Payment Verification Issue
+						</CardTitle>
+					</CardHeader>
+					<CardContent className="text-center space-y-6">
+						<Alert variant="destructive">
+							<XCircle className="h-4 w-4" />
+							<AlertTitle>Verification Failed</AlertTitle>
+							<AlertDescription>
+								We couldn't automatically verify your payment. This doesn't
+								necessarily mean your payment failed.
+							</AlertDescription>
+						</Alert>
+
+						<div className="space-y-2 text-sm text-muted-foreground">
+							<p>
+								If you were charged, your subscription will be activated within a
+								few minutes. Please check your:
+							</p>
+							<ul className="list-disc list-inside text-left space-y-1">
+								<li>Email for a payment confirmation</li>
+								<li>Billing page for subscription status</li>
+								<li>Bank statement for the charge</li>
+							</ul>
+						</div>
+
+						{orderId && (
+							<div className="bg-muted p-3 rounded-lg text-xs">
+								<p>
+									<strong>Order ID:</strong> {orderId}
+								</p>
+								<p className="text-muted-foreground mt-1">
+									Please include this ID if contacting support
+								</p>
+							</div>
+						)}
+
+						<div className="space-y-3">
+							<Button className="w-full" onClick={() => navigate("/billing")}>
+								Check Billing Status
+								<ArrowRight className="size-4 ml-2" />
+							</Button>
+							<Button
+								variant="outline"
+								className="w-full"
+								onClick={() => navigate("/dashboard")}
+							>
+								Go to Dashboard
+							</Button>
+						</div>
+
+						<p className="text-xs text-muted-foreground">
+							If you need help, please contact support with your Order ID.
+						</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	// Payment verified successfully
 	return (
 		<div className="min-h-screen flex items-center justify-center p-4">
 			<Card className="w-full max-w-md">
@@ -238,7 +250,7 @@ export default function BillingSuccess() {
 						</p>
 					</div>
 
-					{checkoutId && (
+					{orderId && (
 						<div className="bg-muted p-3 rounded-lg text-sm">
 							<p>
 								<strong>Order ID:</strong> {orderId}

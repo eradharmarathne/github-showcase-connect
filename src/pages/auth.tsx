@@ -328,7 +328,7 @@ export default function Auth() {
 									type="button"
 									variant="ghost"
 									size="icon"
-									className="absolute right-2 top-1/2 -translate-y-1/2 size-5"
+									className="absolute right-2 cursor-pointer top-1/2 -translate-y-1/2 size-5"
 									onClick={() => setShowPassword(!showPassword)}
 									disabled={submitting}
 								>
@@ -341,7 +341,7 @@ export default function Auth() {
 							</div>
 						</div>
 
-						<Button type="submit" className="w-full" disabled={submitting}>
+						<Button type="submit" className="w-full  cursor-pointer" disabled={submitting}>
 							{submitting ? (
 								<div className="flex items-center justify-center">
 									<div className="animate-spin rounded-full size-4 border-2 border-transparent border-t-current"></div>
@@ -379,7 +379,7 @@ export default function Auth() {
 								variant="outline"
 								onClick={() => handleOAuthSignIn("google")}
 								disabled={submitting}
-								className="w-full"
+								className="w-full cursor-pointer"
 							>
 								<GoogleIcon />
 								<span className="ml-2">Google</span>
@@ -389,7 +389,7 @@ export default function Auth() {
 								variant="outline"
 								onClick={() => handleOAuthSignIn("facebook")}
 								disabled={submitting}
-								className="w-full"
+								className="w-full cursor-pointer"
 							>
 								<FacebookIcon />
 								<span className="ml-2">Facebook</span>
@@ -405,7 +405,7 @@ export default function Auth() {
 							size="sm"
 							onClick={fillDemoCredentials}
 							disabled={submitting}
-							className="w-full border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
+							className="w-full  cursor-pointer border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
 						>
 							Try Demo Account
 						</Button>
@@ -427,7 +427,7 @@ export default function Auth() {
 						<button
 							type="button"
 							onClick={() => setIsLogin(!isLogin)}
-							className="text-primary hover:underline"
+							className="text-primary  cursor-pointer hover:underline"
 							disabled={submitting}
 						>
 							{isLogin
