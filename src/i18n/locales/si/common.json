@@ -776,7 +776,7 @@
         "account": "Account",
         "accountRequired": "Account *",
         "accountPlaceholder": "Select account",
-        "accountDescription": "Account to record the payment"
+  "accountDescription": "ගෙවීම වාර්තා කිරීමට ගිණුම"
       },
       "paymentTypes": {
         "direct": "💵 Direct Payment (Paid Now)",
