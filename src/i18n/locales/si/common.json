@@ -665,12 +665,12 @@
     "cancel": "Cancel"
   },
   "profile": {
-    "myProfile": "My Profile",
-    "settings": "Settings",
-    "billing": "Billing & Subscription",
-    "manageUsers": "Manage Users",
-    "masterFiles": "Master Files",
-    "bookingChannels": "Booking Channels"
+  "myProfile": "මගේ පැතිකඩ",
+  "settings": "සැකසීම්",
+  "billing": "ගිණුම් ගැනීම සහ දායකත්වය",
+  "manageUsers": "පරිශීලක කළමනාකරණය",
+  "masterFiles": "ප්‍රධාන ගොනු",
+  "bookingChannels": "වෙන්කරණ නාලිකා"
   },
   "fullscreen": {
     "enter": "Enter fullscreen",
