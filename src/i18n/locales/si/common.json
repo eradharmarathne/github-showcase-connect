@@ -720,79 +720,79 @@
     }
   },
   "income": {
-    "title": "Income Management",
-    "permissionDenied": "You don't have permission to access income management.",
+    "title": "ආදායම් කළමනාකරණය",
+    "permissionDenied": "ඔබට ආදායම් කළමනාකරණයට ප්‍රවේශ වීමට අවසර නැත.",
     "reservationsTable": {
-      "title": "Reservations - Add Income",
+      "title": "වෙන්කිරීම් - ආදායම් එකතු කරන්න",
       "headers": {
-        "reservationNumber": "Reservation #",
-        "guest": "Guest",
-        "room": "Room",
-        "checkIn": "Check-in",
-        "checkOut": "Check-out",
-        "totalAmount": "Total Amount",
-        "status": "Status",
-        "action": "Action"
+        "reservationNumber": "වෙන්කිරීම #",
+        "guest": "අමුත්තා",
+        "room": "කාමරය",
+        "checkIn": "පිවිසුම",
+        "checkOut": "පිටවීම",
+        "totalAmount": "මුළු මුදල",
+        "status": "තත්ත්වය",
+        "action": "ක්‍රියාව"
       },
-      "addIncomeButton": "Add Income",
+      "addIncomeButton": "ආදායම එක් කරන්න",
       "disabledReasons": {
-        "confirmed": "Income cannot be added - reservation is confirmed (payment completed)",
+        "confirmed": "ආදායම එකතු කළ නොහැක - වෙන්කිරීම තහවුරු කර ඇත (ගෙවීම සම්පූර්ණයි)",
         "fullyPaid": "ආදායම් එකතු කළ නොහැක - වෙන්කරන් ශේෂය සම්පූර්ණයෙන් ගෙවා ඇත",
-        "alreadyRecorded": "Income already recorded for this reservation"
+        "alreadyRecorded": "මෙම වෙන්කිරීම සඳහා ආදායම දැනටමත් වාර්තා කර ඇත"
       },
       "statuses": {
-        "tentative": "Tentative",
-        "confirmed": "Confirmed",
-        "checked_in": "Checked In",
-        "checked_out": "Checked Out",
-        "cancelled": "Cancelled"
+        "tentative": "අවස්ථානගත",
+        "confirmed": "තහවුරු",
+        "checked_in": "පිවිසී ඇත",
+        "checked_out": "පිටවී ඇත",
+        "cancelled": "අවලංගු"
       }
     },
     "historyTable": {
-      "title": "Recent Income History",
+      "title": "මෑත ආදායම් ඉතිහාසය",
       "headers": {
-        "date": "Date",
-        "note": "Note",
-        "type": "Type",
-        "amount": "Amount",
-        "account": "Account"
+        "date": "දිනය",
+        "note": "සටහන",
+        "type": "වර්ගය",
+        "amount": "මුදල",
+        "account": "ගිණුම"
       }
     },
     "addDialog": {
-      "title": "Add Income",
-      "description": "Record income for the selected reservation.",
+      "title": "ආදායම එක් කරන්න",
+      "description": "තෝරාගත් වෙන්කිරීම සඳහා ආදායම වාර්තා කරන්න.",
       "reservationInfo": {
-        "reservation": "Reservation:",
-        "guest": "Guest:",
-        "amount": "Amount:"
+        "reservation": "වෙන්කිරීම:",
+        "guest": "අමුත්තා:",
+        "amount": "මුදල:"
       },
       "form": {
-        "amount": "Amount",
-        "note": "Note",
-        "notePlaceholder": "Additional notes...",
-        "incomeType": "Income Type",
-        "incomeTypePlaceholder": "Select income type",
-        "paymentType": "Payment Type",
-        "account": "Account",
-        "accountRequired": "Account *",
-        "accountPlaceholder": "Select account",
-  "accountDescription": "ගෙවීම වාර්තා කිරීමට ගිණුම"
+        "amount": "මුදල",
+        "note": "සටහන",
+        "notePlaceholder": "අමතර සටහන්...",
+        "incomeType": "ආදායම් වර්ගය",
+        "incomeTypePlaceholder": "ආදායම් වර්ගය තෝරන්න",
+        "paymentType": "ගෙවීම් වර්ගය",
+        "account": "ගිණුම",
+        "accountRequired": "ගිණුම *",
+        "accountPlaceholder": "ගිණුම තෝරන්න",
+        "accountDescription": "ගෙවීම වාර්තා කිරීමට ගිණුම"
       },
       "paymentTypes": {
-        "direct": "💵 Direct Payment (Paid Now)",
-        "deferred": "📋 Add to Bill (Pay Later)",
-        "directDescription": "Guest paid directly. Will update account balance.",
-        "deferredDescription": "Add to reservation bill. Guest will pay during checkout.",
-        "deferredInfo": "💡 Deferred Payment: This amount will be added to the reservation total. Guest will pay during checkout. No account will be updated now."
+        "direct": "💵 සෘජු ගෙවීම (දැන් ගෙවයි)",
+        "deferred": "📋 බිල්පතට එක් කරන්න (පසුව ගෙවයි)",
+        "directDescription": "අමුත්තා සෘජුව ගෙවා ඇත. ගිණුමේ ශේෂය යාවත්කාලීන වේ.",
+        "deferredDescription": "වෙන්කිරීමේ බිල්පතට එකතු කරන්න. අමුත්තා පිටවීමේදී ගෙවයි.",
+        "deferredInfo": "💡 ප්‍රමාද ගෙවීම: මෙම මුදල වෙන්කිරීමේ මුළු එකතුවට එකතු වේ. අමුත්තා පිටවීමේදී ගෙවයි. දැන් කිසිදු ගිණුමක් යාවත්කාලීන නොවේ."
       },
       "buttons": {
-        "cancel": "Cancel",
-        "record": "Record Income"
+        "cancel": "අවලංගු කරන්න",
+        "record": "ආදායම වාර්තා කරන්න"
       },
       "messages": {
-        "directSuccess": "Direct payment recorded to account",
-        "deferredSuccess": "Amount added to reservation bill",
-        "error": "Failed to record income"
+        "directSuccess": "සෘජු ගෙවීම ගිණුමට වාර්තා විය",
+        "deferredSuccess": "මුදල වෙන්කිරීමේ බිල්පතට එකතු විය",
+        "error": "ආදායම වාර්තා කිරීමට අසමත් විය"
       }
     }
   },
