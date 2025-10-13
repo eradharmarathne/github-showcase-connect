@@ -373,7 +373,7 @@ export default function Auth() {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-2 gap-3">
+						<div className="flex justify-center items-center">
 							<Button
 								type="button"
 								variant="outline"
@@ -384,7 +384,7 @@ export default function Auth() {
 								<GoogleIcon />
 								<span className="ml-2">Google</span>
 							</Button>
-							<Button
+							{/* <Button
 								type="button"
 								variant="outline"
 								onClick={() => handleOAuthSignIn("facebook")}
@@ -393,7 +393,7 @@ export default function Auth() {
 							>
 								<FacebookIcon />
 								<span className="ml-2">Facebook</span>
-							</Button>
+							</Button> */}
 						</div>
 					</div>
 

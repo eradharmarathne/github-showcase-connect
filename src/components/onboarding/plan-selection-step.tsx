@@ -167,7 +167,7 @@ export function PlanSelectionStep({
 							variant="outline"
 							onClick={onStartTrial}
 							disabled={processingPayment}
-							className="flex items-center gap-2 flex-1 sm:flex-none"
+							className="flex items-center gap-2 py-2 sm:py-0 flex-1 sm:flex-none"
 						>
 							{processingPayment
 								? "Starting Trial..."
@@ -178,7 +178,7 @@ export function PlanSelectionStep({
 							size="lg"
 							onClick={onPayNow}
 							disabled={processingPayment}
-							className="flex items-center gap-2 flex-1 sm:flex-none"
+							className="flex items-center py-2 sm:py-0 gap-2 flex-1 sm:flex-none"
 						>
 							{processingPayment ? "Processing..." : "Pay Now & Get Started"}
 							<CreditCard className="h-4 w-4" />

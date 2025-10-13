@@ -33,8 +33,6 @@ import {
 } from "@/lib/creem";
 
 type Plan = Tables<"plans">;
-type Subscription = Tables<"subscriptions">;
-type Tenant = Tables<"tenants">;
 
 interface PlanWithCreemProduct extends Plan {
 	creemProduct?: any;
@@ -70,7 +68,6 @@ interface UsageData {
 
 export default function BillingSubscription() {
 	const { t } = useTranslation("common");
-	const navigate = useNavigate();
 	const { toast } = useToast();
 	const { tenant, user } = useAuth();
 	const {
@@ -334,61 +331,6 @@ export default function BillingSubscription() {
 		}
 	};
 
-	// Handle manual subscription sync/refresh
-	const handleSyncSubscription = async () => {
-		if (!tenant) return;
-
-		setSyncing(true);
-		try {
-			// For now, we'll just refresh the subscription data from our database
-			// In a real implementation, you'd fetch from Creem API to get the latest status
-			const { data: subscriptionData, error: subscriptionError } =
-				await supabase
-					.from("subscriptions")
-					.select(`
-					*,
-					plans (*)
-				`)
-					.eq("tenant_id", tenant.id)
-					.maybeSingle();
-
-			if (subscriptionError) {
-				console.error("Subscription fetch error:", subscriptionError);
-				throw new Error("Failed to fetch subscription data");
-			}
-
-			// Also refresh tenant data
-			const { data: tenantData, error: tenantError } = await supabase
-				.from("tenants")
-				.select("*")
-				.eq("id", tenant.id)
-				.single();
-
-			if (!tenantError && tenantData) {
-				// This would update the auth context if needed
-				console.log("Updated tenant data:", tenantData);
-			}
-
-			toast({
-				title: "Success",
-				description: "Subscription status refreshed",
-			});
-
-			// Force a page reload to ensure all components are updated with fresh data
-			window.location.reload();
-		} catch (error) {
-			console.error("Sync error:", error);
-			toast({
-				title: "Error",
-				description:
-					"Failed to sync subscription status. If you just made a payment, please contact support.",
-				variant: "destructive",
-			});
-		} finally {
-			setSyncing(false);
-		}
-	};
-
 	const handleCancelSubscription = async () => {
 		if (!currentSubscription?.creem_subscription_id) {
 			toast({
@@ -476,18 +418,6 @@ export default function BillingSubscription() {
 				return <AlertTriangle className="size-4 text-gray-600" />;
 		}
 	};
-
-	const isTrialExpired =
-		tenant?.trial_ends_at && new Date(tenant.trial_ends_at) < new Date();
-	const trialDaysLeft = tenant?.trial_ends_at
-		? Math.max(
-				0,
-				Math.ceil(
-					(new Date(tenant.trial_ends_at).getTime() - new Date().getTime()) /
-						(1000 * 3600 * 24),
-				),
-			)
-		: 0;
 
 	// Show loading spinner while data is being fetched
 	if (loading || subscriptionLoading) {
