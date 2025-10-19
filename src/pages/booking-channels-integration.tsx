@@ -158,161 +158,76 @@ export default function BookingChannelsIntegration() {
 		Record<string, { url: string; source: string }>
 	>({});
 
-	useEffect(() => {
-		const fetchData = async () => {
-			setLoading(true);
-			try {
-				// Fetch bookings with location data
-				const { data: bookingsData, error: bookingsError } = await supabase
-					.from("external_bookings")
-					.select(`
-            *,
-            location:locations(name)
-          `)
-					.order("check_in", { ascending: false });
+	const calculateStats = (bookings: ExternalBooking[]): SyncStats => {
+		const sourceBreakdown: Record<string, number> = {};
+		const statusBreakdown: Record<string, number> = {};
+		let recentSync: string | null = null;
 
-				// Fetch locations
-				const { data: locationsData, error: locationsError } = await supabase
-					.from("locations")
-					.select("*")
-					.eq("is_active", true)
-					.order("name");
+		bookings.forEach((booking) => {
+			// Source breakdown
+			sourceBreakdown[booking.source] =
+				(sourceBreakdown[booking.source] || 0) + 1;
 
-				if (bookingsError) throw bookingsError;
-				if (locationsError) throw locationsError;
+			// Status breakdown
+			statusBreakdown[booking.status] =
+				(statusBreakdown[booking.status] || 0) + 1;
 
-				// Fetch property mappings from database
-				const { data: mappingsData } = await supabase
-					.from("channel_property_mappings")
-					.select(`
-            *,
-            locations (id, name)
-          `)
-					.eq("is_active", true);
-
-				// Fetch iCal sync URLs
-				const { data: syncUrlsData } = await supabase
-					.from("booking_sync_urls")
-					.select(`
-						*,
-						locations (id, name),
-						rooms (id, room_number)
-					`)
-					.eq("is_active", true)
-					.order("created_at", { ascending: false });
-
-				// Transform mappings data into the format expected by the component
-				const transformedMappings: PropertyMapping[] = [];
-				if (mappingsData) {
-					const groupedMappings = mappingsData.reduce(
-						(acc, mapping) => {
-							const locationId = mapping.location_id;
-							if (!acc[locationId]) {
-								acc[locationId] = {
-									locationId,
-									locationName: mapping.locations?.name || "",
-									channelProperties: [],
-								};
-							}
-							acc[locationId].channelProperties.push(
-								mapping.channel_property_name,
-							);
-							return acc;
-						},
-						{} as Record<string, PropertyMapping>,
-					);
-
-					transformedMappings.push(...Object.values(groupedMappings));
-				}
-
-				setBookings(bookingsData || []);
-				setLocations(locationsData || []);
-				setPropertyMappings(transformedMappings);
-				setSyncUrls(syncUrlsData || []);
-
-				// Calculate stats
-				if (bookingsData) {
-					const stats = calculateStats(bookingsData);
-					setSyncStats(stats);
-				}
-			} catch (error) {
-				console.error("Error fetching data:", error);
-				toast.error(t("bookingChannels.messages.fetchError"));
-			} finally {
-				setLoading(false);
+			// Find most recent sync
+			if (!recentSync || booking.last_synced_at > recentSync) {
+				recentSync = booking.last_synced_at;
 			}
+		});
+
+		return {
+			totalBookings: bookings.length,
+			recentSync,
+			sourceBreakdown,
+			statusBreakdown,
 		};
-
-		const syncChannelData = async () => {
-			setSyncing(true);
-			try {
-				const { data, error } = await supabase.functions.invoke(
-					"fetch-beds24-bookings",
-				);
-
-				if (error) {
-					toast.error("Failed to sync booking channel data");
-				} else {
-					// Refresh the data after sync
-					fetchData();
-				}
-			} catch (error) {
-				console.error("Error syncing booking channel data:", error);
-				toast.error("Failed to sync booking channel data");
-			} finally {
-				setSyncing(false);
-			}
-		};
-
-		fetchData();
-		setLastSyncTime(new Date());
-
-		// Auto-sync every hour
-		const interval = setInterval(
-			() => {
-				syncChannelData();
-			},
-			60 * 60 * 1000,
-		); // 1 hour in milliseconds
-
-		return () => clearInterval(interval);
-	}, []); // Dependencies are intentionally empty for initial setup
-
-	// Auto-select first location when locations are loaded - removed
-	// Location is now managed by sidebar context
+	};
 
 	const fetchData = async () => {
+		if (!selectedLocation || !tenant?.id) {
+			setLoading(false);
+			return;
+		}
+
 		setLoading(true);
 		try {
-			// Fetch bookings with location data
+			// Fetch bookings with location data - filtered by selected location
 			const { data: bookingsData, error: bookingsError } = await supabase
 				.from("external_bookings")
 				.select(`
           *,
           location:locations(name)
         `)
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
 				.order("check_in", { ascending: false });
 
-			// Fetch locations
+			// Fetch locations for the current tenant (for property mappings display)
 			const { data: locationsData, error: locationsError } = await supabase
 				.from("locations")
 				.select("*")
+				.eq("tenant_id", tenant.id)
 				.eq("is_active", true)
 				.order("name");
 
 			if (bookingsError) throw bookingsError;
 			if (locationsError) throw locationsError;
 
-			// Fetch property mappings from database
+			// Fetch property mappings from database - filtered by selected location
 			const { data: mappingsData } = await supabase
 				.from("channel_property_mappings")
 				.select(`
           *,
           locations (id, name)
         `)
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
 				.eq("is_active", true);
 
-			// Fetch iCal sync URLs
+			// Fetch iCal sync URLs - filtered by selected location
 			const { data: syncUrlsData } = await supabase
 				.from("booking_sync_urls")
 				.select(`
@@ -320,6 +235,8 @@ export default function BookingChannelsIntegration() {
 					locations (id, name),
 					rooms (id, room_number)
 				`)
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
 				.eq("is_active", true)
 				.order("created_at", { ascending: false });
 
@@ -359,39 +276,47 @@ export default function BookingChannelsIntegration() {
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
-			toast.error("Failed to fetch booking channel data");
+			toast.error(t("bookingChannels.messages.fetchError"));
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const calculateStats = (bookings: ExternalBooking[]): SyncStats => {
-		const sourceBreakdown: Record<string, number> = {};
-		const statusBreakdown: Record<string, number> = {};
-		let recentSync: string | null = null;
+	useEffect(() => {
+		const syncChannelData = async () => {
+			setSyncing(true);
+			try {
+				const { data, error } = await supabase.functions.invoke(
+					"fetch-beds24-bookings",
+				);
 
-		bookings.forEach((booking) => {
-			// Source breakdown
-			sourceBreakdown[booking.source] =
-				(sourceBreakdown[booking.source] || 0) + 1;
-
-			// Status breakdown
-			statusBreakdown[booking.status] =
-				(statusBreakdown[booking.status] || 0) + 1;
-
-			// Find most recent sync
-			if (!recentSync || booking.last_synced_at > recentSync) {
-				recentSync = booking.last_synced_at;
+				if (error) {
+					toast.error("Failed to sync booking channel data");
+				} else {
+					// Refresh the data after sync
+					fetchData();
+				}
+			} catch (error) {
+				console.error("Error syncing booking channel data:", error);
+				toast.error("Failed to sync booking channel data");
+			} finally {
+				setSyncing(false);
 			}
-		});
-
-		return {
-			totalBookings: bookings.length,
-			recentSync,
-			sourceBreakdown,
-			statusBreakdown,
 		};
-	};
+
+		fetchData();
+		setLastSyncTime(new Date());
+
+		// Auto-sync every hour
+		const interval = setInterval(
+			() => {
+				syncChannelData();
+			},
+			60 * 60 * 1000,
+		); // 1 hour in milliseconds
+
+		return () => clearInterval(interval);
+	}, [selectedLocation, tenant?.id]); // Re-fetch when location or tenant changes
 
 	const syncChannelData = async () => {
 		setSyncing(true);
@@ -738,17 +663,14 @@ export default function BookingChannelsIntegration() {
 		}
 	};
 
-	const filteredBookings = !selectedLocation
-		? []
-		: bookings
-				.map((booking) => {
-					const mappedLocation = getLocationFromBooking(booking);
-					return {
-						...booking,
-						mappedLocation: mappedLocation,
-					};
-				})
-				.filter((booking) => booking.mappedLocation?.id === selectedLocation);
+	// No need to filter bookings - they're already filtered by selectedLocation in the query
+	const filteredBookings = bookings.map((booking) => {
+		const mappedLocation = getLocationFromBooking(booking);
+		return {
+			...booking,
+			mappedLocation: mappedLocation,
+		};
+	});
 
 	if (loading) {
 		return <BookingChannelsSkeleton />;
@@ -880,41 +802,7 @@ export default function BookingChannelsIntegration() {
 				</TabsList>
 
 				<TabsContent value="bookings" className="space-y-4">
-					{/* Location Filter */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<MapPin className="size-5" />
-								{t("bookingChannels.locationFilter.title")}
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="flex flex-wrap gap-2">
-								{locations.map((location) => {
-									const locationBookings = bookings.filter((booking) => {
-										const mappedLocation = getLocationFromBooking(booking);
-										return mappedLocation?.id === location.id;
-									}).length;
-
-									return (
-										<Button
-											key={location.id}
-											variant={
-												selectedLocation === location.id ? "default" : "outline"
-											}
-											size="sm"
-											disabled
-											title={t("bookingChannels.locationFilter.switchingNote")}
-										>
-											{location.name} ({locationBookings})
-										</Button>
-									);
-								})}
-							</div>
-						</CardContent>
-					</Card>
-
-					{/* Bookings Table */}
+					{/* Bookings Table - filtered by selected location from AppSidebar */}
 					<Card>
 						<CardHeader>
 							<CardTitle>{t("bookingChannels.bookingsTable.title")}</CardTitle>
