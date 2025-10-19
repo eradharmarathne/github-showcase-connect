@@ -5,12 +5,14 @@ import {
 	Calendar,
 	CheckCircle,
 	Clock,
+	Delete,
 	DollarSign,
 	Eye,
 	Key,
 	MapPin,
 	RefreshCw,
 	Settings as SettingsIcon,
+	Trash2,
 	Users,
 	Wifi,
 } from "lucide-react";
@@ -27,6 +29,13 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -99,10 +108,16 @@ interface ExternalBooking {
 	adults: number;
 	children: number;
 	room_name?: string;
+	room_id?: string | null;
 	location_id?: string;
 	location?: {
 		name: string;
 	};
+	room?: {
+		id: string;
+		room_number: string;
+		room_type: string;
+	} | null;
 	last_synced_at: string;
 	raw_data?: any;
 	mappedLocation?: Location | null;
@@ -157,6 +172,10 @@ export default function BookingChannelsIntegration() {
 	const [icalInputValues, setIcalInputValues] = useState<
 		Record<string, { url: string; source: string }>
 	>({});
+	const [rooms, setRooms] = useState<
+		Array<{ id: string; room_number: string; room_type: string }>
+	>([]);
+	const [mappingRoomId, setMappingRoomId] = useState<string | null>(null);
 
 	const calculateStats = (bookings: ExternalBooking[]): SyncStats => {
 		const sourceBreakdown: Record<string, number> = {};
@@ -199,7 +218,8 @@ export default function BookingChannelsIntegration() {
 				.from("external_bookings")
 				.select(`
           *,
-          location:locations(name)
+          location:locations(name),
+          room:rooms(id, room_number, room_type)
         `)
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
@@ -213,8 +233,18 @@ export default function BookingChannelsIntegration() {
 				.eq("is_active", true)
 				.order("name");
 
+			// Fetch rooms for the selected location
+			const { data: roomsData, error: roomsError } = await supabase
+				.from("rooms")
+				.select("id, room_number, room_type")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.eq("is_active", true)
+				.order("room_number");
+
 			if (bookingsError) throw bookingsError;
 			if (locationsError) throw locationsError;
+			if (roomsError) throw roomsError;
 
 			// Fetch property mappings from database - filtered by selected location
 			const { data: mappingsData } = await supabase
@@ -266,6 +296,7 @@ export default function BookingChannelsIntegration() {
 
 			setBookings(bookingsData || []);
 			setLocations(locationsData || []);
+			setRooms(roomsData || []);
 			setPropertyMappings(transformedMappings);
 			setSyncUrls(syncUrlsData || []);
 
@@ -696,9 +727,34 @@ export default function BookingChannelsIntegration() {
 		}
 	};
 
+	const updateBookingRoomMapping = async (
+		bookingId: string,
+		roomId: string | null,
+	) => {
+		try {
+			const { error } = await supabase
+				.from("external_bookings")
+				.update({ room_id: roomId })
+				.eq("id", bookingId);
+
+			if (error) throw error;
+
+			toast.success(t("bookingChannels.bookingsTable.roomMappedSuccess"));
+			setMappingRoomId(null);
+			fetchData();
+		} catch (error: any) {
+			console.error("Error updating room mapping:", error);
+			toast.error(t("bookingChannels.bookingsTable.roomMappingError"));
+		}
+	};
+
+	console.log("Bookings:", bookings);
+	console.log("Selected Location:", selectedLocation);
+
 	// No need to filter bookings - they're already filtered by selectedLocation in the query
 	const filteredBookings = bookings.map((booking) => {
 		const mappedLocation = getLocationFromBooking(booking);
+			console.log("Locations:", mappedLocation);
 		return {
 			...booking,
 			mappedLocation: mappedLocation,
@@ -710,7 +766,7 @@ export default function BookingChannelsIntegration() {
 	}
 
 	return (
-		<div className="space-y-6 px-4 sm:px-6 md:px-8 pt-8">
+		<div className="space-y-6 px-4 sm:px-6 md:px-8 pt-8 pb-20 sm:pb-0">
 			{/* Header */}
 			<div className="flex items-center gap-2">
 				<Button
@@ -882,15 +938,69 @@ export default function BookingChannelsIntegration() {
 											<TableRow key={booking.id} className="hover:bg-muted/50">
 												<TableCell className="font-medium">
 													<div className="space-y-1">
-														<div className="text-sm font-medium">
-															{booking.room_name ||
-																t(
-																	"bookingChannels.bookingsTable.unknownProperty",
-																)}
-														</div>
-														<div className="text-xs text-muted-foreground">
-															ID: {booking.external_id}
-														</div>
+														{!booking.room_id && mappingRoomId === booking.id ? (
+															<div className="flex items-center gap-2">
+																<Select
+																	onValueChange={(value) =>
+																		updateBookingRoomMapping(booking.id, value)
+																	}
+																>
+																	<SelectTrigger className="w-full h-8 text-xs">
+																		<SelectValue
+																			placeholder={t(
+																				"bookingChannels.bookingsTable.selectRoom",
+																			)}
+																		/>
+																	</SelectTrigger>
+																	<SelectContent>
+																		{rooms.map((room) => (
+																			<SelectItem key={room.id} value={room.id}>
+																				{room.room_number} - {room.room_type}
+																			</SelectItem>
+																		))}
+																	</SelectContent>
+																</Select>
+																<Button
+																	variant="ghost"
+																	size="sm"
+																	className="h-8 px-2"
+																	onClick={() => setMappingRoomId(null)}
+																>
+																	{t("bookingChannels.bookingsTable.cancel")}
+																</Button>
+															</div>
+														) : (
+															<div>
+																<div className="text-sm font-medium flex items-center gap-2">
+																	{booking.room_id && booking.room ? (
+																		<>
+																			{booking.room.room_number} - {booking.room.room_type}
+																		</>
+																	) : (
+																		<>
+																			{booking.room_name ||
+																				t(
+																					"bookingChannels.bookingsTable.unknownProperty",
+																				)}
+																			{rooms.length > 0 && (
+																				<Button
+																					variant="outline"
+																					size="sm"
+																					className="h-6 text-xs px-2"
+																					onClick={() => setMappingRoomId(booking.id)}
+																				>
+																					<Bed className="size-3 mr-1" />
+																					{t("bookingChannels.bookingsTable.mapRoom")}
+																				</Button>
+																			)}
+																		</>
+																	)}
+																</div>
+																<div className="text-xs text-muted-foreground">
+																	ID: {booking.external_id}
+																</div>
+															</div>
+														)}
 													</div>
 												</TableCell>
 												<TableCell>
@@ -1036,16 +1146,25 @@ export default function BookingChannelsIntegration() {
 									</div>
 									<div>
 										<h4 className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
-											Property
+											{t("bookingChannels.bookingDialog.propertyRoom")}
 										</h4>
 										<div className="mt-1">
 											<p className="font-medium">
-												{selectedBooking.room_name || "Unknown"}
+												{selectedBooking.room_id && selectedBooking.room
+													? `${selectedBooking.room.room_number} - ${selectedBooking.room.room_type}`
+													: selectedBooking.room_name ||
+														t("bookingChannels.bookingDialog.unknownProperty")}
 											</p>
 											<p className="text-sm text-muted-foreground">
 												{selectedBooking.mappedLocation?.name ||
-													"Unmapped Location"}
+													selectedBooking.location?.name ||
+													t("bookingChannels.bookingDialog.unmappedLocation")}
 											</p>
+											{!selectedBooking.room_id && (
+												<Badge variant="secondary" className="text-xs mt-1">
+													{t("bookingChannels.bookingDialog.notMappedToRoom")}
+												</Badge>
+											)}
 										</div>
 									</div>
 								</div>
@@ -1427,7 +1546,7 @@ export default function BookingChannelsIntegration() {
 																	variant="destructive"
 																	onClick={() => deleteSyncUrl(syncUrl.id)}
 																>
-																	<AlertCircle className="size-4" />
+																	<Trash2 className="size-4" />
 																</Button>
 															</div>
 														</div>
