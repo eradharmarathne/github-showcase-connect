@@ -138,53 +138,45 @@ serve(async (req) => {
 		const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-		// Fetch active locations from DB for mapping
-		const { data: locations, error: locationsError } = await supabase
-			.from("locations")
-			.select("id, name, tenant_id")
+		// Fetch active Beds24 property mappings for resolving properties to locations
+		const { data: propertyMappings, error: mappingsError } = await supabase
+			.from("beds24_property_mappings")
+			.select("beds24_property_id, location_id, tenant_id, beds24_property_name")
 			.eq("is_active", true);
 
-		if (locationsError) {
-			console.error("Failed to fetch locations:", locationsError);
+		if (mappingsError) {
+			console.error("Failed to fetch property mappings:", mappingsError);
+			throw new Error("Cannot sync without property mappings configured");
 		}
 
-		// Helper: map Beds24 property name to our location (returns both id and tenant_id)
-		const resolveLocation = (propertyName: string): { id: string; tenant_id: string } | null => {
-			if (!propertyName || !locations) return null;
-			const name = propertyName.toLowerCase();
-			// Adjust these rules to your naming
-			if (name.includes("rusty") || name.includes("bunk")) {
-				const location = locations.find((l) => l.name.toLowerCase().includes("rusty"));
-				return location ? { id: location.id, tenant_id: location.tenant_id } : null;
-			}
-			if (
-				name.includes("asaliya") ||
-				name.includes("luxury") ||
-				name.includes("villa")
-			) {
-				const location = locations.find((l) => l.name.toLowerCase().includes("asaliya"));
-				return location ? { id: location.id, tenant_id: location.tenant_id } : null;
-			}
-			return null;
-		};		// 1) Fetch properties to build an id->name map
-		console.log("Fetching properties from Beds24 API v2...");
-		const propsJson: unknown = await beds24Request("/properties");
-		const properties: V2Property[] = Array.isArray((propsJson as any)?.data)
-			? (propsJson as any).data
-			: Array.isArray(propsJson)
-				? (propsJson as any)
-				: [];
-
-		const propertyIdToName = new Map<string, string>();
-		for (const p of properties) {
-			if (p?.id != null) {
-				propertyIdToName.set(String(p.id), p.name ?? "");
-			}
+		if (!propertyMappings || propertyMappings.length === 0) {
+			console.warn("No active Beds24 property mappings found");
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: "No Beds24 property mappings configured. Please set up property mappings in the Booking Channels Integration page.",
+					timestamp: new Date().toISOString(),
+				}),
+				{
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+					status: 400,
+				},
+			);
 		}
 
-		console.log(`Fetched ${propertyIdToName.size} properties`);
+		// Build a map of Beds24 property ID -> location details
+		const propertyIdToLocation = new Map<string, { location_id: string; tenant_id: string; property_name: string }>();
+		for (const mapping of propertyMappings) {
+			propertyIdToLocation.set(mapping.beds24_property_id, {
+				location_id: mapping.location_id,
+				tenant_id: mapping.tenant_id,
+				property_name: mapping.beds24_property_name,
+			});
+		}
 
-		// 2) Fetch bookings
+		console.log(`Loaded ${propertyIdToLocation.size} active Beds24 property mappings`);
+
+		// Fetch bookings from Beds24 API
 		console.log("Fetching bookings from Beds24 API v2...");
 		const bookingsJson: unknown = await beds24Request("/bookings");
 		const bookings: V2Booking[] = Array.isArray((bookingsJson as any)?.data)
@@ -257,15 +249,22 @@ serve(async (req) => {
 					continue;
 				}
 
-			// Property mapping
+			// Property mapping using beds24_property_mappings table
 			const propIdRaw = b.propertyId ?? b.propId;
 			const propId = propIdRaw != null ? String(propIdRaw) : undefined;
-			const propertyName = propId ? (propertyIdToName.get(propId) ?? "") : "";
-			const location = resolveLocation(propertyName);
 			
-			// Skip if we can't resolve location (and thus tenant_id)
-			if (!location) {
-				console.warn(`Skipping booking ${externalId} - cannot resolve location for property: ${propertyName}`);
+			// Skip if no property ID
+			if (!propId) {
+				console.warn(`Skipping booking ${externalId} - no property ID found`);
+				continue;
+			}
+			
+			// Look up location from property mappings
+			const locationMapping = propertyIdToLocation.get(propId);
+			
+			// Skip if we can't resolve location (no mapping configured for this property)
+			if (!locationMapping) {
+				console.warn(`Skipping booking ${externalId} - no mapping found for Beds24 property ID: ${propId}. Please configure this property in the Booking Channels Integration page.`);
 				continue;
 			}
 
@@ -290,7 +289,7 @@ serve(async (req) => {
 
 			const externalBookingData: Record<string, unknown> = {
 				external_id: externalId,
-				property_id: propId ?? "unknown",
+				property_id: propId,
 				source,
 				guest_name: guestName,
 				check_in: checkInDate.toISOString(),
@@ -298,25 +297,27 @@ serve(async (req) => {
 				status,
 				total_amount: totalAmount,
 				currency: "USD", // Beds24 v2 does not guarantee currency; adjust if needed
-				location_id: location.id,
-				tenant_id: location.tenant_id,
+				location_id: locationMapping.location_id,
+				tenant_id: locationMapping.tenant_id,
 				room_name: roomName ?? null,
 				adults,
 				children,
 				raw_data: b as JsonRecord,
 				last_synced_at: new Date().toISOString(),
-			};				const { error: upsertError } = await supabase
-					.from("external_bookings")
-					.upsert(externalBookingData, {
-						onConflict: "external_id,property_id,source",
-					});
+			};
 
-				if (upsertError) {
-					console.error(`Failed to upsert booking ${externalId}:`, upsertError);
-				} else {
-					totalSynced++;
-					if (propertyName) syncDetails.push(`${propertyName}: 1`);
-				}
+			const { error: upsertError } = await supabase
+				.from("external_bookings")
+				.upsert(externalBookingData, {
+					onConflict: "external_id,property_id,source",
+				});
+
+			if (upsertError) {
+				console.error(`Failed to upsert booking ${externalId}:`, upsertError);
+			} else {
+				totalSynced++;
+				syncDetails.push(`${locationMapping.property_name}: 1`);
+			}
 			} catch (bookingError) {
 				console.error("Error processing booking:", bookingError);
 			}
