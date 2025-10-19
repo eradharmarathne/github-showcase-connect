@@ -1213,7 +1213,7 @@ export default function BookingChannelsIntegration() {
 				</TabsContent>
 
 				<TabsContent value="settings" className="space-y-4">
-					{/* Property Mapping Section */}
+					{/* Property Mapping Section - filtered by selected location */}
 					<Card>
 						<CardHeader>
 							<div className="flex items-center justify-between">
@@ -1224,94 +1224,98 @@ export default function BookingChannelsIntegration() {
 									</CardTitle>
 									<CardDescription>
 										Map your booking channel properties to internal locations
-										and rooms
+										and rooms for{" "}
+										{locations.find((l) => l.id === selectedLocation)?.name ||
+											"selected location"}
 									</CardDescription>
 								</div>
 							</div>
 						</CardHeader>
 						<CardContent className="space-y-6">
-							{/* Location-based Property Mappings */}
+							{/* Location-based Property Mappings - show only selected location */}
 							<div className="space-y-4">
-								{locations.map((location) => {
-									const mapping = propertyMappings.find(
-										(m) => m.locationName === location.name,
-									);
-									return (
-										<Card
-											key={location.id}
-											className="border-l-4 border-l-primary"
-										>
-											<CardHeader className="pb-3">
-												<div className="flex items-center justify-between">
-													<CardTitle className="text-base md:text-lg lg:text-xl">
-														{location.name}
-													</CardTitle>
-													<Badge variant={mapping ? "default" : "secondary"}>
-														{mapping
-															? `${mapping.channelProperties.length} Properties`
-															: "Not Mapped"}
-													</Badge>
-												</div>
-											</CardHeader>
-											<CardContent className="space-y-3">
-												{mapping && (
-													<div className="space-y-2">
-														<Label className="text-sm font-medium">
-															Mapped Channel Properties:
-														</Label>
-														<div className="flex flex-wrap gap-2">
-															{mapping.channelProperties.map(
-																(property, index) => (
-																	<Badge
-																		key={index}
-																		variant="outline"
-																		className="text-xs"
-																	>
-																		{property}
-																	</Badge>
-																),
-															)}
+								{locations
+									.filter((location) => location.id === selectedLocation)
+									.map((location) => {
+										const mapping = propertyMappings.find(
+											(m) => m.locationName === location.name,
+										);
+										return (
+											<Card
+												key={location.id}
+												className="border-l-4 border-l-primary"
+											>
+												<CardHeader className="pb-3">
+													<div className="flex items-center justify-between">
+														<CardTitle className="text-base md:text-lg lg:text-xl">
+															{location.name}
+														</CardTitle>
+														<Badge variant={mapping ? "default" : "secondary"}>
+															{mapping
+																? `${mapping.channelProperties.length} Properties`
+																: "Not Mapped"}
+														</Badge>
+													</div>
+												</CardHeader>
+												<CardContent className="space-y-3">
+													{mapping && (
+														<div className="space-y-2">
+															<Label className="text-sm font-medium">
+																Mapped Channel Properties:
+															</Label>
+															<div className="flex flex-wrap gap-2">
+																{mapping.channelProperties.map(
+																	(property, index) => (
+																		<Badge
+																			key={index}
+																			variant="outline"
+																			className="text-xs"
+																		>
+																			{property}
+																		</Badge>
+																	),
+																)}
+															</div>
+														</div>
+													)}
+													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+														<div>
+															<Label
+																htmlFor={`property-${location.id}`}
+																className="text-sm"
+															>
+																Add Channel Property Name
+															</Label>
+															<Input
+																id={`property-${location.id}`}
+																placeholder="e.g., Rusty Bunk Villa"
+																className="mt-1"
+																value={propertyInputValues[location.id] || ""}
+																onChange={(e) =>
+																	setPropertyInputValues((prev) => ({
+																		...prev,
+																		[location.id]: e.target.value,
+																	}))
+																}
+															/>
+														</div>
+														<div className="flex items-end">
+															<Button
+																size="sm"
+																className="w-full"
+																onClick={() => addPropertyMapping(location.id)}
+															>
+																Add Property Mapping
+															</Button>
 														</div>
 													</div>
-												)}
-												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-													<div>
-														<Label
-															htmlFor={`property-${location.id}`}
-															className="text-sm"
-														>
-															Add Channel Property Name
-														</Label>
-														<Input
-															id={`property-${location.id}`}
-															placeholder="e.g., Rusty Bunk Villa"
-															className="mt-1"
-															value={propertyInputValues[location.id] || ""}
-															onChange={(e) =>
-																setPropertyInputValues((prev) => ({
-																	...prev,
-																	[location.id]: e.target.value,
-																}))
-															}
-														/>
-													</div>
-													<div className="flex items-end">
-														<Button
-															size="sm"
-															className="w-full"
-															onClick={() => addPropertyMapping(location.id)}
-														>
-															Add Property Mapping
-														</Button>
-													</div>
-												</div>
-											</CardContent>
-										</Card>
-									);
-								})}
+												</CardContent>
+											</Card>
+										);
+									})}
 							</div>
 
-							{/* iCal Sync Management Section */}
+							{/* iCal Sync Management Section - filtered by selected location */}
 							<Card>
 								<CardHeader>
 									<div className="flex items-center justify-between">
@@ -1321,193 +1325,202 @@ export default function BookingChannelsIntegration() {
 												iCal Calendar Sync
 											</CardTitle>
 											<CardDescription>
-												Sync external calendar URLs from booking platforms
+												Sync external calendar URLs from booking platforms for{" "}
+												{locations.find((l) => l.id === selectedLocation)
+													?.name || "selected location"}
 											</CardDescription>
 										</div>
 									</div>
 								</CardHeader>
 								<CardContent className="space-y-6">
-									{/* iCal URLs Management */}
+									{/* iCal URLs Management - show only selected location */}
 									<div className="space-y-4">
-										{locations.map((location) => {
-											const locationSyncUrls = syncUrls.filter(
-												(url) => url.location_id === location.id,
-											);
-											return (
-												<Card
-													key={location.id}
-													className="border-l-4 border-l-blue-500"
-												>
-													<CardHeader className="pb-3">
-														<div className="flex items-center justify-between">
-															<CardTitle className="text-base md:text-lg lg:text-xl">
-																{location.name}
-															</CardTitle>
-															<Badge
-																variant={
-																	locationSyncUrls.length > 0
-																		? "default"
-																		: "secondary"
-																}
-															>
-																{locationSyncUrls.length > 0
-																	? `${locationSyncUrls.length} Sync URLs`
-																	: "No Sync URLs"}
-															</Badge>
-														</div>
-													</CardHeader>
-													<CardContent className="space-y-3">
-														<div className="grid grid-cols-1 gap-4">
-															{/* Add New Sync URL Form */}
-															<div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-																<div>
-																	<Label
-																		htmlFor={`ical-url-${location.id}`}
-																		className="text-sm"
-																	>
-																		iCal URL
-																	</Label>
-																	<Input
-																		id={`ical-url-${location.id}`}
-																		placeholder="https://ical.booking.com/..."
-																		className="mt-1"
-																		value={
-																			icalInputValues[location.id]?.url || ""
-																		}
-																		onChange={(e) =>
-																			setIcalInputValues((prev) => ({
-																				...prev,
-																				[location.id]: {
-																					...prev[location.id],
-																					url: e.target.value,
-																				},
-																			}))
-																		}
-																	/>
-																</div>
-																<div>
-																	<Label
-																		htmlFor={`source-${location.id}`}
-																		className="text-sm"
-																	>
-																		Source
-																	</Label>
-																	<select
-																		id={`source-${location.id}`}
-																		className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background"
-																		value={
-																			icalInputValues[location.id]?.source ||
-																			"ical"
-																		}
-																		onChange={(e) =>
-																			setIcalInputValues((prev) => ({
-																				...prev,
-																				[location.id]: {
-																					...prev[location.id],
-																					source: e.target.value,
-																				},
-																			}))
-																		}
-																	>
-																		<option value="ical">iCal</option>
-																		<option value="booking_com">
-																			Booking.com
-																		</option>
-																		<option value="airbnb">Airbnb</option>
-																		<option value="expedia">Expedia</option>
-																		<option value="beds24">Beds24</option>
-																	</select>
-																</div>
-																<div className="flex items-end">
-																	<Button
-																		size="sm"
-																		className="w-full"
-																		onClick={() => addIcalSyncUrl(location.id)}
-																	>
-																		Add Sync URL
-																	</Button>
-																</div>
+										{locations
+											.filter((location) => location.id === selectedLocation)
+											.map((location) => {
+												const locationSyncUrls = syncUrls.filter(
+													(url) => url.location_id === location.id,
+												);
+												return (
+													<Card
+														key={location.id}
+														className="border-l-4 border-l-blue-500"
+													>
+														<CardHeader className="pb-3">
+															<div className="flex items-center justify-between">
+																<CardTitle className="text-base md:text-lg lg:text-xl">
+																	{location.name}
+																</CardTitle>
+																<Badge
+																	variant={
+																		locationSyncUrls.length > 0
+																			? "default"
+																			: "secondary"
+																	}
+																>
+																	{locationSyncUrls.length > 0
+																		? `${locationSyncUrls.length} Sync URLs`
+																		: "No Sync URLs"}
+																</Badge>
 															</div>
-
-															{/* Display Existing Sync URLs */}
-															{locationSyncUrls.length > 0 && (
-																<div className="space-y-2 mt-4">
-																	<Label className="text-sm font-medium">
-																		Active Sync URLs:
-																	</Label>
-																	<div className="space-y-2">
-																		{locationSyncUrls.map((syncUrl) => (
-																			<div
-																				key={syncUrl.id}
-																				className="flex items-center justify-between p-3 bg-muted rounded-lg"
-																			>
-																				<div className="flex-1 min-w-0">
-																					<div className="flex items-center gap-2 mb-1">
-																						<Badge
-																							className={getSourceColor(
-																								syncUrl.source,
-																							)}
-																						>
-																							{syncUrl.source.replace("_", ".")}
-																						</Badge>
-																						{syncUrl.room_number && (
-																							<Badge
-																								variant="outline"
-																								className="text-xs"
-																							>
-																								Room:{" "}
-																								{syncUrl.rooms?.room_number}
-																							</Badge>
-																						)}
-																					</div>
-																					<div className="text-xs text-muted-foreground truncate">
-																						{syncUrl.ical_url}
-																					</div>
-																					{syncUrl.last_synced_at && (
-																						<div className="text-xs text-muted-foreground mt-1">
-																							Last synced:{" "}
-																							{format(
-																								new Date(
-																									syncUrl.last_synced_at,
-																								),
-																								"MMM dd, HH:mm",
-																							)}
-																						</div>
-																					)}
-																				</div>
-																				<div className="flex gap-2 ml-4">
-																					<Button
-																						size="sm"
-																						variant="outline"
-																						onClick={() =>
-																							manualSyncIcal(syncUrl.id)
-																						}
-																						disabled={syncing}
-																					>
-																						<RefreshCw
-																							className={`size-4 ${syncing ? "animate-spin" : ""}`}
-																						/>
-																					</Button>
-																					<Button
-																						size="sm"
-																						variant="destructive"
-																						onClick={() =>
-																							deleteSyncUrl(syncUrl.id)
-																						}
-																					>
-																						<AlertCircle className="size-4" />
-																					</Button>
-																				</div>
-																			</div>
-																		))}
+														</CardHeader>
+														<CardContent className="space-y-3">
+															<div className="grid grid-cols-1 gap-4">
+																{/* Add New Sync URL Form */}
+																<div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+																	<div>
+																		<Label
+																			htmlFor={`ical-url-${location.id}`}
+																			className="text-sm"
+																		>
+																			iCal URL
+																		</Label>
+																		<Input
+																			id={`ical-url-${location.id}`}
+																			placeholder="https://ical.booking.com/..."
+																			className="mt-1"
+																			value={
+																				icalInputValues[location.id]?.url || ""
+																			}
+																			onChange={(e) =>
+																				setIcalInputValues((prev) => ({
+																					...prev,
+																					[location.id]: {
+																						...prev[location.id],
+																						url: e.target.value,
+																					},
+																				}))
+																			}
+																		/>
+																	</div>
+																	<div>
+																		<Label
+																			htmlFor={`source-${location.id}`}
+																			className="text-sm"
+																		>
+																			Source
+																		</Label>
+																		<select
+																			id={`source-${location.id}`}
+																			className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background"
+																			value={
+																				icalInputValues[location.id]?.source ||
+																				"ical"
+																			}
+																			onChange={(e) =>
+																				setIcalInputValues((prev) => ({
+																					...prev,
+																					[location.id]: {
+																						...prev[location.id],
+																						source: e.target.value,
+																					},
+																				}))
+																			}
+																		>
+																			<option value="ical">iCal</option>
+																			<option value="booking_com">
+																				Booking.com
+																			</option>
+																			<option value="airbnb">Airbnb</option>
+																			<option value="expedia">Expedia</option>
+																			<option value="beds24">Beds24</option>
+																		</select>
+																	</div>
+																	<div className="flex items-end">
+																		<Button
+																			size="sm"
+																			className="w-full"
+																			onClick={() =>
+																				addIcalSyncUrl(location.id)
+																			}
+																		>
+																			Add Sync URL
+																		</Button>
 																	</div>
 																</div>
-															)}
-														</div>
-													</CardContent>
-												</Card>
-											);
-										})}
+
+																{/* Display Existing Sync URLs */}
+																{locationSyncUrls.length > 0 && (
+																	<div className="space-y-2 mt-4">
+																		<Label className="text-sm font-medium">
+																			Active Sync URLs:
+																		</Label>
+																		<div className="space-y-2">
+																			{locationSyncUrls.map((syncUrl) => (
+																				<div
+																					key={syncUrl.id}
+																					className="flex items-center justify-between p-3 bg-muted rounded-lg"
+																				>
+																					<div className="flex-1 min-w-0">
+																						<div className="flex items-center gap-2 mb-1">
+																							<Badge
+																								className={getSourceColor(
+																									syncUrl.source,
+																								)}
+																							>
+																								{syncUrl.source.replace(
+																									"_",
+																									".",
+																								)}
+																							</Badge>
+																							{syncUrl.room_number && (
+																								<Badge
+																									variant="outline"
+																									className="text-xs"
+																								>
+																									Room:{" "}
+																									{syncUrl.rooms?.room_number}
+																								</Badge>
+																							)}
+																						</div>
+																						<div className="text-xs text-muted-foreground truncate">
+																							{syncUrl.ical_url}
+																						</div>
+																						{syncUrl.last_synced_at && (
+																							<div className="text-xs text-muted-foreground mt-1">
+																								Last synced:{" "}
+																								{format(
+																									new Date(
+																										syncUrl.last_synced_at,
+																									),
+																									"MMM dd, HH:mm",
+																								)}
+																							</div>
+																						)}
+																					</div>
+																					<div className="flex gap-2 ml-4">
+																						<Button
+																							size="sm"
+																							variant="outline"
+																							onClick={() =>
+																								manualSyncIcal(syncUrl.id)
+																							}
+																							disabled={syncing}
+																						>
+																							<RefreshCw
+																								className={`size-4 ${syncing ? "animate-spin" : ""}`}
+																							/>
+																						</Button>
+																						<Button
+																							size="sm"
+																							variant="destructive"
+																							onClick={() =>
+																								deleteSyncUrl(syncUrl.id)
+																							}
+																						>
+																							<AlertCircle className="size-4" />
+																						</Button>
+																					</div>
+																				</div>
+																			))}
+																		</div>
+																	</div>
+																)}
+															</div>
+														</CardContent>
+													</Card>
+												);
+											})}
 									</div>
 								</CardContent>
 							</Card>
