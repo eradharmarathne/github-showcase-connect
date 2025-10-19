@@ -284,16 +284,35 @@ export default function BookingChannelsIntegration() {
 
 	useEffect(() => {
 		const syncChannelData = async () => {
+			if (!tenant?.id) {
+				console.log("No tenant ID, skipping sync");
+				return;
+			}
+
 			setSyncing(true);
 			try {
-				const { data, error } = await supabase.functions.invoke(
+				const response = await supabase.functions.invoke(
 					"fetch-beds24-bookings",
+					{
+						body: { tenant_id: tenant.id },
+					},
 				);
 
-				if (error) {
+				// Check for "NO_MAPPINGS" response (this is expected if not configured yet)
+				const responseData = response.data as {
+					success?: boolean;
+					error?: string;
+					code?: string;
+				};
+
+				if (responseData?.code === "NO_MAPPINGS") {
+					console.info("ℹ️ No Beds24 property mappings configured yet");
+					// Don't show error - this is expected on first load
+				} else if (response.error) {
+					console.error("Sync error:", response.error);
 					toast.error("Failed to sync booking channel data");
-				} else {
-					// Refresh the data after sync
+				} else if (responseData?.success !== false) {
+					// Successful sync - refresh the data
 					fetchData();
 				}
 			} catch (error) {
@@ -319,15 +338,29 @@ export default function BookingChannelsIntegration() {
 	}, [selectedLocation, tenant?.id]); // Re-fetch when location or tenant changes
 
 	const syncChannelData = async () => {
+		if (!tenant?.id) {
+			toast.error("No tenant information available");
+			return;
+		}
+
 		setSyncing(true);
 		try {
-			const { data, error } = await supabase.functions.invoke(
-				"fetch-beds24-bookings",
-			);
+			const response = await supabase.functions.invoke("fetch-beds24-bookings", {
+				body: { tenant_id: tenant.id },
+			});
 
-			if (error) {
+			const responseData = response.data as {
+				success?: boolean;
+				error?: string;
+				code?: string;
+			};
+
+			if (responseData?.code === "NO_MAPPINGS") {
+				toast.error("Please configure Beds24 property mappings in the Settings tab first");
+			} else if (response.error) {
+				console.error("Sync error:", response.error);
 				toast.error(t("bookingChannels.messages.syncError"));
-			} else {
+			} else if (responseData?.success !== false) {
 				toast.success(t("bookingChannels.messages.syncSuccess"));
 				// Refresh the data after sync
 				fetchData();
@@ -1218,10 +1251,10 @@ export default function BookingChannelsIntegration() {
 						<div>
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<SettingsIcon className="size-5" />
-								Beds24 Property Mapping
+								 Property Mapping
 							</h3>
 							<p className="text-sm text-muted-foreground mt-1">
-								Map your Beds24 property name to this location
+								Map your property name to this location
 							</p>
 						</div>
 
@@ -1251,7 +1284,7 @@ export default function BookingChannelsIntegration() {
 											<div className="flex-1">
 												<Input
 													id={`property-${location.id}`}
-													placeholder="Enter Beds24 property name"
+													placeholder="Enter property name"
 													value={propertyInputValues[location.id] || ""}
 													onChange={(e) =>
 														setPropertyInputValues((prev) => ({
@@ -1330,7 +1363,6 @@ export default function BookingChannelsIntegration() {
 												<option value="booking_com">Booking.com</option>
 												<option value="airbnb">Airbnb</option>
 												<option value="expedia">Expedia</option>
-												<option value="beds24">Beds24</option>
 											</select>
 											<Button
 												size="default"

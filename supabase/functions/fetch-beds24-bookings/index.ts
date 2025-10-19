@@ -133,16 +133,37 @@ serve(async (req) => {
 	try {
 		console.log("Starting Beds24 (API v2) bookings sync...");
 
+		// Parse request body to get tenant_id if provided
+		let requestBody: { tenant_id?: string } = {};
+		try {
+			if (req.method === "POST") {
+				requestBody = await req.json();
+			}
+		} catch (e) {
+			// If body parsing fails, continue without tenant_id (will fetch all)
+			console.log("No request body provided, syncing all tenants");
+		}
+
+		const tenantId = requestBody.tenant_id;
+		console.log("Tenant ID filter:", tenantId || "ALL");
+
 		// Initialize Supabase client
 		const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 		const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 		// Fetch active Beds24 property mappings for resolving properties to locations
-		const { data: propertyMappings, error: mappingsError } = await supabase
+		// Filter by tenant_id if provided
+		let query = supabase
 			.from("beds24_property_mappings")
 			.select("beds24_property_id, location_id, tenant_id, beds24_property_name")
 			.eq("is_active", true);
+
+		if (tenantId) {
+			query = query.eq("tenant_id", tenantId);
+		}
+
+		const { data: propertyMappings, error: mappingsError } = await query;
 
 		if (mappingsError) {
 			console.error("Failed to fetch property mappings:", mappingsError);
@@ -150,16 +171,17 @@ serve(async (req) => {
 		}
 
 		if (!propertyMappings || propertyMappings.length === 0) {
-			console.warn("No active Beds24 property mappings found");
+			console.warn(`No active Beds24 property mappings found${tenantId ? ` for tenant ${tenantId}` : ""}`);
 			return new Response(
 				JSON.stringify({
 					success: false,
-					error: "No Beds24 property mappings configured. Please set up property mappings in the Booking Channels Integration page.",
+					error: `No Beds24 property mappings configured${tenantId ? " for your account" : ""}. Please set up property mappings in the Settings tab.`,
+					code: "NO_MAPPINGS",
 					timestamp: new Date().toISOString(),
 				}),
 				{
 					headers: { ...corsHeaders, "Content-Type": "application/json" },
-					status: 400,
+					status: 200, // Return 200 with error info instead of 400
 				},
 			);
 		}
