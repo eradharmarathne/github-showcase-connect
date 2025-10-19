@@ -141,38 +141,32 @@ serve(async (req) => {
 		// Fetch active locations from DB for mapping
 		const { data: locations, error: locationsError } = await supabase
 			.from("locations")
-			.select("*")
+			.select("id, name, tenant_id")
 			.eq("is_active", true);
 
 		if (locationsError) {
 			console.error("Failed to fetch locations:", locationsError);
 		}
 
-		// Helper: map Beds24 property name to our location_id
-		const resolveLocationId = (propertyName?: string | null) => {
+		// Helper: map Beds24 property name to our location (returns both id and tenant_id)
+		const resolveLocation = (propertyName: string): { id: string; tenant_id: string } | null => {
 			if (!propertyName || !locations) return null;
 			const name = propertyName.toLowerCase();
 			// Adjust these rules to your naming
 			if (name.includes("rusty") || name.includes("bunk")) {
-				return (
-					locations.find((l) => l.name.toLowerCase().includes("rusty"))?.id ??
-					null
-				);
+				const location = locations.find((l) => l.name.toLowerCase().includes("rusty"));
+				return location ? { id: location.id, tenant_id: location.tenant_id } : null;
 			}
 			if (
 				name.includes("asaliya") ||
 				name.includes("luxury") ||
 				name.includes("villa")
 			) {
-				return (
-					locations.find((l) => l.name.toLowerCase().includes("asaliya"))?.id ??
-					null
-				);
+				const location = locations.find((l) => l.name.toLowerCase().includes("asaliya"));
+				return location ? { id: location.id, tenant_id: location.tenant_id } : null;
 			}
 			return null;
-		};
-
-		// 1) Fetch properties to build an id->name map
+		};		// 1) Fetch properties to build an id->name map
 		console.log("Fetching properties from Beds24 API v2...");
 		const propsJson: unknown = await beds24Request("/properties");
 		const properties: V2Property[] = Array.isArray((propsJson as any)?.data)
@@ -263,50 +257,55 @@ serve(async (req) => {
 					continue;
 				}
 
-				// Property mapping
-				const propIdRaw = b.propertyId ?? b.propId;
-				const propId = propIdRaw != null ? String(propIdRaw) : undefined;
-				const propertyName = propId ? (propertyIdToName.get(propId) ?? "") : "";
-				const locationId = resolveLocationId(propertyName);
+			// Property mapping
+			const propIdRaw = b.propertyId ?? b.propId;
+			const propId = propIdRaw != null ? String(propIdRaw) : undefined;
+			const propertyName = propId ? (propertyIdToName.get(propId) ?? "") : "";
+			const location = resolveLocation(propertyName);
+			
+			// Skip if we can't resolve location (and thus tenant_id)
+			if (!location) {
+				console.warn(`Skipping booking ${externalId} - cannot resolve location for property: ${propertyName}`);
+				continue;
+			}
 
-				const adults = b.numAdult ?? b.adults ?? 1;
-				const children = b.numChild ?? b.children ?? 0;
+			const adults = b.numAdult ?? b.adults ?? 1;
+			const children = b.numChild ?? b.children ?? 0;
 
-				const guestName =
-					b.guestName ||
-					b.name ||
-					b.guestFirstName ||
-					b.primaryGuest?.name ||
-					"Unknown Guest";
+			const guestName =
+				b.guestName ||
+				b.name ||
+				b.guestFirstName ||
+				b.primaryGuest?.name ||
+				"Unknown Guest";
 
-				const roomName =
-					b.roomName ||
-					b.roomType?.name ||
-					(b.roomId != null ? `Room ${b.roomId}` : null);
+			const roomName =
+				b.roomName ||
+				b.roomType?.name ||
+				(b.roomId != null ? `Room ${b.roomId}` : null);
 
-				const totalAmount = b.totalAmount ?? b.total ?? b.price ?? 0;
+			const totalAmount = b.totalAmount ?? b.total ?? b.price ?? 0;
 
-				const status = (b.status ?? "unknown").toString().toLowerCase();
+			const status = (b.status ?? "unknown").toString().toLowerCase();
 
-				const externalBookingData: Record<string, unknown> = {
-					external_id: externalId,
-					property_id: propId ?? "unknown",
-					source,
-					guest_name: guestName,
-					check_in: checkInDate.toISOString(),
-					check_out: checkOutDate.toISOString(),
-					status,
-					total_amount: totalAmount,
-					currency: "USD", // Beds24 v2 does not guarantee currency; adjust if needed
-					location_id: locationId,
-					room_name: roomName ?? null,
-					adults,
-					children,
-					raw_data: b as JsonRecord,
-					last_synced_at: new Date().toISOString(),
-				};
-
-				const { error: upsertError } = await supabase
+			const externalBookingData: Record<string, unknown> = {
+				external_id: externalId,
+				property_id: propId ?? "unknown",
+				source,
+				guest_name: guestName,
+				check_in: checkInDate.toISOString(),
+				check_out: checkOutDate.toISOString(),
+				status,
+				total_amount: totalAmount,
+				currency: "USD", // Beds24 v2 does not guarantee currency; adjust if needed
+				location_id: location.id,
+				tenant_id: location.tenant_id,
+				room_name: roomName ?? null,
+				adults,
+				children,
+				raw_data: b as JsonRecord,
+				last_synced_at: new Date().toISOString(),
+			};				const { error: upsertError } = await supabase
 					.from("external_bookings")
 					.upsert(externalBookingData, {
 						onConflict: "external_id,property_id,source",
