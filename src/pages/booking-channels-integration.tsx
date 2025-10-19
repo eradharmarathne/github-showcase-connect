@@ -1212,426 +1212,305 @@ export default function BookingChannelsIntegration() {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="settings" className="space-y-4">
-					{/* Property Mapping Section - filtered by selected location */}
-					<Card>
-						<CardHeader>
-							<div className="flex items-center justify-between">
-								<div>
-									<CardTitle className="flex items-center gap-2">
-										<SettingsIcon className="size-5" />
-										Channel Property Mapping
-									</CardTitle>
-									<CardDescription>
-										Map your booking channel properties to internal locations
-										and rooms for{" "}
-										{locations.find((l) => l.id === selectedLocation)?.name ||
-											"selected location"}
-									</CardDescription>
-								</div>
-							</div>
-						</CardHeader>
-						<CardContent className="space-y-6">
-							{/* Location-based Property Mappings - show only selected location */}
-							<div className="space-y-4">
-								{locations
-									.filter((location) => location.id === selectedLocation)
-									.map((location) => {
-										const mapping = propertyMappings.find(
-											(m) => m.locationName === location.name,
-										);
-										return (
-											<Card
-												key={location.id}
-												className="border-l-4 border-l-primary"
-											>
-												<CardHeader className="pb-3">
-													<div className="flex items-center justify-between">
-														<CardTitle className="text-base md:text-lg lg:text-xl">
-															{location.name}
-														</CardTitle>
-														<Badge variant={mapping ? "default" : "secondary"}>
-															{mapping
-																? `${mapping.channelProperties.length} Properties`
-																: "Not Mapped"}
-														</Badge>
-													</div>
-												</CardHeader>
-												<CardContent className="space-y-3">
-													{mapping && (
-														<div className="space-y-2">
-															<Label className="text-sm font-medium">
-																Mapped Channel Properties:
-															</Label>
-															<div className="flex flex-wrap gap-2">
-																{mapping.channelProperties.map(
-																	(property, index) => (
-																		<Badge
-																			key={index}
-																			variant="outline"
-																			className="text-xs"
-																		>
-																			{property}
-																		</Badge>
-																	),
-																)}
-															</div>
-														</div>
-													)}
-													<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-														<div>
-															<Label
-																htmlFor={`property-${location.id}`}
-																className="text-sm"
-															>
-																Add Channel Property Name
-															</Label>
-															<Input
-																id={`property-${location.id}`}
-																placeholder="e.g., Rusty Bunk Villa"
-																className="mt-1"
-																value={propertyInputValues[location.id] || ""}
-																onChange={(e) =>
-																	setPropertyInputValues((prev) => ({
-																		...prev,
-																		[location.id]: e.target.value,
-																	}))
-																}
-															/>
-														</div>
-														<div className="flex items-end">
-															<Button
-																size="sm"
-																className="w-full"
-																onClick={() => addPropertyMapping(location.id)}
-															>
-																Add Property Mapping
-															</Button>
-														</div>
-													</div>
-												</CardContent>
-											</Card>
-										);
-									})}
-							</div>
+				<TabsContent value="settings" className="space-y-6">
+					{/* Property Mapping Section */}
+					<div className="space-y-3">
+						<div>
+							<h3 className="text-lg font-semibold flex items-center gap-2">
+								<SettingsIcon className="size-5" />
+								Beds24 Property Mapping
+							</h3>
+							<p className="text-sm text-muted-foreground mt-1">
+								Map your Beds24 property name to this location
+							</p>
+						</div>
 
-							{/* iCal Sync Management Section - filtered by selected location */}
-							<Card>
-								<CardHeader>
-									<div className="flex items-center justify-between">
-										<div>
-											<CardTitle className="flex items-center gap-2">
-												<Calendar className="size-5" />
-												iCal Calendar Sync
-											</CardTitle>
-											<CardDescription>
-												Sync external calendar URLs from booking platforms for{" "}
-												{locations.find((l) => l.id === selectedLocation)
-													?.name || "selected location"}
-											</CardDescription>
-										</div>
-									</div>
-								</CardHeader>
-								<CardContent className="space-y-6">
-									{/* iCal URLs Management - show only selected location */}
-									<div className="space-y-4">
-										{locations
-											.filter((location) => location.id === selectedLocation)
-											.map((location) => {
-												const locationSyncUrls = syncUrls.filter(
-													(url) => url.location_id === location.id,
-												);
-												return (
-													<Card
-														key={location.id}
-														className="border-l-4 border-l-blue-500"
-													>
-														<CardHeader className="pb-3">
-															<div className="flex items-center justify-between">
-																<CardTitle className="text-base md:text-lg lg:text-xl">
-																	{location.name}
-																</CardTitle>
-																<Badge
-																	variant={
-																		locationSyncUrls.length > 0
-																			? "default"
-																			: "secondary"
-																	}
-																>
-																	{locationSyncUrls.length > 0
-																		? `${locationSyncUrls.length} Sync URLs`
-																		: "No Sync URLs"}
-																</Badge>
-															</div>
-														</CardHeader>
-														<CardContent className="space-y-3">
-															<div className="grid grid-cols-1 gap-4">
-																{/* Add New Sync URL Form */}
-																<div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-																	<div>
-																		<Label
-																			htmlFor={`ical-url-${location.id}`}
-																			className="text-sm"
-																		>
-																			iCal URL
-																		</Label>
-																		<Input
-																			id={`ical-url-${location.id}`}
-																			placeholder="https://ical.booking.com/..."
-																			className="mt-1"
-																			value={
-																				icalInputValues[location.id]?.url || ""
-																			}
-																			onChange={(e) =>
-																				setIcalInputValues((prev) => ({
-																					...prev,
-																					[location.id]: {
-																						...prev[location.id],
-																						url: e.target.value,
-																					},
-																				}))
-																			}
-																		/>
-																	</div>
-																	<div>
-																		<Label
-																			htmlFor={`source-${location.id}`}
-																			className="text-sm"
-																		>
-																			Source
-																		</Label>
-																		<select
-																			id={`source-${location.id}`}
-																			className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background"
-																			value={
-																				icalInputValues[location.id]?.source ||
-																				"ical"
-																			}
-																			onChange={(e) =>
-																				setIcalInputValues((prev) => ({
-																					...prev,
-																					[location.id]: {
-																						...prev[location.id],
-																						source: e.target.value,
-																					},
-																				}))
-																			}
-																		>
-																			<option value="ical">iCal</option>
-																			<option value="booking_com">
-																				Booking.com
-																			</option>
-																			<option value="airbnb">Airbnb</option>
-																			<option value="expedia">Expedia</option>
-																			<option value="beds24">Beds24</option>
-																		</select>
-																	</div>
-																	<div className="flex items-end">
-																		<Button
-																			size="sm"
-																			className="w-full"
-																			onClick={() =>
-																				addIcalSyncUrl(location.id)
-																			}
-																		>
-																			Add Sync URL
-																		</Button>
-																	</div>
-																</div>
-
-																{/* Display Existing Sync URLs */}
-																{locationSyncUrls.length > 0 && (
-																	<div className="space-y-2 mt-4">
-																		<Label className="text-sm font-medium">
-																			Active Sync URLs:
-																		</Label>
-																		<div className="space-y-2">
-																			{locationSyncUrls.map((syncUrl) => (
-																				<div
-																					key={syncUrl.id}
-																					className="flex items-center justify-between p-3 bg-muted rounded-lg"
-																				>
-																					<div className="flex-1 min-w-0">
-																						<div className="flex items-center gap-2 mb-1">
-																							<Badge
-																								className={getSourceColor(
-																									syncUrl.source,
-																								)}
-																							>
-																								{syncUrl.source.replace(
-																									"_",
-																									".",
-																								)}
-																							</Badge>
-																							{syncUrl.room_number && (
-																								<Badge
-																									variant="outline"
-																									className="text-xs"
-																								>
-																									Room:{" "}
-																									{syncUrl.rooms?.room_number}
-																								</Badge>
-																							)}
-																						</div>
-																						<div className="text-xs text-muted-foreground truncate">
-																							{syncUrl.ical_url}
-																						</div>
-																						{syncUrl.last_synced_at && (
-																							<div className="text-xs text-muted-foreground mt-1">
-																								Last synced:{" "}
-																								{format(
-																									new Date(
-																										syncUrl.last_synced_at,
-																									),
-																									"MMM dd, HH:mm",
-																								)}
-																							</div>
-																						)}
-																					</div>
-																					<div className="flex gap-2 ml-4">
-																						<Button
-																							size="sm"
-																							variant="outline"
-																							onClick={() =>
-																								manualSyncIcal(syncUrl.id)
-																							}
-																							disabled={syncing}
-																						>
-																							<RefreshCw
-																								className={`size-4 ${syncing ? "animate-spin" : ""}`}
-																							/>
-																						</Button>
-																						<Button
-																							size="sm"
-																							variant="destructive"
-																							onClick={() =>
-																								deleteSyncUrl(syncUrl.id)
-																							}
-																						>
-																							<AlertCircle className="size-4" />
-																						</Button>
-																					</div>
-																				</div>
-																			))}
-																		</div>
-																	</div>
-																)}
-															</div>
-														</CardContent>
-													</Card>
-												);
-											})}
-									</div>
-								</CardContent>
-							</Card>
-
-							{/* API Setup Section */}
-							<Card className="border-dashed">
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Key className="size-5" />
-										API Configuration
-									</CardTitle>
-									<CardDescription>
-										Configure your booking channel API connection
-									</CardDescription>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									{!setupMode ? (
-										<div className="text-center py-8">
-											<div className="space-y-4">
-												<div className="text-muted-foreground">
-													API connection is already configured.
-													{syncStats.recentSync ? (
-														<span className="block mt-2">
-															Last successful sync:{" "}
-															{format(
-																new Date(syncStats.recentSync),
-																"MMM dd, yyyy HH:mm",
-															)}
-														</span>
-													) : (
-														<span className="block mt-2 text-yellow-600">
-															No successful sync yet
-														</span>
-													)}
-												</div>
-												<Button
-													variant="outline"
-													onClick={() => setSetupMode(true)}
-												>
-													Reconfigure API
-												</Button>
-											</div>
-										</div>
-									) : (
-										<div className="space-y-4">
-											<div className="bg-amber-50 p-4 sm:p-6 rounded-lg border border-amber-200">
-												<div className="flex items-start gap-3">
-													<AlertCircle className="size-5 text-amber-600 mt-0.5" />
-													<div className="space-y-2">
-														<h4 className="text-sm md:text-base lg:text-lg font-medium text-amber-800">
-															Setup Instructions
-														</h4>
-														<ol className="text-sm text-amber-700 space-y-1 ml-4 list-decimal">
-															<li>Log into your booking channel account</li>
-															<li>Go to Settings → Channel Manager → API</li>
-															<li>
-																Generate an invite code for this application
-															</li>
-															<li>
-																Enter the invite code below to complete setup
-															</li>
-														</ol>
-													</div>
-												</div>
-											</div>
-
+						{locations
+							.filter((location) => location.id === selectedLocation)
+							.map((location) => {
+								const mapping = propertyMappings.find(
+									(m) => m.locationName === location.name,
+								);
+								return (
+									<div key={location.id} className="space-y-3">
+										{mapping && mapping.channelProperties.length > 0 && (
 											<div className="space-y-2">
-												<Label htmlFor="inviteCode">Channel Invite Code</Label>
-												<div className="flex gap-2">
-													<Input
-														id="inviteCode"
-														placeholder="Enter your booking channel invite code"
-														disabled={exchangingToken}
-													/>
-													<Button
-														onClick={() => {
-															const input = document.getElementById(
-																"inviteCode",
-															) as HTMLInputElement;
-															if (input?.value) {
-																exchangeInviteCode(input.value);
-															}
-														}}
-														disabled={exchangingToken}
-														className="min-w-[100px]"
-													>
-														{exchangingToken ? (
-															<>
-																<RefreshCw className="size-4 mr-2 animate-spin" />
-																Setup...
-															</>
-														) : (
-															"Setup"
-														)}
-													</Button>
+												<Label className="text-sm font-medium">
+													Mapped Properties:
+												</Label>
+												<div className="flex flex-wrap gap-2">
+													{mapping.channelProperties.map((property, index) => (
+														<Badge key={index} variant="outline" className="text-xs">
+															{property}
+														</Badge>
+													))}
 												</div>
 											</div>
-
+										)}
+										<div className="flex flex-col sm:flex-row gap-2">
+											<div className="flex-1">
+												<Input
+													id={`property-${location.id}`}
+													placeholder="Enter Beds24 property name"
+													value={propertyInputValues[location.id] || ""}
+													onChange={(e) =>
+														setPropertyInputValues((prev) => ({
+															...prev,
+															[location.id]: e.target.value,
+														}))
+													}
+												/>
+											</div>
 											<Button
-												variant="ghost"
-												onClick={() => setSetupMode(false)}
-												className="w-full"
+												size="default"
+												className="sm:w-auto"
+												onClick={() => addPropertyMapping(location.id)}
 											>
-												Cancel Setup
+												Add Mapping
 											</Button>
 										</div>
-									)}
-								</CardContent>
-							</Card>
-						</CardContent>
-					</Card>
+									</div>
+								);
+							})}
+					</div>
+
+					{/* iCal Sync Section */}
+					<div className="space-y-3">
+						<div>
+							<h3 className="text-lg font-semibold flex items-center gap-2">
+								<Calendar className="size-5" />
+								iCal Calendar Sync
+							</h3>
+							<p className="text-sm text-muted-foreground mt-1">
+								Add external calendar URLs from booking platforms
+							</p>
+						</div>
+
+						{locations
+							.filter((location) => location.id === selectedLocation)
+							.map((location) => {
+								const locationSyncUrls = syncUrls.filter(
+									(url) => url.location_id === location.id,
+								);
+								return (
+									<div key={location.id} className="space-y-3">
+										{/* Add New Sync URL Form */}
+										<div className="flex flex-col sm:flex-row gap-2">
+											<div className="flex-1">
+												<Input
+													id={`ical-url-${location.id}`}
+													placeholder="https://ical.booking.com/..."
+													value={icalInputValues[location.id]?.url || ""}
+													onChange={(e) =>
+														setIcalInputValues((prev) => ({
+															...prev,
+															[location.id]: {
+																...prev[location.id],
+																url: e.target.value,
+															},
+														}))
+													}
+												/>
+											</div>
+											<select
+												id={`source-${location.id}`}
+												className="h-10 px-3 rounded-md border border-input bg-background sm:w-32"
+												value={icalInputValues[location.id]?.source || "ical"}
+												onChange={(e) =>
+													setIcalInputValues((prev) => ({
+														...prev,
+														[location.id]: {
+															...prev[location.id],
+															source: e.target.value,
+														},
+													}))
+												}
+											>
+												<option value="ical">iCal</option>
+												<option value="booking_com">Booking.com</option>
+												<option value="airbnb">Airbnb</option>
+												<option value="expedia">Expedia</option>
+												<option value="beds24">Beds24</option>
+											</select>
+											<Button
+												size="default"
+												className="sm:w-auto"
+												onClick={() => addIcalSyncUrl(location.id)}
+											>
+												Add URL
+											</Button>
+										</div>
+
+										{/* Display Existing Sync URLs */}
+										{locationSyncUrls.length > 0 && (
+											<div className="space-y-2">
+												<Label className="text-sm font-medium">
+													Active Sync URLs:
+												</Label>
+												<div className="space-y-2">
+													{locationSyncUrls.map((syncUrl) => (
+														<div
+															key={syncUrl.id}
+															className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-muted rounded-md"
+														>
+															<div className="flex-1 min-w-0">
+																<div className="flex flex-wrap items-center gap-2 mb-1">
+																	<Badge
+																		className={getSourceColor(syncUrl.source)}
+																	>
+																		{syncUrl.source.replace("_", ".")}
+																	</Badge>
+																	{syncUrl.room_number && (
+																		<Badge variant="outline" className="text-xs">
+																			Room: {syncUrl.rooms?.room_number}
+																		</Badge>
+																	)}
+																</div>
+																<div className="text-xs text-muted-foreground truncate">
+																	{syncUrl.ical_url}
+																</div>
+																{syncUrl.last_synced_at && (
+																	<div className="text-xs text-muted-foreground mt-1">
+																		Last synced:{" "}
+																		{format(
+																			new Date(syncUrl.last_synced_at),
+																			"MMM dd, HH:mm",
+																		)}
+																	</div>
+																)}
+															</div>
+															<div className="flex gap-2">
+																<Button
+																	size="sm"
+																	variant="outline"
+																	onClick={() => manualSyncIcal(syncUrl.id)}
+																	disabled={syncing}
+																>
+																	<RefreshCw
+																		className={`size-4 ${syncing ? "animate-spin" : ""}`}
+																	/>
+																</Button>
+																<Button
+																	size="sm"
+																	variant="destructive"
+																	onClick={() => deleteSyncUrl(syncUrl.id)}
+																>
+																	<AlertCircle className="size-4" />
+																</Button>
+															</div>
+														</div>
+													))}
+												</div>
+											</div>
+										)}
+									</div>
+								);
+							})}
+					</div>
+
+					{/* API Setup Section */}
+					<div className="space-y-3 pt-4 border-t">
+						<div>
+							<h3 className="text-lg font-semibold flex items-center gap-2">
+								<Key className="size-5" />
+								API Configuration
+							</h3>
+							<p className="text-sm text-muted-foreground mt-1">
+								Configure your booking channel API connection
+							</p>
+						</div>
+
+						{!setupMode ? (
+							<div className="text-center py-8">
+								<div className="space-y-4">
+									<div className="text-muted-foreground">
+										API connection is already configured.
+										{syncStats.recentSync ? (
+											<span className="block mt-2">
+												Last successful sync:{" "}
+												{format(
+													new Date(syncStats.recentSync),
+													"MMM dd, yyyy HH:mm",
+												)}
+											</span>
+										) : (
+											<span className="block mt-2 text-yellow-600">
+												No successful sync yet
+											</span>
+										)}
+									</div>
+									<Button
+										variant="outline"
+										onClick={() => setSetupMode(true)}
+									>
+										Reconfigure API
+									</Button>
+								</div>
+							</div>
+						) : (
+							<div className="space-y-4">
+								<div className="bg-amber-50 p-4 sm:p-6 rounded-lg border border-amber-200">
+									<div className="flex items-start gap-3">
+										<AlertCircle className="size-5 text-amber-600 mt-0.5" />
+										<div className="space-y-2">
+											<h4 className="text-sm md:text-base lg:text-lg font-medium text-amber-800">
+												Setup Instructions
+											</h4>
+											<ol className="text-sm text-amber-700 space-y-1 ml-4 list-decimal">
+												<li>Log into your booking channel account</li>
+												<li>Go to Settings → Channel Manager → API</li>
+												<li>Generate an invite code for this application</li>
+												<li>
+													Enter the invite code below to complete setup
+												</li>
+											</ol>
+										</div>
+									</div>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="inviteCode">Channel Invite Code</Label>
+									<div className="flex flex-col sm:flex-row gap-2">
+										<Input
+											id="inviteCode"
+											placeholder="Enter your booking channel invite code"
+											disabled={exchangingToken}
+											className="flex-1"
+										/>
+										<Button
+											onClick={() => {
+												const input = document.getElementById(
+													"inviteCode",
+												) as HTMLInputElement;
+												if (input?.value) {
+													exchangeInviteCode(input.value);
+												}
+											}}
+											disabled={exchangingToken}
+											className="sm:w-auto min-w-[100px]"
+										>
+											{exchangingToken ? (
+												<>
+													<RefreshCw className="size-4 mr-2 animate-spin" />
+													Setup...
+												</>
+											) : (
+												"Setup"
+											)}
+										</Button>
+									</div>
+								</div>
+
+								<Button
+									variant="ghost"
+									onClick={() => setSetupMode(false)}
+									className="w-full"
+								>
+									Cancel Setup
+								</Button>
+							</div>
+						)}
+					</div>
 				</TabsContent>
 			</Tabs>
 		</div>
