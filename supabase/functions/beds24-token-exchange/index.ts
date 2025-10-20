@@ -17,15 +17,24 @@ serve(async (req) => {
 	try {
 		console.log("Exchanging Beds24 invite code for refresh token...");
 
-		// The invite code should be passed in the request body
+		// The invite code and location_id should be passed in the request body
 		const body = await req.json();
-		const { inviteCode } = body;
+		const { inviteCode, locationId } = body;
 
-		console.log("Request body received:", { hasInviteCode: !!inviteCode, inviteCodeLength: inviteCode?.length });
+		console.log("Request body received:", { 
+			hasInviteCode: !!inviteCode, 
+			inviteCodeLength: inviteCode?.length,
+			hasLocationId: !!locationId 
+		});
 
 		if (!inviteCode) {
 			console.error("Missing invite code in request");
 			throw new Error("Invite code is required");
+		}
+
+		if (!locationId) {
+			console.error("Missing location ID in request");
+			throw new Error("Location ID is required");
 		}
 
 		console.log("Making request to Beds24 API...");
@@ -106,11 +115,27 @@ serve(async (req) => {
 			throw new Error("Failed to get user tenant");
 		}
 
+		// Verify that the location belongs to the user's tenant
+		const { data: location, error: locationError } = await supabase
+			.from("locations")
+			.select("id, tenant_id, name")
+			.eq("id", locationId)
+			.eq("tenant_id", profile.tenant_id)
+			.single();
+
+		if (locationError || !location) {
+			console.error("Location validation failed:", locationError);
+			throw new Error("Invalid location or location does not belong to your organization");
+		}
+
+		console.log("Validated location:", { locationId, locationName: location.name, tenantId: profile.tenant_id });
+
 		// Save credentials to database (upsert to handle reconfiguration)
 		const { error: saveError } = await supabase
 			.from("beds24_credentials")
 			.upsert({
 				tenant_id: profile.tenant_id,
+				location_id: locationId,
 				refresh_token: tokenData.refreshToken,
 				access_token: tokenData.token,
 				token_expires_at: new Date(Date.now() + (tokenData.expiresIn || 3600) * 1000).toISOString(),
@@ -118,7 +143,7 @@ serve(async (req) => {
 				sync_status: "active",
 				created_by: user.id,
 			}, {
-				onConflict: "tenant_id",
+				onConflict: "tenant_id,location_id",
 			});
 
 		if (saveError) {
@@ -126,7 +151,7 @@ serve(async (req) => {
 			throw new Error("Failed to save Beds24 credentials to database");
 		}
 
-		console.log("Beds24 credentials saved successfully for tenant:", profile.tenant_id);
+		console.log("Beds24 credentials saved successfully for tenant:", profile.tenant_id, "location:", locationId);
 
 		return new Response(
 			JSON.stringify({
