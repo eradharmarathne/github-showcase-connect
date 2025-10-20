@@ -35,7 +35,7 @@ export function AccountSelector({
 				{t("income.addDialog.form.accountRequired")}
 			</Label>
 			<Select
-				value={selectedAccountId || undefined}
+				value={selectedAccountId || ""}
 				onValueChange={onAccountChange}
 				required={required}
 			>

@@ -128,17 +128,16 @@ export function ImmediatePaymentForm({
 					currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
 					payment_method: formData.payment_method, // Set as paid (not pending)
 					account_id: formData.account_id,
-					income_type_id: formData.income_type_id,
-					type: "booking",
+					income_type_id: formData.income_type_id || null,
+					type: "booking" as const,
 					note:
 						formData.note ||
 						`General income for reservation ${reservation.reservation_number}`,
-					date: new Date().toISOString(),
+					date: new Date().toISOString().split('T')[0], // Date only (YYYY-MM-DD)
 					is_advance: false,
 					additional_service_id: null, // NULL = general income, NOT payment against a service
 					tenant_id: tenantId,
 					location_id: locationId,
-					created_by: profileId,
 				})
 				.select()
 				.single();
@@ -225,7 +224,7 @@ export function ImmediatePaymentForm({
 						{t("income.addDialog.form.incomeType")}
 					</Label>
 					<Select
-						value={formData.income_type_id || undefined}
+						value={formData.income_type_id || ""}
 						onValueChange={(value) =>
 							setFormData((prev) => ({ ...prev, income_type_id: value }))
 						}
