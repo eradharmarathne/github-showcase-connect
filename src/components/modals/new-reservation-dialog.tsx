@@ -175,6 +175,7 @@ export function NewReservationDialog({
 				"generate_reservation_number",
 				{
 					p_tenant_id: tenant?.id,
+					p_location_id: selectedLocation,
 				},
 			);
 
@@ -297,9 +298,17 @@ export function NewReservationDialog({
 			const bookingGroupId = crypto.randomUUID();
 			const reservations = [];
 
+			// Pre-generate all reservation numbers sequentially to avoid race conditions
+			const reservationNumbers: string[] = [];
+			for (let i = 0; i < roomSelections.length; i++) {
+				const number = await generateReservationNumber();
+				reservationNumbers.push(number);
+			}
+
 			// Create reservation data for each room
-			for (const selection of roomSelections) {
-				const reservationNumber = await generateReservationNumber();
+			for (let i = 0; i < roomSelections.length; i++) {
+				const selection = roomSelections[i];
+				const reservationNumber = reservationNumbers[i];
 
 				const reservationData = {
 					reservation_number: reservationNumber,
@@ -342,12 +351,12 @@ export function NewReservationDialog({
 
 			if (error) throw error;
 
-			const reservationNumbers = reservations
+			const reservationNumbersDisplay = reservations
 				.map((r) => r.reservation_number)
 				.join(", ");
 			toast({
 				title: "Success",
-				description: `Reservation(s) ${reservationNumbers} created successfully`,
+				description: `Reservation(s) ${reservationNumbersDisplay} created successfully`,
 			});
 
 			// Reset form and close dialog

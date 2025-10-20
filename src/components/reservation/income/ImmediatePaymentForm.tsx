@@ -178,7 +178,7 @@ export function ImmediatePaymentForm({
 
 			toast({
 				title: "Success",
-				description: "General income recorded successfully (does not reduce reservation balance)",
+				description: "General income recorded successfully.",
 			});
 
 			onSuccess();
