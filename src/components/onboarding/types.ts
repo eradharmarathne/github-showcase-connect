@@ -35,7 +35,6 @@ export interface PlanSelectionStepProps extends OnboardingStepProps {
 	selectedPlanId: string | null;
 	setSelectedPlanId: (planId: string | null) => void;
 	processingPayment: boolean;
-	onStartTrial: () => void;
 	onPayNow: () => void;
 }
 

@@ -1,7 +1,6 @@
 import {
 	ArrowRight,
 	BadgeCheck,
-	Calendar,
 	CreditCard,
 	Crown,
 } from "lucide-react";
@@ -25,15 +24,13 @@ export function PlanSelectionStep({
 	selectedPlanId,
 	setSelectedPlanId,
 	processingPayment,
-	onStartTrial,
 	onPayNow,
 }: PlanSelectionStepProps) {
 	return (
 		<div className="space-y-6">
 			<div className="text-start mb-8">
 				<p className="text-muted-foreground">
-					Start with a 7-day free trial, then choose the plan that fits your
-					needs
+					Start with a 14-day free trial. Choose the plan that fits your needs.
 				</p>
 			</div>
 
@@ -161,34 +158,21 @@ export function PlanSelectionStep({
 						</p>
 					</div>
 
-					<div className="flex flex-col sm:flex-row gap-3 justify-center">
-						<Button
-							size="lg"
-							variant="outline"
-							onClick={onStartTrial}
-							disabled={processingPayment}
-							className="flex items-center gap-2 py-2 sm:py-0 flex-1 sm:flex-none"
-						>
-							{processingPayment
-								? "Starting Trial..."
-								: "Start 7-Day Free Trial"}
-							<Calendar className="h-4 w-4" />
-						</Button>
+					<div className="flex justify-center">
 						<Button
 							size="lg"
 							onClick={onPayNow}
 							disabled={processingPayment}
-							className="flex items-center py-2 sm:py-0 gap-2 flex-1 sm:flex-none"
+							className="flex items-center gap-2 py-3 px-8"
 						>
-							{processingPayment ? "Processing..." : "Pay Now & Get Started"}
+							{processingPayment ? "Processing..." : "Start 14-Day Free Trial"}
 							<CreditCard className="h-4 w-4" />
 						</Button>
 					</div>
 
 					<div className="text-center text-xs text-muted-foreground">
 						<p>
-							✨ 7-day free trial • Cancel anytime • No hidden fees • Secure
-							payment
+							✨ 14-day free trial via secure payment • Cancel anytime • No hidden fees
 						</p>
 					</div>
 				</div>

@@ -73,6 +73,13 @@ export const SmartRedirect = () => {
 		return <Navigate to="/onboarding" replace />;
 	}
 
+	// Check subscription status - if incomplete, pending_payment, or payment_failed, redirect to onboarding
+	const invalidSubscriptionStatuses = ['incomplete', 'pending_payment', 'payment_failed', 'expired'];
+	if (tenant.subscription_status && invalidSubscriptionStatuses.includes(tenant.subscription_status)) {
+		console.log(`🚨 [REDIRECT] Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`);
+		return <Navigate to="/onboarding" replace />;
+	}
+
 	console.log("✅ [REDIRECT] Tenant valid, checking permissions...");
 
 	// Redirect to the first page the user has access to

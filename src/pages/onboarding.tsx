@@ -168,29 +168,6 @@ export default function Onboarding() {
 		}
 	};
 
-	const handleStartTrial = async () => {
-		if (!selectedPlanId) return;
-
-		try {
-			setProcessingPayment(true);
-
-			// First complete the tenant setup (this creates location and permissions)
-			await completeOnboarding();
-
-			// Navigate to next step (completion)
-			handleNext();
-		} catch (error) {
-			console.error("Error starting trial:", error);
-			toast({
-				title: "Error",
-				description: "Failed to start trial. Please try again.",
-				variant: "destructive",
-			});
-		} finally {
-			setProcessingPayment(false);
-		}
-	};
-
 	const handlePayNow = async () => {
 		if (!selectedPlanId) return;
 
@@ -394,164 +371,6 @@ export default function Onboarding() {
 		}
 	};
 
-	const completeOnboarding = async () => {
-		try {
-			setLoading(true);
-
-			// Generate collision-resistant slug with client-side logic
-			const generateUniqueSlug = async (name: string): Promise<string> => {
-				const baseSlug =
-					name
-						.toLowerCase()
-						.replace(/[^a-z0-9\s-]/g, "")
-						.replace(/\s+/g, "-")
-						.replace(/-+/g, "-")
-						.trim() || "tenant";
-
-				// Check if base slug exists
-				const { data: existing } = await supabase
-					.from("tenants")
-					.select("slug")
-					.eq("slug", baseSlug)
-					.limit(1);
-
-				if (!existing || existing.length === 0) {
-					return baseSlug;
-				}
-
-				// Find the next available slug with counter
-				let counter = 2;
-				let candidateSlug = `${baseSlug}-${counter}`;
-
-				while (true) {
-					const { data: existingCandidate } = await supabase
-						.from("tenants")
-						.select("slug")
-						.eq("slug", candidateSlug)
-						.limit(1);
-
-					if (!existingCandidate || existingCandidate.length === 0) {
-						return candidateSlug;
-					}
-
-					counter++;
-					candidateSlug = `${baseSlug}-${counter}`;
-				}
-			};
-
-			const slug = await generateUniqueSlug(formData.companyName);
-
-			// Create tenant
-			const { data: tenant, error: tenantError } = await supabase
-				.from("tenants")
-				.insert({
-					name: formData.companyName,
-					slug: slug,
-					hotel_name: formData.companyName,
-					hotel_email: formData.email,
-					hotel_phone: formData.phone,
-					hotel_address: formData.address,
-					hotel_timezone: formData.timezone || "UTC",
-					owner_profile_id: user!.id,
-					onboarding_completed: true,
-					trial_ends_at: new Date(
-						Date.now() + 14 * 24 * 60 * 60 * 1000,
-					).toISOString(), // 14 days trial
-					subscription_status: "trial",
-				})
-				.select()
-				.single();
-
-			if (tenantError) throw tenantError;
-
-			// Update user profile with tenant_id and mark first login as completed
-			const { error: profileError } = await supabase
-				.from("profiles")
-				.update({
-					tenant_id: tenant.id,
-					role: "admin",
-					first_login_completed: true,
-				})
-				.eq("id", user!.id);
-
-			if (profileError) throw profileError;
-
-			// Create default location for the tenant
-			const { data: location, error: locationError } = await supabase
-				.from("locations")
-				.insert({
-					name: formData.companyName,
-					tenant_id: tenant.id,
-					is_active: true,
-					property_type: formData.propertyType,
-				})
-				.select()
-				.single();
-
-			if (locationError) throw locationError;
-
-			// Create user permissions for the new location
-			const { error: permissionsError } = await supabase
-				.from("user_permissions")
-				.insert([
-					{
-						user_id: user.id,
-						tenant_id: tenant.id,
-						location_id: location.id,
-						tenant_role: "tenant_admin", // Owner gets tenant admin role
-						is_tenant_admin: true, // Ensure admin flag is set
-						access_dashboard: true,
-						access_income: true,
-						access_expenses: true,
-						access_reports: true,
-						access_calendar: true,
-						access_bookings: true,
-						access_rooms: true,
-						access_master_files: true,
-						access_accounts: true,
-						access_users: true,
-						access_settings: true,
-						access_booking_channels: true,
-					},
-				]);
-			if (permissionsError) throw permissionsError;
-
-			// Create trial subscription with selected plan
-			const { error: subscriptionError } = await supabase
-				.from("subscriptions")
-				.insert({
-					tenant_id: tenant.id,
-					plan_id: selectedPlanId || "professional", // Use selected plan or default
-					status: "trialing",
-					current_period_start: new Date().toISOString(),
-					current_period_end: new Date(
-						Date.now() + 14 * 24 * 60 * 60 * 1000,
-					).toISOString(),
-					trial_end: new Date(
-						Date.now() + 14 * 24 * 60 * 60 * 1000,
-					).toISOString(),
-				});
-
-			if (subscriptionError) throw subscriptionError;
-
-			toast({
-				title: "Welcome aboard! 🎉",
-				description: `Your ${formData.companyName} account has been set up successfully. You're on a 14-day free trial!`,
-			});
-
-			// Don't redirect here - let the calling function handle the next step
-		} catch (error: any) {
-			console.error("Onboarding error:", error);
-			toast({
-				title: "Setup Error",
-				description:
-					error.message || "Failed to complete setup. Please try again.",
-				variant: "destructive",
-			});
-		} finally {
-			setLoading(false);
-		}
-	};
 
 	const handleComplete = async () => {
 		try {
@@ -624,7 +443,6 @@ export default function Onboarding() {
 						selectedPlanId={selectedPlanId}
 						setSelectedPlanId={setSelectedPlanId}
 						processingPayment={processingPayment}
-						onStartTrial={handleStartTrial}
 						onPayNow={handlePayNow}
 					/>
 				);
