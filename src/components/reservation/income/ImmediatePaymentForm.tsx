@@ -70,16 +70,21 @@ export function ImmediatePaymentForm({
 	const { toast } = useToast();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
+	// Initialize form with account's currency to avoid unnecessary conversions
+	const initialAccount = accounts && accounts.length > 0 ? accounts[0] : null;
+	const initialCurrency = initialAccount?.currency || "LKR";
+	const reservationBalance = Math.max(
+		0,
+		(reservation.total_amount || 0) - (reservation.paid_amount || 0),
+	);
+
 	const [formData, setFormData] = useState<ImmediatePaymentFormData>({
-		amount: Math.max(
-			0,
-			(reservation.total_amount || 0) - (reservation.paid_amount || 0),
-		),
-		currency: reservation.currency || "LKR",
+		amount: reservationBalance,
+		currency: initialCurrency,
 		note:
 			t("income.addDialog.reservationInfo.reservation") +
 			` ${reservation.reservation_number}`,
-		account_id: accounts && accounts.length > 0 ? accounts[0].id : "",
+		account_id: initialAccount?.id || "",
 		income_type_id:
 			incomeTypes && incomeTypes.length > 0 ? incomeTypes[0].id : "",
 		payment_method: "cash",
