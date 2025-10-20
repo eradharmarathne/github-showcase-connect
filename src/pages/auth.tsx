@@ -261,7 +261,7 @@ export default function Auth() {
 						<div className="mt-14 rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20">
 							<img
 								alt="Dashboard screenshot showing data visualization and analytics interface"
-								src="https://blocks.tremor.so/_next/image?url=%2Fhome%2Fdashboard.webp&w=3840&q=75"
+								src="/images/dashboard.png"
 								width={2432}
 								height={1442}
 								className="rounded-md shadow-2xl shadow-black/50 ring-1 ring-gray-900/5"

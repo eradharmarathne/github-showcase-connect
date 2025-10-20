@@ -100,8 +100,9 @@ export function ImmediatePaymentForm({
 		setIsSubmitting(true);
 
 		try {
-			// Immediate payment: create payment record
-			// Database trigger will automatically update account balance and reservation amounts
+			// General income (not added to bill): create income record WITHOUT additional_service_id
+			// This marks it as general hotel income that won't reduce the reservation balance
+			// The trigger only reduces balance for income with additional_service_id (paid service items)
 			const selectedAccount = accounts.find(
 				(acc) => acc.id === formData.account_id,
 			);
@@ -119,34 +120,38 @@ export function ImmediatePaymentForm({
 				);
 			}
 
-			const { data: paymentData, error: paymentError } = await supabase
-				.from("payments")
+			const { data: incomeData, error: incomeError } = await supabase
+				.from("income")
 				.insert({
-					reservation_id: reservation.id,
+					booking_id: reservation.id, // Link to reservation for tracking
 					amount: convertedAmount,
 					currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
-					payment_method: formData.payment_method,
-					payment_type: "reservation",
-					payment_number: `PAY-${Date.now()}`,
+					payment_method: formData.payment_method, // Set as paid (not pending)
 					account_id: formData.account_id,
-					notes:
+					income_type_id: formData.income_type_id,
+					type: "booking",
+					note:
 						formData.note ||
-						`Payment for reservation ${reservation.reservation_number}`,
+						`General income for reservation ${reservation.reservation_number}`,
+					date: new Date().toISOString(),
+					is_advance: false,
+					additional_service_id: null, // NULL = general income, NOT payment against a service
 					tenant_id: tenantId,
+					location_id: locationId,
 					created_by: profileId,
 				})
 				.select()
 				.single();
 
-			if (paymentError) throw paymentError;
+			if (incomeError) throw incomeError;
 
 			// Log currency conversion if currencies differ
-			if (paymentData && formData.currency !== accountCurrency) {
+			if (incomeData && formData.currency !== accountCurrency) {
 				const { error: conversionLogError } = await supabase
 					.from("currency_conversion_log")
 					.insert({
-						transaction_type: "payment",
-						transaction_id: paymentData.id,
+						transaction_type: "income",
+						transaction_id: incomeData.id,
 						from_currency: formData.currency as "LKR" | "USD" | "EUR" | "GBP",
 						to_currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
 						from_amount: formData.amount,
@@ -155,7 +160,7 @@ export function ImmediatePaymentForm({
 						rate_source: "system",
 						tenant_id: tenantId,
 						created_by: profileId,
-						notes: `Payment for reservation ${reservation.reservation_number}`,
+						notes: `General income for reservation ${reservation.reservation_number}`,
 					});
 
 				if (conversionLogError) {
@@ -169,15 +174,15 @@ export function ImmediatePaymentForm({
 
 			toast({
 				title: "Success",
-				description: "Payment recorded successfully",
+				description: "General income recorded successfully (does not reduce reservation balance)",
 			});
 
 			onSuccess();
 		} catch (error) {
-			console.error("Error recording payment:", error);
+			console.error("Error recording income:", error);
 			toast({
 				title: "Error",
-				description: "Failed to record payment. Please try again.",
+				description: "Failed to record income. Please try again.",
 				variant: "destructive",
 			});
 		} finally {
