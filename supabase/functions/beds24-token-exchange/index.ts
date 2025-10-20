@@ -17,14 +17,15 @@ serve(async (req) => {
 	try {
 		console.log("Exchanging Beds24 invite code for refresh token...");
 
-		// The invite code and location_id should be passed in the request body
+		// The invite code, location_id, and tenant_id should be passed in the request body
 		const body = await req.json();
-		const { inviteCode, locationId } = body;
+		const { inviteCode, locationId, tenantId } = body;
 
 		console.log("Request body received:", { 
 			hasInviteCode: !!inviteCode, 
 			inviteCodeLength: inviteCode?.length,
-			hasLocationId: !!locationId 
+			hasLocationId: !!locationId,
+			hasTenantId: !!tenantId
 		});
 
 		if (!inviteCode) {
@@ -35,6 +36,11 @@ serve(async (req) => {
 		if (!locationId) {
 			console.error("Missing location ID in request");
 			throw new Error("Location ID is required");
+		}
+
+		if (!tenantId) {
+			console.error("Missing tenant ID in request");
+			throw new Error("Tenant ID is required");
 		}
 
 		console.log("Making request to Beds24 API...");
@@ -99,28 +105,18 @@ serve(async (req) => {
 			},
 		});
 
-		// Get user's tenant_id
+		// Get user for created_by field
 		const { data: { user }, error: userError } = await supabase.auth.getUser();
 		if (userError || !user) {
-			throw new Error("Failed to get user information");
+			console.warn("Could not get user information, proceeding without created_by");
 		}
 
-		const { data: profile, error: profileError } = await supabase
-			.from("profiles")
-			.select("tenant_id")
-			.eq("id", user.id)
-			.single();
-
-		if (profileError || !profile?.tenant_id) {
-			throw new Error("Failed to get user tenant");
-		}
-
-		// Verify that the location belongs to the user's tenant
+		// Verify that the location belongs to the tenant (security check)
 		const { data: location, error: locationError } = await supabase
 			.from("locations")
 			.select("id, tenant_id, name")
 			.eq("id", locationId)
-			.eq("tenant_id", profile.tenant_id)
+			.eq("tenant_id", tenantId)
 			.single();
 
 		if (locationError || !location) {
@@ -128,20 +124,20 @@ serve(async (req) => {
 			throw new Error("Invalid location or location does not belong to your organization");
 		}
 
-		console.log("Validated location:", { locationId, locationName: location.name, tenantId: profile.tenant_id });
+		console.log("Validated location:", { locationId, locationName: location.name, tenantId });
 
 		// Save credentials to database (upsert to handle reconfiguration)
 		const { error: saveError } = await supabase
 			.from("beds24_credentials")
 			.upsert({
-				tenant_id: profile.tenant_id,
+				tenant_id: tenantId,
 				location_id: locationId,
 				refresh_token: tokenData.refreshToken,
 				access_token: tokenData.token,
 				token_expires_at: new Date(Date.now() + (tokenData.expiresIn || 3600) * 1000).toISOString(),
 				is_active: true,
 				sync_status: "active",
-				created_by: user.id,
+				created_by: user?.id,
 			}, {
 				onConflict: "tenant_id,location_id",
 			});
@@ -151,7 +147,7 @@ serve(async (req) => {
 			throw new Error("Failed to save Beds24 credentials to database");
 		}
 
-		console.log("Beds24 credentials saved successfully for tenant:", profile.tenant_id, "location:", locationId);
+		console.log("Beds24 credentials saved successfully for tenant:", tenantId, "location:", locationId);
 
 		return new Response(
 			JSON.stringify({

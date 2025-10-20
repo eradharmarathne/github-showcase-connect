@@ -411,12 +411,17 @@ export default function BookingChannelsIntegration() {
 				throw new Error("Please select a location first");
 			}
 
+			if (!tenant?.id) {
+				throw new Error("Tenant information not available");
+			}
+
 			const { data, error } = await supabase.functions.invoke(
 				"beds24-token-exchange",
 				{
 					body: { 
 						inviteCode: inviteCode,
 						locationId: selectedLocation,
+						tenantId: tenant.id,
 					},
 				},
 			);
