@@ -30,26 +30,15 @@ export default function ForgotPassword() {
 
 		try {
 			const { error } = await supabase.auth.resetPasswordForEmail(email, {
-				redirectTo: `${window.location.origin}/auth/reset-password`,
+				redirectTo: `${window.location.origin}/auth`,
 			});
 
 			if (error) {
-				console.error("Password reset error:", error);
-				
-				// Check if it's a configuration error
-				if (error.status === 500) {
-					toast({
-						title: "Service Configuration Error",
-						description: "Email service is not properly configured. Please contact support or check:\n1. Supabase email provider settings\n2. Redirect URL allowlist includes: " + window.location.origin,
-						variant: "destructive",
-					});
-				} else {
-					toast({
-						title: "Password Reset Failed",
-						description: error.message,
-						variant: "destructive",
-					});
-				}
+				toast({
+					title: "Password Reset Failed",
+					description: error.message,
+					variant: "destructive",
+				});
 			} else {
 				setIsEmailSent(true);
 				toast({
@@ -57,11 +46,10 @@ export default function ForgotPassword() {
 					description: "Check your email for password reset instructions.",
 				});
 			}
-		} catch (error: any) {
-			console.error("Unexpected error:", error);
+		} catch (error) {
 			toast({
 				title: "Error",
-				description: error?.message || "An unexpected error occurred. Please try again.",
+				description: "An unexpected error occurred. Please try again.",
 				variant: "destructive",
 			});
 		} finally {
@@ -74,7 +62,7 @@ export default function ForgotPassword() {
 
 		try {
 			const { error } = await supabase.auth.resetPasswordForEmail(email, {
-				redirectTo: `${window.location.origin}/auth/reset-password`,
+				redirectTo: `${window.location.origin}/auth`,
 			});
 
 			if (error) {
