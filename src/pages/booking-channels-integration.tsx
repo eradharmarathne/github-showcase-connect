@@ -370,10 +370,18 @@ export default function BookingChannelsIntegration() {
 			return;
 		}
 
+		if (!selectedLocation) {
+			toast.error("Please select a location first");
+			return;
+		}
+
 		setSyncing(true);
 		try {
 			const response = await supabase.functions.invoke("fetch-beds24-bookings", {
-				body: { tenant_id: tenant.id },
+				body: {
+					tenant_id: tenant.id,
+					location_id: selectedLocation,
+				},
 			});
 
 			const responseData = response.data as {
@@ -382,7 +390,9 @@ export default function BookingChannelsIntegration() {
 				code?: string;
 			};
 
-			if (responseData?.code === "NO_MAPPINGS") {
+			if (responseData?.code === "NO_CREDENTIALS") {
+				toast.error("Please connect your Beds24 account first in the Settings tab");
+			} else if (responseData?.code === "NO_MAPPINGS") {
 				toast.error("Please configure Beds24 property mappings in the Settings tab first");
 			} else if (response.error) {
 				console.error("Sync error:", response.error);

@@ -54,13 +54,12 @@ interface V2Booking extends JsonRecord {
 	totalAmount?: number;
 }
 
-// Function to refresh access token using refresh token
-async function refreshAccessToken() {
-	const refreshToken = Deno.env.get("BEDS24_REFRESH_TOKEN");
-	if (!refreshToken) {
-		throw new Error("Missing Beds24 refresh token (BEDS24_REFRESH_TOKEN)");
-	}
-
+// Function to refresh access token using refresh token from database
+async function refreshAccessToken(
+	supabase: any,
+	credentialId: string,
+	refreshToken: string,
+) {
 	console.log("Refreshing Beds24 access token...");
 	const response = await fetch(
 		"https://beds24.com/api/v2/authentication/token",
@@ -82,33 +81,69 @@ async function refreshAccessToken() {
 	}
 
 	const tokenData = await response.json();
-	ACCESS_TOKEN = tokenData.token;
-	EXPIRES_AT = Date.now() + (tokenData.expiresIn - 60) * 1000; // Refresh 1 min early
+	const newAccessToken = tokenData.token;
+	const expiresAt = new Date(Date.now() + (tokenData.expiresIn - 60) * 1000);
+
+	// Update the database with new access token and expiry
+	const { error: updateError } = await supabase
+		.from("beds24_credentials")
+		.update({
+			access_token: newAccessToken,
+			token_expires_at: expiresAt.toISOString(),
+		})
+		.eq("id", credentialId);
+
+	if (updateError) {
+		console.error("Failed to update access token in database:", updateError);
+		// Don't throw - we can still use the token for this request
+	}
+
 	console.log("Access token refreshed successfully");
+	return { token: newAccessToken, expiresAt };
 }
 
 // Function to make authenticated requests to Beds24 API
-async function beds24Request(path: string) {
+async function beds24Request(
+	path: string,
+	supabase: any,
+	credentialId: string,
+	accessToken: string,
+	tokenExpiresAt: Date,
+	refreshToken: string,
+) {
+	let currentToken = accessToken;
+
 	// Check if we need to refresh the token
-	if (!ACCESS_TOKEN || Date.now() > EXPIRES_AT) {
-		await refreshAccessToken();
+	if (!currentToken || Date.now() > tokenExpiresAt.getTime()) {
+		const refreshed = await refreshAccessToken(
+			supabase,
+			credentialId,
+			refreshToken,
+		);
+		currentToken = refreshed.token;
 	}
 
 	let response = await fetch(`${BEDS24_API_BASE}${path}`, {
 		headers: {
 			accept: "application/json",
-			token: ACCESS_TOKEN,
+			token: currentToken,
 		},
 	});
 
 	// If we get 401, try refreshing token once more
 	if (response.status === 401) {
 		console.log("Got 401, refreshing token and retrying...");
-		await refreshAccessToken();
+		const refreshed = await refreshAccessToken(
+			supabase,
+			credentialId,
+			refreshToken,
+		);
+		currentToken = refreshed.token;
+
 		response = await fetch(`${BEDS24_API_BASE}${path}`, {
 			headers: {
 				accept: "application/json",
-				token: ACCESS_TOKEN,
+				token: currentToken,
 			},
 		});
 	}
@@ -133,24 +168,65 @@ serve(async (req) => {
 	try {
 		console.log("Starting Beds24 (API v2) bookings sync...");
 
-		// Parse request body to get tenant_id if provided
-		let requestBody: { tenant_id?: string } = {};
+		// Parse request body to get tenant_id and location_id
+		let requestBody: { tenant_id?: string; location_id?: string } = {};
 		try {
 			if (req.method === "POST") {
 				requestBody = await req.json();
 			}
 		} catch (e) {
-			// If body parsing fails, continue without tenant_id (will fetch all)
-			console.log("No request body provided, syncing all tenants");
+			// If body parsing fails, continue without filters
+			console.log("No request body provided, syncing all locations");
 		}
 
 		const tenantId = requestBody.tenant_id;
-		console.log("Tenant ID filter:", tenantId || "ALL");
+		const locationId = requestBody.location_id;
+		console.log(
+			"Filters:",
+			tenantId ? `tenant_id=${tenantId}` : "ALL TENANTS",
+			locationId ? `location_id=${locationId}` : "ALL LOCATIONS",
+		);
 
 		// Initialize Supabase client
 		const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 		const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 		const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+		// Fetch Beds24 credentials - required to authenticate with Beds24 API
+		let credQuery = supabase
+			.from("beds24_credentials")
+			.select("*")
+			.eq("is_active", true);
+
+		if (tenantId) {
+			credQuery = credQuery.eq("tenant_id", tenantId);
+		}
+		if (locationId) {
+			credQuery = credQuery.eq("location_id", locationId);
+		}
+
+		const { data: credentials, error: credError } = await credQuery.limit(1)
+			.single();
+
+		if (credError || !credentials) {
+			console.error("No active Beds24 credentials found:", credError);
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: "No Beds24 credentials configured. Please connect your Beds24 account first.",
+					code: "NO_CREDENTIALS",
+					timestamp: new Date().toISOString(),
+				}),
+				{
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+					status: 200,
+				},
+			);
+		}
+
+		console.log(
+			`Using Beds24 credentials for location ${credentials.location_id}`,
+		);
 
 		// Fetch active Beds24 property mappings for resolving properties to locations
 		// Filter by tenant_id if provided
@@ -162,6 +238,9 @@ serve(async (req) => {
 		if (tenantId) {
 			query = query.eq("tenant_id", tenantId);
 		}
+		if (locationId) {
+			query = query.eq("location_id", locationId);
+		}
 
 		const { data: propertyMappings, error: mappingsError } = await query;
 
@@ -171,7 +250,9 @@ serve(async (req) => {
 		}
 
 		if (!propertyMappings || propertyMappings.length === 0) {
-			console.warn(`No active Beds24 property mappings found${tenantId ? ` for tenant ${tenantId}` : ""}`);
+			console.warn(
+				`No active Beds24 property mappings found${tenantId ? ` for tenant ${tenantId}` : ""}${locationId ? ` and location ${locationId}` : ""}`,
+			);
 			return new Response(
 				JSON.stringify({
 					success: false,
@@ -187,7 +268,10 @@ serve(async (req) => {
 		}
 
 		// Build a map of Beds24 property ID -> location details
-		const propertyIdToLocation = new Map<string, { location_id: string; tenant_id: string; property_name: string }>();
+		const propertyIdToLocation = new Map<
+			string,
+			{ location_id: string; tenant_id: string; property_name: string }
+		>();
 		for (const mapping of propertyMappings) {
 			propertyIdToLocation.set(mapping.beds24_property_id, {
 				location_id: mapping.location_id,
@@ -196,11 +280,24 @@ serve(async (req) => {
 			});
 		}
 
-		console.log(`Loaded ${propertyIdToLocation.size} active Beds24 property mappings`);
+		console.log(
+			`Loaded ${propertyIdToLocation.size} active Beds24 property mappings`,
+		);
 
-		// Fetch bookings from Beds24 API
+		// Fetch bookings from Beds24 API using credentials from database
 		console.log("Fetching bookings from Beds24 API v2...");
-		const bookingsJson: unknown = await beds24Request("/bookings");
+		const tokenExpiresAt = credentials.token_expires_at
+			? new Date(credentials.token_expires_at)
+			: new Date(0);
+
+		const bookingsJson: unknown = await beds24Request(
+			"/bookings",
+			supabase,
+			credentials.id,
+			credentials.access_token,
+			tokenExpiresAt,
+			credentials.refresh_token,
+		);
 		const bookings: V2Booking[] = Array.isArray((bookingsJson as any)?.data)
 			? (bookingsJson as any).data
 			: Array.isArray(bookingsJson)
