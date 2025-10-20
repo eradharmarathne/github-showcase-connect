@@ -246,18 +246,16 @@ export default function BookingChannelsIntegration() {
 			if (locationsError) throw locationsError;
 			if (roomsError) throw roomsError;
 
-			// Fetch property mappings from database - filtered by selected location
-			const { data: mappingsData } = await supabase
-				.from("channel_property_mappings")
-				.select(`
+		// Fetch property mappings from database - filtered by selected location
+		const { data: mappingsData } = await supabase
+			.from("beds24_property_mappings")
+			.select(`
           *,
           locations (id, name)
         `)
-				.eq("tenant_id", tenant.id)
-				.eq("location_id", selectedLocation)
-				.eq("is_active", true);
-
-			// Fetch iCal sync URLs - filtered by selected location
+			.eq("tenant_id", tenant.id)
+			.eq("location_id", selectedLocation)
+			.eq("is_active", true);			// Fetch iCal sync URLs - filtered by selected location
 			const { data: syncUrlsData } = await supabase
 				.from("booking_sync_urls")
 				.select(`
@@ -274,24 +272,22 @@ export default function BookingChannelsIntegration() {
 			const transformedMappings: PropertyMapping[] = [];
 			if (mappingsData) {
 				const groupedMappings = mappingsData.reduce(
-					(acc, mapping) => {
-						const locationId = mapping.location_id;
-						if (!acc[locationId]) {
-							acc[locationId] = {
-								locationId,
-								locationName: mapping.locations?.name || "",
-								channelProperties: [],
-							};
-						}
-						acc[locationId].channelProperties.push(
-							mapping.channel_property_name,
-						);
-						return acc;
-					},
-					{} as Record<string, PropertyMapping>,
-				);
-
-				transformedMappings.push(...Object.values(groupedMappings));
+				(acc, mapping) => {
+					const locationId = mapping.location_id;
+					if (!acc[locationId]) {
+						acc[locationId] = {
+							locationId,
+							locationName: mapping.locations?.name || "",
+							channelProperties: [],
+						};
+					}
+					acc[locationId].channelProperties.push(
+						mapping.beds24_property_name,
+					);
+					return acc;
+				},
+				{} as Record<string, PropertyMapping>,
+			);				transformedMappings.push(...Object.values(groupedMappings));
 			}
 
 			setBookings(bookingsData || []);
@@ -615,20 +611,19 @@ export default function BookingChannelsIntegration() {
 			return;
 		}
 
-		try {
-			const { error } = await supabase
-				.from("channel_property_mappings")
-				.insert({
-					tenant_id: tenant.id,
-					location_id: locationId,
-					channel_property_name: propertyName,
-					channel: "beds24",
-					is_active: true,
-				});
+	try {
+		const { error } = await supabase
+			.from("beds24_property_mappings")
+			.insert({
+				tenant_id: tenant.id,
+				location_id: locationId,
+				beds24_property_id: propertyName, // Using property name as ID for now
+				beds24_property_name: propertyName,
+				mapping_type: "location", // or "room" if mapping to specific room
+				is_active: true,
+			});
 
-			if (error) throw error;
-
-			toast.success("Property mapping added successfully");
+		if (error) throw error;			toast.success("Property mapping added successfully");
 
 			// Clear input
 			setPropertyInputValues((prev) => ({
