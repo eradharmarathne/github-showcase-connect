@@ -408,7 +408,7 @@ export default function BookingChannelsIntegration() {
 		setExchangingToken(true);
 		try {
 			const { data, error } = await supabase.functions.invoke(
-				"channel-token-exchange",
+				"beds24-token-exchange",
 				{
 					body: { inviteCode },
 				},
