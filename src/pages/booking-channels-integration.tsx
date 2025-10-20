@@ -415,7 +415,7 @@ export default function BookingChannelsIntegration() {
 				"beds24-token-exchange",
 				{
 					body: { 
-						inviteCode,
+						inviteCode: inviteCode,
 						locationId: selectedLocation,
 					},
 				},
@@ -430,13 +430,24 @@ export default function BookingChannelsIntegration() {
 				// Refresh the data to show the new connection
 				fetchData();
 			} else {
-				throw new Error(data.error || "Token exchange failed");
+				// Show detailed Beds24 error if available
+				const errorMessage = data?.details 
+					? `Beds24 error: ${data.details}` 
+					: (data?.error || "Token exchange failed");
+				throw new Error(errorMessage);
 			}
 		} catch (error: any) {
 			console.error("Token exchange error:", error);
+			
+			// Parse Beds24 API errors for better user feedback
+			let userMessage = error.message || "Unknown error";
+			if (userMessage.includes("Token not valid")) {
+				userMessage = "Invalid or expired invite code. Please generate a new invite code in Beds24 and try again.";
+			}
+			
 			toast.error(
 				t("bookingChannels.messages.tokenExchangeError", {
-					error: error.message || "Unknown error",
+					error: userMessage,
 				}),
 			);
 		} finally {
