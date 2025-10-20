@@ -619,7 +619,7 @@ export default function BookingChannelsIntegration() {
 				location_id: locationId,
 				beds24_property_id: propertyName, // Using property name as ID for now
 				beds24_property_name: propertyName,
-				mapping_type: "location", // or "room" if mapping to specific room
+				mapping_type: "villa", // Property-level mapping (villa or room)
 				is_active: true,
 			});
 
