@@ -407,10 +407,17 @@ export default function BookingChannelsIntegration() {
 	const exchangeInviteCode = async (inviteCode: string) => {
 		setExchangingToken(true);
 		try {
+			if (!selectedLocation) {
+				throw new Error("Please select a location first");
+			}
+
 			const { data, error } = await supabase.functions.invoke(
 				"beds24-token-exchange",
 				{
-					body: { inviteCode },
+					body: { 
+						inviteCode,
+						locationId: selectedLocation,
+					},
 				},
 			);
 
@@ -420,6 +427,8 @@ export default function BookingChannelsIntegration() {
 				toast.success(t("bookingChannels.messages.tokenExchangeSuccess"));
 				toast.info(t("bookingChannels.messages.tokenExchangeInfo"));
 				setSetupMode(false);
+				// Refresh the data to show the new connection
+				fetchData();
 			} else {
 				throw new Error(data.error || "Token exchange failed");
 			}

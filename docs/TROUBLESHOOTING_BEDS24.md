@@ -28,9 +28,12 @@ Frontend code was calling a non-existent Edge Function `channel-token-exchange` 
 
 2. Test the function call:
    ```typescript
-   // Correct call
+   // Correct call (requires both inviteCode and locationId)
    await supabase.functions.invoke("beds24-token-exchange", {
-     body: { inviteCode: "YOUR_INVITE_CODE" }
+     body: { 
+       inviteCode: "YOUR_INVITE_CODE",
+       locationId: "YOUR_LOCATION_UUID"
+     }
    });
    ```
 
