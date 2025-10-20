@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
 	"Access-Control-Allow-Origin": "*",
@@ -74,17 +75,67 @@ serve(async (req) => {
 			hasToken: !!tokenData.token 
 		});
 
+		// Get authorization header to create Supabase client
+		const authHeader = req.headers.get("Authorization");
+		if (!authHeader) {
+			throw new Error("Authorization header required");
+		}
+
+		// Initialize Supabase client with user's auth token
+		const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+		const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+		const supabase = createClient(supabaseUrl, supabaseKey, {
+			global: {
+				headers: { Authorization: authHeader },
+			},
+		});
+
+		// Get user's tenant_id
+		const { data: { user }, error: userError } = await supabase.auth.getUser();
+		if (userError || !user) {
+			throw new Error("Failed to get user information");
+		}
+
+		const { data: profile, error: profileError } = await supabase
+			.from("profiles")
+			.select("tenant_id")
+			.eq("id", user.id)
+			.single();
+
+		if (profileError || !profile?.tenant_id) {
+			throw new Error("Failed to get user tenant");
+		}
+
+		// Save credentials to database (upsert to handle reconfiguration)
+		const { error: saveError } = await supabase
+			.from("beds24_credentials")
+			.upsert({
+				tenant_id: profile.tenant_id,
+				refresh_token: tokenData.refreshToken,
+				access_token: tokenData.token,
+				token_expires_at: new Date(Date.now() + (tokenData.expiresIn || 3600) * 1000).toISOString(),
+				is_active: true,
+				sync_status: "active",
+				created_by: user.id,
+			}, {
+				onConflict: "tenant_id",
+			});
+
+		if (saveError) {
+			console.error("Failed to save credentials:", saveError);
+			throw new Error("Failed to save Beds24 credentials to database");
+		}
+
+		console.log("Beds24 credentials saved successfully for tenant:", profile.tenant_id);
+
 		return new Response(
 			JSON.stringify({
 				success: true,
-				message: "Successfully exchanged invite code",
+				message: "Beds24 integration configured successfully! Credentials are securely stored.",
 				data: {
-					refreshToken: tokenData.refreshToken,
-					token: tokenData.token,
 					expiresIn: tokenData.expiresIn,
-					// Don't log sensitive data, but confirm we got it
-					hasRefreshToken: !!tokenData.refreshToken,
-					hasToken: !!tokenData.token,
+					isActive: true,
+					syncStatus: "active",
 				},
 				timestamp: new Date().toISOString(),
 			}),

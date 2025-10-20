@@ -585,8 +585,8 @@
       "syncSuccess": "Booking channel data synced successfully",
       "syncError": "Failed to sync booking channel data",
       "fetchError": "Failed to fetch booking channel data",
-      "tokenExchangeSuccess": "Token exchange successful! You can now sync with booking channels.",
-      "tokenExchangeInfo": "Please save your refresh token in Supabase secrets as CHANNEL_REFRESH_TOKEN",
+      "tokenExchangeSuccess": "Beds24 connected successfully! Your credentials are securely stored and ready to sync bookings.",
+      "tokenExchangeInfo": "Your credentials are automatically stored securely in the database. You can now sync bookings.",
       "tokenExchangeError": "Token exchange failed: {{error}}"
     }
   },
