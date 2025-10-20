@@ -24,9 +24,17 @@ export default function ResetPassword() {
 	useEffect(() => {
 		const checkSession = async () => {
 			try {
+				console.log("Reset password page: Checking session...");
+				
 				// Check if user has an active session
 				// The token was already verified in auth.tsx before redirecting here
 				const { data: { session }, error } = await supabase.auth.getSession();
+
+				console.log("Session check result:", { 
+					hasSession: !!session, 
+					error: error?.message,
+					userId: session?.user?.id 
+				});
 
 				if (error || !session) {
 					console.error("No active session found:", error);
@@ -35,8 +43,13 @@ export default function ResetPassword() {
 						description: "This password reset link is invalid or has expired. Please request a new one.",
 						variant: "destructive",
 					});
-					navigate("/auth/forgot-password");
+					
+					// Delay redirect to show the toast
+					setTimeout(() => {
+						navigate("/auth/forgot-password");
+					}, 2000);
 				} else {
+					console.log("Valid session found, showing reset password form");
 					setIsValidToken(true);
 				}
 			} catch (error) {
@@ -46,7 +59,11 @@ export default function ResetPassword() {
 					description: "Failed to verify reset link. Please try again.",
 					variant: "destructive",
 				});
-				navigate("/auth/forgot-password");
+				
+				// Delay redirect to show the toast
+				setTimeout(() => {
+					navigate("/auth/forgot-password");
+				}, 2000);
 			} finally {
 				setIsLoading(false);
 			}

@@ -57,7 +57,7 @@ export default function Auth() {
 			if (tokenHash && type === "recovery") {
 				// Verify the recovery token and establish a session
 				try {
-					const { error } = await supabase.auth.verifyOtp({
+					const { data, error } = await supabase.auth.verifyOtp({
 						token_hash: tokenHash,
 						type: "recovery",
 					});
@@ -73,8 +73,24 @@ export default function Auth() {
 						return;
 					}
 
+					// Verify session was established
+					if (!data.session) {
+						console.error("No session established after token verification");
+						toast({
+							title: "Error",
+							description: "Failed to establish session. Please try again.",
+							variant: "destructive",
+						});
+						navigate("/auth/forgot-password", { replace: true });
+						return;
+					}
+
+					console.log("Recovery token verified, session established:", data.session);
+
+					// Small delay to ensure session is fully established
+					await new Promise(resolve => setTimeout(resolve, 500));
+
 					// Token verified successfully, redirect to reset password page
-					// Do not pass token_hash in URL as it's already been consumed
 					navigate("/auth/reset-password", { replace: true });
 				} catch (error) {
 					console.error("Exception during recovery token verification:", error);
