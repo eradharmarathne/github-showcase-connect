@@ -17,38 +17,62 @@ serve(async (req) => {
 		console.log("Exchanging Beds24 invite code for refresh token...");
 
 		// The invite code should be passed in the request body
-		const { inviteCode } = await req.json();
+		const body = await req.json();
+		const { inviteCode } = body;
+
+		console.log("Request body received:", { hasInviteCode: !!inviteCode, inviteCodeLength: inviteCode?.length });
 
 		if (!inviteCode) {
+			console.error("Missing invite code in request");
 			throw new Error("Invite code is required");
 		}
 
+		console.log("Making request to Beds24 API...");
+		
 		// Exchange invite code for refresh token
+		// According to Beds24 API V2 docs, invite code should be in 'code' header
 		const response = await fetch(
 			"https://beds24.com/api/v2/authentication/setup",
 			{
 				method: "GET",
 				headers: {
 					accept: "application/json",
-					inviteCode: inviteCode,
+					code: inviteCode,
 				},
 			},
 		);
+
+		console.log("Beds24 API response status:", response.status);
 
 		if (!response.ok) {
 			const errorText = await response.text();
 			console.error(
 				"Failed to exchange invite code:",
 				response.status,
+				response.statusText,
 				errorText,
 			);
-			throw new Error(
-				`Token exchange failed: ${response.status} ${response.statusText}`,
+			
+			// Return more detailed error information
+			return new Response(
+				JSON.stringify({
+					success: false,
+					error: `Beds24 API error: ${response.status} ${response.statusText}`,
+					details: errorText,
+					timestamp: new Date().toISOString(),
+				}),
+				{
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+					status: 400, // Use 400 for client errors
+				},
 			);
 		}
 
 		const tokenData = await response.json();
-		console.log("Successfully exchanged invite code for tokens");
+		console.log("Successfully exchanged invite code for tokens", { 
+			hasRefreshToken: !!tokenData.refreshToken,
+			hasToken: !!tokenData.token 
+		});
 
 		return new Response(
 			JSON.stringify({
@@ -71,6 +95,11 @@ serve(async (req) => {
 		);
 	} catch (error: any) {
 		console.error("Token exchange error:", error);
+		console.error("Error details:", {
+			message: error?.message,
+			stack: error?.stack,
+			name: error?.name,
+		});
 
 		return new Response(
 			JSON.stringify({
