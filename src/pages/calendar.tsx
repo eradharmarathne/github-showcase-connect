@@ -28,7 +28,7 @@ type Room = Database["public"]["Tables"]["rooms"]["Row"];
 export default function Calendar() {
 	const { t } = useTranslation("common");
 	const navigate = useNavigate();
-	const [currentDate, setCurrentDate] = useState(new Date());
+	const [currentDate, setCurrentDate] = useState(startOfMonth(new Date()));
 	const [showDirectBookings, setShowDirectBookings] = useState(true);
 	const [showBookingCom, setShowBookingCom] = useState(true);
 	const [showAirbnb, setShowAirbnb] = useState(true);
@@ -70,20 +70,20 @@ export default function Calendar() {
 	};
 
 	const handlePreviousMonth = () => {
-		setCurrentDate(subMonths(currentDate, 1));
+		setCurrentDate(startOfMonth(subMonths(currentDate, 1)));
 	};
 
 	const handleNextMonth = () => {
-		setCurrentDate(addMonths(currentDate, 1));
+		setCurrentDate(startOfMonth(addMonths(currentDate, 1)));
 	};
 
 	const handleToday = () => {
-		setCurrentDate(new Date());
+		setCurrentDate(startOfMonth(new Date()));
 	};
 
 	return (
 		<PermissionRoute permission={["access_calendar"]}>
-			<div className="space-y-4 pb-20 sm:pb-8 px-4 sm:px-6 md:px-8 pt-4">
+			<div className="space-y-4 pb-20 sm:pb-8 px-4 sm:px-6 md:px-0 pt-4">
 				{/* Navigation Header */}
 				<div className="flex items-center justify-between flex-wrap gap-2">
 					<div className="flex items-center gap-2">
