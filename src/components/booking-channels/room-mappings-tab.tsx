@@ -86,15 +86,68 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 				},
 			);
 
-			if (error) throw error;
+			if (error) {
+				console.error("Edge Function error:", error);
+				throw error;
+			}
 
 			if (!data?.rooms || data.rooms.length === 0) {
-				toast.info("No Beds24 rooms found. Please configure Beds24 integration first.");
+				toast.info(
+					data?.error || "No Beds24 rooms found. Please configure Beds24 integration and property mappings first.",
+					{ description: data?.details }
+				);
 				return;
 			}
 
-			setBeds24Rooms(data.rooms);
-			setAvailableRooms(data.availableRooms || []);
+			// Normalize Edge Function room objects to the UI's Beds24Room shape
+			const normalizedBeds24Rooms: Beds24Room[] = (data.rooms || []).map((r: any) => ({
+				id: r.beds24_room_id ?? r.id,
+				name: r.beds24_room_name ?? r.name ?? "",
+				propertyId: r.beds24_property_id ?? r.propertyId,
+				propertyName: r.beds24_property_name ?? r.propertyName ?? "",
+				maxOccupancy: r.max_occupancy ?? r.maxOccupancy,
+				description: r.description ?? r.desc ?? null,
+				mappingStatus: r.is_mapped ? "mapped" : "unmapped",
+				currentMapping: r.mapped_to_room
+					? {
+						room_id: r.mapped_to_room_id || r.mapped_to_room?.id,
+						room_number: r.mapped_to_room?.room_number || r.mapped_to_room?.name || "",
+						room_type: r.mapped_to_room?.room_type || r.mapped_to_room?.type || "",
+					}
+					: r.mapped_to_room_id
+					? { room_id: r.mapped_to_room_id, room_number: "", room_type: "" }
+					: undefined,
+				suggestions: r.suggestions
+					? r.suggestions.map((s: any) => ({
+						room_id: s.room_id || s.suggested_room_id,
+						room_number: s.room_number || s.roomNumber || "",
+						room_type: s.room_type || s.roomType || "",
+						similarity: (s.similarity ?? s.suggestion_score ?? 0) / 100,
+					}))
+					: r.suggestion_score
+					? [
+						{
+							room_id: r.suggested_room_id || null,
+							room_number: "",
+							room_type: "",
+							similarity: (r.suggestion_score || 0) / 100,
+						},
+					]
+					: [],
+			}));
+
+			setBeds24Rooms(normalizedBeds24Rooms);
+			// The Edge Function returns `cco_rooms` (array) — map it to our `availableRooms` shape
+			const ccoRoomsRaw = data.cco_rooms || data.availableRooms || [];
+			const mappedCcoRooms: Room[] = Array.isArray(ccoRoomsRaw)
+				? ccoRoomsRaw.map((r: any) => ({
+					id: r.id || r.room_id || r.roomId || String(r.id),
+					room_number: r.room_number || r.roomNumber || r.name || "",
+					room_type: r.room_type || r.roomType || r.type || "",
+				}))
+				: [];
+
+			setAvailableRooms(mappedCcoRooms);
 
 			const mappedCount = data.rooms.filter(
 				(r: Beds24Room) => r.mappingStatus === "mapped",
@@ -104,9 +157,12 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 			toast.success(
 				`Loaded ${data.rooms.length} Beds24 rooms (${mappedCount} mapped, ${unmappedCount} unmapped)`,
 			);
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error fetching Beds24 rooms:", error);
-			toast.error("Failed to fetch Beds24 rooms. Please check your integration.");
+			const errorMessage = error?.message || "Failed to fetch Beds24 rooms";
+			toast.error(errorMessage, {
+				description: "Please check your Beds24 integration in the Settings tab"
+			});
 		} finally {
 			setLoading(false);
 		}

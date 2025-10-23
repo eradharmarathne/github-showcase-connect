@@ -143,9 +143,9 @@ serve(async (req) => {
 
 		for (const mapping of propertyMappings) {
 			try {
-				// Fetch rooms from Beds24 API
+				// Fetch rooms from Beds24 API using the correct endpoint: GET /rooms?propertyId=X
 				const roomsResponse = await fetch(
-					`${BEDS24_API_URL}/inventory/rooms?propertyId=${mapping.beds24_property_id}`,
+					`${BEDS24_API_URL}/rooms?propertyId=${mapping.beds24_property_id}`,
 					{
 						headers: {
 							token: accessToken,
