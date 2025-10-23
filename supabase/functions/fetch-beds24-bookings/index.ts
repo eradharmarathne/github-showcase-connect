@@ -289,6 +289,24 @@ serve(async (req) => {
 			`Loaded ${propertyIdToLocation.size} active Beds24 property mappings`,
 		);
 
+		// Fetch room mappings for automatic room assignment
+		const { data: roomMappings } = await supabase
+			.from("channel_room_mappings")
+			.select("channel_room_id, room_id")
+			.eq("channel", "beds24")
+			.eq("is_active", true);
+
+		// Build map of Beds24 roomId -> CheckingCheckout room_id
+		const beds24RoomToRoomId = new Map<string, string>();
+		if (roomMappings) {
+			for (const mapping of roomMappings) {
+				beds24RoomToRoomId.set(mapping.channel_room_id, mapping.room_id);
+			}
+			console.log(
+				`Loaded ${beds24RoomToRoomId.size} active room mappings`,
+			);
+		}
+
 		// Fetch bookings from Beds24 API using credentials from database
 		console.log("Fetching bookings from Beds24 API v2...");
 		const tokenExpiresAt = credentials.token_expires_at
@@ -425,6 +443,19 @@ serve(async (req) => {
 				b.roomType?.name ||
 				(b.roomId != null ? `Room ${b.roomId}` : null);
 
+			// Try to map Beds24 roomId to CheckingCheckout room_id
+			let mappedRoomId: string | null = null;
+			if (b.roomId != null) {
+				const beds24RoomId = String(b.roomId);
+				mappedRoomId = beds24RoomToRoomId.get(beds24RoomId) || null;
+				
+				if (mappedRoomId) {
+					console.log(`Booking ${externalId}: Mapped Beds24 room ${beds24RoomId} to CCO room ${mappedRoomId}`);
+				} else {
+					console.log(`Booking ${externalId}: No room mapping found for Beds24 room ${beds24RoomId}`);
+				}
+			}
+
 			const totalAmount = b.totalAmount ?? b.total ?? b.price ?? 0;
 
 			const status = (b.status ?? "unknown").toString().toLowerCase();
@@ -444,6 +475,7 @@ serve(async (req) => {
 				currency: currency,
 				location_id: locationMapping.location_id,
 				tenant_id: locationMapping.tenant_id,
+				room_id: mappedRoomId,  // ✅ Auto-assigned room via mapping!
 				room_name: roomName ?? null,
 				adults,
 				children,
