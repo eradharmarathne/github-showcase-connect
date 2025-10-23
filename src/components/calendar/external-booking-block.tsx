@@ -1,3 +1,10 @@
+import { format, parseISO } from "date-fns";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ExternalBooking } from "./timeline-view";
 
 interface ExternalBookingBlockProps {
@@ -79,18 +86,26 @@ export function ExternalBookingBlock({
 		return source.charAt(0).toUpperCase() + source.slice(1);
 	};
 
+	// Format dates for tooltip
+	const checkInDate = parseISO(booking.check_in);
+	const checkOutDate = parseISO(booking.check_out);
+	const nights = spanDays;
+
 	return (
-		<div
-			className="absolute inset-y-[2px] flex items-center"
-			style={{
-				left: `calc(${(startIndex / totalDays) * 100}% + 50%)`,
-				right: `calc(${100 - ((startIndex + spanDays) / totalDays) * 100}% + 50%)`,
-			}}
-		>
-			<button
-				type="button"
-				onClick={() => onClick(booking)}
-				className={`
+		<TooltipProvider>
+			<Tooltip delayDuration={200}>
+				<TooltipTrigger asChild>
+					<div
+						className="absolute inset-y-[2px] flex items-center"
+						style={{
+							left: `calc(${(startIndex / totalDays) * 100}% + 50%)`,
+							right: `calc(${100 - ((startIndex + spanDays) / totalDays) * 100}% + 50%)`,
+						}}
+					>
+						<button
+							type="button"
+							onClick={() => onClick(booking)}
+							className={`
 					w-full h-full border-2 ${colors.border} ${colors.bg}
 					flex flex-col justify-center px-1 sm:px-1.5
 					hover:opacity-80 transition-opacity
@@ -98,8 +113,8 @@ export function ExternalBookingBlock({
 					cursor-pointer
 					text-left
 				`}
-				style={{
-					clipPath: `polygon(
+							style={{
+								clipPath: `polygon(
 						0 0,
 						6px 50%,
 						0 100%,
@@ -107,52 +122,100 @@ export function ExternalBookingBlock({
 						100% 50%,
 						calc(100% - 6px) 0
 					)`,
-					backgroundImage: `repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays}))`,
-				}}
-				title={`${formatSourceName(booking.source)} - ${booking.guest_name}`}
-			>
-				{/* Channel indicator stripe */}
-				<div
-					className={`absolute top-0 left-0 right-0 h-0.5 ${colors.border.replace("border-", "bg-")}`}
-				/>
+								backgroundImage: `repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays}))`,
+							}}
+						>
+							{/* Channel indicator stripe */}
+							<div
+								className={`absolute top-0 left-0 right-0 h-0.5 ${colors.border.replace("border-", "bg-")}`}
+							/>
 
-				{/* Booking details - guest name and guest count */}
-				{spanDays >= 2 ? (
-					<div className="flex items-center gap-1 w-full">
-						<span
-							className="text-[8px] sm:text-[9px]"
-							title={formatSourceName(booking.source)}
-						>
-							{colors.icon}
-						</span>
-						<span
-							className={`${colors.text} text-[9px] sm:text-[10px] font-semibold truncate flex-1`}
-						>
-							{booking.guest_name}
-						</span>
-						<span
-							className={`${colors.text} text-[9px] sm:text-[10px] font-semibold shrink-0`}
-						>
-							• ({adults + children}{" "}
-							{adults + children === 1 ? "guest" : "guests"})
-						</span>
-					</div>
-				) : (
-					<div className="flex items-center justify-center">
-						<span className={`${colors.text} text-[9px]`}>•</span>
-					</div>
-				)}
+							{/* Booking details - guest name and guest count */}
+							{spanDays >= 2 ? (
+								<div className="flex items-center gap-1 w-full">
+									<span
+										className="text-[8px] sm:text-[9px]"
+										title={formatSourceName(booking.source)}
+									>
+										{colors.icon}
+									</span>
+									<span
+										className={`${colors.text} text-[9px] sm:text-[10px] font-semibold truncate flex-1`}
+									>
+										{booking.guest_name}
+									</span>
+									<span
+										className={`${colors.text} text-[9px] sm:text-[10px] font-semibold shrink-0`}
+									>
+										• ({adults + children}{" "}
+										{adults + children === 1 ? "guest" : "guests"})
+									</span>
+								</div>
+							) : (
+								<div className="flex items-center justify-center">
+									<span className={`${colors.text} text-[9px]`}>•</span>
+								</div>
+							)}
 
-				{/* Unmapped indicator */}
-				{!booking.room_id && spanDays >= 2 && (
-					<div
-						className="absolute bottom-0 right-0 bg-yellow-400 text-[6px] sm:text-[7px] px-0.5 rounded-tl"
-						title="Room not mapped"
-					>
-						⚠️
+							{/* Unmapped indicator */}
+							{!booking.room_id && spanDays >= 2 && (
+								<div
+									className="absolute bottom-0 right-0 bg-yellow-400 text-[6px] sm:text-[7px] px-0.5 rounded-tl"
+									title="Room not mapped"
+								>
+									⚠️
+								</div>
+							)}
+						</button>
 					</div>
-				)}
-			</button>
-		</div>
+				</TooltipTrigger>
+				<TooltipContent side="top" className="max-w-xs">
+					<div className="space-y-2">
+						<div className="font-semibold flex items-center gap-2">
+							<span>{colors.icon}</span>
+							<span>{formatSourceName(booking.source)}</span>
+						</div>
+						<div className="text-sm space-y-1">
+							<div>
+								<span className="font-medium">Guest:</span> {booking.guest_name}
+							</div>
+							<div>
+								<span className="font-medium">Check-in:</span>{" "}
+								{format(checkInDate, "EEE, MMM d, yyyy")}
+							</div>
+							<div>
+								<span className="font-medium">Check-out:</span>{" "}
+								{format(checkOutDate, "EEE, MMM d, yyyy")}
+							</div>
+							<div>
+								<span className="font-medium">Nights:</span> {nights}
+							</div>
+							<div>
+								<span className="font-medium">Guests:</span> {adults} adults
+								{children ? `, ${children} children` : ""}
+							</div>
+							<div>
+								<span className="font-medium">Amount:</span>{" "}
+								{getCurrencySymbol(currency)}
+								{amount.toFixed(2)}
+							</div>
+							<div>
+								<span className="font-medium">Status:</span>{" "}
+								<span className="capitalize">{booking.status}</span>
+							</div>
+							<div>
+								<span className="font-medium">Booking ID:</span>{" "}
+								{booking.external_id}
+							</div>
+							{!booking.room_id && (
+								<div className="mt-2 p-2 bg-yellow-50 border border-yellow-300 rounded text-yellow-800 text-xs">
+									⚠️ Room not mapped - please assign a room
+								</div>
+							)}
+						</div>
+					</div>
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
 	);
 }

@@ -15,7 +15,7 @@ import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { TimelineViewSkeleton } from "../skeleton/timeline-view-skelton";
-import { CalendarLegend, RoomRow } from ".";
+import { CalendarLegend, RoomRow, UnmappedBookingsRow } from ".";
 
 type Room = Database["public"]["Tables"]["rooms"]["Row"];
 type Reservation = {
@@ -338,6 +338,15 @@ export function TimelineView({
 					</div>
 				</div>
 			</div>
+
+			{/* Unmapped Bookings Row */}
+			<UnmappedBookingsRow
+				unmappedBookings={filteredExternalBookings.filter((b) => !b.room_id)}
+				calendarDays={calendarDays}
+				getCurrencySymbol={getCurrencySymbol}
+				onBookingClick={onBookingClick}
+				calculateBookingSpan={calculateBookingSpan}
+			/>
 
 			{/* Room Rows */}
 			<div className="overflow-y-auto flex-1">
