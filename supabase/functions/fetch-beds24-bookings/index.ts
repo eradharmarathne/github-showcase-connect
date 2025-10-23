@@ -316,10 +316,23 @@ serve(async (req) => {
 
 		// Optional: map source id to name
 		const mapSource = (b: V2Booking): string => {
+			// First, check if there's a channel field (Beds24 v2 API uses this)
+			if (typeof (b as any).channel === "string" && (b as any).channel) {
+				const channel = (b as any).channel.toLowerCase();
+				if (channel === "booking") return "booking_com";
+				if (channel === "airbnb") return "airbnb";
+				if (channel === "expedia") return "expedia";
+				if (channel === "vrbo") return "vrbo";
+				// Add more channel mappings as needed
+			}
+			
+			// Fallback to source/sourceName fields
 			if (typeof b.source === "string" && b.source)
 				return b.source.toLowerCase();
 			if (typeof b.sourceName === "string" && b.sourceName)
 				return b.sourceName.toLowerCase();
+			
+			// Legacy apiSourceId mapping (older Beds24 API)
 			switch (b.apiSourceId) {
 				case 3:
 					return "booking_com";
