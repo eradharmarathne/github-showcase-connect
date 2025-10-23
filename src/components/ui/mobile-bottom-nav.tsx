@@ -31,8 +31,8 @@ export function MobileBottomNav() {
 									: "text-muted-foreground hover:text-foreground",
 							)}
 						>
-							<item.icon className={cn("size-5", isActive && "text-primary")} />
-							<span className="font-medium">{item.name}</span>
+							<item.icon className={cn("size-4", isActive && "text-primary")} />
+							<span className="font-medium text-xs sm:text-base">{item.name}</span>
 						</Link>
 					);
 				})}

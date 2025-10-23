@@ -82,7 +82,7 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 			const { data, error } = await supabase.functions.invoke(
 				"fetch-beds24-rooms",
 				{
-					body: { tenantId: tenant.id, locationId },
+					body: { location_id: locationId },
 				},
 			);
 
