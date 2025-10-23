@@ -53,6 +53,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RoomMappingsTab } from "@/components/booking-channels/room-mappings-tab";
 import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
@@ -915,6 +916,9 @@ export default function BookingChannelsIntegration() {
 					<TabsTrigger value="analytics">
 						{t("bookingChannels.tabs.analytics")}
 					</TabsTrigger>
+					<TabsTrigger value="room-mappings">
+						Room Mappings
+					</TabsTrigger>
 					<TabsTrigger value="settings">
 						{t("bookingChannels.tabs.settings")}
 					</TabsTrigger>
@@ -1392,6 +1396,10 @@ export default function BookingChannelsIntegration() {
 							</div>
 						</CardContent>
 					</Card>
+				</TabsContent>
+
+				<TabsContent value="room-mappings" className="space-y-6">
+					<RoomMappingsTab locationId={selectedLocation || null} />
 				</TabsContent>
 
 				<TabsContent value="settings" className="space-y-6">
