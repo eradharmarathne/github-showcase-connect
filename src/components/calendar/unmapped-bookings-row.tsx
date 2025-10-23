@@ -165,65 +165,47 @@ export function UnmappedBookingsRow({
 											style={{
 												left: `calc(${(booking.span.startIndex / totalDays) * 100}% + ${booking.span.startIndex}px)`,
 												width: `calc(${(booking.span.spanDays / totalDays) * 100}% + ${booking.span.spanDays - 1}px)`,
-												top: "2px",
-												height: "18px",
+												top: "0",
+												bottom: "0",
 											}}
 											onClick={() => onBookingClick(booking)}
 										>
 											{/* Start indicator dot */}
 											<div
-												className={`absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30 ${colors.badge}`}
-												style={{ left: "-5px" }}
+												className={`absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white shadow-sm z-30 ${colors.badge}`}
+												style={{ left: "-4px" }}
 											/>
 											{/* End indicator dot - amber for unmapped */}
 											<div
-												className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30 bg-amber-500"
-												style={{ right: "-5px" }}
+												className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white shadow-sm z-30 bg-amber-500"
+												style={{ right: "-4px" }}
 											/>
-											{/* Main booking shape with strong parallelogram */}
+											{/* Main booking shape */}
 											<div
-												className={`absolute inset-0 shadow-lg ${colors.bg}`}
-												style={{
-													clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
-												}}
-											/>
-											{/* Inner layer for depth */}
-											<div
-												className="absolute inset-[1px] bg-gradient-to-b from-white/10 to-transparent"
-												style={{
-													clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
-												}}
+												className={`absolute inset-0 shadow-sm ${colors.bg} border-t-2 border-b-2 ${colors.border}`}
 											/>
 											{/* Content */}
-											<div className="absolute inset-0 flex items-center px-3 py-1 z-10" style={{ paddingLeft: "10%" }}>
+											<div className="absolute inset-0 flex items-center px-2 py-1 z-10">
 												{/* Channel badge */}
 												<div
-													className={`absolute top-0 left-0 ${colors.badge} text-white text-[9px] px-1.5 py-0.5 font-black uppercase leading-none`}
-													style={{
-														clipPath: "polygon(0 0, 100% 0, 80% 100%, 0 100%)",
-														letterSpacing: "0.5px",
-													}}
+													className={`absolute top-0 left-0 ${colors.badge} text-white text-[8px] px-1 py-0.5 font-bold uppercase leading-none`}
 												>
 													{colors.label}
 												</div>
 
 												{/* Warning badge */}
 												<div
-													className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] px-1.5 py-0.5 font-black uppercase leading-none flex items-center gap-0.5"
-													style={{
-														clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0 100%)",
-														letterSpacing: "0.5px",
-													}}
+													className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] px-1 py-0.5 font-bold uppercase leading-none flex items-center gap-0.5"
 												>
 													<AlertTriangle className="h-2 w-2" />
 												</div>
 
 												{/* Guest name and count */}
-												<span className="text-white text-sm font-bold truncate flex-1 drop-shadow-sm">
+												<span className={`text-xs font-semibold truncate flex-1 ${colors.text}`}>
 													{booking.guest_name}
 												</span>
 												{booking.span.spanDays >= 2 && (
-													<span className="text-white text-xs font-bold ml-2 drop-shadow-sm shrink-0">
+													<span className={`text-[10px] font-medium ml-1 shrink-0 ${colors.text}`}>
 														({adults + children})
 													</span>
 												)}

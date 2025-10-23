@@ -160,8 +160,8 @@ export function RoomRow({
 													style={{
 														left: "0",
 														width: `calc(${bookingStartingToday.span.spanDays * 100}% + ${(bookingStartingToday.span.spanDays - 1)}px)`,
-														top: "2px",
-														height: "18px",
+														top: "0",
+														bottom: "0",
 													}}
 													onClick={() => onBookingClick(bookingStartingToday)}
 												>
@@ -181,38 +181,20 @@ export function RoomRow({
 														)}
 														style={{ right: "-5px" }}
 													/>
-													{/* Main booking shape with strong parallelogram */}
+													{/* Main booking shape */}
 													<div
 														className={cn(
-															"absolute inset-0 shadow-lg",
+															"absolute inset-0 shadow-sm",
 															getStatusColor(bookingStartingToday.status),
 														)}
-														style={{
-															clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
-															backgroundImage:
-																"repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / " +
-																bookingStartingToday.span.spanDays +
-																" - 1px), rgba(0,0,0,0.1) calc(100% / " +
-																bookingStartingToday.span.spanDays +
-																" - 1px), rgba(0,0,0,0.1) calc(100% / " +
-																bookingStartingToday.span.spanDays +
-																"))",
-														}}
-													/>
-													{/* Inner layer for depth */}
-													<div
-														className="absolute inset-[1px] bg-gradient-to-b from-white/10 to-transparent"
-														style={{
-															clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
-														}}
 													/>
 													{/* Content */}
-													<div className="absolute inset-0 flex items-center px-3 py-1 z-10" style={{ paddingLeft: "10%" }}>
-														<span className="text-white text-sm font-bold truncate flex-1 drop-shadow-sm">
+													<div className="absolute inset-0 flex items-center px-2 py-1 z-10">
+														<span className="text-white text-xs font-semibold truncate flex-1 drop-shadow-sm">
 															{bookingStartingToday.guest_name}
 														</span>
 														{bookingStartingToday.span.spanDays >= 2 && (
-															<span className="text-white text-xs font-bold ml-2 drop-shadow-sm shrink-0">
+															<span className="text-white text-[10px] font-medium ml-1 drop-shadow-sm shrink-0">
 																({bookingStartingToday.adults +
 																	(bookingStartingToday.children || 0)})
 															</span>
