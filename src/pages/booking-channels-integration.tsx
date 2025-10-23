@@ -246,16 +246,16 @@ export default function BookingChannelsIntegration() {
 			if (locationsError) throw locationsError;
 			if (roomsError) throw roomsError;
 
-		// Fetch property mappings from database - filtered by selected location
-		const { data: mappingsData } = await supabase
-			.from("beds24_property_mappings")
-			.select(`
+			// Fetch property mappings from database - filtered by selected location
+			const { data: mappingsData } = await supabase
+				.from("beds24_property_mappings")
+				.select(`
           *,
           locations (id, name)
         `)
-			.eq("tenant_id", tenant.id)
-			.eq("location_id", selectedLocation)
-			.eq("is_active", true);			// Fetch iCal sync URLs - filtered by selected location
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.eq("is_active", true);			// Fetch iCal sync URLs - filtered by selected location
 			const { data: syncUrlsData } = await supabase
 				.from("booking_sync_urls")
 				.select(`
@@ -272,22 +272,22 @@ export default function BookingChannelsIntegration() {
 			const transformedMappings: PropertyMapping[] = [];
 			if (mappingsData) {
 				const groupedMappings = mappingsData.reduce(
-				(acc, mapping) => {
-					const locationId = mapping.location_id;
-					if (!acc[locationId]) {
-						acc[locationId] = {
-							locationId,
-							locationName: mapping.locations?.name || "",
-							channelProperties: [],
-						};
-					}
-					acc[locationId].channelProperties.push(
-						mapping.beds24_property_name,
-					);
-					return acc;
-				},
-				{} as Record<string, PropertyMapping>,
-			);				transformedMappings.push(...Object.values(groupedMappings));
+					(acc, mapping) => {
+						const locationId = mapping.location_id;
+						if (!acc[locationId]) {
+							acc[locationId] = {
+								locationId,
+								locationName: mapping.locations?.name || "",
+								channelProperties: [],
+							};
+						}
+						acc[locationId].channelProperties.push(
+							mapping.beds24_property_name,
+						);
+						return acc;
+					},
+					{} as Record<string, PropertyMapping>,
+				); transformedMappings.push(...Object.values(groupedMappings));
 			}
 
 			setBookings(bookingsData || []);
@@ -424,7 +424,7 @@ export default function BookingChannelsIntegration() {
 			const { data, error } = await supabase.functions.invoke(
 				"beds24-token-exchange",
 				{
-					body: { 
+					body: {
 						inviteCode: inviteCode,
 						locationId: selectedLocation,
 						tenantId: tenant.id,
@@ -442,20 +442,20 @@ export default function BookingChannelsIntegration() {
 				fetchData();
 			} else {
 				// Show detailed Beds24 error if available
-				const errorMessage = data?.details 
-					? `Beds24 error: ${data.details}` 
+				const errorMessage = data?.details
+					? `Beds24 error: ${data.details}`
 					: (data?.error || "Token exchange failed");
 				throw new Error(errorMessage);
 			}
 		} catch (error: any) {
 			console.error("Token exchange error:", error);
-			
+
 			// Parse Beds24 API errors for better user feedback
 			let userMessage = error.message || "Unknown error";
 			if (userMessage.includes("Token not valid")) {
 				userMessage = "Invalid or expired invite code. Please generate a new invite code in Beds24 and try again.";
 			}
-			
+
 			toast.error(
 				t("bookingChannels.messages.tokenExchangeError", {
 					error: userMessage,
@@ -527,7 +527,7 @@ export default function BookingChannelsIntegration() {
 	const calculateNights = (checkIn: string, checkOut: string) => {
 		const nights = Math.ceil(
 			(new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-				(1000 * 60 * 60 * 24),
+			(1000 * 60 * 60 * 24),
 		);
 		return nights;
 	};
@@ -621,19 +621,19 @@ export default function BookingChannelsIntegration() {
 			return;
 		}
 
-	try {
-		const { error } = await supabase
-			.from("beds24_property_mappings")
-			.insert({
-				tenant_id: tenant.id,
-				location_id: locationId,
-				beds24_property_id: propertyName, // Using property name as ID for now
-				beds24_property_name: propertyName,
-				mapping_type: "villa", // Property-level mapping (villa or room)
-				is_active: true,
-			});
+		try {
+			const { error } = await supabase
+				.from("beds24_property_mappings")
+				.insert({
+					tenant_id: tenant.id,
+					location_id: locationId,
+					beds24_property_id: propertyName, // Using property name as ID for now
+					beds24_property_name: propertyName,
+					mapping_type: "villa", // Property-level mapping (villa or room)
+					is_active: true,
+				});
 
-		if (error) throw error;			toast.success("Property mapping added successfully");
+			if (error) throw error; toast.success("Property mapping added successfully");
 
 			// Clear input
 			setPropertyInputValues((prev) => ({
@@ -784,7 +784,7 @@ export default function BookingChannelsIntegration() {
 	// No need to filter bookings - they're already filtered by selectedLocation in the query
 	const filteredBookings = bookings.map((booking) => {
 		const mappedLocation = getLocationFromBooking(booking);
-			console.log("Locations:", mappedLocation);
+		console.log("Locations:", mappedLocation);
 		return {
 			...booking,
 			mappedLocation: mappedLocation,
@@ -1183,7 +1183,7 @@ export default function BookingChannelsIntegration() {
 												{selectedBooking.room_id && selectedBooking.room
 													? `${selectedBooking.room.room_number} - ${selectedBooking.room.room_type}`
 													: selectedBooking.room_name ||
-														t("bookingChannels.bookingDialog.unknownProperty")}
+													t("bookingChannels.bookingDialog.unknownProperty")}
 											</p>
 											<p className="text-sm text-muted-foreground">
 												{selectedBooking.mappedLocation?.name ||
@@ -1400,7 +1400,7 @@ export default function BookingChannelsIntegration() {
 						<div>
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<SettingsIcon className="size-5" />
-								 Property Mapping
+								Property Mapping
 							</h3>
 							<p className="text-sm text-muted-foreground mt-1">
 								Map your property name to this location

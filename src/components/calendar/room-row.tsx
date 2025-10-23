@@ -97,9 +97,9 @@ export function RoomRow({
 		<TooltipProvider>
 			<div className="border-b last:border-b-0 hover:bg-muted/20 transition-colors">
 				<div className="flex w-full">
-					{/* Room Info Column - Compact & Responsive */}
-					<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1 border-r flex items-center">
-						<div className="font-medium text-[10px] sm:text-xs truncate">
+					{/* Room Info Column - Compact */}
+					<div className="w-16 sm:w-20 shrink-0 px-1.5 py-3 border-r flex items-center justify-center">
+						<div className="font-bold text-[10px] sm:text-xs truncate">
 							{room.room_number}
 						</div>
 					</div>
@@ -130,21 +130,20 @@ export function RoomRow({
 										dayIndex < booking.span.startIndex + booking.span.spanDays,
 								);
 
-							const cellWidth = isMobile ? 32 : 40;
-
 							return (
 								<div
 									key={dayIndex}
 									className={cn(
-										"flex-1 min-w-[32px] sm:min-w-[40px] h-8 sm:h-9 border-r last:border-r-0 relative flex items-center justify-center",
-										isOccupied && !bookingStartingToday && "bg-muted/20",
+										"flex-1 h-12 border-r last:border-r-0 relative flex items-center justify-center",
+										isOccupied && !bookingStartingToday && !externalBookingStartingToday && "bg-muted/10",
 									)}
+									style={{ minWidth: "32px" }}
 								>
 									{/* Render external bookings first (below direct bookings) */}
 									{externalBookingStartingToday && (
 										<ExternalBookingBlock
 											booking={externalBookingStartingToday}
-											startIndex={externalBookingStartingToday.span.startIndex}
+											startIndex={dayIndex}
 											spanDays={externalBookingStartingToday.span.spanDays}
 											totalDays={calendarDays.length}
 											getCurrencySymbol={getCurrencySymbol}
@@ -157,53 +156,66 @@ export function RoomRow({
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<div
-													className={cn(
-														"absolute inset-y-[2px] cursor-pointer transition-all z-20 flex items-center justify-center overflow-visible",
-														getStatusColor(bookingStartingToday.status),
-													)}
+													className="absolute cursor-pointer transition-all z-20 flex items-center justify-center overflow-visible hover:brightness-110"
 													style={{
-														left: "20%",
-														right: `calc(${100 - bookingStartingToday.span.spanDays * 100}% + 50%)`,
-														clipPath: `polygon(
-														0 0,
-														6px 50%,
-														0 100%,
-														calc(100% - 6px) 100%,
-														100% 50%,
-														calc(100% - 6px) 0
-													)`,
-														backgroundImage:
-															"repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / " +
-															bookingStartingToday.span.spanDays +
-															" - 1px), rgba(0,0,0,0.05) calc(100% / " +
-															bookingStartingToday.span.spanDays +
-															" - 1px), rgba(0,0,0,0.05) calc(100% / " +
-															bookingStartingToday.span.spanDays +
-															"))",
+														left: "0",
+														width: `calc(${bookingStartingToday.span.spanDays * 100}% + ${(bookingStartingToday.span.spanDays - 1)}px)`,
+														top: "2px",
+														height: "18px",
 													}}
 													onClick={() => onBookingClick(bookingStartingToday)}
 												>
-													{/* Booking details - guest name and count */}
-													<div className="text-white capitalize text-[9px] sm:text-[10px] font-semibold truncate px-1 relative z-10 flex items-center gap-1">
-														{bookingStartingToday.span.spanDays >= 2 ? (
-															<>
-																<span className="truncate">
-																	{bookingStartingToday.guest_name}
-																</span>
-																<span className="shrink-0">
-																	• (
-																	{bookingStartingToday.adults +
-																		(bookingStartingToday.children || 0)}{" "}
-																	{bookingStartingToday.adults +
-																		(bookingStartingToday.children || 0) ===
-																	1
-																		? "guest"
-																		: "guests"}
-																	)
-																</span>
-															</>
-														) : (
-															<span>•</span>
+													{/* Start indicator dot */}
+													<div
+														className={cn(
+															"absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30",
+															getStatusColor(bookingStartingToday.status),
+														)}
+														style={{ left: "-5px" }}
+													/>
+													{/* End indicator dot */}
+													<div
+														className={cn(
+															"absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30",
+															getStatusColor(bookingStartingToday.status),
+														)}
+														style={{ right: "-5px" }}
+													/>
+													{/* Main booking shape with strong parallelogram */}
+													<div
+														className={cn(
+															"absolute inset-0 shadow-lg",
+															getStatusColor(bookingStartingToday.status),
+														)}
+														style={{
+															clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+															backgroundImage:
+																"repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / " +
+																bookingStartingToday.span.spanDays +
+																" - 1px), rgba(0,0,0,0.1) calc(100% / " +
+																bookingStartingToday.span.spanDays +
+																" - 1px), rgba(0,0,0,0.1) calc(100% / " +
+																bookingStartingToday.span.spanDays +
+																"))",
+														}}
+													/>
+													{/* Inner layer for depth */}
+													<div
+														className="absolute inset-[1px] bg-gradient-to-b from-white/10 to-transparent"
+														style={{
+															clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+														}}
+													/>
+													{/* Content */}
+													<div className="absolute inset-0 flex items-center px-3 py-1 z-10" style={{ paddingLeft: "10%" }}>
+														<span className="text-white text-sm font-bold truncate flex-1 drop-shadow-sm">
+															{bookingStartingToday.guest_name}
+														</span>
+														{bookingStartingToday.span.spanDays >= 2 && (
+															<span className="text-white text-xs font-bold ml-2 drop-shadow-sm shrink-0">
+																({bookingStartingToday.adults +
+																	(bookingStartingToday.children || 0)})
+															</span>
 														)}
 													</div>
 												</div>
@@ -284,7 +296,7 @@ export function RoomRow({
 											onClick={() => onQuickBook(room, day)}
 											title={`Book ${room.room_number} for ${format(day, "MMM dd, yyyy")}`}
 										>
-											<Plus className="size-3 text-muted-foreground/30 group-hover:text-primary group-hover:scale-125 transition-all" />
+											<Plus className="size-4 text-muted-foreground/40 group-hover:text-primary group-hover:scale-125 transition-all" />
 										</button>
 									)}
 								</div>

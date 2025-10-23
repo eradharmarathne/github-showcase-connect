@@ -29,45 +29,51 @@ const getSourceColor = (source: string) => {
 		case "booking_com":
 		case "booking.com":
 			return {
-				bg: "bg-blue-100",
-				border: "border-blue-400",
-				text: "text-blue-800",
-				icon: "🏛️",
+				bg: "bg-blue-50",
+				border: "border-blue-500",
+				text: "text-blue-900",
+				badge: "bg-blue-500",
+				label: "B.com",
 			};
 		case "airbnb":
 			return {
-				bg: "bg-pink-100",
-				border: "border-pink-400",
-				text: "text-pink-800",
-				icon: "🏡",
+				bg: "bg-pink-50",
+				border: "border-pink-500",
+				text: "text-pink-900",
+				badge: "bg-pink-500",
+				label: "Airbnb",
 			};
 		case "expedia":
 			return {
-				bg: "bg-yellow-100",
-				border: "border-yellow-400",
-				text: "text-yellow-800",
-				icon: "✈️",
+				bg: "bg-yellow-50",
+				border: "border-yellow-500",
+				text: "text-yellow-900",
+				badge: "bg-yellow-500",
+				label: "Expedia",
 			};
 		case "beds24":
 			return {
-				bg: "bg-purple-100",
-				border: "border-purple-400",
-				text: "text-purple-800",
-				icon: "🛏️",
+				bg: "bg-purple-50",
+				border: "border-purple-500",
+				text: "text-purple-900",
+				badge: "bg-purple-500",
+				label: "Beds24",
 			};
 		case "ical":
 			return {
-				bg: "bg-teal-100",
-				border: "border-teal-400",
-				text: "text-teal-800",
-				icon: "📅",
+				bg: "bg-teal-50",
+				border: "border-teal-500",
+				text: "text-teal-900",
+				badge: "bg-teal-500",
+				label: "iCal",
 			};
 		default:
 			return {
-				bg: "bg-gray-100",
-				border: "border-gray-400",
-				text: "text-gray-800",
-				icon: "🌐",
+				bg: "bg-gray-50",
+				border: "border-gray-500",
+				text: "text-gray-900",
+				badge: "bg-gray-500",
+				label: "Other",
 			};
 	}
 };
@@ -112,32 +118,31 @@ export function UnmappedBookingsRow({
 
 	return (
 		<TooltipProvider>
-			<div className="border-b bg-yellow-50">
+			<div className="border-b bg-amber-50">
 				<div className="flex w-full">
-					{/* Warning Label Column */}
-					<div className="flex-shrink-0 w-[180px] sm:w-[200px] border-r bg-yellow-100">
-						<div className="p-2 sm:p-3 flex items-center gap-2">
-							<AlertTriangle className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-							<div className="flex-1 min-w-0">
-								<div className="text-xs font-semibold text-yellow-900 truncate">
-									Unmapped Bookings
+					{/* Warning Label Column - Compact */}
+					<div className="flex-shrink-0 w-16 sm:w-20 border-r bg-amber-100">
+						<div className="px-1.5 py-2 flex flex-col items-center gap-1">
+							<AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
+							<div className="flex-1 min-w-0 text-center">
+								<div className="text-[9px] sm:text-[10px] font-bold text-amber-900">
+									Unmapped
 								</div>
-								<div className="text-[10px] text-yellow-700">
-									{bookingsWithSpans.length} booking
-									{bookingsWithSpans.length !== 1 ? "s" : ""} need room
-									assignment
+								<div className="text-[8px] text-amber-700 font-medium">
+									{bookingsWithSpans.length}
 								</div>
 							</div>
 						</div>
 					</div>
 
 					{/* Calendar Grid */}
-					<div className="flex-1 relative min-h-[48px] sm:min-h-[56px]">
+					<div className="flex-1 relative h-12">
 						<div className="flex w-full h-full">
 							{calendarDays.map((day, index) => (
 								<div
 									key={index}
-									className="flex-1 border-r last:border-r-0 border-yellow-200"
+									className="flex-1 border-r last:border-r-0 border-amber-200"
+									style={{ minWidth: "32px" }}
 								/>
 							))}
 						</div>
@@ -156,62 +161,81 @@ export function UnmappedBookingsRow({
 								<Tooltip key={booking.id} delayDuration={200}>
 									<TooltipTrigger asChild>
 										<div
-											className="absolute inset-y-[2px] flex items-center"
+											className="absolute flex items-center z-10 cursor-pointer transition-all hover:brightness-110 overflow-visible"
 											style={{
-												left: `calc(${(booking.span.startIndex / totalDays) * 100}% + 50%)`,
-												right: `calc(${100 - ((booking.span.startIndex + booking.span.spanDays) / totalDays) * 100}% + 50%)`,
+												left: `calc(${(booking.span.startIndex / totalDays) * 100}% + ${booking.span.startIndex}px)`,
+												width: `calc(${(booking.span.spanDays / totalDays) * 100}% + ${booking.span.spanDays - 1}px)`,
+												top: "2px",
+												height: "18px",
 											}}
+											onClick={() => onBookingClick(booking)}
 										>
-											<button
-												type="button"
-												onClick={() => onBookingClick(booking)}
-												className={`
-													w-full h-full border-2 ${colors.border} ${colors.bg}
-													flex flex-col justify-center px-1 sm:px-1.5
-													hover:opacity-80 transition-opacity
-													relative overflow-visible
-													cursor-pointer
-													text-left
-												`}
+											{/* Start indicator dot */}
+											<div
+												className={`absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30 ${colors.badge}`}
+												style={{ left: "-5px" }}
+											/>
+											{/* End indicator dot - amber for unmapped */}
+											<div
+												className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30 bg-amber-500"
+												style={{ right: "-5px" }}
+											/>
+											{/* Main booking shape with strong parallelogram */}
+											<div
+												className={`absolute inset-0 shadow-lg ${colors.bg}`}
 												style={{
-													clipPath: `polygon(
-														0 0,
-														6px 50%,
-														0 100%,
-														calc(100% - 6px) 100%,
-														100% 50%,
-														calc(100% - 6px) 0
-													)`,
+													clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
 												}}
-											>
-												{/* Warning stripe */}
-												<div className="absolute top-0 left-0 right-0 h-1 bg-yellow-500" />
+											/>
+											{/* Inner layer for depth */}
+											<div
+												className="absolute inset-[1px] bg-gradient-to-b from-white/10 to-transparent"
+												style={{
+													clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+												}}
+											/>
+											{/* Content */}
+											<div className="absolute inset-0 flex items-center px-3 py-1 z-10" style={{ paddingLeft: "10%" }}>
+												{/* Channel badge */}
+												<div
+													className={`absolute top-0 left-0 ${colors.badge} text-white text-[9px] px-1.5 py-0.5 font-black uppercase leading-none`}
+													style={{
+														clipPath: "polygon(0 0, 100% 0, 80% 100%, 0 100%)",
+														letterSpacing: "0.5px",
+													}}
+												>
+													{colors.label}
+												</div>
 
-												{/* Booking details */}
-												{booking.span.spanDays >= 2 ? (
-													<div className="flex items-center gap-1 w-full">
-														<span className="text-[8px] sm:text-[9px]">
-															{colors.icon}
-														</span>
-														<span
-															className={`${colors.text} text-[9px] sm:text-[10px] font-semibold truncate flex-1`}
-														>
-															{booking.guest_name}
-														</span>
-														<AlertTriangle className="h-3 w-3 text-yellow-600 flex-shrink-0" />
-													</div>
-												) : (
-													<div className="flex items-center justify-center">
-														<AlertTriangle className="h-2 w-2 text-yellow-600" />
-													</div>
+												{/* Warning badge */}
+												<div
+													className="absolute top-0 right-0 bg-amber-500 text-white text-[9px] px-1.5 py-0.5 font-black uppercase leading-none flex items-center gap-0.5"
+													style={{
+														clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0 100%)",
+														letterSpacing: "0.5px",
+													}}
+												>
+													<AlertTriangle className="h-2 w-2" />
+												</div>
+
+												{/* Guest name and count */}
+												<span className="text-white text-sm font-bold truncate flex-1 drop-shadow-sm">
+													{booking.guest_name}
+												</span>
+												{booking.span.spanDays >= 2 && (
+													<span className="text-white text-xs font-bold ml-2 drop-shadow-sm shrink-0">
+														({adults + children})
+													</span>
 												)}
-											</button>
+											</div>
 										</div>
 									</TooltipTrigger>
 									<TooltipContent side="top" className="max-w-xs">
 										<div className="space-y-2">
 											<div className="font-semibold flex items-center gap-2">
-												<span>{colors.icon}</span>
+												<span className={`${colors.badge} text-white text-xs px-2 py-0.5 rounded`}>
+													{colors.label}
+												</span>
 												<span>{formatSourceName(booking.source)}</span>
 											</div>
 											<div className="text-sm space-y-1">
@@ -249,7 +273,7 @@ export function UnmappedBookingsRow({
 													<span className="font-medium">Booking ID:</span>{" "}
 													{booking.external_id}
 												</div>
-												<div className="mt-2 p-2 bg-yellow-50 border border-yellow-300 rounded text-yellow-800 text-xs flex items-start gap-2">
+												<div className="mt-2 p-2 bg-amber-50 border border-amber-300 rounded text-amber-900 text-xs font-medium flex items-start gap-2">
 													<AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" />
 													<span>
 														Room not mapped - Click to view details and assign a

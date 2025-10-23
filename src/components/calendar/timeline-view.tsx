@@ -182,15 +182,15 @@ export function TimelineView({
 		booking: Reservation,
 		calendarDays: Date[],
 	): BookingSpan => {
-		const checkIn = parseISO(booking.check_in_date);
-		const checkOut = parseISO(booking.check_out_date);
+		const checkIn = startOfDay(parseISO(booking.check_in_date));
+		const checkOut = startOfDay(parseISO(booking.check_out_date));
 
 		const monthStart = calendarDays[0];
 		const monthEnd = calendarDays[calendarDays.length - 1];
 
 		// Check if booking overlaps with the month
-		const bookingStart = startOfDay(checkIn);
-		const bookingEnd = endOfDay(checkOut);
+		const bookingStart = checkIn;
+		const bookingEnd = checkOut;
 		const monthInterval = {
 			start: startOfDay(monthStart),
 			end: endOfDay(monthEnd),
@@ -213,17 +213,15 @@ export function TimelineView({
 		);
 
 		// Calculate span days
+		// For hotel bookings: Oct 6 check-in to Oct 7 check-out = spans Oct 6 and Oct 7 (2 days shown, 1 night)
 		const effectiveEnd = bookingEnd > monthInterval.end ? monthEnd : checkOut;
-		const spanDays = Math.max(
-			1,
-			differenceInDays(effectiveEnd, effectiveStart) + 1,
-		);
+		const spanDays = differenceInDays(effectiveEnd, effectiveStart) + 1;
 
 		return {
 			startIndex: Math.max(0, startIndex),
-			spanDays: Math.min(
-				spanDays,
-				calendarDays.length - Math.max(0, startIndex),
+			spanDays: Math.max(
+				1,
+				Math.min(spanDays, calendarDays.length - Math.max(0, startIndex)),
 			),
 			isVisible: true,
 		};
@@ -312,25 +310,26 @@ export function TimelineView({
 	}
 
 	return (
-		<div className="border rounded-lg overflow-hidden bg-background flex flex-col h-fit w-full">
+		<div className="border rounded-lg overflow-hidden bg-background flex flex-col h-fit w-full shadow-sm">
 			{/* Calendar Header */}
 			<div className="border-b bg-muted/50 sticky top-0 z-20">
 				<div className="flex w-full">
-					{/* Room Column Header - Compact & Responsive */}
-					<div className="w-24 sm:w-28 md:w-32 shrink-0 px-1.5 sm:px-2 py-1.5 border-r font-semibold text-[10px] sm:text-xs flex items-center bg-muted/50">
-						Room/Type
+					{/* Room Column Header - Compact */}
+					<div className="w-16 sm:w-20 shrink-0 px-1.5 py-2.5 border-r font-bold text-[10px] sm:text-xs flex items-center bg-muted/50">
+						Room
 					</div>
 					{/* Date Headers - Full width responsive */}
 					<div className="flex flex-1 bg-muted/50">
 						{calendarDays.map((day) => (
 							<div
 								key={day.toISOString()}
-								className="flex-1 min-w-[32px] sm:min-w-[40px] px-0.5 py-0.5 text-center border-r last:border-r-0"
+								className="flex-1 px-0.5 py-1.5 text-center border-r last:border-r-0"
+								style={{ minWidth: "32px" }}
 							>
-								<div className="text-[8px] sm:text-[9px] md:text-[10px] font-medium text-muted-foreground">
-									{format(day, "EEE")}
+								<div className="text-[9px] sm:text-[10px] font-medium text-muted-foreground uppercase">
+									{format(day, "EEE").slice(0, 1)}
 								</div>
-								<div className="text-[9px] sm:text-[10px] md:text-xs font-semibold">
+								<div className="text-[10px] sm:text-xs font-bold mt-0.5">
 									{format(day, "dd")}
 								</div>
 							</div>
@@ -359,8 +358,8 @@ export function TimelineView({
 						{Object.entries(groupedRooms).map(([roomType, roomsInGroup]) => (
 							<div key={roomType}>
 								{/* Room Type Category Header */}
-								<div className="bg-muted/80 border-b border-t px-2 py-1 z-10">
-									<div className="font-semibold text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wide">
+								<div className="bg-muted/80 border-b border-t px-2 py-1.5 z-10">
+									<div className="font-bold text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wide">
 										{roomType}
 									</div>
 								</div>

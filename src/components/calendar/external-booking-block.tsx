@@ -22,45 +22,51 @@ const getSourceColor = (source: string) => {
 		case "booking_com":
 		case "booking.com":
 			return {
-				bg: "bg-blue-100",
-				border: "border-blue-400",
-				text: "text-blue-800",
-				icon: "🏛️",
+				bg: "bg-blue-50",
+				border: "border-blue-500",
+				text: "text-blue-900",
+				badge: "bg-blue-500",
+				label: "B.com",
 			};
 		case "airbnb":
 			return {
-				bg: "bg-pink-100",
-				border: "border-pink-400",
-				text: "text-pink-800",
-				icon: "🏡",
+				bg: "bg-pink-50",
+				border: "border-pink-500",
+				text: "text-pink-900",
+				badge: "bg-pink-500",
+				label: "Airbnb",
 			};
 		case "expedia":
 			return {
-				bg: "bg-yellow-100",
-				border: "border-yellow-400",
-				text: "text-yellow-800",
-				icon: "✈️",
+				bg: "bg-yellow-50",
+				border: "border-yellow-500",
+				text: "text-yellow-900",
+				badge: "bg-yellow-500",
+				label: "Expedia",
 			};
 		case "beds24":
 			return {
-				bg: "bg-purple-100",
-				border: "border-purple-400",
-				text: "text-purple-800",
-				icon: "🛏️",
+				bg: "bg-purple-50",
+				border: "border-purple-500",
+				text: "text-purple-900",
+				badge: "bg-purple-500",
+				label: "Beds24",
 			};
 		case "ical":
 			return {
-				bg: "bg-teal-100",
-				border: "border-teal-400",
-				text: "text-teal-800",
-				icon: "📅",
+				bg: "bg-teal-50",
+				border: "border-teal-500",
+				text: "text-teal-900",
+				badge: "bg-teal-500",
+				label: "iCal",
 			};
 		default:
 			return {
-				bg: "bg-gray-100",
-				border: "border-gray-400",
-				text: "text-gray-800",
-				icon: "🌐",
+				bg: "bg-gray-50",
+				border: "border-gray-500",
+				text: "text-gray-900",
+				badge: "bg-gray-500",
+				label: "Other",
 			};
 	}
 };
@@ -96,83 +102,85 @@ export function ExternalBookingBlock({
 			<Tooltip delayDuration={200}>
 				<TooltipTrigger asChild>
 					<div
-						className="absolute inset-y-[2px] flex items-center"
+						className="absolute flex items-center z-10 cursor-pointer transition-all hover:brightness-110 overflow-visible"
 						style={{
-							left: `calc(${(startIndex / totalDays) * 100}% + 50%)`,
-							right: `calc(${100 - ((startIndex + spanDays) / totalDays) * 100}% + 50%)`,
+							left: "0",
+							width: `calc(${spanDays * 100}% + ${(spanDays - 1)}px)`,
+							top: "24px",
+							height: "18px",
 						}}
+						onClick={() => onClick(booking)}
 					>
-						<button
-							type="button"
-							onClick={() => onClick(booking)}
-							className={`
-					w-full h-full border-2 ${colors.border} ${colors.bg}
-					flex flex-col justify-center px-1 sm:px-1.5
-					hover:opacity-80 transition-opacity
-					relative overflow-visible
-					cursor-pointer
-					text-left
-				`}
+						{/* Start indicator dot */}
+						<div
+							className={`absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30 ${colors.badge}`}
+							style={{ left: "-5px" }}
+						/>
+						{/* End indicator dot */}
+						<div
+							className={`absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30 ${colors.badge}`}
+							style={{ right: "-5px" }}
+						/>
+						{/* Main booking shape with strong parallelogram */}
+						<div
+							className={`absolute inset-0 shadow-lg ${colors.bg}`}
 							style={{
-								clipPath: `polygon(
-						0 0,
-						6px 50%,
-						0 100%,
-						calc(100% - 6px) 100%,
-						100% 50%,
-						calc(100% - 6px) 0
-					)`,
-								backgroundImage: `repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.05) calc(100% / ${spanDays}))`,
+								clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+								backgroundImage: `repeating-linear-gradient(90deg, transparent 0%, transparent calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.1) calc(100% / ${spanDays} - 1px), rgba(0,0,0,0.1) calc(100% / ${spanDays}))`,
 							}}
-						>
-							{/* Channel indicator stripe */}
+						/>
+						{/* Inner layer for depth */}
+						<div
+							className="absolute inset-[1px] bg-gradient-to-b from-white/10 to-transparent"
+							style={{
+								clipPath: "polygon(8% 0%, 100% 0%, 92% 100%, 0% 100%)",
+							}}
+						/>
+						{/* Content */}
+						<div className="absolute inset-0 flex items-center px-3 py-1 z-10" style={{ paddingLeft: "10%" }}>
+							{/* Channel badge */}
 							<div
-								className={`absolute top-0 left-0 right-0 h-0.5 ${colors.border.replace("border-", "bg-")}`}
-							/>
+								className={`absolute top-0 left-0 ${colors.badge} text-white text-[9px] px-1.5 py-0.5 font-black uppercase leading-none`}
+								style={{
+									clipPath: "polygon(0 0, 100% 0, 80% 100%, 0 100%)",
+									letterSpacing: "0.5px",
+								}}
+							>
+								{colors.label}
+							</div>
 
-							{/* Booking details - guest name and guest count */}
-							{spanDays >= 2 ? (
-								<div className="flex items-center gap-1 w-full">
-									<span
-										className="text-[8px] sm:text-[9px]"
-										title={formatSourceName(booking.source)}
-									>
-										{colors.icon}
-									</span>
-									<span
-										className={`${colors.text} text-[9px] sm:text-[10px] font-semibold truncate flex-1`}
-									>
-										{booking.guest_name}
-									</span>
-									<span
-										className={`${colors.text} text-[9px] sm:text-[10px] font-semibold shrink-0`}
-									>
-										• ({adults + children}{" "}
-										{adults + children === 1 ? "guest" : "guests"})
-									</span>
-								</div>
-							) : (
-								<div className="flex items-center justify-center">
-									<span className={`${colors.text} text-[9px]`}>•</span>
-								</div>
+							{/* Guest name and count */}
+							<span className="text-white text-sm font-bold truncate flex-1 drop-shadow-sm">
+								{booking.guest_name}
+							</span>
+							{spanDays >= 2 && (
+								<span className="text-white text-xs font-bold ml-2 drop-shadow-sm shrink-0">
+									({adults + children})
+								</span>
 							)}
 
 							{/* Unmapped indicator */}
 							{!booking.room_id && spanDays >= 2 && (
 								<div
-									className="absolute bottom-0 right-0 bg-yellow-400 text-[6px] sm:text-[7px] px-0.5 rounded-tl"
+									className="absolute bottom-0 right-0 bg-amber-500 text-white text-[9px] px-1.5 py-0.5 font-black uppercase leading-none"
 									title="Room not mapped"
+									style={{
+										clipPath: "polygon(20% 0, 100% 0, 100% 100%, 0 100%)",
+										letterSpacing: "0.5px",
+									}}
 								>
-									⚠️
+									!
 								</div>
 							)}
-						</button>
+						</div>
 					</div>
 				</TooltipTrigger>
 				<TooltipContent side="top" className="max-w-xs">
 					<div className="space-y-2">
 						<div className="font-semibold flex items-center gap-2">
-							<span>{colors.icon}</span>
+							<span className={`${colors.badge} text-white text-xs px-2 py-0.5 rounded`}>
+								{colors.label}
+							</span>
 							<span>{formatSourceName(booking.source)}</span>
 						</div>
 						<div className="text-sm space-y-1">
@@ -208,8 +216,8 @@ export function ExternalBookingBlock({
 								{booking.external_id}
 							</div>
 							{!booking.room_id && (
-								<div className="mt-2 p-2 bg-yellow-50 border border-yellow-300 rounded text-yellow-800 text-xs">
-									⚠️ Room not mapped - please assign a room
+								<div className="mt-2 p-2 bg-amber-50 border border-amber-300 rounded text-amber-900 text-xs font-medium">
+									WARNING: Room not mapped - please assign a room
 								</div>
 							)}
 						</div>
