@@ -4,6 +4,7 @@ import {
 	differenceInDays,
 	eachDayOfInterval,
 	endOfDay,
+	endOfMonth,
 	format,
 	isSameDay,
 	isWithinInterval,
@@ -168,13 +169,13 @@ export function TimelineView({
 				if (error) throw error;
 				return data || [];
 			},
-			enabled: !!selectedLocation && !!tenant?.id,
-			staleTime: 30000, // Cache for 30 seconds
-		});
+		enabled: !!selectedLocation && !!tenant?.id,
+		staleTime: 30000, // Cache for 30 seconds
+	});
 
-	// Generate calendar days - 30 days from current date
+	// Generate calendar days for the entire month
 	const startDate = startOfDay(currentDate);
-	const endDate = addDays(startDate, 29); // 30 days total (0-29)
+	const endDate = endOfMonth(currentDate); // Show all days in the month
 	const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 
 	// Calculate booking span
