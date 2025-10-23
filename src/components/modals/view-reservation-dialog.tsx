@@ -68,6 +68,34 @@ export function ViewReservationDialog({
 
 		setLoading(true);
 		try {
+			// First, check if this is a reservation or external booking
+			const { data: resCheck } = await supabase
+				.from("reservations")
+				.select("id")
+				.eq("id", reservationId)
+				.maybeSingle();
+
+			if (!resCheck) {
+				// Not found in reservations, check external_bookings
+				const { data: extCheck } = await supabase
+					.from("external_bookings")
+					.select("id")
+					.eq("id", reservationId)
+					.maybeSingle();
+
+				if (extCheck) {
+					// This is an external booking, show appropriate message
+					toast({
+						title: "External Booking",
+						description:
+							"This is an external booking from a channel manager. Please view it in the Booking Channels Integration page or assign it to a room first.",
+						variant: "default",
+					});
+					onClose();
+					return;
+				}
+			}
+
 			const [reservationRes, incomeRes] = await Promise.all([
 				supabase
 					.from("reservations")
@@ -107,7 +135,7 @@ export function ViewReservationDialog({
 		} finally {
 			setLoading(false);
 		}
-	}, [reservationId, toast]);
+	}, [reservationId, toast, onClose]);
 
 	useEffect(() => {
 		if (isOpen && reservationId) {
