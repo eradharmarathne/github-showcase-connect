@@ -159,7 +159,7 @@ export function RoomRow({
 													className="absolute cursor-pointer transition-all z-20 flex items-center justify-center overflow-visible hover:brightness-110"
 													style={{
 														left: "50%",
-														width: `calc(${bookingStartingToday.span.spanDays * 100}% + ${(bookingStartingToday.span.spanDays - 1)}px - 50%)`,
+														width: `calc(${(bookingStartingToday.span.spanDays - 0.5) * 100}% + ${(bookingStartingToday.span.spanDays - 1)}px)`,
 														top: "0",
 														bottom: "0",
 													}}

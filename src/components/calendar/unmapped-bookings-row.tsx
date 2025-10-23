@@ -160,7 +160,7 @@ export function UnmappedBookingsRow({
 											className="absolute flex items-center z-10 cursor-pointer transition-all hover:brightness-110 overflow-visible"
 											style={{
 												left: `calc(${(booking.span.startIndex / totalDays) * 100}% + ${booking.span.startIndex}px + ${halfDayPercent}%)`,
-												width: `calc(${(booking.span.spanDays / totalDays) * 100}% + ${booking.span.spanDays - 1}px - ${halfDayPercent}%)`,
+												width: `calc(${((booking.span.spanDays - 0.5) / totalDays) * 100}% + ${booking.span.spanDays - 1}px)`,
 												top: "0",
 												bottom: "0",
 											}}
