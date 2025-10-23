@@ -95,7 +95,7 @@ export function ExternalBookingBlock({
 	// Format dates for tooltip
 	const checkInDate = parseISO(booking.check_in);
 	const checkOutDate = parseISO(booking.check_out);
-	const nights = spanDays;
+	const nights = spanDays - 1; // Number of nights is days minus 1 (check-out day not included)
 
 	return (
 		<TooltipProvider>

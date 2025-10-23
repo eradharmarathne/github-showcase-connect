@@ -228,13 +228,13 @@ export function UnmappedBookingsRow({
 												<div>
 													<span className="font-medium">Check-out:</span>{" "}
 													{format(checkOutDate, "EEE, MMM d, yyyy")}
-												</div>
-												<div>
-													<span className="font-medium">Nights:</span>{" "}
-													{booking.span.spanDays}
-												</div>
-												<div>
-													<span className="font-medium">Guests:</span> {adults}{" "}
+											</div>
+											<div>
+												<span className="font-medium">Nights:</span>{" "}
+												{booking.span.spanDays - 1}
+											</div>
+											<div>
+												<span className="font-medium">Guests:</span> {adults}{" "}
 													adults
 													{children ? `, ${children} children` : ""}
 												</div>
