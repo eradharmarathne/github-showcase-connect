@@ -104,8 +104,8 @@ export function ExternalBookingBlock({
 					<div
 						className="absolute flex items-center z-10 cursor-pointer transition-all hover:brightness-110 overflow-visible"
 						style={{
-							left: "0",
-							width: `calc(${spanDays * 100}% + ${(spanDays - 1)}px)`,
+							left: "50%",
+							width: `calc(${(spanDays - 1) * 100}% + ${(spanDays - 1)}px + 50%)`,
 							top: "0",
 							bottom: "0",
 							opacity: 0.8,

@@ -122,16 +122,11 @@ export function UnmappedBookingsRow({
 				<div className="flex w-full">
 					{/* Warning Label Column - Compact */}
 					<div className="flex-shrink-0 w-16 sm:w-20 border-r bg-amber-100">
-						<div className="px-1.5 py-2 flex flex-col items-center gap-1">
+						<div className="px-1.5 py-1 flex flex-col items-center gap-1">
 							<AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-							<div className="flex-1 min-w-0 text-center">
-								<div className="text-[9px] sm:text-[10px] font-bold text-amber-900">
-									Unmapped
+							<div className="text-[9px] sm:text-[10px] font-bold text-amber-900">
+									Unmapped ({bookingsWithSpans.length})
 								</div>
-								<div className="text-[8px] text-amber-700 font-medium">
-									{bookingsWithSpans.length}
-								</div>
-							</div>
 						</div>
 					</div>
 
@@ -157,14 +152,15 @@ export function UnmappedBookingsRow({
 							const amount = booking.total_amount || 0;
 							const currency = booking.currency || "USD";
 
+							const halfDayPercent = (1 / totalDays) * 50; // Half of one day as percentage
 							return (
 								<Tooltip key={booking.id} delayDuration={200}>
 									<TooltipTrigger asChild>
 										<div
 											className="absolute flex items-center z-10 cursor-pointer transition-all hover:brightness-110 overflow-visible"
 											style={{
-												left: `calc(${(booking.span.startIndex / totalDays) * 100}% + ${booking.span.startIndex}px)`,
-												width: `calc(${(booking.span.spanDays / totalDays) * 100}% + ${booking.span.spanDays - 1}px)`,
+												left: `calc(${(booking.span.startIndex / totalDays) * 100}% + ${booking.span.startIndex}px + ${halfDayPercent}%)`,
+												width: `calc(${((booking.span.spanDays - 1) / totalDays) * 100}% + ${booking.span.spanDays - 1}px + ${halfDayPercent}%)`,
 												top: "0",
 												bottom: "0",
 											}}
