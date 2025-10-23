@@ -43,6 +43,9 @@ interface V2Booking extends JsonRecord {
 	children?: number;
 	guestName?: string;
 	guestFirstName?: string;
+	guestLastName?: string;
+	firstName?: string;
+	lastName?: string;
 	name?: string;
 	primaryGuest?: { name?: string };
 	status?: string;
@@ -392,10 +395,15 @@ serve(async (req) => {
 			const adults = b.numAdult ?? b.adults ?? 1;
 			const children = b.numChild ?? b.children ?? 0;
 
+			// Extract guest name from various possible fields
+			const firstName = b.firstName || b.guestFirstName || "";
+			const lastName = b.lastName || b.guestLastName || "";
+			const fullName = `${firstName} ${lastName}`.trim();
+			
 			const guestName =
+				fullName ||
 				b.guestName ||
 				b.name ||
-				b.guestFirstName ||
 				b.primaryGuest?.name ||
 				"Unknown Guest";
 
