@@ -52,18 +52,63 @@ export const useReservationFinancials = () => {
 
 			if (error) throw error;
 
+			// Get external bookings (channel manager bookings)
+			const { data: externalBookings, error: externalError } = await supabase
+				.from("external_bookings")
+				.select(`
+					*,
+					rooms(room_number, room_type),
+					locations(name)
+				`)
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.order("last_synced_at", { ascending: false });
+
+			if (externalError) throw externalError;
+
+			// Transform external bookings to match reservation format
+			const transformedExternalBookings = (externalBookings || []).map((booking) => ({
+				id: booking.id,
+				reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
+				guest_name: booking.guest_name,
+				status: booking.status,
+				currency: booking.currency || "USD",
+				check_in_date: booking.check_in,
+				check_out_date: booking.check_out,
+				nights: Math.ceil(
+					(new Date(booking.check_out).getTime() -
+						new Date(booking.check_in).getTime()) /
+						(1000 * 60 * 60 * 24),
+				),
+				room_rate: booking.total_amount ? Number(booking.total_amount) / Math.ceil(
+					(new Date(booking.check_out).getTime() -
+						new Date(booking.check_in).getTime()) /
+						(1000 * 60 * 60 * 24),
+				) : 0,
+				total_amount: Number(booking.total_amount) || 0,
+				paid_amount: Number(booking.total_amount) || 0, // Channel bookings are typically pre-paid
+				balance_amount: 0,
+				rooms: booking.rooms,
+				locations: booking.locations,
+				tenant_id: booking.tenant_id,
+				location_id: booking.location_id,
+			}));
+
+			// Combine both reservation types
+			const allReservations = [...(reservations || []), ...transformedExternalBookings];
+
 			// Get income records for expense calculations
 			const { data: incomeRecords, error: incomeError } = await supabase
 				.from("income")
 				.select("*")
 				.eq("tenant_id", tenant.id)
-				.in("booking_id", reservations?.map((r) => r.id) || []);
+				.in("booking_id", allReservations?.map((r) => r.id) || []);
 
 			if (incomeError) throw incomeError;
 
 			// Calculate financial data with USD conversion using proper currency conversion
 			const financialData: ReservationFinancial[] = await Promise.all(
-				reservations?.map(async (reservation) => {
+				allReservations?.map(async (reservation) => {
 					// Convert reservation amounts to USD
 					const roomAmountOriginal = reservation.room_rate * reservation.nights;
 					const roomAmountUsd = await convertCurrency(
