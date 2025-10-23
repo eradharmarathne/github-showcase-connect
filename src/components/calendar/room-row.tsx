@@ -209,6 +209,7 @@ export function RoomRow({
 											>
 												<div className="font-semibold text-sm mb-2">
 													{bookingStartingToday.guest_name}
+													{bookingStartingToday.span.spanDays}
 												</div>
 												<div className="space-y-1">
 													<div className="flex justify-between gap-4">
