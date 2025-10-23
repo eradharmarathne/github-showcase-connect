@@ -52,6 +52,8 @@ interface V2Booking extends JsonRecord {
 	price?: number;
 	total?: number;
 	totalAmount?: number;
+	currency?: string; // Currency code (USD, LKR, EUR, etc.)
+	ucurrency?: string; // Alternative currency field name in Beds24 API
 }
 
 // Function to refresh access token using refresh token from database
@@ -406,6 +408,9 @@ serve(async (req) => {
 
 			const status = (b.status ?? "unknown").toString().toLowerCase();
 
+			// Extract currency from Beds24 API - check multiple possible field names
+			const currency = b.currency || b.ucurrency || "USD";
+
 			const externalBookingData: Record<string, unknown> = {
 				external_id: externalId,
 				property_id: propId,
@@ -415,7 +420,7 @@ serve(async (req) => {
 				check_out: checkOutDate.toISOString(),
 				status,
 				total_amount: totalAmount,
-				currency: "USD", // Beds24 v2 does not guarantee currency; adjust if needed
+				currency: currency,
 				location_id: locationMapping.location_id,
 				tenant_id: locationMapping.tenant_id,
 				room_name: roomName ?? null,
