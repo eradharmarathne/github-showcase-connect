@@ -545,10 +545,11 @@ export default function BookingChannelsIntegration() {
 	};
 
 	const formatPrice = (booking: ExternalBooking) => {
-		if (booking.raw_data?.price) {
-			return `${booking.raw_data.price.toLocaleString()} LKR`;
-		}
-		return `${booking.total_amount?.toLocaleString() || "0"} ${booking.currency}`;
+		// Always use the currency from the database (fetched from property settings)
+		// The raw_data.price field exists but doesn't include currency information
+		const amount = booking.total_amount || booking.raw_data?.price || 0;
+		const currency = booking.currency || "USD";
+		return `${amount.toLocaleString()} ${currency}`;
 	};
 
 	const getPaymentInfo = (booking: ExternalBooking) => {
