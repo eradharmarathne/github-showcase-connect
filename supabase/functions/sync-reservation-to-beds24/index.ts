@@ -138,16 +138,23 @@ serve(async (req) => {
 			);
 		}
 
-		// Get Beds24 room mapping
+		// Get Beds24 room mapping from channel_room_mappings table
 		const { data: roomMapping, error: mappingError } = await supabase
-			.from("beds24_property_mappings")
-			.select("beds24_property_id, beds24_property_name")
+			.from("channel_room_mappings")
+			.select("channel_room_id, channel_room_name")
 			.eq("room_id", reservation.room_id)
+			.eq("channel", "beds24")
 			.eq("is_active", true)
 			.single();
 
 		if (mappingError || !roomMapping) {
 			const errorMsg = "No Beds24 room mapping found for this room";
+			
+			console.error(
+				`Room mapping not found: room_id=${reservation.room_id}, error:`,
+				mappingError,
+			);
+			
 			await supabase
 				.from("reservations")
 				.update({
@@ -160,11 +167,17 @@ serve(async (req) => {
 				JSON.stringify({
 					error: errorMsg,
 					details:
-						"Configure room mapping in Booking Channels Integration page",
+						"Configure room mapping in Booking Channels Integration → Room Mappings tab",
+					room_id: reservation.room_id,
+					room_number: reservation.rooms?.room_number,
 				}),
 				{ status: 400, headers: { "Content-Type": "application/json" } },
 			);
 		}
+		
+		console.log(
+			`Found room mapping: CCO room ${reservation.room_id} → Beds24 room ${roomMapping.channel_room_id} (${roomMapping.channel_room_name})`,
+		);
 
 		// Get Beds24 credentials for this location
 		const { data: beds24Creds, error: credsError } = await supabase
@@ -258,7 +271,7 @@ serve(async (req) => {
 
 		// Build Beds24 booking payload
 		const bookingPayload: Beds24BookingPayload = {
-			roomId: Number.parseInt(roomMapping.beds24_property_id),
+			roomId: Number.parseInt(roomMapping.channel_room_id), // Beds24 room ID
 			status: beds24Status,
 			arrival: reservation.check_in_date,
 			departure: reservation.check_out_date,
@@ -355,12 +368,12 @@ serve(async (req) => {
 			}),
 			{ status: 200, headers: { "Content-Type": "application/json" } },
 		);
-	} catch (error) {
+	} catch (error: any) {
 		console.error("Error in sync-reservation-to-beds24:", error);
 		return new Response(
 			JSON.stringify({
 				error: "Internal server error",
-				details: error.message,
+				details: error?.message || "Unknown error",
 			}),
 			{ status: 500, headers: { "Content-Type": "application/json" } },
 		);
