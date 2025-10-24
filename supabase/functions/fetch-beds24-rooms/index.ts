@@ -134,6 +134,39 @@ serve(async (req) => {
 			);
 		}
 
+		// First, verify the token has access to properties
+		console.log(`Verifying token access to properties...`);
+		const propertiesTestResponse = await fetch(
+			`${BEDS24_API_URL}/properties`,
+			{
+				method: "GET",
+				headers: {
+					token: accessToken,
+				},
+			},
+		);
+
+		if (!propertiesTestResponse.ok) {
+			const errorText = await propertiesTestResponse.text();
+			console.error(
+				`Token validation failed: ${propertiesTestResponse.status}`,
+				errorText,
+			);
+			return new Response(
+				JSON.stringify({
+					error: "Beds24 token validation failed",
+					details: errorText,
+					status: propertiesTestResponse.status,
+				}),
+				{ status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+			);
+		}
+
+		const propertiesData = await propertiesTestResponse.json();
+		console.log(
+			`Token valid. Account has ${propertiesData?.data?.length || 0} properties`,
+		);
+
 		console.log(
 			`Fetching rooms for ${propertyMappings.length} Beds24 properties`,
 		);
@@ -143,30 +176,47 @@ serve(async (req) => {
 
 		for (const mapping of propertyMappings) {
 			try {
-				// Fetch rooms from Beds24 API using the correct endpoint: GET /rooms?propertyId=X
-				const roomsResponse = await fetch(
-					`${BEDS24_API_URL}/rooms?propertyId=${mapping.beds24_property_id}`,
-					{
-						headers: {
-							token: accessToken,
-						},
+				// Fetch property with rooms from Beds24 API
+				// Note: GET /properties/rooms is "Coming soon" per API docs
+				// Alternative: GET /properties?id=X&includeAllRooms=true
+				// This returns the property with nested roomTypes array
+				const apiUrl = `${BEDS24_API_URL}/properties?id=${mapping.beds24_property_id}&includeAllRooms=true`;
+				console.log(`Fetching property with rooms from: ${apiUrl} (property: ${mapping.beds24_property_name})`);
+				
+				const propertyResponse = await fetch(apiUrl, {
+					method: "GET",
+					headers: {
+						token: accessToken,
 					},
-				);
+				});
 
-				if (!roomsResponse.ok) {
+				if (!propertyResponse.ok) {
+					const errorText = await propertyResponse.text();
 					console.error(
-						`Failed to fetch rooms for property ${mapping.beds24_property_id}:`,
-						roomsResponse.status,
+						`Failed to fetch property for ${mapping.beds24_property_name} (${mapping.beds24_property_id}): ${propertyResponse.status}`,
 					);
+					console.error(`API Error Response:`, errorText);
 					continue;
 				}
 
-				const roomsData = await roomsResponse.json();
-				const rooms: Beds24Room[] = Array.isArray(roomsData?.data)
-					? roomsData.data
-					: Array.isArray(roomsData)
-						? roomsData
-						: [];
+				const propertyData = await propertyResponse.json();
+				console.log(`Property response structure:`, JSON.stringify(propertyData, null, 2));
+				
+				// Extract rooms from property data
+				// Properties API returns: { success: true, type: "property", data: [{ id, name, roomTypes: [...] }] }
+				const property = propertyData?.data?.[0];
+				const roomTypes = property?.roomTypes || [];
+				
+				const rooms: Beds24Room[] = roomTypes.map((roomType: any) => ({
+					id: roomType.id,
+					propertyId: mapping.beds24_property_id,
+					name: roomType.name,
+					description: roomType.description,
+					roomQty: roomType.qty,
+					minOccupancy: roomType.minPeople,
+					maxOccupancy: roomType.maxPeople || roomType.maxAdult,
+					type: roomType.roomType,
+				}));
 
 				console.log(
 					`Found ${rooms.length} rooms for property ${mapping.beds24_property_name}`,
@@ -206,7 +256,7 @@ serve(async (req) => {
 		const roomsWithStatus = allRooms.map((beds24Room) => {
 			// Check if already mapped
 			const existingMapping = existingMappings?.find(
-				(m) => m.channel_room_id === String(beds24Room.id),
+				(m: any) => m.channel_room_id === String(beds24Room.id),
 			);
 
 			// Try to auto-match by name similarity
