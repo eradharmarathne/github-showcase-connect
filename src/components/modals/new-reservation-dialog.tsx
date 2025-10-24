@@ -345,11 +345,48 @@ export function NewReservationDialog({
 			}
 
 			// Insert all reservations in a single transaction
-			const { error } = await supabase
+			const { data: createdReservations, error } = await supabase
 				.from("reservations")
-				.insert(reservations);
+				.insert(reservations)
+				.select();
 
 			if (error) throw error;
+
+			// Sync direct bookings to Beds24
+			if (createdReservations && reservations[0].booking_source) {
+				const directBookingSources = [
+					"direct",
+					"manual",
+					"phone",
+					"email",
+					"walk_in",
+				];
+				if (directBookingSources.includes(reservations[0].booking_source)) {
+					console.log(
+						`Syncing ${createdReservations.length} direct reservation(s) to Beds24`,
+					);
+					// Fire and forget for each reservation - don't block UI
+					for (const reservation of createdReservations) {
+						supabase.functions
+							.invoke("sync-reservation-to-beds24", {
+								body: { reservation_id: reservation.id },
+							})
+							.then((result) => {
+								if (result.error) {
+									console.error(
+										`Beds24 sync failed for ${reservation.reservation_number}:`,
+										result.error,
+									);
+								} else {
+									console.log(
+										`Beds24 sync successful for ${reservation.reservation_number}:`,
+										result.data,
+									);
+								}
+							});
+					}
+				}
+			}
 
 			const reservationNumbersDisplay = reservations
 				.map((r) => r.reservation_number)

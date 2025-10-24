@@ -384,11 +384,38 @@ export function CompactReservationDialog({
 				tenant_id: tenant.id,
 			};
 
-			const { error } = await supabase
+			const { data: createdReservation, error } = await supabase
 				.from("reservations")
-				.insert([reservationData]);
+				.insert([reservationData])
+				.select()
+				.single();
 
 			if (error) throw error;
+
+			// Sync direct bookings to Beds24
+			if (
+				createdReservation &&
+				["direct", "manual", "phone", "email", "walk_in"].includes(
+					formData.booking_source,
+				)
+			) {
+				console.log(
+					"Syncing direct reservation to Beds24:",
+					createdReservation.id,
+				);
+				// Fire and forget - don't block UI
+				supabase.functions
+					.invoke("sync-reservation-to-beds24", {
+						body: { reservation_id: createdReservation.id },
+					})
+					.then((result) => {
+						if (result.error) {
+							console.error("Beds24 sync failed:", result.error);
+						} else {
+							console.log("Beds24 sync successful:", result.data);
+						}
+					});
+			}
 
 			toast({
 				title: "Success",
