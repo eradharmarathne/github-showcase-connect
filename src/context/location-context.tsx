@@ -24,8 +24,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 	const [loading, setLoading] = useState(true);
 	const { tenant } = useAuth();
 
+	// Extract tenantId as a primitive to prevent unnecessary callback recreation
+	// Using tenant?.id directly in dependencies causes refetch even when id hasn't changed
+	const tenantId = tenant?.id;
+
 	const fetchLocations = React.useCallback(async () => {
-		if (!tenant?.id) {
+		if (!tenantId) {
 			setLocations([]);
 			setLoading(false);
 			return;
@@ -35,7 +39,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 			const { data, error } = await supabase
 				.from("locations")
 				.select("*")
-				.eq("tenant_id", tenant.id)
+				.eq("tenant_id", tenantId)
 				.eq("is_active", true)
 				.order("name");
 
@@ -46,7 +50,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 		} finally {
 			setLoading(false);
 		}
-	}, [tenant?.id]);
+	}, [tenantId]);
 
 	useEffect(() => {
 		fetchLocations();

@@ -289,6 +289,41 @@ serve(async (req) => {
 			`Loaded ${propertyIdToLocation.size} active Beds24 property mappings`,
 		);
 
+		// Fetch property details to get currency for each property
+		const propertyIdToCurrency = new Map<string, string>();
+		
+		for (const [propertyId] of propertyIdToLocation) {
+			try {
+				const propertyResponse = await beds24Request(
+					`/properties?id=${propertyId}`,
+					supabase,
+					credentials.id,
+					credentials.access_token,
+					new Date(credentials.token_expires_at),
+					credentials.refresh_token,
+				);
+
+				if (!propertyResponse.ok) {
+					console.warn(`Failed to fetch currency for property ${propertyId}`);
+					continue;
+				}
+
+				const propertyData = await propertyResponse.json();
+				
+				// Property API returns: { success: true, type: "property", data: [...] }
+				if (propertyData.success && propertyData.data && propertyData.data.length > 0) {
+					const property = propertyData.data[0];
+					const currency = property.currency || "USD"; // Default to USD if not specified
+					propertyIdToCurrency.set(propertyId, currency);
+					console.log(`Property ${propertyId} uses currency: ${currency}`);
+				}
+			} catch (error) {
+				console.error(`Error fetching currency for property ${propertyId}:`, error);
+			}
+		}
+
+		console.log(`Loaded currency information for ${propertyIdToCurrency.size} properties`);
+
 		// Fetch room mappings for automatic room assignment
 		const { data: roomMappings } = await supabase
 			.from("channel_room_mappings")
@@ -460,8 +495,10 @@ serve(async (req) => {
 
 			const status = (b.status ?? "unknown").toString().toLowerCase();
 
-			// Extract currency from Beds24 API - check multiple possible field names
-			const currency = b.currency || b.ucurrency || "USD";
+			// Get currency from property settings (booking objects don't include currency)
+			// Beds24 API V2 booking schema does not include currency field
+			// Currency is a property-level setting, not per-booking
+			const currency = propId ? (propertyIdToCurrency.get(propId) || "USD") : "USD";
 
 			const externalBookingData: Record<string, unknown> = {
 				external_id: externalId,

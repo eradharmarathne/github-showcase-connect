@@ -40,7 +40,30 @@ import ResetPassword from "./pages/reset-password";
 import Settings from "./pages/settings";
 import Users from "./pages/users";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			// Data stays fresh for 5 minutes (no refetch during this time)
+			staleTime: 5 * 60 * 1000, // 5 minutes
+
+			// Keep unused data in cache for 10 minutes
+			gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+
+			// Disable refetch on window focus globally
+			// Components can opt-in individually if needed
+			refetchOnWindowFocus: false,
+
+			// Only refetch on mount if data is stale
+			refetchOnMount: true,
+
+			// Refetch on network reconnection
+			refetchOnReconnect: true,
+
+			// Retry failed requests once
+			retry: 1,
+		},
+	},
+});
 
 const App = () => (
 	<QueryClientProvider client={queryClient}>
