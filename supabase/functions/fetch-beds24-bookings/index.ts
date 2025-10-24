@@ -504,7 +504,9 @@ serve(async (req) => {
 				}
 			}
 
-			const totalAmount = b.totalAmount ?? b.total ?? b.price ?? 0;
+			const totalAmount = Number(b.totalAmount ?? b.total ?? b.price ?? 0);
+			const depositAmount = Number(b.deposit ?? 0); // Amount paid as deposit/advance
+			const balanceAmount = totalAmount - depositAmount; // Remaining balance
 
 			const status = (b.status ?? "unknown").toString().toLowerCase();
 
@@ -514,7 +516,7 @@ serve(async (req) => {
 			const currency = propId ? (propertyIdToCurrency.get(propId) || "USD") : "USD";
 			
 			if (externalId) {
-				console.log(`💰 Booking ${externalId}: Amount ${totalAmount} ${currency} (property: ${propId})`);
+				console.log(`💰 Booking ${externalId}: Total ${totalAmount} ${currency}, Paid ${depositAmount} ${currency}, Balance ${balanceAmount} ${currency} (property: ${propId})`);
 			}
 
 			const externalBookingData: Record<string, unknown> = {
@@ -526,6 +528,8 @@ serve(async (req) => {
 				check_out: checkOutDate.toISOString(),
 				status,
 				total_amount: totalAmount,
+				paid_amount: depositAmount,
+				balance_amount: balanceAmount,
 				currency: currency,
 				location_id: locationMapping.location_id,
 				tenant_id: locationMapping.tenant_id,

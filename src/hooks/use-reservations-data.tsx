@@ -177,8 +177,8 @@ export function useReservationsData() {
 					room_rate: 0,
 					total_amount: booking.total_amount || 0,
 					advance_amount: null,
-					paid_amount: booking.total_amount || 0, // Assume channel bookings are paid
-					balance_amount: 0,
+					paid_amount: booking.paid_amount || 0, // Deposit amount paid from Beds24
+					balance_amount: booking.balance_amount || 0, // Remaining balance
 					currency: (booking.currency || "USD") as
 						| "LKR"
 						| "USD"
