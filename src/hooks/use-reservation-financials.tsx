@@ -67,35 +67,43 @@ export const useReservationFinancials = () => {
 			if (externalError) throw externalError;
 
 			// Transform external bookings to match reservation format
-			const transformedExternalBookings = (externalBookings || []).map((booking) => ({
-				id: booking.id,
-				reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
-				guest_name: booking.guest_name,
-				status: booking.status,
-				currency: booking.currency || "USD",
-				check_in_date: booking.check_in,
-				check_out_date: booking.check_out,
-				nights: Math.ceil(
-					(new Date(booking.check_out).getTime() -
-						new Date(booking.check_in).getTime()) /
-						(1000 * 60 * 60 * 24),
-				),
-				room_rate: booking.total_amount ? Number(booking.total_amount) / Math.ceil(
-					(new Date(booking.check_out).getTime() -
-						new Date(booking.check_in).getTime()) /
-						(1000 * 60 * 60 * 24),
-				) : 0,
-				total_amount: Number(booking.total_amount) || 0,
-				paid_amount: Number(booking.total_amount) || 0, // Channel bookings are typically pre-paid
-				balance_amount: 0,
-				rooms: booking.rooms,
-				locations: booking.locations,
-				tenant_id: booking.tenant_id,
-				location_id: booking.location_id,
-			}));
+			const transformedExternalBookings = (externalBookings || []).map(
+				(booking) => ({
+					id: booking.id,
+					reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
+					guest_name: booking.guest_name,
+					status: booking.status,
+					currency: booking.currency || "USD",
+					check_in_date: booking.check_in,
+					check_out_date: booking.check_out,
+					nights: Math.ceil(
+						(new Date(booking.check_out).getTime() -
+							new Date(booking.check_in).getTime()) /
+							(1000 * 60 * 60 * 24),
+					),
+					room_rate: booking.total_amount
+						? Number(booking.total_amount) /
+							Math.ceil(
+								(new Date(booking.check_out).getTime() -
+									new Date(booking.check_in).getTime()) /
+									(1000 * 60 * 60 * 24),
+							)
+						: 0,
+					total_amount: Number(booking.total_amount) || 0,
+					paid_amount: Number(booking.total_amount) || 0, // Channel bookings are typically pre-paid
+					balance_amount: 0,
+					rooms: booking.rooms,
+					locations: booking.locations,
+					tenant_id: booking.tenant_id,
+					location_id: booking.location_id,
+				}),
+			);
 
 			// Combine both reservation types
-			const allReservations = [...(reservations || []), ...transformedExternalBookings];
+			const allReservations = [
+				...(reservations || []),
+				...transformedExternalBookings,
+			];
 
 			// Get income records for expense calculations
 			const { data: incomeRecords, error: incomeError } = await supabase

@@ -59,24 +59,40 @@ export const SmartRedirect = () => {
 	// If user doesn't have a tenant_id in their profile, check for pending invitations
 	if (!profile?.tenant_id || !tenant) {
 		if (hasInvitations) {
-			console.log("🎫 [REDIRECT] No tenant_id but has invitations - redirecting to /pending-invitation");
+			console.log(
+				"🎫 [REDIRECT] No tenant_id but has invitations - redirecting to /pending-invitation",
+			);
 			return <Navigate to="/pending-invitation" replace />;
 		}
 
-		console.log("🚀 [REDIRECT] No tenant_id and no invitations - redirecting to /onboarding");
+		console.log(
+			"🚀 [REDIRECT] No tenant_id and no invitations - redirecting to /onboarding",
+		);
 		return <Navigate to="/onboarding" replace />;
 	}
 
 	// If tenant hasn't completed onboarding, redirect to onboarding
 	if (!tenant.onboarding_completed) {
-		console.log("🚨 [REDIRECT] Tenant onboarding not completed - redirecting to /onboarding");
+		console.log(
+			"🚨 [REDIRECT] Tenant onboarding not completed - redirecting to /onboarding",
+		);
 		return <Navigate to="/onboarding" replace />;
 	}
 
 	// Check subscription status - if incomplete, pending_payment, or payment_failed, redirect to onboarding
-	const invalidSubscriptionStatuses = ['incomplete', 'pending_payment', 'payment_failed', 'expired'];
-	if (tenant.subscription_status && invalidSubscriptionStatuses.includes(tenant.subscription_status)) {
-		console.log(`🚨 [REDIRECT] Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`);
+	const invalidSubscriptionStatuses = [
+		"incomplete",
+		"pending_payment",
+		"payment_failed",
+		"expired",
+	];
+	if (
+		tenant.subscription_status &&
+		invalidSubscriptionStatuses.includes(tenant.subscription_status)
+	) {
+		console.log(
+			`🚨 [REDIRECT] Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`,
+		);
 		return <Navigate to="/onboarding" replace />;
 	}
 

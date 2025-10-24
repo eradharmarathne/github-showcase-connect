@@ -135,7 +135,10 @@ export function RoomRow({
 									key={dayIndex}
 									className={cn(
 										"flex-1 h-12 border-r last:border-r-0 relative flex items-center justify-center",
-										isOccupied && !bookingStartingToday && !externalBookingStartingToday && "bg-muted/10",
+										isOccupied &&
+											!bookingStartingToday &&
+											!externalBookingStartingToday &&
+											"bg-muted/10",
 									)}
 									style={{ minWidth: "32px" }}
 								>
@@ -196,8 +199,10 @@ export function RoomRow({
 														</span>
 														{bookingStartingToday.span.spanDays >= 2 && (
 															<span className="text-white text-[10px] font-medium ml-1 drop-shadow-sm shrink-0">
-																({bookingStartingToday.adults +
-																	(bookingStartingToday.children || 0)})
+																(
+																{bookingStartingToday.adults +
+																	(bookingStartingToday.children || 0)}
+																)
 															</span>
 														)}
 													</div>

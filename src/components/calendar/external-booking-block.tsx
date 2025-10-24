@@ -136,11 +136,15 @@ export function ExternalBookingBlock({
 							</div>
 
 							{/* Guest name and count */}
-							<span className={`text-xs font-semibold truncate flex-1 ${colors.text}`}>
+							<span
+								className={`text-xs font-semibold truncate flex-1 ${colors.text}`}
+							>
 								{booking.guest_name}
 							</span>
 							{spanDays >= 2 && (
-								<span className={`text-[10px] font-medium ml-1 shrink-0 ${colors.text}`}>
+								<span
+									className={`text-[10px] font-medium ml-1 shrink-0 ${colors.text}`}
+								>
 									({adults + children})
 								</span>
 							)}
@@ -160,7 +164,9 @@ export function ExternalBookingBlock({
 				<TooltipContent side="top" className="max-w-xs">
 					<div className="space-y-2">
 						<div className="font-semibold flex items-center gap-2">
-							<span className={`${colors.badge} text-white text-xs px-2 py-0.5 rounded`}>
+							<span
+								className={`${colors.badge} text-white text-xs px-2 py-0.5 rounded`}
+							>
 								{colors.label}
 							</span>
 							<span>{formatSourceName(booking.source)}</span>

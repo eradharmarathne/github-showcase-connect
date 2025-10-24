@@ -17,7 +17,9 @@ export const AuthRedirect = () => {
 
 	// If user is authenticated, redirect to smart redirect for proper routing
 	if (user) {
-		console.log("➡️ [AUTH-REDIRECT] User authenticated, redirecting to /smart-redirect");
+		console.log(
+			"➡️ [AUTH-REDIRECT] User authenticated, redirecting to /smart-redirect",
+		);
 		return <Navigate to="/smart-redirect" replace />;
 	}
 

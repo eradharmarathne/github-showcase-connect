@@ -94,23 +94,25 @@ export function UnmappedBookingsRow({
 	if (unmappedBookings.length === 0) return null;
 
 	// Calculate spans for unmapped bookings
-	const bookingsWithSpans = unmappedBookings.map((booking) => {
-		const fakeReservation = {
-			...booking,
-			room_id: "unmapped",
-			check_in_date: booking.check_in,
-			check_out_date: booking.check_out,
-			total_amount: booking.total_amount || 0,
-			currency: booking.currency || "USD",
-			adults: booking.adults || 0,
-			children: booking.children || 0,
-			reservation_number: booking.external_id,
-		};
-		return {
-			...booking,
-			span: calculateBookingSpan(fakeReservation as any, calendarDays),
-		};
-	}).filter((booking) => booking.span.isVisible);
+	const bookingsWithSpans = unmappedBookings
+		.map((booking) => {
+			const fakeReservation = {
+				...booking,
+				room_id: "unmapped",
+				check_in_date: booking.check_in,
+				check_out_date: booking.check_out,
+				total_amount: booking.total_amount || 0,
+				currency: booking.currency || "USD",
+				adults: booking.adults || 0,
+				children: booking.children || 0,
+				reservation_number: booking.external_id,
+			};
+			return {
+				...booking,
+				span: calculateBookingSpan(fakeReservation as any, calendarDays),
+			};
+		})
+		.filter((booking) => booking.span.isVisible);
 
 	if (bookingsWithSpans.length === 0) return null;
 
@@ -125,8 +127,8 @@ export function UnmappedBookingsRow({
 						<div className="px-1.5 py-1 flex flex-col items-center gap-1">
 							<AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
 							<div className="text-[9px] sm:text-[10px] font-bold text-amber-900">
-									Unmapped ({bookingsWithSpans.length})
-								</div>
+								Unmapped ({bookingsWithSpans.length})
+							</div>
 						</div>
 					</div>
 
@@ -190,18 +192,20 @@ export function UnmappedBookingsRow({
 												</div>
 
 												{/* Warning badge */}
-												<div
-													className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] px-1 py-0.5 font-bold uppercase leading-none flex items-center gap-0.5"
-												>
+												<div className="absolute top-0 right-0 bg-amber-500 text-white text-[8px] px-1 py-0.5 font-bold uppercase leading-none flex items-center gap-0.5">
 													<AlertTriangle className="h-2 w-2" />
 												</div>
 
 												{/* Guest name and count */}
-												<span className={`text-xs font-semibold truncate flex-1 ${colors.text}`}>
+												<span
+													className={`text-xs font-semibold truncate flex-1 ${colors.text}`}
+												>
 													{booking.guest_name}
 												</span>
 												{booking.span.spanDays >= 2 && (
-													<span className={`text-[10px] font-medium ml-1 shrink-0 ${colors.text}`}>
+													<span
+														className={`text-[10px] font-medium ml-1 shrink-0 ${colors.text}`}
+													>
 														({adults + children})
 													</span>
 												)}
@@ -211,7 +215,9 @@ export function UnmappedBookingsRow({
 									<TooltipContent side="top" className="max-w-xs">
 										<div className="space-y-2">
 											<div className="font-semibold flex items-center gap-2">
-												<span className={`${colors.badge} text-white text-xs px-2 py-0.5 rounded`}>
+												<span
+													className={`${colors.badge} text-white text-xs px-2 py-0.5 rounded`}
+												>
 													{colors.label}
 												</span>
 												<span>{formatSourceName(booking.source)}</span>
@@ -228,13 +234,13 @@ export function UnmappedBookingsRow({
 												<div>
 													<span className="font-medium">Check-out:</span>{" "}
 													{format(checkOutDate, "EEE, MMM d, yyyy")}
-											</div>
-											<div>
-												<span className="font-medium">Nights:</span>{" "}
-												{booking.span.spanDays - 1}
-											</div>
-											<div>
-												<span className="font-medium">Guests:</span> {adults}{" "}
+												</div>
+												<div>
+													<span className="font-medium">Nights:</span>{" "}
+													{booking.span.spanDays - 1}
+												</div>
+												<div>
+													<span className="font-medium">Guests:</span> {adults}{" "}
 													adults
 													{children ? `, ${children} children` : ""}
 												</div>

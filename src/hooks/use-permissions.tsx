@@ -14,7 +14,9 @@ export const usePermissions = () => {
 		const fetchPermissions = async () => {
 			// If no user or no tenant_id, set loading to false immediately
 			if (!user || !profile?.tenant_id) {
-				console.log("⚠️ [PERMISSIONS] No user or tenant_id, skipping permissions fetch");
+				console.log(
+					"⚠️ [PERMISSIONS] No user or tenant_id, skipping permissions fetch",
+				);
 				setPermissions(null);
 				setLoading(false);
 				return;
@@ -39,7 +41,10 @@ export const usePermissions = () => {
 					setPermissions(data || null);
 				}
 			} catch (error) {
-				console.error("❌ [PERMISSIONS] Exception fetching permissions:", error);
+				console.error(
+					"❌ [PERMISSIONS] Exception fetching permissions:",
+					error,
+				);
 				setPermissions(null);
 			} finally {
 				setLoading(false);

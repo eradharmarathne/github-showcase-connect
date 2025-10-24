@@ -24,7 +24,10 @@ export const usePaymentStatus = ({
 			return;
 		}
 
-		console.log("💳 [PAYMENT-STATUS] Starting payment status polling for tenant:", tenantId);
+		console.log(
+			"💳 [PAYMENT-STATUS] Starting payment status polling for tenant:",
+			tenantId,
+		);
 
 		let pollCount = 0;
 		const maxPolls = (timeoutMinutes * 60) / pollIntervalSeconds;
@@ -32,7 +35,9 @@ export const usePaymentStatus = ({
 		const checkPaymentStatus = async () => {
 			try {
 				pollCount++;
-				console.log(`🔄 [PAYMENT-STATUS] Poll #${pollCount} checking status...`);
+				console.log(
+					`🔄 [PAYMENT-STATUS] Poll #${pollCount} checking status...`,
+				);
 
 				// Check tenant subscription status
 				const { data: tenantData, error: tenantError } = await supabase
@@ -42,18 +47,26 @@ export const usePaymentStatus = ({
 					.single();
 
 				if (tenantError) {
-					console.error("❌ [PAYMENT-STATUS] Error fetching tenant:", tenantError);
+					console.error(
+						"❌ [PAYMENT-STATUS] Error fetching tenant:",
+						tenantError,
+					);
 					return;
 				}
 
-				console.log(`📊 [PAYMENT-STATUS] Tenant status: ${tenantData?.subscription_status}`);
+				console.log(
+					`📊 [PAYMENT-STATUS] Tenant status: ${tenantData?.subscription_status}`,
+				);
 
 				// Check if payment was verified (status changed from pending_payment)
 				if (
 					tenantData?.subscription_status === "active" ||
 					tenantData?.subscription_status === "trialing"
 				) {
-					console.log("✅ [PAYMENT-STATUS] Payment verified! Status:", tenantData.subscription_status);
+					console.log(
+						"✅ [PAYMENT-STATUS] Payment verified! Status:",
+						tenantData.subscription_status,
+					);
 					setStatus("verified");
 					return true; // Stop polling
 				}
@@ -72,7 +85,10 @@ export const usePaymentStatus = ({
 					tenantData?.subscription_status === "cancelled" ||
 					tenantData?.subscription_status === "expired"
 				) {
-					console.log("❌ [PAYMENT-STATUS] Payment failed or subscription in terminal state:", tenantData.subscription_status);
+					console.log(
+						"❌ [PAYMENT-STATUS] Payment failed or subscription in terminal state:",
+						tenantData.subscription_status,
+					);
 					setStatus("failed");
 					return true; // Stop polling
 				}
@@ -87,7 +103,10 @@ export const usePaymentStatus = ({
 
 				return false; // Continue polling
 			} catch (err) {
-				console.error("❌ [PAYMENT-STATUS] Exception during status check:", err);
+				console.error(
+					"❌ [PAYMENT-STATUS] Exception during status check:",
+					err,
+				);
 				return false; // Continue polling on error
 			}
 		};

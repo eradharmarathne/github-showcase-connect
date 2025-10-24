@@ -19,6 +19,7 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { RoomMappingsTab } from "@/components/booking-channels/room-mappings-tab";
 import { BookingChannelsSkeleton } from "@/components/skeleton/booking-channels-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,13 +31,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
@@ -44,6 +38,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Table,
 	TableBody,
@@ -53,7 +54,6 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RoomMappingsTab } from "@/components/booking-channels/room-mappings-tab";
 import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
@@ -256,7 +256,7 @@ export default function BookingChannelsIntegration() {
         `)
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
-				.eq("is_active", true);			// Fetch iCal sync URLs - filtered by selected location
+				.eq("is_active", true); // Fetch iCal sync URLs - filtered by selected location
 			const { data: syncUrlsData } = await supabase
 				.from("booking_sync_urls")
 				.select(`
@@ -288,7 +288,8 @@ export default function BookingChannelsIntegration() {
 						return acc;
 					},
 					{} as Record<string, PropertyMapping>,
-				); transformedMappings.push(...Object.values(groupedMappings));
+				);
+				transformedMappings.push(...Object.values(groupedMappings));
 			}
 
 			setBookings(bookingsData || []);
@@ -378,12 +379,15 @@ export default function BookingChannelsIntegration() {
 
 		setSyncing(true);
 		try {
-			const response = await supabase.functions.invoke("fetch-beds24-bookings", {
-				body: {
-					tenant_id: tenant.id,
-					location_id: selectedLocation,
+			const response = await supabase.functions.invoke(
+				"fetch-beds24-bookings",
+				{
+					body: {
+						tenant_id: tenant.id,
+						location_id: selectedLocation,
+					},
 				},
-			});
+			);
 
 			const responseData = response.data as {
 				success?: boolean;
@@ -392,9 +396,13 @@ export default function BookingChannelsIntegration() {
 			};
 
 			if (responseData?.code === "NO_CREDENTIALS") {
-				toast.error("Please connect your Beds24 account first in the Settings tab");
+				toast.error(
+					"Please connect your Beds24 account first in the Settings tab",
+				);
 			} else if (responseData?.code === "NO_MAPPINGS") {
-				toast.error("Please configure Beds24 property mappings in the Settings tab first");
+				toast.error(
+					"Please configure Beds24 property mappings in the Settings tab first",
+				);
 			} else if (response.error) {
 				console.error("Sync error:", response.error);
 				toast.error(t("bookingChannels.messages.syncError"));
@@ -445,7 +453,7 @@ export default function BookingChannelsIntegration() {
 				// Show detailed Beds24 error if available
 				const errorMessage = data?.details
 					? `Beds24 error: ${data.details}`
-					: (data?.error || "Token exchange failed");
+					: data?.error || "Token exchange failed";
 				throw new Error(errorMessage);
 			}
 		} catch (error: any) {
@@ -454,7 +462,8 @@ export default function BookingChannelsIntegration() {
 			// Parse Beds24 API errors for better user feedback
 			let userMessage = error.message || "Unknown error";
 			if (userMessage.includes("Token not valid")) {
-				userMessage = "Invalid or expired invite code. Please generate a new invite code in Beds24 and try again.";
+				userMessage =
+					"Invalid or expired invite code. Please generate a new invite code in Beds24 and try again.";
 			}
 
 			toast.error(
@@ -528,7 +537,7 @@ export default function BookingChannelsIntegration() {
 	const calculateNights = (checkIn: string, checkOut: string) => {
 		const nights = Math.ceil(
 			(new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-			(1000 * 60 * 60 * 24),
+				(1000 * 60 * 60 * 24),
 		);
 		return nights;
 	};
@@ -624,18 +633,17 @@ export default function BookingChannelsIntegration() {
 		}
 
 		try {
-			const { error } = await supabase
-				.from("beds24_property_mappings")
-				.insert({
-					tenant_id: tenant.id,
-					location_id: locationId,
-					beds24_property_id: propertyName, // Using property name as ID for now
-					beds24_property_name: propertyName,
-					mapping_type: "villa", // Property-level mapping (villa or room)
-					is_active: true,
-				});
+			const { error } = await supabase.from("beds24_property_mappings").insert({
+				tenant_id: tenant.id,
+				location_id: locationId,
+				beds24_property_id: propertyName, // Using property name as ID for now
+				beds24_property_name: propertyName,
+				mapping_type: "villa", // Property-level mapping (villa or room)
+				is_active: true,
+			});
 
-			if (error) throw error; toast.success("Property mapping added successfully");
+			if (error) throw error;
+			toast.success("Property mapping added successfully");
 
 			// Clear input
 			setPropertyInputValues((prev) => ({
@@ -917,9 +925,7 @@ export default function BookingChannelsIntegration() {
 					<TabsTrigger value="analytics">
 						{t("bookingChannels.tabs.analytics")}
 					</TabsTrigger>
-					<TabsTrigger value="room-mappings">
-						Room Mappings
-					</TabsTrigger>
+					<TabsTrigger value="room-mappings">Room Mappings</TabsTrigger>
 					<TabsTrigger value="settings">
 						{t("bookingChannels.tabs.settings")}
 					</TabsTrigger>
@@ -973,7 +979,8 @@ export default function BookingChannelsIntegration() {
 											<TableRow key={booking.id} className="hover:bg-muted/50">
 												<TableCell className="font-medium">
 													<div className="space-y-1">
-														{!booking.room_id && mappingRoomId === booking.id ? (
+														{!booking.room_id &&
+														mappingRoomId === booking.id ? (
 															<div className="flex items-center gap-2">
 																<Select
 																	onValueChange={(value) =>
@@ -1009,7 +1016,8 @@ export default function BookingChannelsIntegration() {
 																<div className="text-sm font-medium flex items-center gap-2">
 																	{booking.room_id && booking.room ? (
 																		<>
-																			{booking.room.room_number} - {booking.room.room_type}
+																			{booking.room.room_number} -{" "}
+																			{booking.room.room_type}
 																		</>
 																	) : (
 																		<>
@@ -1022,10 +1030,14 @@ export default function BookingChannelsIntegration() {
 																					variant="outline"
 																					size="sm"
 																					className="h-6 text-xs px-2"
-																					onClick={() => setMappingRoomId(booking.id)}
+																					onClick={() =>
+																						setMappingRoomId(booking.id)
+																					}
 																				>
 																					<Bed className="size-3 mr-1" />
-																					{t("bookingChannels.bookingsTable.mapRoom")}
+																					{t(
+																						"bookingChannels.bookingsTable.mapRoom",
+																					)}
 																				</Button>
 																			)}
 																		</>
@@ -1188,7 +1200,7 @@ export default function BookingChannelsIntegration() {
 												{selectedBooking.room_id && selectedBooking.room
 													? `${selectedBooking.room.room_number} - ${selectedBooking.room.room_type}`
 													: selectedBooking.room_name ||
-													t("bookingChannels.bookingDialog.unknownProperty")}
+														t("bookingChannels.bookingDialog.unknownProperty")}
 											</p>
 											<p className="text-sm text-muted-foreground">
 												{selectedBooking.mappedLocation?.name ||
@@ -1431,7 +1443,11 @@ export default function BookingChannelsIntegration() {
 												</Label>
 												<div className="flex flex-wrap gap-2">
 													{mapping.channelProperties.map((property, index) => (
-														<Badge key={index} variant="outline" className="text-xs">
+														<Badge
+															key={index}
+															variant="outline"
+															className="text-xs"
+														>
 															{property}
 														</Badge>
 													))}
@@ -1551,7 +1567,10 @@ export default function BookingChannelsIntegration() {
 																		{syncUrl.source.replace("_", ".")}
 																	</Badge>
 																	{syncUrl.room_number && (
-																		<Badge variant="outline" className="text-xs">
+																		<Badge
+																			variant="outline"
+																			className="text-xs"
+																		>
 																			Room: {syncUrl.rooms?.room_number}
 																		</Badge>
 																	)}
@@ -1629,10 +1648,7 @@ export default function BookingChannelsIntegration() {
 											</span>
 										)}
 									</div>
-									<Button
-										variant="outline"
-										onClick={() => setSetupMode(true)}
-									>
+									<Button variant="outline" onClick={() => setSetupMode(true)}>
 										Reconfigure API
 									</Button>
 								</div>
@@ -1650,9 +1666,7 @@ export default function BookingChannelsIntegration() {
 												<li>Log into your booking channel account</li>
 												<li>Go to Settings → Channel Manager → API</li>
 												<li>Generate an invite code for this application</li>
-												<li>
-													Enter the invite code below to complete setup
-												</li>
+												<li>Enter the invite code below to complete setup</li>
 											</ol>
 										</div>
 									</div>

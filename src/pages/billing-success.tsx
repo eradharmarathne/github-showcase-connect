@@ -1,9 +1,16 @@
-import { ArrowRight, CheckCircle, CreditCard, Crown, Loader2, XCircle } from "lucide-react";
+import {
+	ArrowRight,
+	CheckCircle,
+	CreditCard,
+	Crown,
+	Loader2,
+	XCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/context/auth-context";
 import { usePaymentStatus } from "@/hooks/use-payment-status";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +30,12 @@ export default function BillingSuccess() {
 	const source = searchParams.get("source"); // 'onboarding' or 'billing'
 
 	// ✅ SECURE: Use polling to wait for webhook verification
-	const { status: paymentStatus, isVerified, isFailed, isTimeout } = usePaymentStatus({
+	const {
+		status: paymentStatus,
+		isVerified,
+		isFailed,
+		isTimeout,
+	} = usePaymentStatus({
 		tenantId: tenant?.id || null,
 		enabled: !!checkoutId && !!tenant,
 		timeoutMinutes: 10,
@@ -48,7 +60,9 @@ export default function BillingSuccess() {
 	// Handle payment failure
 	useEffect(() => {
 		if (isFailed || isTimeout) {
-			console.error("❌ [BILLING-SUCCESS] Payment verification failed or timed out");
+			console.error(
+				"❌ [BILLING-SUCCESS] Payment verification failed or timed out",
+			);
 			toast({
 				title: "Payment Verification Issue",
 				description:
@@ -179,8 +193,8 @@ export default function BillingSuccess() {
 
 						<div className="space-y-2 text-sm text-muted-foreground">
 							<p>
-								If you were charged, your subscription will be activated within a
-								few minutes. Please check your:
+								If you were charged, your subscription will be activated within
+								a few minutes. Please check your:
 							</p>
 							<ul className="list-disc list-inside text-left space-y-1">
 								<li>Email for a payment confirmation</li>

@@ -138,7 +138,7 @@ export function ImmediatePaymentForm({
 					note:
 						formData.note ||
 						`General income for reservation ${reservation.reservation_number}`,
-					date: new Date().toISOString().split('T')[0], // Date only (YYYY-MM-DD)
+					date: new Date().toISOString().split("T")[0], // Date only (YYYY-MM-DD)
 					is_advance: false,
 					additional_service_id: null, // NULL = general income, NOT payment against a service
 					tenant_id: tenantId,

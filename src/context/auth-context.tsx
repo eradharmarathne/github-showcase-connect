@@ -177,7 +177,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 								// If profile doesn't exist, create it (fallback)
 								if (!profileData) {
-									console.log("🆕 [AUTH] Profile not found, creating new profile...");
+									console.log(
+										"🆕 [AUTH] Profile not found, creating new profile...",
+									);
 
 									const newProfileData = {
 										id: session.user.id,

@@ -1,13 +1,14 @@
-import { useState } from "react";
 import {
-	RefreshCw,
-	Save,
 	AlertCircle,
 	CheckCircle,
-	Link2,
 	Download,
+	Link2,
+	RefreshCw,
+	Save,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -23,10 +24,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
+import { supabase } from "@/integrations/supabase/client";
 import { RoomMappingRow } from "./room-mapping-row";
 
 interface Beds24Room {
@@ -93,58 +93,63 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 
 			if (!data?.rooms || data.rooms.length === 0) {
 				toast.info(
-					data?.error || "No Beds24 rooms found. Please configure Beds24 integration and property mappings first.",
-					{ description: data?.details }
+					data?.error ||
+						"No Beds24 rooms found. Please configure Beds24 integration and property mappings first.",
+					{ description: data?.details },
 				);
 				return;
 			}
 
 			// Normalize Edge Function room objects to the UI's Beds24Room shape
-			const normalizedBeds24Rooms: Beds24Room[] = (data.rooms || []).map((r: any) => ({
-				id: r.beds24_room_id ?? r.id,
-				name: r.beds24_room_name ?? r.name ?? "",
-				propertyId: r.beds24_property_id ?? r.propertyId,
-				propertyName: r.beds24_property_name ?? r.propertyName ?? "",
-				maxOccupancy: r.max_occupancy ?? r.maxOccupancy,
-				description: r.description ?? r.desc ?? null,
-				mappingStatus: r.is_mapped ? "mapped" : "unmapped",
-				currentMapping: r.mapped_to_room
-					? {
-						room_id: r.mapped_to_room_id || r.mapped_to_room?.id,
-						room_number: r.mapped_to_room?.room_number || r.mapped_to_room?.name || "",
-						room_type: r.mapped_to_room?.room_type || r.mapped_to_room?.type || "",
-					}
-					: r.mapped_to_room_id
-					? { room_id: r.mapped_to_room_id, room_number: "", room_type: "" }
-					: undefined,
-				suggestions: r.suggestions
-					? r.suggestions.map((s: any) => ({
-						room_id: s.room_id || s.suggested_room_id,
-						room_number: s.room_number || s.roomNumber || "",
-						room_type: s.room_type || s.roomType || "",
-						similarity: (s.similarity ?? s.suggestion_score ?? 0) / 100,
-					}))
-					: r.suggestion_score
-					? [
-						{
-							room_id: r.suggested_room_id || null,
-							room_number: "",
-							room_type: "",
-							similarity: (r.suggestion_score || 0) / 100,
-						},
-					]
-					: [],
-			}));
+			const normalizedBeds24Rooms: Beds24Room[] = (data.rooms || []).map(
+				(r: any) => ({
+					id: r.beds24_room_id ?? r.id,
+					name: r.beds24_room_name ?? r.name ?? "",
+					propertyId: r.beds24_property_id ?? r.propertyId,
+					propertyName: r.beds24_property_name ?? r.propertyName ?? "",
+					maxOccupancy: r.max_occupancy ?? r.maxOccupancy,
+					description: r.description ?? r.desc ?? null,
+					mappingStatus: r.is_mapped ? "mapped" : "unmapped",
+					currentMapping: r.mapped_to_room
+						? {
+								room_id: r.mapped_to_room_id || r.mapped_to_room?.id,
+								room_number:
+									r.mapped_to_room?.room_number || r.mapped_to_room?.name || "",
+								room_type:
+									r.mapped_to_room?.room_type || r.mapped_to_room?.type || "",
+							}
+						: r.mapped_to_room_id
+							? { room_id: r.mapped_to_room_id, room_number: "", room_type: "" }
+							: undefined,
+					suggestions: r.suggestions
+						? r.suggestions.map((s: any) => ({
+								room_id: s.room_id || s.suggested_room_id,
+								room_number: s.room_number || s.roomNumber || "",
+								room_type: s.room_type || s.roomType || "",
+								similarity: (s.similarity ?? s.suggestion_score ?? 0) / 100,
+							}))
+						: r.suggestion_score
+							? [
+									{
+										room_id: r.suggested_room_id || null,
+										room_number: "",
+										room_type: "",
+										similarity: (r.suggestion_score || 0) / 100,
+									},
+								]
+							: [],
+				}),
+			);
 
 			setBeds24Rooms(normalizedBeds24Rooms);
 			// The Edge Function returns `cco_rooms` (array) — map it to our `availableRooms` shape
 			const ccoRoomsRaw = data.cco_rooms || data.availableRooms || [];
 			const mappedCcoRooms: Room[] = Array.isArray(ccoRoomsRaw)
 				? ccoRoomsRaw.map((r: any) => ({
-					id: r.id || r.room_id || r.roomId || String(r.id),
-					room_number: r.room_number || r.roomNumber || r.name || "",
-					room_type: r.room_type || r.roomType || r.type || "",
-				}))
+						id: r.id || r.room_id || r.roomId || String(r.id),
+						room_number: r.room_number || r.roomNumber || r.name || "",
+						room_type: r.room_type || r.roomType || r.type || "",
+					}))
 				: [];
 
 			setAvailableRooms(mappedCcoRooms);
@@ -161,14 +166,17 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 			console.error("Error fetching Beds24 rooms:", error);
 			const errorMessage = error?.message || "Failed to fetch Beds24 rooms";
 			toast.error(errorMessage, {
-				description: "Please check your Beds24 integration in the Settings tab"
+				description: "Please check your Beds24 integration in the Settings tab",
 			});
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	const handleMappingChange = (beds24RoomId: number, ccoRoomId: string | null) => {
+	const handleMappingChange = (
+		beds24RoomId: number,
+		ccoRoomId: string | null,
+	) => {
 		setPendingMappings((prev) => {
 			const newMap = new Map(prev);
 			newMap.set(beds24RoomId, ccoRoomId);
@@ -377,7 +385,9 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 					{!locationId ? (
 						<div className="text-center py-12 text-muted-foreground">
 							<AlertCircle className="size-12 mx-auto mb-4 opacity-50" />
-							<p>Please select a location from the sidebar to view room mappings</p>
+							<p>
+								Please select a location from the sidebar to view room mappings
+							</p>
 						</div>
 					) : beds24Rooms.length === 0 ? (
 						<div className="text-center py-12 text-muted-foreground">
@@ -444,8 +454,8 @@ export function RoomMappingsTab({ locationId }: RoomMappingsTabProps) {
 								<p className="text-sm text-green-700">
 									We found {stats.highConfidenceSuggestions} high-confidence
 									room matches based on name similarity. These rows are
-									highlighted in green. Review and save these mappings to
-									enable automatic room assignment for future bookings.
+									highlighted in green. Review and save these mappings to enable
+									automatic room assignment for future bookings.
 								</p>
 							</div>
 						</div>

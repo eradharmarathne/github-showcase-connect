@@ -32,7 +32,9 @@ export function MobileBottomNav() {
 							)}
 						>
 							<item.icon className={cn("size-4", isActive && "text-primary")} />
-							<span className="font-medium text-xs sm:text-base">{item.name}</span>
+							<span className="font-medium text-xs sm:text-base">
+								{item.name}
+							</span>
 						</Link>
 					);
 				})}

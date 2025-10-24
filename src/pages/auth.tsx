@@ -66,7 +66,8 @@ export default function Auth() {
 						console.error("Recovery token verification failed:", error);
 						toast({
 							title: "Invalid Reset Link",
-							description: "This password reset link is invalid or has expired.",
+							description:
+								"This password reset link is invalid or has expired.",
 							variant: "destructive",
 						});
 						navigate("/auth/forgot-password", { replace: true });
@@ -85,10 +86,13 @@ export default function Auth() {
 						return;
 					}
 
-					console.log("Recovery token verified, session established:", data.session);
+					console.log(
+						"Recovery token verified, session established:",
+						data.session,
+					);
 
 					// Small delay to ensure session is fully established
-					await new Promise(resolve => setTimeout(resolve, 500));
+					await new Promise((resolve) => setTimeout(resolve, 500));
 
 					// Token verified successfully, redirect to reset password page
 					navigate("/auth/reset-password", { replace: true });
@@ -145,7 +149,9 @@ export default function Auth() {
 	// Handle redirect after successful authentication
 	useEffect(() => {
 		if (user && !submitting) {
-			console.log("✅ [AUTH-PAGE] User authenticated, redirecting to smart-redirect");
+			console.log(
+				"✅ [AUTH-PAGE] User authenticated, redirecting to smart-redirect",
+			);
 			// User is authenticated, redirect to smart redirect for proper routing
 			navigate("/smart-redirect", { replace: true });
 		}
@@ -357,7 +363,11 @@ export default function Auth() {
 							</div>
 						</div>
 
-						<Button type="submit" className="w-full  cursor-pointer" disabled={submitting}>
+						<Button
+							type="submit"
+							className="w-full  cursor-pointer"
+							disabled={submitting}
+						>
 							{submitting ? (
 								<div className="flex items-center justify-center">
 									<div className="animate-spin rounded-full size-4 border-2 border-transparent border-t-current"></div>

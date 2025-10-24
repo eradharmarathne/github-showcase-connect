@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Analytics } from '@vercel/analytics/react';
+import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -78,26 +78,26 @@ const App = () => (
 							<BrowserRouter>
 								<Routes>
 									<Route path="/" element={<AuthRedirect />} />
-								<Route path="/auth" element={<Auth />} />
-								<Route path="/ui" element={<Design />} />
-								<Route
-									path="/auth/forgot-password"
-									element={<ForgotPassword />}
-								/>
-								<Route
-									path="/auth/reset-password"
-									element={<ResetPassword />}
-								/>
-								{/* Alternative reset-password route without /auth prefix for email links */}
-								<Route path="/reset-password" element={<ResetPassword />} />
-								<Route
-									path="/pending-invitation"
-									element={
-										<ProtectedRoute>
-											<PendingInvitation />
-										</ProtectedRoute>
-									}
-								/>
+									<Route path="/auth" element={<Auth />} />
+									<Route path="/ui" element={<Design />} />
+									<Route
+										path="/auth/forgot-password"
+										element={<ForgotPassword />}
+									/>
+									<Route
+										path="/auth/reset-password"
+										element={<ResetPassword />}
+									/>
+									{/* Alternative reset-password route without /auth prefix for email links */}
+									<Route path="/reset-password" element={<ResetPassword />} />
+									<Route
+										path="/pending-invitation"
+										element={
+											<ProtectedRoute>
+												<PendingInvitation />
+											</ProtectedRoute>
+										}
+									/>
 									<Route
 										path="/onboarding"
 										element={

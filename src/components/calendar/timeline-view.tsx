@@ -169,9 +169,9 @@ export function TimelineView({
 				if (error) throw error;
 				return data || [];
 			},
-		enabled: !!selectedLocation && !!tenant?.id,
-		staleTime: 30000, // Cache for 30 seconds
-	});
+			enabled: !!selectedLocation && !!tenant?.id,
+			staleTime: 30000, // Cache for 30 seconds
+		});
 
 	// Generate calendar days for the entire month
 	const startDate = startOfDay(currentDate);

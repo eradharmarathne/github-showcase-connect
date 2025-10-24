@@ -26,43 +26,48 @@ export default function ResetPassword() {
 		const checkSession = async () => {
 			try {
 				console.log("Reset password page: Checking session...");
-				
+
 				// Check if user has an active session
 				// The token was already verified by Supabase before redirecting here
-				const { data: { session }, error } = await supabase.auth.getSession();
+				const {
+					data: { session },
+					error,
+				} = await supabase.auth.getSession();
 
-				console.log("Session check result:", { 
-					hasSession: !!session, 
+				console.log("Session check result:", {
+					hasSession: !!session,
 					error: error?.message,
 					userId: session?.user?.id,
 					authProviders: session?.user?.app_metadata?.providers || [],
-					authMethod: session?.user?.app_metadata?.provider
+					authMethod: session?.user?.app_metadata?.provider,
 				});
 
 				if (error || !session) {
 					console.error("No active session found:", error);
 					toast({
 						title: "Invalid Reset Link",
-						description: "This password reset link is invalid or has expired. Please request a new one.",
+						description:
+							"This password reset link is invalid or has expired. Please request a new one.",
 						variant: "destructive",
 					});
-					
+
 					// Delay redirect to show the toast
 					setTimeout(() => {
 						navigate("/auth/forgot-password");
 					}, 2000);
 				} else {
 					console.log("Valid session found, showing reset password form");
-					
+
 					// Check if user signed up with OAuth (Google, Facebook, etc.)
 					const providers = session.user?.app_metadata?.providers || [];
-					const isOAuth = providers.includes('google') || providers.includes('facebook');
+					const isOAuth =
+						providers.includes("google") || providers.includes("facebook");
 					setIsOAuthUser(isOAuth);
-					
+
 					if (isOAuth) {
 						console.log("OAuth user detected - allowing password addition");
 					}
-					
+
 					setIsValidToken(true);
 				}
 			} catch (error) {
@@ -72,7 +77,7 @@ export default function ResetPassword() {
 					description: "Failed to verify reset link. Please try again.",
 					variant: "destructive",
 				});
-				
+
 				// Delay redirect to show the toast
 				setTimeout(() => {
 					navigate("/auth/forgot-password");
@@ -134,15 +139,19 @@ export default function ResetPassword() {
 
 			if (error) {
 				toast({
-					title: isOAuthUser ? "Failed to Add Password" : "Password Reset Failed",
+					title: isOAuthUser
+						? "Failed to Add Password"
+						: "Password Reset Failed",
 					description: error.message,
 					variant: "destructive",
 				});
 			} else {
 				setIsResetComplete(true);
 				toast({
-					title: isOAuthUser ? "Password Added Successfully" : "Password Reset Successful",
-					description: isOAuthUser 
+					title: isOAuthUser
+						? "Password Added Successfully"
+						: "Password Reset Successful",
+					description: isOAuthUser
 						? "You can now sign in with email/password in addition to your OAuth provider."
 						: "Your password has been updated successfully.",
 				});
@@ -214,13 +223,14 @@ export default function ResetPassword() {
 					<div className="relative z-10 w-full max-w-md">
 						<div className=" mt-16 space-y-3">
 							<h3 className="text-base md:text-lg lg:text-xl font-bold text-white">
-								{isOAuthUser ? "Password Added Successfully" : "Password Successfully Reset"}
+								{isOAuthUser
+									? "Password Added Successfully"
+									: "Password Successfully Reset"}
 							</h3>
 							<p className="text-gray-300">
 								{isOAuthUser
 									? "You can now sign in with email/password in addition to your OAuth provider."
-									: "Your password has been updated successfully. You can now sign in with your new credentials."
-								}
+									: "Your password has been updated successfully. You can now sign in with your new credentials."}
 							</p>
 						</div>
 					</div>
@@ -234,13 +244,14 @@ export default function ResetPassword() {
 									<CheckCircle className="size-6 text-green-600" />
 								</div>
 								<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">
-									{isOAuthUser ? "Password Added Successfully" : "Password Reset Complete"}
+									{isOAuthUser
+										? "Password Added Successfully"
+										: "Password Reset Complete"}
 								</h1>
 								<p className="text-sm text-muted-foreground">
-									{isOAuthUser 
+									{isOAuthUser
 										? "You can now sign in with email/password in addition to your OAuth provider (Google, Facebook, etc.)."
-										: "Your password has been successfully updated. You can now sign in with your new password."
-									}
+										: "Your password has been successfully updated. You can now sign in with your new password."}
 								</p>
 							</div>
 						</div>
@@ -264,13 +275,14 @@ export default function ResetPassword() {
 								<Lock className="size-6 text-blue-600" />
 							</div>
 							<h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-foreground">
-								{isOAuthUser ? "Add Password to Your Account" : "Set New Password"}
+								{isOAuthUser
+									? "Add Password to Your Account"
+									: "Set New Password"}
 							</h1>
 							<p className="text-sm text-muted-foreground">
-								{isOAuthUser 
+								{isOAuthUser
 									? "Add a password to enable signing in with email in addition to your OAuth provider (Google, Facebook, etc.)"
-									: "Enter your new password below. Make sure it's strong and secure."
-								}
+									: "Enter your new password below. Make sure it's strong and secure."}
 							</p>
 						</div>
 					</div>

@@ -1,3 +1,4 @@
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import {
@@ -12,14 +13,13 @@ import {
 	PropertyDetailsStep,
 	STEPS,
 } from "@/components/onboarding";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
-import { useToast } from "@/hooks/use-toast";
 import { usePaymentStatus } from "@/hooks/use-payment-status";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckoutSession } from "@/lib/creem";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { CheckCircle, Loader2, XCircle } from "lucide-react";
 
 export default function Onboarding() {
 	const [currentStep, setCurrentStep] = useState(1);
@@ -57,7 +57,11 @@ export default function Onboarding() {
 	const { toast } = useToast();
 	const { user, profile, tenant } = useAuth();
 	const [searchParams] = useSearchParams();
-	const { status: paymentStatus, isVerified, isFailed } = usePaymentStatus({
+	const {
+		status: paymentStatus,
+		isVerified,
+		isFailed,
+	} = usePaymentStatus({
 		tenantId: pendingTenantId,
 		enabled: awaitingPayment,
 	});
@@ -118,7 +122,8 @@ export default function Onboarding() {
 			console.log("✅ [ONBOARDING] Payment verified, completing onboarding...");
 			toast({
 				title: "Payment Verified! 🎉",
-				description: "Your payment has been confirmed. Setting up your account...",
+				description:
+					"Your payment has been confirmed. Setting up your account...",
 			});
 
 			// Mark tenant as onboarding complete
@@ -209,7 +214,8 @@ export default function Onboarding() {
 
 				toast({
 					title: "Payment Window Opened",
-					description: "Complete your payment in the new tab. We'll verify it automatically.",
+					description:
+						"Complete your payment in the new tab. We'll verify it automatically.",
 				});
 			} else {
 				throw new Error("No checkout URL received from Creem");
@@ -362,7 +368,8 @@ export default function Onboarding() {
 			console.error("Pending tenant creation error:", error);
 			toast({
 				title: "Setup Error",
-				description: error.message || "Failed to create tenant. Please try again.",
+				description:
+					error.message || "Failed to create tenant. Please try again.",
 				variant: "destructive",
 			});
 			throw error;
@@ -370,7 +377,6 @@ export default function Onboarding() {
 			setLoading(false);
 		}
 	};
-
 
 	const handleComplete = async () => {
 		try {
@@ -472,8 +478,8 @@ export default function Onboarding() {
 								<Loader2 className="h-4 w-4 animate-spin" />
 								<AlertTitle>Waiting for Payment Verification...</AlertTitle>
 								<AlertDescription>
-									Please complete your payment in the new tab. We're monitoring for
-									confirmation and will update automatically.
+									Please complete your payment in the new tab. We're monitoring
+									for confirmation and will update automatically.
 								</AlertDescription>
 							</>
 						)}
@@ -491,7 +497,8 @@ export default function Onboarding() {
 								<XCircle className="h-4 w-4 text-red-600" />
 								<AlertTitle>Payment Verification Failed</AlertTitle>
 								<AlertDescription>
-									We couldn't verify your payment. Please try again or contact support.
+									We couldn't verify your payment. Please try again or contact
+									support.
 								</AlertDescription>
 							</>
 						)}

@@ -1,10 +1,19 @@
 /**
  * Beds24 Sync Status Badge Component
- * 
+ *
  * Displays sync status for reservations that are synced to Beds24.
  * Shows different colors/icons based on sync state.
  */
 
+import {
+	AlertCircle,
+	CheckCircle2,
+	Clock,
+	RefreshCw,
+	XCircle,
+} from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,15 +23,6 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
-import {
-	CheckCircle2,
-	Clock,
-	XCircle,
-	AlertCircle,
-	RefreshCw,
-} from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 interface Beds24SyncStatusProps {
 	reservation: {
@@ -74,7 +74,9 @@ export function Beds24SyncStatus({
 			icon: CheckCircle2,
 			color: "text-green-600",
 			description: `Successfully synced to Beds24${
-				reservation.beds24_booking_id ? ` (ID: ${reservation.beds24_booking_id})` : ""
+				reservation.beds24_booking_id
+					? ` (ID: ${reservation.beds24_booking_id})`
+					: ""
 			}`,
 		},
 		failed: {
@@ -141,7 +143,9 @@ export function Beds24SyncStatus({
 					</TooltipTrigger>
 					<TooltipContent className="max-w-xs">
 						<p className="font-medium">Beds24 Sync Status</p>
-						<p className="text-sm text-muted-foreground">{config.description}</p>
+						<p className="text-sm text-muted-foreground">
+							{config.description}
+						</p>
 						{reservation.beds24_synced_at && (
 							<p className="text-xs text-muted-foreground mt-1">
 								Last synced:{" "}
@@ -203,9 +207,13 @@ export function Beds24SyncStatusCompact({
 					<div className="flex items-center justify-center">{Icon}</div>
 				</TooltipTrigger>
 				<TooltipContent>
-					<p className="font-medium capitalize">{syncStatus.replace("_", " ")}</p>
+					<p className="font-medium capitalize">
+						{syncStatus.replace("_", " ")}
+					</p>
 					{reservation.beds24_booking_id && (
-						<p className="text-xs">Beds24 ID: {reservation.beds24_booking_id}</p>
+						<p className="text-xs">
+							Beds24 ID: {reservation.beds24_booking_id}
+						</p>
 					)}
 				</TooltipContent>
 			</Tooltip>

@@ -1,9 +1,4 @@
-import {
-	ArrowRight,
-	BadgeCheck,
-	CreditCard,
-	Crown,
-} from "lucide-react";
+import { ArrowRight, BadgeCheck, CreditCard, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -172,7 +167,8 @@ export function PlanSelectionStep({
 
 					<div className="text-center text-xs text-muted-foreground">
 						<p>
-							✨ 14-day free trial via secure payment • Cancel anytime • No hidden fees
+							✨ 14-day free trial via secure payment • Cancel anytime • No
+							hidden fees
 						</p>
 					</div>
 				</div>

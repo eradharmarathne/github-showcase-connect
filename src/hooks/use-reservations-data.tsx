@@ -150,60 +150,61 @@ export function useReservationsData() {
 			if (externalBookingsError) throw externalBookingsError;
 
 			// Transform external bookings to match ReservationWithJoins format
-			const transformedExternalBookings: ReservationWithJoins[] =
-				(externalBookingsData || []).map((booking) => {
-					const rawData = booking.raw_data as any;
-					return {
-						id: booking.id,
-						reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
-						location_id: booking.location_id,
-						room_id: booking.room_id || "", // May be null if not mapped
-						guest_name: booking.guest_name,
-						guest_email: rawData?.guest?.email || null,
-						guest_phone: rawData?.guest?.phone || null,
-						guest_address: null,
-						guest_id_number: null,
-						guest_nationality: null,
-						adults: booking.adults || 0,
-						children: booking.children || 0,
-						check_in_date: booking.check_in,
-						check_out_date: booking.check_out,
-						nights: Math.ceil(
-							(new Date(booking.check_out).getTime() -
-								new Date(booking.check_in).getTime()) /
-								(1000 * 60 * 60 * 24),
-						),
-						room_rate: 0,
-						total_amount: booking.total_amount || 0,
-						advance_amount: null,
-						paid_amount: booking.total_amount || 0, // Assume channel bookings are paid
-						balance_amount: 0,
-						currency: (booking.currency || "USD") as
-							| "LKR"
-							| "USD"
-							| "EUR"
-							| "GBP",
-						status: booking.status as any,
-						special_requests: rawData?.notes || null,
-						arrival_time: null,
-						created_by: null,
-						grc_approved: false,
-						grc_approved_by: null,
-						grc_approved_at: null,
-						created_at: booking.last_synced_at,
-						updated_at: booking.last_synced_at,
-						tenant_id: booking.tenant_id,
-						guide_id: null,
-						agent_id: null,
-						guide_commission: null,
-						agent_commission: null,
-						booking_source: booking.source, // beds24, airbnb, booking_com, etc.
-						locations: booking.locations,
-						rooms: booking.rooms,
-						guides: null,
-						agents: null,
-					};
-				});
+			const transformedExternalBookings: ReservationWithJoins[] = (
+				externalBookingsData || []
+			).map((booking) => {
+				const rawData = booking.raw_data as any;
+				return {
+					id: booking.id,
+					reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
+					location_id: booking.location_id,
+					room_id: booking.room_id || "", // May be null if not mapped
+					guest_name: booking.guest_name,
+					guest_email: rawData?.guest?.email || null,
+					guest_phone: rawData?.guest?.phone || null,
+					guest_address: null,
+					guest_id_number: null,
+					guest_nationality: null,
+					adults: booking.adults || 0,
+					children: booking.children || 0,
+					check_in_date: booking.check_in,
+					check_out_date: booking.check_out,
+					nights: Math.ceil(
+						(new Date(booking.check_out).getTime() -
+							new Date(booking.check_in).getTime()) /
+							(1000 * 60 * 60 * 24),
+					),
+					room_rate: 0,
+					total_amount: booking.total_amount || 0,
+					advance_amount: null,
+					paid_amount: booking.total_amount || 0, // Assume channel bookings are paid
+					balance_amount: 0,
+					currency: (booking.currency || "USD") as
+						| "LKR"
+						| "USD"
+						| "EUR"
+						| "GBP",
+					status: booking.status as any,
+					special_requests: rawData?.notes || null,
+					arrival_time: null,
+					created_by: null,
+					grc_approved: false,
+					grc_approved_by: null,
+					grc_approved_at: null,
+					created_at: booking.last_synced_at,
+					updated_at: booking.last_synced_at,
+					tenant_id: booking.tenant_id,
+					guide_id: null,
+					agent_id: null,
+					guide_commission: null,
+					agent_commission: null,
+					booking_source: booking.source, // beds24, airbnb, booking_com, etc.
+					locations: booking.locations,
+					rooms: booking.rooms,
+					guides: null,
+					agents: null,
+				};
+			});
 
 			// Combine direct reservations and external bookings
 			const allReservations = [

@@ -1,6 +1,6 @@
+import { AlertCircle, Loader2, Mail, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { AlertCircle, Loader2, Mail, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ export default function PendingInvitation() {
 		}
 	}, [user, profile, navigate, invitations.length, loading]);
 
-	const acceptInvitation = async (invitation: typeof invitations[0]) => {
+	const acceptInvitation = async (invitation: (typeof invitations)[0]) => {
 		if (!user || !profile) return;
 
 		console.log("🎯 [PENDING-INVITATION] Accepting invitation:", {
@@ -71,7 +71,8 @@ export default function PendingInvitation() {
 				.from("profiles")
 				.update({
 					tenant_id: invitation.tenant_id,
-					tenant_role: invitation.role as Database["public"]["Enums"]["tenant_role"],
+					tenant_role:
+						invitation.role as Database["public"]["Enums"]["tenant_role"],
 				})
 				.eq("id", user.id);
 
@@ -87,7 +88,8 @@ export default function PendingInvitation() {
 					user_id: user.id,
 					tenant_id: invitation.tenant_id,
 					location_id: invitation.location_id,
-					tenant_role: invitation.role as Database["public"]["Enums"]["tenant_role"],
+					tenant_role:
+						invitation.role as Database["public"]["Enums"]["tenant_role"],
 					is_tenant_admin: false,
 					access_dashboard: invitation.permissions.access_dashboard ?? true,
 					access_income: invitation.permissions.access_income ?? false,
@@ -96,11 +98,13 @@ export default function PendingInvitation() {
 					access_calendar: invitation.permissions.access_calendar ?? true,
 					access_bookings: invitation.permissions.access_bookings ?? true,
 					access_rooms: invitation.permissions.access_rooms ?? false,
-					access_master_files: invitation.permissions.access_master_files ?? false,
+					access_master_files:
+						invitation.permissions.access_master_files ?? false,
 					access_accounts: invitation.permissions.access_accounts ?? false,
 					access_users: invitation.permissions.access_users ?? false,
 					access_settings: invitation.permissions.access_settings ?? false,
-					access_booking_channels: invitation.permissions.access_booking_channels ?? false,
+					access_booking_channels:
+						invitation.permissions.access_booking_channels ?? false,
 				};
 
 				const { error: permissionsError } = await supabase
@@ -112,7 +116,9 @@ export default function PendingInvitation() {
 				if (permissionsError) {
 					console.error("Error creating permissions:", permissionsError);
 					// Don't fail the whole operation if permissions creation fails
-					toast.warning("Invitation accepted but permissions may need manual setup.");
+					toast.warning(
+						"Invitation accepted but permissions may need manual setup.",
+					);
 				}
 			}
 
@@ -130,7 +136,9 @@ export default function PendingInvitation() {
 				// Don't fail if marking accepted fails - user is already added
 			}
 
-			console.log("🔄 [PENDING-INVITATION] Refreshing profile and tenant data...");
+			console.log(
+				"🔄 [PENDING-INVITATION] Refreshing profile and tenant data...",
+			);
 			// Refresh profile and tenant data
 			await refreshProfile();
 			await refreshTenant();
@@ -144,7 +152,10 @@ export default function PendingInvitation() {
 				navigate("/dashboard", { replace: true });
 			}, 1000);
 		} catch (err) {
-			console.error("❌ [PENDING-INVITATION] Exception accepting invitation:", err);
+			console.error(
+				"❌ [PENDING-INVITATION] Exception accepting invitation:",
+				err,
+			);
 			toast.error("An unexpected error occurred. Please try again.");
 		} finally {
 			setAccepting(null);
@@ -175,8 +186,8 @@ export default function PendingInvitation() {
 						Pending Invitations
 					</CardTitle>
 					<CardDescription>
-						You have been invited to join an organization. Accept an invitation below to
-						continue.
+						You have been invited to join an organization. Accept an invitation
+						below to continue.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -193,21 +204,27 @@ export default function PendingInvitation() {
 							<CardContent className="pt-6">
 								<div className="space-y-4">
 									<div>
-										<h3 className="font-semibold text-lg">{invitation.tenant_name}</h3>
+										<h3 className="font-semibold text-lg">
+											{invitation.tenant_name}
+										</h3>
 										{invitation.location_name && (
 											<p className="text-sm text-muted-foreground">
 												Location: {invitation.location_name}
 											</p>
 										)}
-										<p className="text-sm text-muted-foreground">Role: {invitation.role}</p>
+										<p className="text-sm text-muted-foreground">
+											Role: {invitation.role}
+										</p>
 									</div>
 
 									<div className="text-sm">
 										<p className="text-muted-foreground">
-											Invited: {new Date(invitation.created_at).toLocaleDateString()}
+											Invited:{" "}
+											{new Date(invitation.created_at).toLocaleDateString()}
 										</p>
 										<p className="text-muted-foreground">
-											Expires: {new Date(invitation.expires_at).toLocaleDateString()}
+											Expires:{" "}
+											{new Date(invitation.expires_at).toLocaleDateString()}
 										</p>
 									</div>
 

@@ -1,5 +1,6 @@
+import { AlertCircle, CheckCircle, Link2 } from "lucide-react";
 import { useState } from "react";
-import { CheckCircle, AlertCircle, Link2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
 	Select,
 	SelectContent,
@@ -7,7 +8,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 
 interface Beds24Room {
