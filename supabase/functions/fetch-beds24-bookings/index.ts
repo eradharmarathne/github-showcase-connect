@@ -292,8 +292,12 @@ serve(async (req) => {
 		// Fetch property details to get currency for each property
 		const propertyIdToCurrency = new Map<string, string>();
 		
+		console.log(`📍 Fetching currency information for ${propertyIdToLocation.size} properties...`);
+		
 		for (const [propertyId] of propertyIdToLocation) {
 			try {
+				console.log(`🔍 Fetching property details for property ID: ${propertyId}`);
+				
 				const propertyResponse = await beds24Request(
 					`/properties?id=${propertyId}`,
 					supabase,
@@ -304,25 +308,34 @@ serve(async (req) => {
 				);
 
 				if (!propertyResponse.ok) {
-					console.warn(`Failed to fetch currency for property ${propertyId}`);
+					const errorText = await propertyResponse.text();
+					console.error(`❌ Failed to fetch property ${propertyId}: ${propertyResponse.status} ${errorText}`);
+					console.warn(`⚠️  Using USD fallback for property ${propertyId}`);
+					propertyIdToCurrency.set(propertyId, "USD");
 					continue;
 				}
 
 				const propertyData = await propertyResponse.json();
+				console.log(`📦 Property ${propertyId} API response:`, JSON.stringify(propertyData, null, 2));
 				
 				// Property API returns: { success: true, type: "property", data: [...] }
 				if (propertyData.success && propertyData.data && propertyData.data.length > 0) {
 					const property = propertyData.data[0];
 					const currency = property.currency || "USD"; // Default to USD if not specified
 					propertyIdToCurrency.set(propertyId, currency);
-					console.log(`Property ${propertyId} uses currency: ${currency}`);
+					console.log(`✅ Property ${propertyId} (${property.name}) uses currency: ${currency}`);
+				} else {
+					console.warn(`⚠️  Property ${propertyId} returned no data, using USD fallback`);
+					propertyIdToCurrency.set(propertyId, "USD");
 				}
 			} catch (error) {
-				console.error(`Error fetching currency for property ${propertyId}:`, error);
+				console.error(`❌ Error fetching currency for property ${propertyId}:`, error);
+				console.warn(`⚠️  Using USD fallback for property ${propertyId}`);
+				propertyIdToCurrency.set(propertyId, "USD");
 			}
 		}
 
-		console.log(`Loaded currency information for ${propertyIdToCurrency.size} properties`);
+		console.log(`✅ Loaded currency information for ${propertyIdToCurrency.size} properties`);
 
 		// Fetch room mappings for automatic room assignment
 		const { data: roomMappings } = await supabase
@@ -499,6 +512,10 @@ serve(async (req) => {
 			// Beds24 API V2 booking schema does not include currency field
 			// Currency is a property-level setting, not per-booking
 			const currency = propId ? (propertyIdToCurrency.get(propId) || "USD") : "USD";
+			
+			if (externalId) {
+				console.log(`💰 Booking ${externalId}: Amount ${totalAmount} ${currency} (property: ${propId})`);
+			}
 
 			const externalBookingData: Record<string, unknown> = {
 				external_id: externalId,
