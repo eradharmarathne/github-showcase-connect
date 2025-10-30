@@ -167,8 +167,8 @@ export function PlanSelectionStep({
 
 					<div className="text-center text-xs text-muted-foreground">
 						<p>
-							✨ Subscribe now for 14-day free trial • Secure payment • Cancel anytime • No
-							hidden fees
+							✨ Subscribe now for 14-day free trial • Secure payment • Cancel
+							anytime • No hidden fees
 						</p>
 					</div>
 				</div>
