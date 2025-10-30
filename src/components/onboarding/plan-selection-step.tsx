@@ -149,7 +149,7 @@ export function PlanSelectionStep({
 							Ready to get started?
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							Choose how you'd like to begin with your selected plan
+							Subscribe now and get 14 days free trial
 						</p>
 					</div>
 
@@ -160,14 +160,14 @@ export function PlanSelectionStep({
 							disabled={processingPayment}
 							className="flex items-center gap-2 py-3 px-8"
 						>
-							{processingPayment ? "Processing..." : "Start 14-Day Free Trial"}
+							{processingPayment ? "Processing..." : "Subscribe & Start Trial"}
 							<CreditCard className="h-4 w-4" />
 						</Button>
 					</div>
 
 					<div className="text-center text-xs text-muted-foreground">
 						<p>
-							✨ 14-day free trial via secure payment • Cancel anytime • No
+							✨ Subscribe now for 14-day free trial • Secure payment • Cancel anytime • No
 							hidden fees
 						</p>
 					</div>

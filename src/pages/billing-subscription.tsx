@@ -69,6 +69,7 @@ interface UsageData {
 export default function BillingSubscription() {
 	const { t } = useTranslation("common");
 	const { toast } = useToast();
+	const navigate = useNavigate();
 	const { tenant, user } = useAuth();
 	const {
 		data: currentSubscription,
@@ -234,6 +235,16 @@ export default function BillingSubscription() {
 			fetchUsageData();
 		}
 	}, [tenant, fetchInvoiceHistory, fetchPaymentMethods, fetchUsageData]);
+
+	// Redirect to onboarding if user hasn't completed it
+	useEffect(() => {
+		if (tenant && !tenant.onboarding_completed) {
+			console.log(
+				"⚠️ [BILLING] User hasn't completed onboarding, redirecting...",
+			);
+			navigate("/onboarding", { replace: true });
+		}
+	}, [tenant, navigate]);
 
 	useEffect(() => {
 		// Calculate trial days remaining
