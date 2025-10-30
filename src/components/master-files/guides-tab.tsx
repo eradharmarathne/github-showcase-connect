@@ -39,6 +39,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { usePermissions } from "@/hooks/use-permissions";
 import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +74,7 @@ export default function GuidesTab() {
 		is_active: true,
 	});
 	const { toast } = useToast();
+	const { hasPermission } = usePermissions();
 
 	const fetchGuides = useCallback(async () => {
 		if (!tenant?.id) return;
@@ -103,6 +105,16 @@ export default function GuidesTab() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		// Check permission before allowing edit/create
+		if (!hasPermission("access_master_files")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to manage guides",
+				variant: "destructive",
+			});
+			return;
+		}
 
 		try {
 			if (editingGuide) {
@@ -179,6 +191,18 @@ export default function GuidesTab() {
 
 	const confirmDelete = async () => {
 		if (!guideToDelete) return;
+
+		// Check permission before allowing delete
+		if (!hasPermission("access_master_files")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to delete guides",
+				variant: "destructive",
+			});
+			setDeleteConfirmOpen(false);
+			setGuideToDelete(null);
+			return;
+		}
 
 		try {
 			const { error } = await supabase

@@ -39,6 +39,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { usePermissions } from "@/hooks/use-permissions";
 import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +74,7 @@ export default function AgentsTab() {
 	});
 	const { toast } = useToast();
 	const { tenant } = useTenant();
+	const { hasPermission } = usePermissions();
 
 	const fetchAgents = useCallback(async () => {
 		if (!tenant?.id) return;
@@ -104,6 +106,17 @@ export default function AgentsTab() {
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (isSubmitting) return;
+
+		// Check permission before allowing edit/create
+		if (!hasPermission("access_master_files")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to manage agents",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		setIsSubmitting(true);
 
 		try {
@@ -185,6 +198,19 @@ export default function AgentsTab() {
 
 	const confirmDelete = async () => {
 		if (!agentToDelete || isDeleting) return;
+
+		// Check permission before allowing delete
+		if (!hasPermission("access_master_files")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to delete agents",
+				variant: "destructive",
+			});
+			setDeleteConfirmOpen(false);
+			setAgentToDelete(null);
+			return;
+		}
+
 		setIsDeleting(true);
 
 		try {

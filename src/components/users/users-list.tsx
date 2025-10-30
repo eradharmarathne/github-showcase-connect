@@ -28,6 +28,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 import {
 	type User as UsersDataUser,
 	useUsersData,
@@ -40,14 +41,24 @@ interface UsersListProps {
 
 export function UsersList({ onEditUser }: UsersListProps) {
 	const { users, loading, refetch, deleteUser } = useUsersData();
+	const { toast } = useToast();
 
 	const handleDeleteUser = async (userId: string) => {
 		if (confirm("Are you sure you want to remove this user's access?")) {
 			try {
 				await deleteUser(userId);
-			} catch (error) {
+				toast({
+					title: "Success",
+					description: "User deleted successfully",
+				});
+			} catch (error: any) {
 				console.error("Failed to delete user:", error);
-				alert("Failed to delete user. Please try again.");
+				toast({
+					title: "Error",
+					description:
+						error.message || "Failed to delete user. Please try again.",
+					variant: "destructive",
+				});
 			}
 		}
 	};

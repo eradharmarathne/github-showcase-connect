@@ -14,17 +14,16 @@ import {
 import { STEPS } from "./constants";
 import { OnboardingProgressProps } from "./types";
 
-export function OnboardingProgress({
-	currentStep,
-	totalSteps,
-}: OnboardingProgressProps) {
+export function OnboardingProgress({ currentStep }: OnboardingProgressProps) {
 	return (
 		<div className="mb-2 sm:mb-8 pt-0 sm:pt-8">
 			<Stepper
 				value={currentStep}
 				indicators={{
 					completed: <Check className="size-3 sm:size-4" />,
-					loading: <LoaderCircleIcon className="size-3 sm:size-4 animate-spin" />,
+					loading: (
+						<LoaderCircleIcon className="size-3 sm:size-4 animate-spin" />
+					),
 				}}
 				className="space-y-4 sm:space-y-8"
 			>
@@ -90,7 +89,7 @@ export function OnboardingProgress({
 
 				<StepperPanel className="hidden">
 					{/* We don't need the panel content as we handle it in the main component */}
-					{STEPS.map((step, index) => (
+					{STEPS.map((_, index) => (
 						<StepperContent key={index} value={index + 1} />
 					))}
 				</StepperPanel>

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { usePermissions } from "@/hooks/use-permissions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Location, User, UserPermissions } from "./types";
@@ -33,6 +34,7 @@ export function EditUserDialog({
 	tenant,
 	onEditSuccess,
 }: EditUserDialogProps) {
+	const { hasPermission } = usePermissions();
 	const [editingUser, setEditingUser] = useState<User | null>(user);
 
 	// Update editing user when user prop changes
@@ -61,6 +63,16 @@ export function EditUserDialog({
 
 	const handleSaveEditUser = async () => {
 		if (!editingUser || !tenant?.id) return;
+
+		// Check permission before allowing edit
+		if (!hasPermission("access_users")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to edit users",
+				variant: "destructive",
+			});
+			return;
+		}
 
 		try {
 			// Update user basic info if needed (name, etc.)

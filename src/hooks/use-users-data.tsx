@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
+import { usePermissions } from "@/hooks/use-permissions";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -37,6 +38,7 @@ export const useUsersData = (): UseUsersDataReturn => {
 
 	const { tenant } = useAuth();
 	const { locations } = useLocationContext();
+	const { hasPermission } = usePermissions();
 
 	const fetchUsers = useCallback(async () => {
 		if (!tenant?.id) return;
@@ -157,6 +159,11 @@ export const useUsersData = (): UseUsersDataReturn => {
 		async (userId: string) => {
 			if (!tenant?.id) return;
 
+			// Check permission before allowing deletion
+			if (!hasPermission("access_users")) {
+				throw new Error("You don't have permission to delete users");
+			}
+
 			try {
 				// Delete user permissions first
 				const { error: permissionsError } = await supabase
@@ -187,7 +194,7 @@ export const useUsersData = (): UseUsersDataReturn => {
 				throw error;
 			}
 		},
-		[tenant?.id, fetchUsers],
+		[tenant?.id, fetchUsers, hasPermission],
 	);
 
 	useEffect(() => {

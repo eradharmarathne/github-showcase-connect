@@ -108,7 +108,8 @@ export default function Onboarding() {
 		};
 
 		fetchPlans();
-	}, [user, navigate, formData.email, toast, profile?.tenant_id, tenant]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user, navigate, toast, profile?.tenant_id, tenant]);
 
 	useEffect(() => {
 		if (hasExistingTenant) {
@@ -463,7 +464,7 @@ export default function Onboarding() {
 
 	return (
 		<div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
-			<div className="max-w-4xl py-8 sm:py-16 w-full mx-auto">
+			<div className="max-w-4xl py-4 sm:py-16 w-full mx-auto">
 				{/* Progress Header */}
 				<OnboardingProgress
 					currentStep={currentStep}

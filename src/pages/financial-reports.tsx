@@ -30,6 +30,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +57,7 @@ type FinancialData = {
 };
 
 export default function FinancialReports() {
+	const { tenant } = useAuth();
 	const { selectedLocation } = useLocationContext();
 	const [selectedMonth, setSelectedMonth] = useState("all");
 	const [startDate, setStartDate] = useState("");
@@ -90,28 +92,66 @@ export default function FinancialReports() {
 	}, [selectedLocation, selectedMonth, startDate, endDate]);
 
 	const fetchInitialData = async () => {
+		if (!tenant?.id) return;
+
 		try {
 			const [locationsData, accountsData] = await Promise.all([
-				supabase.from("locations").select("id, name").eq("is_active", true),
-				supabase.from("accounts").select("id, name, currency"),
+				supabase
+					.from("locations")
+					.select("id, name")
+					.eq("tenant_id", tenant.id)
+					.eq("is_active", true),
+				supabase
+					.from("accounts")
+					.select("id, name, currency")
+					.eq("tenant_id", tenant.id),
 			]);
+
+			if (locationsData.error) {
+				console.error("Error fetching locations:", locationsData.error);
+				toast({
+					title: "Error",
+					description: "Failed to fetch locations",
+					variant: "destructive",
+				});
+				return;
+			}
+
+			if (accountsData.error) {
+				console.error("Error fetching accounts:", accountsData.error);
+				toast({
+					title: "Error",
+					description: "Failed to fetch accounts",
+					variant: "destructive",
+				});
+				return;
+			}
 
 			setLocations(locationsData.data || []);
 			setAccounts(accountsData.data || []);
 		} catch (error) {
 			console.error("Error fetching initial data:", error);
+			toast({
+				title: "Error",
+				description: "An unexpected error occurred",
+				variant: "destructive",
+			});
 		}
 	};
 
 	const fetchFinancialData = async () => {
+		if (!tenant?.id || !selectedLocation) return;
+
 		setLoading(true);
 		try {
 			let incomeQuery = supabase
 				.from("income")
-				.select("amount, type, date, accounts(currency)");
+				.select("amount, type, date, accounts(currency)")
+				.eq("tenant_id", tenant.id);
 			let expenseQuery = supabase
 				.from("expenses")
-				.select("amount, main_type, date, accounts(currency)");
+				.select("amount, main_type, date, accounts(currency)")
+				.eq("tenant_id", tenant.id);
 
 			incomeQuery = incomeQuery.eq("location_id", selectedLocation);
 			expenseQuery = expenseQuery.eq("location_id", selectedLocation);
@@ -138,6 +178,28 @@ export default function FinancialReports() {
 				incomeQuery,
 				expenseQuery,
 			]);
+
+			if (incomeResult.error) {
+				console.error("Error fetching income data:", incomeResult.error);
+				toast({
+					title: "Error",
+					description: "Failed to fetch income data",
+					variant: "destructive",
+				});
+				setLoading(false);
+				return;
+			}
+
+			if (expenseResult.error) {
+				console.error("Error fetching expense data:", expenseResult.error);
+				toast({
+					title: "Error",
+					description: "Failed to fetch expense data",
+					variant: "destructive",
+				});
+				setLoading(false);
+				return;
+			}
 
 			const incomeData = incomeResult.data || [];
 			const expenseData = expenseResult.data || [];

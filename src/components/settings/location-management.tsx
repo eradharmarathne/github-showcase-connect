@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { usePermissions } from "@/hooks/use-permissions";
 import { useTenant } from "@/hooks/use-tenant";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { Location } from "./types";
 
 export function LocationManagement() {
 	const { tenant } = useTenant();
+	const { hasPermission } = usePermissions();
 	const [locations, setLocations] = useState<Location[]>([]);
 	const [isEditingLocation, setIsEditingLocation] = useState(false);
 	const [editingLocationId, setEditingLocationId] = useState<string | null>(
@@ -61,6 +63,16 @@ export function LocationManagement() {
 	};
 
 	const handleLocationSave = async () => {
+		// Check permission before allowing edit
+		if (!hasPermission("access_settings")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to edit locations",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		try {
 			const { error } = await supabase
 				.from("locations")
@@ -104,6 +116,16 @@ export function LocationManagement() {
 	};
 
 	const handleAddNewLocation = async () => {
+		// Check permission before allowing creation
+		if (!hasPermission("access_settings")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to create locations",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		try {
 			const { error } = await supabase.from("locations").insert([
 				{

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/auth-context";
+import { usePermissions } from "@/hooks/use-permissions";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrencySymbol } from "@/utils/currency";
@@ -96,6 +97,7 @@ export default function RoomsTab() {
 	];
 	const { toast } = useToast();
 	const { tenant } = useAuth();
+	const { hasPermission } = usePermissions();
 
 	const fetchRooms = useCallback(async () => {
 		if (!tenant?.id) {
@@ -155,6 +157,16 @@ export default function RoomsTab() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		// Check permission before allowing edit/create
+		if (!hasPermission("access_master_files")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to manage rooms",
+				variant: "destructive",
+			});
+			return;
+		}
 
 		if (!tenant?.id) {
 			toast({
@@ -240,6 +252,16 @@ export default function RoomsTab() {
 	};
 
 	const handleDelete = async (id: string) => {
+		// Check permission before allowing delete
+		if (!hasPermission("access_master_files")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to delete rooms",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		if (!tenant?.id) {
 			toast({
 				title: "Error",

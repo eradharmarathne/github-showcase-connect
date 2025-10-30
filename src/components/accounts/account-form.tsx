@@ -15,6 +15,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { usePermissions } from "@/hooks/use-permissions";
 import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +41,7 @@ export function AccountForm({
 }: AccountFormProps) {
 	const { toast } = useToast();
 	const { tenant } = useTenant();
+	const { hasPermission } = usePermissions();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [formData, setFormData] = useState({
 		name: editingAccount?.name || "",
@@ -51,6 +53,16 @@ export function AccountForm({
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (isSubmitting) return;
+
+		// Check permission before allowing create/edit
+		if (!hasPermission("access_accounts")) {
+			toast({
+				title: "Error",
+				description: "You don't have permission to manage accounts",
+				variant: "destructive",
+			});
+			return;
+		}
 
 		setIsSubmitting(true);
 
