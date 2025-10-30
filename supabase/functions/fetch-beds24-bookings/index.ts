@@ -298,7 +298,7 @@ serve(async (req) => {
 			try {
 				console.log(`🔍 Fetching property details for property ID: ${propertyId}`);
 				
-				const propertyResponse = await beds24Request(
+				const propertyData = await beds24Request(
 					`/properties?id=${propertyId}`,
 					supabase,
 					credentials.id,
@@ -307,15 +307,6 @@ serve(async (req) => {
 					credentials.refresh_token,
 				);
 
-				if (!propertyResponse.ok) {
-					const errorText = await propertyResponse.text();
-					console.error(`❌ Failed to fetch property ${propertyId}: ${propertyResponse.status} ${errorText}`);
-					console.warn(`⚠️  Using USD fallback for property ${propertyId}`);
-					propertyIdToCurrency.set(propertyId, "USD");
-					continue;
-				}
-
-				const propertyData = await propertyResponse.json();
 				console.log(`📦 Property ${propertyId} API response:`, JSON.stringify(propertyData, null, 2));
 				
 				// Property API returns: { success: true, type: "property", data: [...] }

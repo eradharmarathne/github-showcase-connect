@@ -242,9 +242,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 						}, 0);
 					} else {
 						// Profile already exists for this user, just ensure tenant data is loaded
-						if (profile.tenant_id) {
-							await fetchTenant(profile.tenant_id);
-							await fetchSubscription(profile.tenant_id);
+						console.log(
+							"✅ [AUTH] Profile exists, checking tenant data...",
+						);
+						// Fetch the profile again to get latest data
+						const latestProfile = await fetchProfile(session.user.id);
+						if (latestProfile?.tenant_id) {
+							await fetchTenant(latestProfile.tenant_id);
+							await fetchSubscription(latestProfile.tenant_id);
 						}
 					}
 				}
