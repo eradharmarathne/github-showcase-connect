@@ -343,20 +343,89 @@ serve(async (req) => {
 			});
 		}
 
+		// Block dates in Beds24 calendar to prevent double bookings
+		console.log("Blocking dates in Beds24 calendar");
+		let datesBlocked = false;
+		let blockingError: string | null = null;
+
+		try {
+			// Calculate date range: arrival to departure - 1 day (last night booked)
+			// Beds24 uses last night booked, not checkout date
+			const checkOutDate = new Date(reservation.check_out_date);
+			checkOutDate.setDate(checkOutDate.getDate() - 1);
+			const lastNightBooked = checkOutDate.toISOString().split("T")[0];
+
+			const calendarPayload = [
+				{
+					roomId: Number.parseInt(roomMapping.channel_room_id),
+					calendar: [
+						{
+							from: reservation.check_in_date,
+							to: lastNightBooked,
+							numAvail: 0,
+							override: "blackout",
+						},
+					],
+				},
+			];
+
+			console.log(
+				"Calendar blocking payload:",
+				JSON.stringify(calendarPayload),
+			);
+
+			const calendarResponse = await fetch(`${BEDS24_API_URL}/calendar`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					token: accessToken,
+				},
+				body: JSON.stringify(calendarPayload),
+			});
+
+			const calendarData = await calendarResponse.json();
+
+			if (!calendarResponse.ok) {
+				console.error("Failed to block dates in calendar:", calendarData);
+				blockingError = JSON.stringify(calendarData);
+				// Don't fail entire sync - booking is already created
+			} else {
+				console.log("Successfully blocked dates in Beds24 calendar");
+				datesBlocked = true;
+			}
+		} catch (error: any) {
+			console.error("Error blocking dates in calendar:", error);
+			blockingError = error?.message || "Unknown error blocking dates";
+			// Don't fail entire sync - booking is already created
+		}
+
 		// Update reservation with Beds24 booking ID and success status
-		await supabase
-			.from("reservations")
-			.update({
-				beds24_booking_id: beds24BookingId,
-				beds24_sync_status: "synced",
-				beds24_synced_at: new Date().toISOString(),
-				beds24_sync_error: null,
-			})
-			.eq("id", reservation_id);
+		const updateData: any = {
+			beds24_booking_id: beds24BookingId,
+			beds24_sync_status: "synced",
+			beds24_synced_at: new Date().toISOString(),
+			beds24_sync_error: null,
+			beds24_dates_blocked: datesBlocked,
+		};
+
+		if (datesBlocked) {
+			updateData.beds24_dates_blocked_at = new Date().toISOString();
+		}
+
+		await supabase.from("reservations").update(updateData).eq("id", reservation_id);
 
 		console.log(
 			`Successfully synced reservation ${reservation_id} to Beds24 booking ${beds24BookingId}`,
 		);
+
+		if (datesBlocked) {
+			console.log(`✅ Dates blocked in Beds24 calendar for reservation ${reservation_id}`);
+		} else {
+			console.warn(
+				`⚠️ Booking synced but dates NOT blocked in Beds24 calendar for reservation ${reservation_id}`,
+				blockingError,
+			);
+		}
 
 		return new Response(
 			JSON.stringify({
@@ -365,6 +434,8 @@ serve(async (req) => {
 				reservation_id: reservation_id,
 				beds24_booking_id: beds24BookingId,
 				beds24_response: beds24Data,
+				dates_blocked: datesBlocked,
+				blocking_error: blockingError,
 			}),
 			{ status: 200, headers: { "Content-Type": "application/json" } },
 		);
