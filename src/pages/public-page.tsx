@@ -18,13 +18,17 @@ interface Location {
 	id: string;
 	name: string;
 	address?: string;
-	slug: string;
+	public_booking_enabled: boolean;
+	public_booking_message?: string | null;
+	public_booking_email?: string | null;
+	public_booking_phone?: string | null;
+	show_room_prices: boolean;
 }
 
 interface Tenant {
 	id: string;
 	name: string;
-	slug: string;
+	username: string;
 }
 
 interface BookingFormData {
@@ -42,7 +46,7 @@ interface BookingFormData {
 }
 
 export default function PublicBookingPage() {
-	const { tenantSlug, locationSlug } = useParams<{ tenantSlug: string; locationSlug: string }>();
+	const { username, locationId } = useParams<{ username: string; locationId: string }>();
 	const { toast } = useToast();
 
 	const [loading, setLoading] = useState(true);
@@ -71,25 +75,40 @@ export default function PublicBookingPage() {
 			try {
 				setLoading(true);
 
-				// Fetch tenant
+				// Fetch tenant by username
 				const { data: tenantData, error: tenantError } = await supabase
 					.from("tenants")
-					.select("id, name, slug")
-					.eq("slug", tenantSlug)
+					.select("id, name, username")
+					.eq("username", username)
 					.single();
 
 				if (tenantError) throw tenantError;
 				setTenant(tenantData);
 
-				// Fetch location
+				// Fetch location by ID
 				const { data: locationData, error: locationError } = await supabase
 					.from("locations")
-					.select("id, name, address, slug")
-					.eq("slug", locationSlug)
+					.select(`
+						id, 
+						name, 
+						address, 
+						public_booking_enabled,
+						public_booking_message,
+						public_booking_email,
+						public_booking_phone,
+						show_room_prices
+					`)
+					.eq("id", locationId)
 					.eq("tenant_id", tenantData.id)
 					.single();
 
 				if (locationError) throw locationError;
+				
+				// Check if public booking is enabled
+				if (!locationData.public_booking_enabled) {
+					throw new Error("Public booking is not enabled for this location");
+				}
+				
 				setLocation(locationData);
 
 				// Fetch available room types
@@ -109,7 +128,7 @@ export default function PublicBookingPage() {
 				console.error("Error fetching data:", error);
 				toast({
 					title: "Error",
-					description: "Failed to load booking information. Please try again.",
+					description: error instanceof Error ? error.message : "Failed to load booking information. Please try again.",
 					variant: "destructive",
 				});
 			} finally {
@@ -117,10 +136,10 @@ export default function PublicBookingPage() {
 			}
 		};
 
-		if (tenantSlug && locationSlug) {
+		if (username && locationId) {
 			fetchData();
 		}
-	}, [tenantSlug, locationSlug, toast]);
+	}, [username, locationId, toast]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -158,8 +177,8 @@ export default function PublicBookingPage() {
 						apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
 					},
 					body: JSON.stringify({
-						tenantSlug,
-						locationSlug,
+						username,
+						locationId,
 						guestName: formData.guestName,
 						guestEmail: formData.guestEmail,
 						guestPhone: formData.guestPhone || undefined,
@@ -222,7 +241,7 @@ export default function PublicBookingPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+			<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100">
 				<div className="flex flex-col items-center gap-4">
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
 					<p className="text-muted-foreground">Loading booking form...</p>
@@ -233,7 +252,7 @@ export default function PublicBookingPage() {
 
 	if (!tenant || !location) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+			<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100">
 				<Card className="max-w-md">
 					<CardHeader>
 						<CardTitle>Hotel Not Found</CardTitle>
@@ -249,7 +268,7 @@ export default function PublicBookingPage() {
 	const nights = calculateNights();
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+		<div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 py-8 px-4">
 			<div className="max-w-4xl mx-auto">
 				{/* Header */}
 				<Card className="mb-6">

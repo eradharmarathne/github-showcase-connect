@@ -8,8 +8,8 @@ const corsHeaders = {
 };
 
 interface PublicBookingRequest {
-	tenantSlug: string;
-	locationSlug: string;
+	username: string;
+	locationId: string;
 	guestName: string;
 	guestEmail: string;
 	guestPhone?: string;
@@ -39,8 +39,8 @@ serve(async (req) => {
 
 		// Validate required fields
 		if (
-			!bookingData.tenantSlug ||
-			!bookingData.locationSlug ||
+			!bookingData.username ||
+			!bookingData.locationId ||
 			!bookingData.guestName ||
 			!bookingData.guestEmail ||
 			!bookingData.checkInDate ||
@@ -50,8 +50,8 @@ serve(async (req) => {
 				JSON.stringify({
 					error: "Missing required fields",
 					required: [
-						"tenantSlug",
-						"locationSlug",
+						"username",
+						"locationId",
 						"guestName",
 						"guestEmail",
 						"checkInDate",
@@ -79,11 +79,11 @@ serve(async (req) => {
 			);
 		}
 
-		// Find tenant by slug
+		// Find tenant by username
 		const { data: tenant, error: tenantError } = await supabase
 			.from("tenants")
 			.select("id, name")
-			.eq("slug", bookingData.tenantSlug)
+			.eq("username", bookingData.username)
 			.single();
 
 		if (tenantError || !tenant) {
@@ -96,11 +96,11 @@ serve(async (req) => {
 			);
 		}
 
-		// Find location by slug and tenant
+		// Find location by ID and verify it belongs to tenant
 		const { data: location, error: locationError } = await supabase
 			.from("locations")
-			.select("id, name")
-			.eq("slug", bookingData.locationSlug)
+			.select("id, name, public_booking_enabled")
+			.eq("id", bookingData.locationId)
 			.eq("tenant_id", tenant.id)
 			.single();
 
@@ -109,6 +109,17 @@ serve(async (req) => {
 				JSON.stringify({ error: "Location not found" }),
 				{
 					status: 404,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				},
+			);
+		}
+
+		// Check if public booking is enabled for this location
+		if (!location.public_booking_enabled) {
+			return new Response(
+				JSON.stringify({ error: "Public booking is not enabled for this location" }),
+				{
+					status: 403,
 					headers: { ...corsHeaders, "Content-Type": "application/json" },
 				},
 			);
@@ -179,7 +190,7 @@ serve(async (req) => {
 		return new Response(
 			JSON.stringify({
 				error: "An unexpected error occurred",
-				details: error.message,
+				details: error instanceof Error ? error.message : "Unknown error",
 			}),
 			{
 				status: 500,

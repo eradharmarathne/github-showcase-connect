@@ -8,6 +8,7 @@ import {
 	ProfileSettings,
 } from "@/components/settings";
 import { PrintSettingsTab } from "@/components/settings/print-settings-tab";
+import { PublicBookingSettings } from "@/components/settings/public-booking-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Settings() {
@@ -16,7 +17,7 @@ export default function Settings() {
 	return (
 		<div className="w-full pb-8 mx-auto p-6">
 			<Tabs defaultValue="profile" className="w-full">
-				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-1 h-auto p-1">
+				<TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-8 gap-1 h-auto p-1">
 					<TabsTrigger value="profile" className="text-xs sm:text-sm px-2 py-2">
 						{t("settings.profile")}
 					</TabsTrigger>
@@ -25,6 +26,12 @@ export default function Settings() {
 						className="text-xs sm:text-sm px-2 py-2"
 					>
 						{t("settings.locations")}
+					</TabsTrigger>
+					<TabsTrigger
+						value="public-booking"
+						className="text-xs sm:text-sm px-2 py-2"
+					>
+						Public Booking
 					</TabsTrigger>
 					<TabsTrigger
 						value="form-fields"
@@ -61,6 +68,10 @@ export default function Settings() {
 
 				<TabsContent value="locations">
 					<LocationManagement />
+				</TabsContent>
+
+				<TabsContent value="public-booking">
+					<PublicBookingSettings />
 				</TabsContent>
 
 				<TabsContent value="form-fields">
