@@ -70,89 +70,55 @@ export function ViewReservationDialog({
 
 		setLoading(true);
 		try {
-			// First, check if this is a reservation or external booking
-			const { data: resCheck } = await supabase
-				.from("reservations")
-				.select("id")
-				.eq("id", reservationId)
-				.maybeSingle();
+			// Fetch reservation (handles both direct and external bookings from unified table)
+			const [reservationRes, incomeRes] = await Promise.all([
+				supabase
+					.from("reservations")
+					.select(`
+						*,
+						locations (*),
+						rooms (*),
+						guides (*),
+						agents (*)
+					`)
+					.eq("id", reservationId)
+					.maybeSingle(),
+				supabase
+					.from("income")
+					.select(`
+						id,
+						booking_id,
+						amount,
+						payment_method,
+						currency
+					`)
+					.eq("booking_id", reservationId),
+			]);
 
-			const isExternal = !resCheck;
-			setIsExternalBooking(isExternal);
+			if (reservationRes.error) throw reservationRes.error;
+			if (incomeRes.error) throw incomeRes.error;
 
-			if (isExternal) {
-				// Fetch external booking data
-				const [externalBookingRes, incomeRes] = await Promise.all([
-					supabase
-						.from("external_bookings")
-						.select(`
-							*,
-							locations (*),
-							rooms (*)
-						`)
-						.eq("id", reservationId)
-						.single(),
-					supabase
-						.from("income")
-						.select(`
-							id,
-							booking_id,
-							amount,
-							payment_method,
-							currency
-						`)
-						.eq("booking_id", reservationId),
-				]);
-
-				if (externalBookingRes.error) {
-					if (externalBookingRes.error.code === 'PGRST116') {
-						toast({
-							title: "Not Found",
-							description: "Booking not found.",
-							variant: "destructive",
-						});
-						onClose();
-						setLoading(false);
-						return;
-					}
-					throw externalBookingRes.error;
-				}
-				if (incomeRes.error) throw incomeRes.error;
-
-				setExternalBooking(externalBookingRes.data);
-				setIncomeRecords(incomeRes.data || []);
-			} else {
-				// Fetch regular reservation data
-				const [reservationRes, incomeRes] = await Promise.all([
-					supabase
-						.from("reservations")
-						.select(`
-							*,
-							locations (*),
-							rooms (*),
-							guides (*),
-							agents (*)
-						`)
-						.eq("id", reservationId)
-						.single(),
-					supabase
-						.from("income")
-						.select(`
-							id,
-							booking_id,
-							amount,
-							payment_method,
-							currency
-						`)
-						.eq("booking_id", reservationId),
-				]);
-
-				if (reservationRes.error) throw reservationRes.error;
-				if (incomeRes.error) throw incomeRes.error;
-
-				setReservation(reservationRes.data);
-				setIncomeRecords(incomeRes.data || []);
+			if (!reservationRes.data) {
+				toast({
+					title: "Not Found",
+					description: "Booking not found.",
+					variant: "destructive",
+				});
+				onClose();
+				setLoading(false);
+				return;
 			}
+
+			// Check if it's an external booking
+			const isExternal = reservationRes.data.is_external === true;
+			setIsExternalBooking(isExternal);
+			
+			if (isExternal) {
+				setExternalBooking(reservationRes.data);
+			} else {
+				setReservation(reservationRes.data);
+			}
+			setIncomeRecords(incomeRes.data || []);
 		} catch (error) {
 			console.error("Error fetching reservation:", error);
 			toast({

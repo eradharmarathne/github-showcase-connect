@@ -119,7 +119,7 @@ export function useReservationsData() {
 		try {
 			setLoading(true);
 
-			// Fetch direct reservations
+			// Fetch all reservations (both direct and external) from unified table
 			const { data: reservationsData, error: reservationsError } =
 				await supabase
 					.from("reservations")
@@ -135,78 +135,70 @@ export function useReservationsData() {
 
 			if (reservationsError) throw reservationsError;
 
-			// Fetch external bookings (channel manager bookings)
-			const { data: externalBookingsData, error: externalBookingsError } =
-				await supabase
-					.from("external_bookings")
-					.select(`
-						*,
-						locations(id, name, address, phone, email, property_type, tenant_id, is_active, created_at),
-						rooms(id, room_number, room_type, bed_type, description, amenities, base_price, max_occupancy, property_type, currency, location_id, tenant_id, is_active, created_at, updated_at)
-					`)
-					.eq("location_id", selectedLocation)
-					.order("last_synced_at", { ascending: false });
-
-			if (externalBookingsError) throw externalBookingsError;
-
-			// Transform external bookings to match ReservationWithJoins format
-			const transformedExternalBookings: ReservationWithJoins[] = (
-				externalBookingsData || []
+			// Transform to consistent format, handling both external and direct bookings
+			const allReservations: ReservationWithJoins[] = (
+				reservationsData || []
 			).map((booking) => {
+				const isExternal = booking.is_external === true;
 				const rawData = booking.raw_data as any;
+				
+				// For external bookings, use timestamp fields; for direct, use date fields
+				const checkInDate = isExternal 
+					? (booking.check_in_timestamp || booking.check_in_date)
+					: booking.check_in_date;
+				const checkOutDate = isExternal
+					? (booking.check_out_timestamp || booking.check_out_date)
+					: booking.check_out_date;
+				
 				return {
 					id: booking.id,
-					reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
+					reservation_number: isExternal
+						? `${(booking.source_channel || booking.booking_source || 'EXTERNAL').toUpperCase()}-${booking.external_id}`
+						: booking.reservation_number,
 					location_id: booking.location_id,
-					room_id: booking.room_id || "", // May be null if not mapped
+					room_id: booking.room_id || "",
 					guest_name: booking.guest_name,
-					guest_email: rawData?.guest?.email || null,
-					guest_phone: rawData?.guest?.phone || null,
-					guest_address: null,
-					guest_id_number: null,
-					guest_nationality: null,
+					guest_email: isExternal ? (rawData?.guest?.email || null) : booking.guest_email,
+					guest_phone: isExternal ? (rawData?.guest?.phone || null) : booking.guest_phone,
+					guest_address: booking.guest_address,
+					guest_id_number: booking.guest_id_number,
+					guest_nationality: booking.guest_nationality,
 					adults: booking.adults || 0,
 					children: booking.children || 0,
-					check_in_date: booking.check_in,
-					check_out_date: booking.check_out,
-				nights: Math.ceil(
-					(new Date(booking.check_out).getTime() -
-						new Date(booking.check_in).getTime()) /
-						(1000 * 60 * 60 * 24),
-				),
-				room_rate: 0,
-				total_amount: booking.total_amount || 0,
-				advance_amount: null,
-				paid_amount: booking.paid_amount || 0, // Deposit amount paid from Beds24
-				balance_amount: booking.balance_amount || 0, // Remaining balance
-				currency: booking.currency || "USD",
-				status: booking.status as any,
-					special_requests: rawData?.notes || null,
-					arrival_time: null,
-					created_by: null,
-					grc_approved: false,
-					grc_approved_by: null,
-					grc_approved_at: null,
-					created_at: booking.last_synced_at,
-					updated_at: booking.last_synced_at,
+					check_in_date: checkInDate,
+					check_out_date: checkOutDate,
+					nights: booking.nights || Math.ceil(
+						(new Date(checkOutDate).getTime() -
+							new Date(checkInDate).getTime()) /
+							(1000 * 60 * 60 * 24),
+					),
+					room_rate: booking.room_rate || 0,
+					total_amount: booking.total_amount || 0,
+					advance_amount: booking.advance_amount,
+					paid_amount: booking.paid_amount || 0,
+					balance_amount: booking.balance_amount || 0,
+					currency: booking.currency || "USD",
+					status: booking.status as any,
+					special_requests: isExternal ? (rawData?.notes || null) : booking.special_requests,
+					arrival_time: booking.arrival_time,
+					created_by: booking.created_by,
+					grc_approved: booking.grc_approved || false,
+					grc_approved_by: booking.grc_approved_by,
+					grc_approved_at: booking.grc_approved_at,
+					created_at: booking.created_at,
+					updated_at: booking.updated_at,
 					tenant_id: booking.tenant_id,
-					guide_id: null,
-					agent_id: null,
-					guide_commission: null,
-					agent_commission: null,
-					booking_source: booking.source, // beds24, airbnb, booking_com, etc.
+					guide_id: booking.guide_id,
+					agent_id: booking.agent_id,
+					guide_commission: booking.guide_commission,
+					agent_commission: booking.agent_commission,
+					booking_source: booking.source_channel || booking.booking_source || 'direct',
 					locations: booking.locations,
 					rooms: booking.rooms,
-					guides: null,
-					agents: null,
+					guides: booking.guides,
+					agents: booking.agents,
 				};
 			});
-
-			// Combine direct reservations and external bookings
-			const allReservations = [
-				...(reservationsData || []),
-				...transformedExternalBookings,
-			];
 
 			// Sort by check-in date (most recent first)
 			allReservations.sort(
