@@ -38,7 +38,7 @@ export const useReservationFinancials = () => {
 				throw new Error("Missing tenant or location");
 			}
 
-			// Get basic reservation data with related tables
+			// Get ALL reservations (both direct and external) from unified table
 			const { data: reservations, error } = await supabase
 				.from("reservations")
 				.select(`
@@ -52,59 +52,33 @@ export const useReservationFinancials = () => {
 
 			if (error) throw error;
 
-			// Get external bookings (channel manager bookings) from unified reservations table
-			const { data: externalBookings, error: externalError } = await supabase
-				.from("reservations")
-				.select(`
-					*,
-					rooms(room_number, room_type),
-					locations(name)
-				`)
-				.eq("tenant_id", tenant.id)
-				.eq("location_id", selectedLocation)
-				.eq("is_external", true)
-				.order("last_synced_at", { ascending: false });
+			// Normalize all reservations (handle external booking specifics)
+			const allReservations = (reservations || []).map((reservation) => {
+				// For external bookings, use timestamps if available, otherwise use dates
+				const checkInDate = reservation.is_external && reservation.check_in_timestamp 
+					? reservation.check_in_timestamp 
+					: reservation.check_in_date;
+				const checkOutDate = reservation.is_external && reservation.check_out_timestamp 
+					? reservation.check_out_timestamp 
+					: reservation.check_out_date;
+				
+				const nights = Math.ceil(
+					(new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24),
+				);
 
-			if (externalError) throw externalError;
-
-			// Transform external bookings to match reservation format
-			const transformedExternalBookings = (externalBookings || []).map(
-				(booking) => {
-					// For external bookings, use check_in_timestamp if available, otherwise check_in_date
-					const checkInDate = booking.check_in_timestamp || booking.check_in_date;
-					const checkOutDate = booking.check_out_timestamp || booking.check_out_date;
-					const nights = Math.ceil(
-						(new Date(checkOutDate).getTime() -
-							new Date(checkInDate).getTime()) /
-							(1000 * 60 * 60 * 24),
-					);
-					
-					return {
-						id: booking.id,
-						reservation_number: booking.reservation_number || `${booking.source_channel?.toUpperCase()}-${booking.external_id}`,
-						guest_name: booking.guest_name,
-						status: booking.status,
-						currency: booking.currency || "USD",
-						check_in_date: checkInDate,
-						check_out_date: checkOutDate,
-						nights,
-						room_rate: booking.room_rate || (booking.total_amount ? Number(booking.total_amount) / nights : 0),
-						total_amount: Number(booking.total_amount) || 0,
-						paid_amount: Number(booking.paid_amount) || 0,
-						balance_amount: Number(booking.balance_amount) || 0,
-						rooms: booking.rooms,
-						locations: booking.locations,
-						tenant_id: booking.tenant_id,
-						location_id: booking.location_id,
-					};
-				},
-			);
-
-			// Combine both reservation types
-			const allReservations = [
-				...(reservations || []),
-				...transformedExternalBookings,
-			];
+				return {
+					...reservation,
+					reservation_number: reservation.reservation_number || 
+						(reservation.is_external ? `${reservation.source_channel?.toUpperCase()}-${reservation.external_id}` : ''),
+					check_in_date: checkInDate,
+					check_out_date: checkOutDate,
+					nights,
+					room_rate: reservation.room_rate || (reservation.total_amount ? Number(reservation.total_amount) / nights : 0),
+					total_amount: Number(reservation.total_amount) || 0,
+					paid_amount: Number(reservation.paid_amount) || 0,
+					balance_amount: Number(reservation.balance_amount) || 0,
+				};
+			});
 
 			// Get income records for expense calculations
 			const { data: incomeRecords, error: incomeError } = await supabase
