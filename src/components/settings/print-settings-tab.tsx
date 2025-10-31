@@ -522,15 +522,14 @@ export function PrintSettingsTab() {
 									</Button>
 								</div>
 
-								{/* Live Preview */}
-								<div className="border rounded-lg p-4 bg-white" ref={printPreviewRef}>
-									<PrintPreviewSample printSettings={formData} />
-								</div>
+							{/* Live Preview */}
+							<div className="border rounded-lg p-4 bg-white" ref={printPreviewRef}>
+								<PrintPreviewSample printSettings={formData} />
+							</div>
 
-								<p className="text-xs text-muted-foreground">
-									💡 Tip: Make changes in other tabs and see them reflected here in real-time.
-									Click "Save Print Settings" to apply changes permanently.
-								</p>
+							<p className="text-xs text-muted-foreground">
+								💡 Tip: Make changes in other tabs and see them reflected here in real-time. Click "Save Print Settings" to persist changes.
+							</p>
 							</div>
 						</TabsContent>
 					</Tabs>

@@ -1668,6 +1668,10 @@ export type Database = {
           name: string
           phone: string | null
           property_type: string | null
+          public_booking_enabled: boolean | null
+          public_booking_page_title: string | null
+          public_booking_slug: string | null
+          slug: string | null
           tenant_id: string
           updated_at: string | null
         }
@@ -1680,6 +1684,10 @@ export type Database = {
           name: string
           phone?: string | null
           property_type?: string | null
+          public_booking_enabled?: boolean | null
+          public_booking_page_title?: string | null
+          public_booking_slug?: string | null
+          slug?: string | null
           tenant_id: string
           updated_at?: string | null
         }
@@ -1692,6 +1700,10 @@ export type Database = {
           name?: string
           phone?: string | null
           property_type?: string | null
+          public_booking_enabled?: boolean | null
+          public_booking_page_title?: string | null
+          public_booking_slug?: string | null
+          slug?: string | null
           tenant_id?: string
           updated_at?: string | null
         }
@@ -2135,6 +2147,114 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_bookings: {
+        Row: {
+          adults: number | null
+          check_in_date: string
+          check_out_date: string
+          children: number | null
+          converted_reservation_id: string | null
+          created_at: string | null
+          guest_address: string | null
+          guest_email: string
+          guest_name: string
+          guest_nationality: string | null
+          guest_phone: string | null
+          id: string
+          ip_address: string | null
+          location_id: string
+          room_type_preference: string | null
+          source: string | null
+          special_requests: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          adults?: number | null
+          check_in_date: string
+          check_out_date: string
+          children?: number | null
+          converted_reservation_id?: string | null
+          created_at?: string | null
+          guest_address?: string | null
+          guest_email: string
+          guest_name: string
+          guest_nationality?: string | null
+          guest_phone?: string | null
+          id?: string
+          ip_address?: string | null
+          location_id: string
+          room_type_preference?: string | null
+          source?: string | null
+          special_requests?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          adults?: number | null
+          check_in_date?: string
+          check_out_date?: string
+          children?: number | null
+          converted_reservation_id?: string | null
+          created_at?: string | null
+          guest_address?: string | null
+          guest_email?: string
+          guest_name?: string
+          guest_nationality?: string | null
+          guest_phone?: string | null
+          id?: string
+          ip_address?: string | null
+          location_id?: string
+          room_type_preference?: string | null
+          source?: string | null
+          special_requests?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_bookings_converted_reservation_id_fkey"
+            columns: ["converted_reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservation_financials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_bookings_converted_reservation_id_fkey"
+            columns: ["converted_reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservation_payment_history"
+            referencedColumns: ["reservation_id"]
+          },
+          {
+            foreignKeyName: "public_bookings_converted_reservation_id_fkey"
+            columns: ["converted_reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_bookings_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_bookings_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2951,6 +3071,10 @@ export type Database = {
       }
       generate_invitation_token: { Args: never; Returns: string }
       generate_invoice_number: { Args: never; Returns: string }
+      generate_location_slug: {
+        Args: { location_id: string; location_name: string }
+        Returns: string
+      }
       generate_payment_number: { Args: never; Returns: string }
       generate_reservation_number:
         | {

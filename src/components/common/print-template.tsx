@@ -10,25 +10,29 @@ interface PrintTemplateProps {
 	children: React.ReactNode;
 	qrCodeData?: string;
 	documentType?: string;
+	// optional override so previews can pass unsaved settings
+	printSettingsOverride?: any;
 }
 
-export function PrintTemplate({ children, qrCodeData, documentType = "Document" }: PrintTemplateProps) {
+export function PrintTemplate({ children, qrCodeData, documentType = "Document", printSettingsOverride }: PrintTemplateProps) {
 	const { printSettings } = usePrintSettings();
+	// allow preview to pass unsaved form state
+	const settings = printSettingsOverride ?? printSettings;
 	const { tenant } = useTenant();
 	const [qrCodeUrl, setQrCodeUrl] = useState<string>("");
 
 	// Generate QR code if enabled
 	useEffect(() => {
-		if (printSettings?.show_qr_code && qrCodeData) {
+		if (settings?.show_qr_code && qrCodeData) {
 			QRCode.toDataURL(qrCodeData, { width: 150 })
 				.then(setQrCodeUrl)
 				.catch(console.error);
 		}
-	}, [printSettings?.show_qr_code, qrCodeData]);
+	}, [settings?.show_qr_code, qrCodeData]);
 
 	// Get font size class
 	const getFontSizeClass = () => {
-		switch (printSettings?.font_size) {
+		switch (settings?.font_size) {
 			case "small":
 				return "text-xs";
 			case "large":
@@ -40,7 +44,7 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document" 
 
 	// Get paper size class
 	const getPaperSizeClass = () => {
-		switch (printSettings?.paper_size) {
+		switch (settings?.paper_size) {
 			case "Letter":
 				return "w-[8.5in] min-h-[11in]";
 			case "A5":
@@ -53,10 +57,10 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document" 
 	return (
 		<div
 			className={`bg-white mx-auto p-8 print:p-8 ${getPaperSizeClass()} ${getFontSizeClass()} ${
-				printSettings?.show_border ? "border-2 border-gray-300" : ""
+				settings?.show_border ? "border-2 border-gray-300" : ""
 			}`}
 			style={{
-				fontFamily: printSettings?.font_family || "Arial, sans-serif",
+				fontFamily: settings?.font_family || "Arial, sans-serif",
 			}}
 		>
 			<style>
@@ -79,12 +83,12 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document" 
 			<div className="mb-6 pb-4 border-b-2" style={{ borderColor: printSettings?.primary_color || "#000" }}>
 				<div className="flex items-start justify-between">
 					{/* Logo */}
-					{printSettings?.show_logo && tenant?.logo_url && (
+					{settings?.show_logo && tenant?.logo_url && (
 						<div
 							className={`${
-								printSettings.logo_position === "center"
+								settings.logo_position === "center"
 									? "mx-auto"
-									: printSettings.logo_position === "right"
+									: settings.logo_position === "right"
 										? "ml-auto"
 										: ""
 							}`}
@@ -94,10 +98,10 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document" 
 					)}
 
 					{/* Header Text */}
-					{printSettings?.header_text && (
+					{settings?.header_text && (
 						<div className="text-center flex-1">
-							<h1 className="text-2xl font-bold" style={{ color: printSettings?.primary_color || "#000" }}>
-								{printSettings.header_text}
+							<h1 className="text-2xl font-bold" style={{ color: "#000" }}>
+								{settings.header_text}
 							</h1>
 						</div>
 					)}

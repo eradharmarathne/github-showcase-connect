@@ -34,6 +34,7 @@ import NotFound from "./pages/not-found";
 import Onboarding from "./pages/onboarding";
 import PaymentForm from "./pages/payment-form";
 import PendingInvitation from "./pages/pending-invitation";
+import PublicBookingPage from "./pages/public-page";
 import Reports from "./pages/reports";
 import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
@@ -82,6 +83,10 @@ const App = () => (
 										<Route path="/" element={<AuthRedirect />} />
 										<Route path="/auth" element={<Auth />} />
 										<Route path="/ui" element={<Design />} />
+										
+										{/* Public Booking Page - No Auth Required */}
+										<Route path="/booking/:tenantSlug/:locationSlug" element={<PublicBookingPage />} />
+										
 										<Route
 											path="/auth/forgot-password"
 											element={<ForgotPassword />}

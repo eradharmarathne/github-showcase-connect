@@ -42,132 +42,166 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 	};
 
 	return (
-		<PrintTemplate qrCodeData={sampleReservation.reservation_number} documentType="Reservation">
+		<PrintTemplate qrCodeData={sampleReservation.reservation_number} documentType="Reservation" printSettingsOverride={printSettings}>
 			<div className="space-y-6">
-				{/* Header */}
-				<div className="text-center border-b-2 border-gray-300 pb-4">
-					<h1 className="text-2xl font-bold mb-2">RESERVATION CONFIRMATION</h1>
-					<div className="text-xl font-semibold text-gray-700">
+				{/* Document Title */}
+				<div className="text-center border-b-2 border-black pb-4">
+					<h1 className="text-2xl font-bold mb-2 uppercase tracking-wide">
+						Reservation Confirmation
+					</h1>
+					<div className="text-lg font-semibold">
 						{sampleReservation.location.name}
 					</div>
-					<div className="text-sm text-gray-600 mt-2">
+					<div className="text-sm mt-2">
 						Confirmation Number:{" "}
 						<span className="font-bold">{sampleReservation.reservation_number}</span>
+					</div>
+					<div className="text-xs mt-1">
+						Issued: {format(new Date(sampleReservation.created_at), "PPP")}
 					</div>
 				</div>
 
 				{/* Guest Information */}
 				<div>
-					<h2 className="text-lg font-bold mb-3 bg-gray-100 p-2 border-l-4 border-blue-500">
+					<h2 className="text-base font-bold mb-3 pb-1 border-b border-gray-400 uppercase tracking-wide">
 						Guest Information
 					</h2>
-					<div className="grid grid-cols-2 gap-3 text-sm">
-						<div>
-							<span className="font-semibold">Name:</span> {sampleReservation.guest_name}
-						</div>
-						<div>
-							<span className="font-semibold">Email:</span> {sampleReservation.guest_email}
-						</div>
-						<div>
-							<span className="font-semibold">Phone:</span> {sampleReservation.guest_phone}
-						</div>
-						<div>
-							<span className="font-semibold">Nationality:</span>{" "}
-							{sampleReservation.guest_nationality}
-						</div>
-						<div>
-							<span className="font-semibold">Adults:</span> {sampleReservation.adults}
-						</div>
-						<div>
-							<span className="font-semibold">Children:</span> {sampleReservation.children}
-						</div>
-					</div>
+					<table className="w-full text-sm">
+						<tbody>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 w-1/3 font-semibold">Guest Name:</td>
+								<td className="py-2">{sampleReservation.guest_name}</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Email Address:</td>
+								<td className="py-2">{sampleReservation.guest_email}</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Phone Number:</td>
+								<td className="py-2">{sampleReservation.guest_phone}</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Nationality:</td>
+								<td className="py-2">{sampleReservation.guest_nationality}</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Number of Guests:</td>
+								<td className="py-2">
+									{sampleReservation.adults} Adult(s), {sampleReservation.children} Child(ren)
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 
 				{/* Reservation Details */}
 				<div>
-					<h2 className="text-lg font-bold mb-3 bg-gray-100 p-2 border-l-4 border-blue-500">
+					<h2 className="text-base font-bold mb-3 pb-1 border-b border-gray-400 uppercase tracking-wide">
 						Reservation Details
 					</h2>
-					<div className="grid grid-cols-2 gap-3 text-sm">
-						<div>
-							<span className="font-semibold">Room:</span>{" "}
-							{sampleReservation.room.room_number} - {sampleReservation.room.room_type}
-						</div>
-						<div>
-							<span className="font-semibold">Status:</span>{" "}
-							<span className="capitalize">{sampleReservation.status}</span>
-						</div>
-						<div>
-							<span className="font-semibold">Check-in:</span>{" "}
-							{format(new Date(sampleReservation.check_in_date), "PPP")}
-						</div>
-						<div>
-							<span className="font-semibold">Check-out:</span>{" "}
-							{format(new Date(sampleReservation.check_out_date), "PPP")}
-						</div>
-						<div>
-							<span className="font-semibold">Nights:</span> {sampleReservation.nights}
-						</div>
-						<div>
-							<span className="font-semibold">Room Rate:</span>{" "}
-							{getCurrencySymbol(sampleReservation.currency)}
-							{sampleReservation.room_rate} per night
-						</div>
-					</div>
+					<table className="w-full text-sm">
+						<tbody>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 w-1/3 font-semibold">Room Number:</td>
+								<td className="py-2">{sampleReservation.room.room_number}</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Room Type:</td>
+								<td className="py-2">{sampleReservation.room.room_type}</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Check-In Date:</td>
+								<td className="py-2">
+									{format(new Date(sampleReservation.check_in_date), "EEEE, MMMM d, yyyy")}
+								</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Check-Out Date:</td>
+								<td className="py-2">
+									{format(new Date(sampleReservation.check_out_date), "EEEE, MMMM d, yyyy")}
+								</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Length of Stay:</td>
+								<td className="py-2">{sampleReservation.nights} Night(s)</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 font-semibold">Reservation Status:</td>
+								<td className="py-2 uppercase font-semibold">{sampleReservation.status}</td>
+							</tr>
+						</tbody>
+					</table>
 					{sampleReservation.special_requests && (
-						<div className="mt-3 text-sm">
-							<span className="font-semibold">Special Requests:</span>{" "}
-							{sampleReservation.special_requests}
+						<div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded">
+							<div className="text-xs font-semibold uppercase mb-1">Special Requests:</div>
+							<div className="text-sm">{sampleReservation.special_requests}</div>
 						</div>
 					)}
 				</div>
 
 				{/* Payment Summary */}
 				<div>
-					<h2 className="text-lg font-bold mb-3 bg-gray-100 p-2 border-l-4 border-blue-500">
+					<h2 className="text-base font-bold mb-3 pb-1 border-b border-gray-400 uppercase tracking-wide">
 						Payment Summary
 					</h2>
-					<div className="space-y-2 text-sm">
-						<div className="flex justify-between">
-							<span>Total Amount:</span>
-							<span className="font-semibold">
-								{getCurrencySymbol(sampleReservation.currency)}
-								{sampleReservation.total_amount.toFixed(2)}
-							</span>
-						</div>
-						<div className="flex justify-between">
-							<span>Advance Payment:</span>
-							<span>
-								{getCurrencySymbol(sampleReservation.currency)}
-								{sampleReservation.advance_amount?.toFixed(2)}
-							</span>
-						</div>
-						<div className="flex justify-between">
-							<span>Paid Amount:</span>
-							<span>
-								{getCurrencySymbol(sampleReservation.currency)}
-								{sampleReservation.paid_amount?.toFixed(2)}
-							</span>
-						</div>
-						<div className="flex justify-between border-t-2 border-gray-300 pt-2 font-bold">
-							<span>Balance Due:</span>
-							<span>
-								{getCurrencySymbol(sampleReservation.currency)}
-								{sampleReservation.balance_amount?.toFixed(2)}
-							</span>
-						</div>
-					</div>
+					<table className="w-full text-sm">
+						<tbody>
+							<tr className="border-b border-gray-200">
+								<td className="py-2 w-2/3">
+									Room Rate ({getCurrencySymbol(sampleReservation.currency)}
+									{sampleReservation.room_rate} × {sampleReservation.nights} night(s))
+								</td>
+								<td className="py-2 text-right font-semibold">
+									{getCurrencySymbol(sampleReservation.currency)}
+									{sampleReservation.total_amount.toFixed(2)}
+								</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2">Advance Payment</td>
+								<td className="py-2 text-right">
+									{getCurrencySymbol(sampleReservation.currency)}
+									{sampleReservation.advance_amount?.toFixed(2)}
+								</td>
+							</tr>
+							<tr className="border-b border-gray-200">
+								<td className="py-2">Amount Paid</td>
+								<td className="py-2 text-right">
+									{getCurrencySymbol(sampleReservation.currency)}
+									{sampleReservation.paid_amount?.toFixed(2)}
+								</td>
+							</tr>
+							<tr className="border-t-2 border-black">
+								<td className="py-3 text-base font-bold">BALANCE DUE</td>
+								<td className="py-3 text-right text-base font-bold">
+									{getCurrencySymbol(sampleReservation.currency)}
+									{sampleReservation.balance_amount?.toFixed(2)}
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 
-				{/* Additional Notes */}
-				<div className="text-xs text-gray-600 border-t pt-4">
+				{/* Important Information */}
+				<div className="mt-6 pt-4 border-t border-gray-300">
+					<h3 className="text-sm font-bold mb-2">IMPORTANT INFORMATION</h3>
+					<ul className="text-xs space-y-1 list-disc list-inside">
+						<li>Check-in time: 2:00 PM | Check-out time: 12:00 PM</li>
+						<li>Valid photo ID and credit card required at check-in</li>
+						<li>Cancellation policy applies as per booking terms</li>
+						<li>Please present this confirmation upon arrival</li>
+					</ul>
+				</div>
+
+				{/* Footer Note */}
+				<div className="text-xs text-center text-gray-600 mt-6 pt-4 border-t border-gray-200">
+					<p className="mb-1">
+						Thank you for choosing {sampleReservation.location.name}.
+					</p>
 					<p>
-						Thank you for choosing {sampleReservation.location.name}. We look forward to
-						welcoming you!
+						We look forward to welcoming you and providing you with an exceptional experience.
 					</p>
 					<p className="mt-2">
-						For any questions or changes to your reservation, please contact us.
+						For inquiries or modifications, please contact us with your confirmation number.
 					</p>
 				</div>
 			</div>

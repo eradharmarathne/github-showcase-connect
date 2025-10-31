@@ -91,7 +91,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Guest Information */}
 			<div className="mb-8">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-blue-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 pb-2 border-b border-gray-200 uppercase tracking-wide">
 					Guest Information
 				</h2>
 				<div className="grid grid-cols-2 gap-4">
@@ -134,7 +134,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Booking Details */}
 			<div className="mb-8">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-green-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 pb-2 border-b border-gray-200 uppercase tracking-wide">
 					Booking Details
 				</h2>
 				<div className="grid grid-cols-2 gap-4">
@@ -190,10 +190,10 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 			{/* Special Requests */}
 			{reservation.special_requests && (
 				<div className="mb-8">
-					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-purple-500">
+					<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 pb-2 border-b border-gray-200 uppercase tracking-wide">
 						Special Requests
 					</h2>
-					<div className="p-4 bg-gray-50 rounded border">
+					<div className="p-3 rounded border border-gray-200 bg-white text-sm">
 						{reservation.special_requests}
 					</div>
 				</div>
@@ -201,10 +201,10 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Financial Summary */}
 			<div className="mb-8">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-2 sm:border-l-4 border-orange-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 pb-2 border-b border-gray-200 uppercase tracking-wide">
 					Financial Summary
 				</h2>
-				<div className="bg-gray-50 p-4 rounded border">
+				<div className="p-4 rounded border border-gray-200 bg-white">
 					<table className="w-full">
 						<tbody>
 							<tr className="border-b">
@@ -226,17 +226,15 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 								</td>
 							</tr>
 							<tr className="border-b">
-								<td className="py-2 font-semibold text-green-700">
-									Paid Amount:
-								</td>
-								<td className="py-2 text-right text-green-700">
+								<td className="py-2 font-semibold">Paid Amount:</td>
+								<td className="py-2 text-right">
 									{getCurrencySymbol(reservation.currency)}
 									{(reservation.paid_amount || 0).toLocaleString()}
 								</td>
 							</tr>
 							<tr>
-								<td className="py-2 font-bold text-red-700">Balance Due:</td>
-								<td className="py-2 text-right font-bold text-red-700">
+								<td className="py-2 font-bold">Balance Due:</td>
+								<td className="py-2 text-right font-bold">
 									{getCurrencySymbol(reservation.currency)}
 									{(reservation.balance_amount || 0).toLocaleString()}
 								</td>
