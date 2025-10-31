@@ -212,7 +212,8 @@ export function ViewReservationDialog({
 		// Balance = Room balance + Pending expenses
 		// Room balance already accounts for paid room amount and paid additional services
 		// We only need to add pending expenses that haven't been paid yet
-		const roomBalance = reservation?.balance_amount || 0;
+		const currentBooking = isExternalBooking ? externalBooking : reservation;
+		const roomBalance = currentBooking?.balance_amount || 0;
 		const pendingExpenses = getPendingExpenses();
 		return roomBalance + pendingExpenses;
 	};
