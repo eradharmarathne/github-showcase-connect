@@ -329,37 +329,29 @@ export default function PublicBookingPage() {
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-6">
-							{/* Location Selection - Only show if multiple locations */}
-							{locations.length > 1 && (
-								<div className="space-y-2">
-									<Label htmlFor="location">
-										Select Location <span className="text-red-500">*</span>
-									</Label>
-									<Select
-										value={selectedLocationId}
-										onValueChange={(value) => setSelectedLocationId(value)}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Choose a location" />
-										</SelectTrigger>
-										<SelectContent>
-											{locations.map((loc) => (
-												<SelectItem key={loc.id} value={loc.id}>
-													<div className="flex items-center gap-2">
-														<MapPin className="h-4 w-4" />
-														<span>{loc.name}</span>
-														{loc.address && (
-															<span className="text-xs text-muted-foreground">• {loc.address}</span>
-														)}
-													</div>
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</div>
-							)}
-
-							{/* Show location info if only one location or one is selected */}
+						{/* Location Selection - Only show if multiple locations */}
+						{locations.length > 1 && (
+							<div className="space-y-2">
+								<Label htmlFor="location">
+									Select Location <span className="text-red-500">*</span>
+								</Label>
+								<Select
+									value={selectedLocationId}
+									onValueChange={(value) => setSelectedLocationId(value)}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Choose a location" />
+									</SelectTrigger>
+									<SelectContent>
+										{locations.map((loc) => (
+											<SelectItem key={loc.id} value={loc.id}>
+												{loc.name}{loc.address && ` • ${loc.address}`}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+						)}							{/* Show location info if only one location or one is selected */}
 							{location && (
 								<div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
 									<MapPin className="h-4 w-4 text-primary" />
