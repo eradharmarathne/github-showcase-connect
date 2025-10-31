@@ -165,12 +165,12 @@ export function PaymentsTable() {
 										<TableHead className="min-w-[120px]">
 											{t("common.stay", "Stay Period")}
 										</TableHead>
-										<TableHead className="min-w-[150px]">
-											{t("common.note", "Note")}
-										</TableHead>
-										<TableHead className="w-[80px]">
-											{t("common.actions", "Actions")}
-										</TableHead>
+									<TableHead className="min-w-[150px]">
+										{t("common.note", "Note")}
+									</TableHead>
+									<TableHead className="w-20">
+										{t("common.actions", "Actions")}
+									</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
