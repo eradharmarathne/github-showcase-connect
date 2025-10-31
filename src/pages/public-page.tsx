@@ -528,7 +528,7 @@ export default function PublicBookingPage() {
 									{/* Room Type Preference */}
 									{roomTypes.length > 0 && (
 										<div className="md:col-span-2">
-											<Label htmlFor="roomType">Room Type Preference</Label>
+											<Label htmlFor="roomType">Room Type Preference (Optional)</Label>
 											<Select
 												value={formData.roomTypePreference}
 												onValueChange={(value) => setFormData({ ...formData, roomTypePreference: value })}
@@ -537,7 +537,6 @@ export default function PublicBookingPage() {
 													<SelectValue placeholder="Select room type (optional)" />
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="">No preference</SelectItem>
 													{roomTypes.map((type) => (
 														<SelectItem key={type} value={type}>
 															{type}
