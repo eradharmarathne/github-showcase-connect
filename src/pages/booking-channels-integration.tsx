@@ -171,12 +171,14 @@ export default function BookingChannelsIntegration() {
 	>({});
 	const [syncUrls, setSyncUrls] = useState<any[]>([]);
 	const [icalInputValues, setIcalInputValues] = useState<
-		Record<string, { url: string; source: string }>
+		Record<string, { url: string; source: string; room_id: string | null }>
 	>({});
 	const [rooms, setRooms] = useState<
 		Array<{ id: string; room_number: string; room_type: string }>
 	>([]);
 	const [mappingRoomId, setMappingRoomId] = useState<string | null>(null);
+	const [editingSyncUrlId, setEditingSyncUrlId] = useState<string | null>(null);
+	const [editingRoomId, setEditingRoomId] = useState<string | null>(null);
 
 	const calculateStats = (bookings: ExternalBooking[]): SyncStats => {
 		const sourceBreakdown: Record<string, number> = {};
@@ -688,6 +690,7 @@ export default function BookingChannelsIntegration() {
 				location_id: locationId,
 				ical_url: icalData.url.trim(),
 				source: icalData.source || "ical",
+				room_id: icalData.room_id || null,
 				is_active: true,
 			});
 
@@ -698,7 +701,7 @@ export default function BookingChannelsIntegration() {
 			// Clear input
 			setIcalInputValues((prev) => ({
 				...prev,
-				[locationId]: { url: "", source: "ical" },
+				[locationId]: { url: "", source: "ical", room_id: null },
 			}));
 
 			// Refresh data
@@ -730,6 +733,34 @@ export default function BookingChannelsIntegration() {
 			console.error("Error deleting sync URL:", error);
 			toast.error(
 				`Failed to delete sync URL: ${error.message || "Unknown error"}`,
+			);
+		}
+	};
+
+	const updateSyncUrlRoomMapping = async (
+		syncUrlId: string,
+		roomId: string | null,
+	) => {
+		try {
+			const { error } = await supabase
+				.from("booking_sync_urls")
+				.update({ room_id: roomId })
+				.eq("id", syncUrlId);
+
+			if (error) throw error;
+
+			toast.success(
+				roomId
+					? "Room mapping updated successfully"
+					: "Room mapping removed successfully",
+			);
+			setEditingSyncUrlId(null);
+			setEditingRoomId(null);
+			fetchData();
+		} catch (error: any) {
+			console.error("Error updating room mapping:", error);
+			toast.error(
+				`Failed to update room mapping: ${error.message || "Unknown error"}`,
 			);
 		}
 	};
@@ -1486,12 +1517,29 @@ export default function BookingChannelsIntegration() {
 						<div>
 							<h3 className="text-lg font-semibold flex items-center gap-2">
 								<Calendar className="size-5" />
-								iCal Calendar Sync
+								iCal Calendar Sync with Room Mapping
 							</h3>
 							<p className="text-sm text-muted-foreground mt-1">
-								Add external calendar URLs from booking platforms
+								Add external calendar URLs from booking platforms and map them to specific rooms for automatic booking assignment
 							</p>
 						</div>
+
+						{/* Info Banner */}
+						<Card className="bg-blue-50 border-blue-200">
+							<CardContent className="pt-4 pb-4">
+								<div className="flex items-start gap-3">
+									<AlertCircle className="size-5 text-blue-600 mt-0.5 flex-shrink-0" />
+									<div className="space-y-1">
+										<h4 className="text-sm font-medium text-blue-900">
+											Automatic Room Assignment
+										</h4>
+										<p className="text-sm text-blue-700">
+											Map each iCal calendar URL to a specific room. Once configured, all bookings from that calendar will automatically be assigned to the mapped room. This is especially useful for Booking.com and Airbnb property calendars.
+										</p>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
 
 						{locations
 							.filter((location) => location.id === selectedLocation)
@@ -1499,11 +1547,14 @@ export default function BookingChannelsIntegration() {
 								const locationSyncUrls = syncUrls.filter(
 									(url) => url.location_id === location.id,
 								);
+								const locationRooms = rooms.filter(
+									(room) => room.id,
+								);
 								return (
 									<div key={location.id} className="space-y-3">
 										{/* Add New Sync URL Form */}
-										<div className="flex flex-col sm:flex-row gap-2">
-											<div className="flex-1">
+										<div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+											<div className="sm:col-span-5">
 												<Input
 													id={`ical-url-${location.id}`}
 													placeholder="https://ical.booking.com/..."
@@ -1514,37 +1565,66 @@ export default function BookingChannelsIntegration() {
 															[location.id]: {
 																...prev[location.id],
 																url: e.target.value,
+																source: prev[location.id]?.source || "ical",
+																room_id: prev[location.id]?.room_id || null,
 															},
 														}))
 													}
 												/>
 											</div>
-											<select
-												id={`source-${location.id}`}
-												className="h-10 px-3 rounded-md border border-input bg-background sm:w-32"
-												value={icalInputValues[location.id]?.source || "ical"}
-												onChange={(e) =>
-													setIcalInputValues((prev) => ({
-														...prev,
-														[location.id]: {
-															...prev[location.id],
-															source: e.target.value,
-														},
-													}))
-												}
-											>
-												<option value="ical">iCal</option>
-												<option value="booking_com">Booking.com</option>
-												<option value="airbnb">Airbnb</option>
-												<option value="expedia">Expedia</option>
-											</select>
-											<Button
-												size="default"
-												className="sm:w-auto"
-												onClick={() => addIcalSyncUrl(location.id)}
-											>
-												Add URL
-											</Button>
+											<div className="sm:col-span-2">
+												<select
+													id={`source-${location.id}`}
+													className="h-10 w-full px-3 rounded-md border border-input bg-background"
+													value={icalInputValues[location.id]?.source || "ical"}
+													onChange={(e) =>
+														setIcalInputValues((prev) => ({
+															...prev,
+															[location.id]: {
+																...prev[location.id],
+																source: e.target.value,
+															},
+														}))
+													}
+												>
+													<option value="ical">iCal</option>
+													<option value="booking_com">Booking.com</option>
+													<option value="airbnb">Airbnb</option>
+													<option value="expedia">Expedia</option>
+												</select>
+											</div>
+											<div className="sm:col-span-3">
+												<select
+													id={`room-${location.id}`}
+													className="h-10 w-full px-3 rounded-md border border-input bg-background"
+													value={icalInputValues[location.id]?.room_id || ""}
+													onChange={(e) =>
+														setIcalInputValues((prev) => ({
+															...prev,
+															[location.id]: {
+																...prev[location.id],
+																room_id: e.target.value || null,
+															},
+														}))
+													}
+												>
+													<option value="">Select Room (Optional)</option>
+													{locationRooms.map((room) => (
+														<option key={room.id} value={room.id}>
+															{room.room_number} - {room.room_type}
+														</option>
+													))}
+												</select>
+											</div>
+											<div className="sm:col-span-2">
+												<Button
+													size="default"
+													className="w-full"
+													onClick={() => addIcalSyncUrl(location.id)}
+												>
+													Add URL
+												</Button>
+											</div>
 										</div>
 
 										{/* Display Existing Sync URLs */}
@@ -1557,29 +1637,116 @@ export default function BookingChannelsIntegration() {
 													{locationSyncUrls.map((syncUrl) => (
 														<div
 															key={syncUrl.id}
-															className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-muted rounded-md"
+															className="flex flex-col gap-3 p-3 bg-muted rounded-md border border-border"
 														>
-															<div className="flex-1 min-w-0">
-																<div className="flex flex-wrap items-center gap-2 mb-1">
+															{/* Top Row: Source, Room Badge, Actions */}
+															<div className="flex flex-wrap items-center justify-between gap-2">
+																<div className="flex flex-wrap items-center gap-2">
 																	<Badge
 																		className={getSourceColor(syncUrl.source)}
 																	>
 																		{syncUrl.source.replace("_", ".")}
 																	</Badge>
-																	{syncUrl.room_number && (
+																	{syncUrl.room_id && syncUrl.rooms ? (
 																		<Badge
 																			variant="outline"
+																			className="text-xs flex items-center gap-1"
+																		>
+																			<Bed className="size-3" />
+																			Room: {syncUrl.rooms.room_number} - {syncUrl.rooms.room_type}
+																		</Badge>
+																	) : (
+																		<Badge
+																			variant="secondary"
 																			className="text-xs"
 																		>
-																			Room: {syncUrl.rooms?.room_number}
+																			No Room Mapped
 																		</Badge>
 																	)}
 																</div>
+																<div className="flex gap-2">
+																	{editingSyncUrlId === syncUrl.id ? (
+																		<>
+																			<select
+																				className="h-8 px-2 text-xs rounded-md border border-input bg-background"
+																				value={editingRoomId || ""}
+																				onChange={(e) =>
+																					setEditingRoomId(e.target.value || null)
+																				}
+																			>
+																				<option value="">No Room</option>
+																				{locationRooms.map((room) => (
+																					<option key={room.id} value={room.id}>
+																						{room.room_number} - {room.room_type}
+																					</option>
+																				))}
+																			</select>
+																			<Button
+																				size="sm"
+																				variant="outline"
+																				onClick={() =>
+																					updateSyncUrlRoomMapping(
+																						syncUrl.id,
+																						editingRoomId,
+																					)
+																				}
+																			>
+																				Save
+																			</Button>
+																			<Button
+																				size="sm"
+																				variant="ghost"
+																				onClick={() => {
+																					setEditingSyncUrlId(null);
+																					setEditingRoomId(null);
+																				}}
+																			>
+																				Cancel
+																			</Button>
+																		</>
+																	) : (
+																		<>
+																			<Button
+																				size="sm"
+																				variant="outline"
+																				onClick={() => {
+																					setEditingSyncUrlId(syncUrl.id);
+																					setEditingRoomId(syncUrl.room_id);
+																				}}
+																				title="Map Room"
+																			>
+																				<Bed className="size-4" />
+																			</Button>
+																			<Button
+																				size="sm"
+																				variant="outline"
+																				onClick={() => manualSyncIcal(syncUrl.id)}
+																				disabled={syncing}
+																				title="Sync Now"
+																			>
+																				<RefreshCw
+																					className={`size-4 ${syncing ? "animate-spin" : ""}`}
+																				/>
+																			</Button>
+																			<Button
+																				size="sm"
+																				variant="destructive"
+																				onClick={() => deleteSyncUrl(syncUrl.id)}
+																				title="Delete"
+																			>
+																				<Trash2 className="size-4" />
+																			</Button>
+																		</>
+																	)}
+																</div>
+															</div>
+															{/* Bottom Row: URL and Last Sync */}
+															<div className="space-y-1">
 																<div className="text-xs text-muted-foreground truncate">
 																	{syncUrl.ical_url}
 																</div>
 																{syncUrl.last_synced_at && (
-																	<div className="text-xs text-muted-foreground mt-1">
+																	<div className="text-xs text-muted-foreground">
 																		Last synced:{" "}
 																		{format(
 																			new Date(syncUrl.last_synced_at),
@@ -1587,25 +1754,6 @@ export default function BookingChannelsIntegration() {
 																		)}
 																	</div>
 																)}
-															</div>
-															<div className="flex gap-2">
-																<Button
-																	size="sm"
-																	variant="outline"
-																	onClick={() => manualSyncIcal(syncUrl.id)}
-																	disabled={syncing}
-																>
-																	<RefreshCw
-																		className={`size-4 ${syncing ? "animate-spin" : ""}`}
-																	/>
-																</Button>
-																<Button
-																	size="sm"
-																	variant="destructive"
-																	onClick={() => deleteSyncUrl(syncUrl.id)}
-																>
-																	<Trash2 className="size-4" />
-																</Button>
 															</div>
 														</div>
 													))}
