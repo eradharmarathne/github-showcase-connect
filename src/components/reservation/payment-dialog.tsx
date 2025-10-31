@@ -59,6 +59,8 @@ export function PaymentDialog({
 	const { selectedLocation } = useLocationContext();
 
 	const [reservation, setReservation] = useState<Reservation | null>(null);
+	const [externalBooking, setExternalBooking] = useState<any | null>(null);
+	const [isExternalBooking, setIsExternalBooking] = useState(false);
 	const [accounts, setAccounts] = useState<Account[]>([]);
 	const [location, setLocation] = useState<any>(null);
 	const [incomeRecords, setIncomeRecords] = useState<any[]>([]);
@@ -111,47 +113,143 @@ export function PaymentDialog({
 
 		setLoading(true);
 		try {
-			const [reservationRes, accountsRes, incomeRes] = await Promise.all([
-				supabase
-					.from("reservations")
-					.select(`
-            *,
-            locations (*),
-            rooms (*)
-          `)
-					.eq("id", reservationId)
-					.eq("tenant_id", tenant.id)
-					.single(),
+			// First, check if this is a reservation or external booking
+			const { data: resCheck } = await supabase
+				.from("reservations")
+				.select("id")
+				.eq("id", reservationId)
+				.eq("tenant_id", tenant.id)
+				.maybeSingle();
 
-				supabase
-					.from("accounts")
-					.select("*")
-					.eq("tenant_id", tenant.id)
-					.order("name"),
+			const isExternal = !resCheck;
+			setIsExternalBooking(isExternal);
 
-				supabase
-					.from("income")
-					.select("*")
-					.eq("booking_id", reservationId)
-					.eq("tenant_id", tenant.id)
-					.order("created_at", { ascending: false }),
-			]);
+			if (isExternal) {
+				// Fetch external booking data
+				const [externalBookingRes, accountsRes, incomeRes] = await Promise.all([
+					supabase
+						.from("external_bookings")
+						.select(`
+              *,
+              locations (*),
+              rooms (*)
+            `)
+						.eq("id", reservationId)
+						.eq("tenant_id", tenant.id)
+						.single(),
 
-			if (reservationRes.error) {
-				toast({
-					title: "Error",
-					description: "Failed to fetch reservation details",
-					variant: "destructive",
+					supabase
+						.from("accounts")
+						.select("*")
+						.eq("tenant_id", tenant.id)
+						.order("name"),
+
+					supabase
+						.from("income")
+						.select("*")
+						.eq("booking_id", reservationId)
+						.eq("tenant_id", tenant.id)
+						.order("created_at", { ascending: false }),
+				]);
+
+				if (externalBookingRes.error) {
+					toast({
+						title: "Error",
+						description: "Failed to fetch booking details",
+						variant: "destructive",
+					});
+					return;
+				}
+
+				setExternalBooking(externalBookingRes.data);
+				setAccounts(accountsRes.data || []);
+				setIncomeRecords(incomeRes.data || []);
+
+				// Calculate display amounts for external booking
+				const totalAmount = externalBookingRes.data.total_amount || 0;
+				const paidAmount = externalBookingRes.data.paid_amount || 0;
+				const balanceAmount = externalBookingRes.data.balance_amount || 0;
+
+				setDisplayAmounts({
+					totalAmount,
+					paidAmount,
+					balanceAmount,
+					currency: externalBookingRes.data.currency || initialCurrency,
 				});
-				return;
-			}
 
-			setReservation(reservationRes.data);
-			setAccounts(accountsRes.data || []);
-			setIncomeRecords(incomeRes.data || []);
+				// Set initial form amount to balance
+				setFormData((prev) => ({
+					...prev,
+					amount: balanceAmount,
+					currency: externalBookingRes.data.currency || initialCurrency,
+				}));
 
-			if (reservationRes.data?.location_id) {
-				await fetchLocation(reservationRes.data.location_id);
+				if (externalBookingRes.data.location_id) {
+					fetchLocation(externalBookingRes.data.location_id);
+				}
+			} else {
+				// Fetch regular reservation data
+				const [reservationRes, accountsRes, incomeRes] = await Promise.all([
+					supabase
+						.from("reservations")
+						.select(`
+              *,
+              locations (*),
+              rooms (*)
+            `)
+						.eq("id", reservationId)
+						.eq("tenant_id", tenant.id)
+						.single(),
+
+					supabase
+						.from("accounts")
+						.select("*")
+						.eq("tenant_id", tenant.id)
+						.order("name"),
+
+					supabase
+						.from("income")
+						.select("*")
+						.eq("booking_id", reservationId)
+						.eq("tenant_id", tenant.id)
+						.order("created_at", { ascending: false }),
+				]);
+
+				if (reservationRes.error) {
+					toast({
+						title: "Error",
+						description: "Failed to fetch reservation details",
+						variant: "destructive",
+					});
+					return;
+				}
+
+				setReservation(reservationRes.data);
+				setAccounts(accountsRes.data || []);
+				setIncomeRecords(incomeRes.data || []);
+
+				// Calculate display amounts for reservation
+				const totalAmount = reservationRes.data.total_amount || 0;
+				const paidAmount = reservationRes.data.paid_amount || 0;
+				const balanceAmount = reservationRes.data.balance_amount || 0;
+
+				setDisplayAmounts({
+					totalAmount,
+					paidAmount,
+					balanceAmount,
+					currency: reservationRes.data.currency || initialCurrency,
+				});
+
+				// Set initial form amount to balance
+				setFormData((prev) => ({
+					...prev,
+					amount: balanceAmount,
+					currency: reservationRes.data.currency || initialCurrency,
+				}));
+
+				if (reservationRes.data.location_id) {
+					fetchLocation(reservationRes.data.location_id);
+				}
 			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
@@ -270,23 +368,25 @@ export function PaymentDialog({
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!reservation || !tenant?.id) return;
+		
+		const currentBooking = isExternalBooking ? externalBooking : reservation;
+		if (!currentBooking || !tenant?.id) return;
 
 		// Prevent overpayment - check remaining balance
-		const totalAmount = reservation.total_amount || 0;
-		const paidAmount = reservation.paid_amount || 0;
+		const totalAmount = currentBooking.total_amount || 0;
+		const paidAmount = currentBooking.paid_amount || 0;
 		const remainingBalance = totalAmount - paidAmount;
 
-		// Convert payment amount to reservation currency for comparison
+		// Convert payment amount to booking currency for comparison
 		let paymentAmountInReservationCurrency = formData.amount;
-		if (formData.currency !== reservation.currency) {
+		if (formData.currency !== currentBooking.currency) {
 			try {
 				paymentAmountInReservationCurrency = await convertCurrency(
 					formData.amount,
 					formData.currency,
-					reservation.currency,
+					currentBooking.currency,
 					tenant?.id!,
-					reservation.location_id,
+					currentBooking.location_id,
 				);
 			} catch (error) {
 				console.error("Error converting currency for validation:", error);
@@ -298,7 +398,7 @@ export function PaymentDialog({
 		if (paymentAmountInReservationCurrency > remainingBalance + tolerance) {
 			toast({
 				title: "Payment Amount Exceeds Balance",
-				description: `Payment amount (${formData.currency} ${formData.amount.toFixed(2)}) exceeds remaining balance (${reservation.currency} ${remainingBalance.toFixed(2)}). Please adjust the amount.`,
+				description: `Payment amount (${formData.currency} ${formData.amount.toFixed(2)}) exceeds remaining balance (${currentBooking.currency} ${remainingBalance.toFixed(2)}). Please adjust the amount.`,
 				variant: "destructive",
 			});
 			setSubmitting(false);
@@ -317,12 +417,12 @@ export function PaymentDialog({
 				formData.currency,
 				accountCurrency,
 				tenant?.id!,
-				reservation.location_id,
+				currentBooking.location_id,
 			);
 
-			// Create payment record (database trigger will automatically update reservation)
+			// Create payment record (database trigger will automatically update reservation/external_booking)
 			const { error: paymentError } = await supabase.from("payments").insert({
-				reservation_id: reservation.id,
+				reservation_id: currentBooking.id,
 				tenant_id: tenant?.id!,
 				amount: convertedAmount,
 				currency: accountCurrency,
@@ -337,23 +437,24 @@ export function PaymentDialog({
 
 			if (paymentError) throw paymentError;
 
-			// If marked as complete, update reservation status to checked_out
+			// If marked as complete, update status to checked_out
 			if (formData.markAsComplete && tenant?.id) {
+				const tableName = isExternalBooking ? "external_bookings" : "reservations";
 				const { error: statusError } = await supabase
-					.from("reservations")
+					.from(tableName)
 					.update({ status: "checked_out" })
-					.eq("id", reservation.id)
+					.eq("id", currentBooking.id)
 					.eq("tenant_id", tenant.id);
 
 				if (statusError) {
-					console.error("Error updating reservation status:", statusError);
+					console.error("Error updating booking status:", statusError);
 					// Don't throw error - payment was successful, just status update failed
 				}
 			}
 			toast({
 				title: "Payment Recorded",
 				description: formData.markAsComplete
-					? `Payment recorded and reservation marked as completed!`
+					? `Payment recorded and booking marked as completed!`
 					: `Payment of ${formData.currency} ${formData.amount} has been recorded successfully.`,
 			});
 

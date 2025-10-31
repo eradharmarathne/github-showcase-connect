@@ -55,6 +55,8 @@ export function ViewReservationDialog({
 	const { t } = useTranslation();
 	const { toast } = useToast();
 	const [reservation, setReservation] = useState<Reservation | null>(null);
+	const [externalBooking, setExternalBooking] = useState<any | null>(null);
+	const [isExternalBooking, setIsExternalBooking] = useState(false);
 	const [incomeRecords, setIncomeRecords] = useState<IncomeRecord[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [convertedAmounts, setConvertedAmounts] = useState({
@@ -75,56 +77,82 @@ export function ViewReservationDialog({
 				.eq("id", reservationId)
 				.maybeSingle();
 
-			if (!resCheck) {
-				// Not found in reservations, check external_bookings
-				const { data: extCheck } = await supabase
-					.from("external_bookings")
-					.select("id")
-					.eq("id", reservationId)
-					.maybeSingle();
+			const isExternal = !resCheck;
+			setIsExternalBooking(isExternal);
 
-				if (extCheck) {
-					// This is an external booking, show appropriate message
-					toast({
-						title: "External Booking",
-						description:
-							"This is an external booking from a channel manager. Please view it in the Booking Channels Integration page or assign it to a room first.",
-						variant: "default",
-					});
-					onClose();
-					return;
+			if (isExternal) {
+				// Fetch external booking data
+				const [externalBookingRes, incomeRes] = await Promise.all([
+					supabase
+						.from("external_bookings")
+						.select(`
+							*,
+							locations (*),
+							rooms (*)
+						`)
+						.eq("id", reservationId)
+						.single(),
+					supabase
+						.from("income")
+						.select(`
+							id,
+							booking_id,
+							amount,
+							payment_method,
+							currency
+						`)
+						.eq("booking_id", reservationId),
+				]);
+
+				if (externalBookingRes.error) {
+					if (externalBookingRes.error.code === 'PGRST116') {
+						toast({
+							title: "Not Found",
+							description: "Booking not found.",
+							variant: "destructive",
+						});
+						onClose();
+						setLoading(false);
+						return;
+					}
+					throw externalBookingRes.error;
 				}
+				if (incomeRes.error) throw incomeRes.error;
+
+				setExternalBooking(externalBookingRes.data);
+				setIncomeRecords(incomeRes.data || []);
+			} else {
+				// Fetch regular reservation data
+				const [reservationRes, incomeRes] = await Promise.all([
+					supabase
+						.from("reservations")
+						.select(`
+							*,
+							locations (*),
+							rooms (*),
+							guides (*),
+							agents (*)
+						`)
+						.eq("id", reservationId)
+						.single(),
+					supabase
+						.from("income")
+						.select(`
+							id,
+							booking_id,
+							amount,
+							payment_method,
+							currency
+						`)
+						.eq("booking_id", reservationId),
+				]);
+
+				if (reservationRes.error) throw reservationRes.error;
+				if (incomeRes.error) throw incomeRes.error;
+
+				setReservation(reservationRes.data);
+				setIncomeRecords(incomeRes.data || []);
 			}
-
-			const [reservationRes, incomeRes] = await Promise.all([
-				supabase
-					.from("reservations")
-					.select(`
-						*,
-						locations (*),
-						rooms (*),
-						guides (*),
-						agents (*)
-					`)
-					.eq("id", reservationId)
-					.single(),
-				supabase
-					.from("income")
-					.select(`
-						id,
-						booking_id,
-						amount,
-						payment_method,
-						currency
-					`)
-					.eq("booking_id", reservationId),
-			]);
-
-			if (reservationRes.error) throw reservationRes.error;
-			if (incomeRes.error) throw incomeRes.error;
-
-			setReservation(reservationRes.data);
-			setIncomeRecords(incomeRes.data || []);
 		} catch (error) {
 			console.error("Error fetching reservation:", error);
 			toast({
@@ -143,9 +171,10 @@ export function ViewReservationDialog({
 		}
 	}, [isOpen, reservationId, fetchReservation]);
 
-	// Convert income amounts to reservation currency when data loads
+	// Convert income amounts to booking currency when data loads
 	useEffect(() => {
-		if (reservation && incomeRecords.length >= 0) {
+		const currentBooking = isExternalBooking ? externalBooking : reservation;
+		if (currentBooking && incomeRecords.length >= 0) {
 			const convertAmounts = async () => {
 				try {
 					let totalExpenses = 0;
@@ -156,9 +185,9 @@ export function ViewReservationDialog({
 						const convertedAmount = await convertCurrency(
 							Number(income.amount),
 							income.currency,
-							reservation.currency,
-							reservation.tenant_id!,
-							reservation.location_id,
+							currentBooking.currency,
+							currentBooking.tenant_id!,
+							currentBooking.location_id,
 						);
 
 						totalExpenses += convertedAmount;
@@ -182,7 +211,7 @@ export function ViewReservationDialog({
 
 			convertAmounts();
 		}
-	}, [reservation, incomeRecords]);
+	}, [reservation, externalBooking, isExternalBooking, incomeRecords]);
 
 	const getPendingExpenses = () => {
 		return convertedAmounts.pendingExpenses;
@@ -251,17 +280,57 @@ export function ViewReservationDialog({
 		return null;
 	}
 
-	if (!reservation) {
+	const currentBooking = isExternalBooking ? externalBooking : reservation;
+	
+	if (!currentBooking) {
 		return (
 			<Dialog open={isOpen} onOpenChange={onClose}>
 				<DialogContent className="max-w-4xl">
 					<div className="text-center py-8">
-						<p className="text-muted-foreground">Reservation not found</p>
+						<p className="text-muted-foreground">Booking not found</p>
 					</div>
 				</DialogContent>
 			</Dialog>
 		);
 	}
+
+	// For external bookings, map field names
+	const bookingNumber = isExternalBooking 
+		? `${currentBooking.source.toUpperCase()}-${currentBooking.external_id}`
+		: currentBooking.reservation_number;
+	
+	const guestName = currentBooking.guest_name;
+	const guestEmail = isExternalBooking 
+		? currentBooking.raw_data?.guest?.email || null
+		: currentBooking.guest_email;
+	const guestPhone = isExternalBooking
+		? currentBooking.raw_data?.guest?.phone || null
+		: currentBooking.guest_phone;
+	const guestAddress = isExternalBooking ? null : currentBooking.guest_address;
+	const guestNationality = isExternalBooking ? null : currentBooking.guest_nationality;
+	const guestPassportNumber = isExternalBooking ? null : currentBooking.guest_passport_number;
+	const guestIdNumber = isExternalBooking ? null : currentBooking.guest_id_number;
+	const adults = currentBooking.adults || 0;
+	const children = currentBooking.children || 0;
+	const checkInDate = isExternalBooking ? currentBooking.check_in : currentBooking.check_in_date;
+	const checkOutDate = isExternalBooking ? currentBooking.check_out : currentBooking.check_out_date;
+	const nights = isExternalBooking 
+		? Math.ceil((new Date(currentBooking.check_out).getTime() - new Date(currentBooking.check_in).getTime()) / (1000 * 60 * 60 * 24))
+		: currentBooking.nights;
+	const arrivalTime = isExternalBooking ? null : currentBooking.arrival_time;
+	const specialRequests = isExternalBooking 
+		? currentBooking.raw_data?.notes || null
+		: currentBooking.special_requests;
+	const bookingSource = isExternalBooking ? currentBooking.source : currentBooking.booking_source;
+	
+	// Room information
+	const roomInfo = currentBooking.rooms || null;
+	
+	// Financial fields
+	const currency = currentBooking.currency || "LKR";
+	const roomRate = currentBooking.room_rate || 0;
+	const totalAmount = currentBooking.total_amount || 0;
+	const paidAmount = currentBooking.paid_amount || 0;
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
@@ -269,11 +338,16 @@ export function ViewReservationDialog({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-xl">
 						<Calendar className="size-5" />
-						{t("reservations.dialog.viewTitle")}
+						{isExternalBooking ? "Booking Details" : t("reservations.dialog.viewTitle")}
 					</DialogTitle>
 					<DialogDescription>
-						{t("reservations.viewDialog.reservationNumber")} #
-						{reservation.reservation_number}
+						{isExternalBooking ? "Booking" : t("reservations.viewDialog.reservationNumber")} #
+						{bookingNumber}
+						{isExternalBooking && (
+							<span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+								External Booking
+							</span>
+						)}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -281,18 +355,18 @@ export function ViewReservationDialog({
 					{/* Status and Location */}
 					<div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b">
 						<div className="flex items-center gap-3">
-							<Badge className={getStatusColor(reservation.status)}>
-								{getStatusText(reservation.status).toUpperCase()}
+							<Badge className={getStatusColor(currentBooking.status)}>
+								{getStatusText(currentBooking.status).toUpperCase()}
 							</Badge>
-							{reservation.locations && (
+							{currentBooking.locations && (
 								<div className="flex items-center gap-2 text-sm text-muted-foreground">
 									<MapPin className="size-4" />
-									<span>{reservation.locations.name}</span>
+									<span>{currentBooking.locations.name}</span>
 								</div>
 							)}
 						</div>
 						<div className="text-sm text-muted-foreground">
-							Created: {new Date(reservation.created_at).toLocaleDateString()}
+							{isExternalBooking ? "Last Synced" : "Created"}: {new Date(isExternalBooking ? currentBooking.last_synced_at : currentBooking.created_at).toLocaleDateString()}
 						</div>
 					</div>
 
@@ -311,57 +385,57 @@ export function ViewReservationDialog({
 										Name
 									</label>
 									<p className="text-sm font-semibold">
-										{reservation.guest_name}
+										{guestName}
 									</p>
 								</div>
-								{reservation.guest_email && (
+								{guestEmail && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Email
 										</label>
-										<p className="text-sm">{reservation.guest_email}</p>
+										<p className="text-sm">{guestEmail}</p>
 									</div>
 								)}
-								{reservation.guest_phone && (
+								{guestPhone && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Phone
 										</label>
-										<p className="text-sm">{reservation.guest_phone}</p>
+										<p className="text-sm">{guestPhone}</p>
 									</div>
 								)}
-								{reservation.guest_address && (
+								{guestAddress && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Address
 										</label>
-										<p className="text-sm">{reservation.guest_address}</p>
+										<p className="text-sm">{guestAddress}</p>
 									</div>
 								)}
-								{reservation.guest_nationality && (
+								{guestNationality && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Nationality
 										</label>
-										<p className="text-sm">{reservation.guest_nationality}</p>
+										<p className="text-sm">{guestNationality}</p>
 									</div>
 								)}
-								{reservation.guest_passport_number && (
+								{guestPassportNumber && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Passport Number
 										</label>
 										<p className="text-sm">
-											{reservation.guest_passport_number}
+											{guestPassportNumber}
 										</p>
 									</div>
 								)}
-								{reservation.guest_id_number && (
+								{guestIdNumber && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											ID Number
 										</label>
-										<p className="text-sm">{reservation.guest_id_number}</p>
+										<p className="text-sm">{guestIdNumber}</p>
 									</div>
 								)}
 								<div className="flex gap-6">
@@ -370,7 +444,7 @@ export function ViewReservationDialog({
 											Adults
 										</label>
 										<p className="text-sm font-semibold">
-											{reservation.adults}
+											{adults}
 										</p>
 									</div>
 									<div>
@@ -378,7 +452,7 @@ export function ViewReservationDialog({
 											Children
 										</label>
 										<p className="text-sm font-semibold">
-											{reservation.children}
+											{children}
 										</p>
 									</div>
 								</div>
@@ -400,7 +474,7 @@ export function ViewReservationDialog({
 											Check-in
 										</label>
 										<p className="text-sm font-semibold">
-											{new Date(reservation.check_in_date).toLocaleDateString()}
+											{new Date(checkInDate).toLocaleDateString()}
 										</p>
 									</div>
 									<div>
@@ -408,9 +482,7 @@ export function ViewReservationDialog({
 											Check-out
 										</label>
 										<p className="text-sm font-semibold">
-											{new Date(
-												reservation.check_out_date,
-											).toLocaleDateString()}
+											{new Date(checkOutDate).toLocaleDateString()}
 										</p>
 									</div>
 								</div>
@@ -418,25 +490,25 @@ export function ViewReservationDialog({
 									<label className="text-xs font-medium text-muted-foreground">
 										Nights
 									</label>
-									<p className="text-sm font-semibold">{reservation.nights}</p>
+									<p className="text-sm font-semibold">{nights}</p>
 								</div>
-								{reservation.arrival_time && (
+								{arrivalTime && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Arrival Time
 										</label>
 										<p className="text-sm flex items-center gap-1">
 											<Clock className="size-3" />
-											{reservation.arrival_time}
+											{arrivalTime}
 										</p>
 									</div>
 								)}
-								{reservation.special_requests && (
+								{specialRequests && (
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Special Requests
 										</label>
-										<p className="text-sm">{reservation.special_requests}</p>
+										<p className="text-sm">{specialRequests}</p>
 									</div>
 								)}
 								<div>
@@ -444,7 +516,7 @@ export function ViewReservationDialog({
 										Booking Source
 									</label>
 									<p className="text-sm capitalize">
-										{reservation.booking_source || "Direct"}
+										{bookingSource || "Direct"}
 									</p>
 								</div>
 							</CardContent>
@@ -459,46 +531,46 @@ export function ViewReservationDialog({
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
-								{reservation.rooms ? (
+								{roomInfo ? (
 									<>
 										<div>
 											<label className="text-xs font-medium text-muted-foreground">
 												Room Number
 											</label>
 											<p className="text-sm font-semibold">
-												{reservation.rooms.room_number}
+												{roomInfo.room_number}
 											</p>
 										</div>
 										<div>
 											<label className="text-xs font-medium text-muted-foreground">
 												Room Type
 											</label>
-											<p className="text-sm">{reservation.rooms.room_type}</p>
+											<p className="text-sm">{roomInfo.room_type}</p>
 										</div>
 										<div>
 											<label className="text-xs font-medium text-muted-foreground">
 												Bed Type
 											</label>
-											<p className="text-sm">{reservation.rooms.bed_type}</p>
+											<p className="text-sm">{roomInfo.bed_type}</p>
 										</div>
-										{reservation.rooms.description && (
+										{roomInfo.description && (
 											<div>
 												<label className="text-xs font-medium text-muted-foreground">
 													Description
 												</label>
 												<p className="text-sm">
-													{reservation.rooms.description}
+													{roomInfo.description}
 												</p>
 											</div>
 										)}
-										{reservation.rooms.amenities &&
-											reservation.rooms.amenities.length > 0 && (
+										{roomInfo.amenities &&
+											roomInfo.amenities.length > 0 && (
 												<div>
 													<label className="text-xs font-medium text-muted-foreground">
 														Amenities
 													</label>
 													<p className="text-sm">
-														{reservation.rooms.amenities.join(", ")}
+														{roomInfo.amenities.join(", ")}
 													</p>
 												</div>
 											)}
@@ -525,15 +597,15 @@ export function ViewReservationDialog({
 										Room Rate (per night)
 									</label>
 									<p className="text-sm font-semibold">
-										{getCurrencySymbol(reservation.currency)}{" "}
-										{reservation.room_rate.toLocaleString()}
+										{getCurrencySymbol(currency)}{" "}
+										{roomRate.toLocaleString()}
 									</p>
 								</div>
 								<div className="flex justify-between items-center">
 									<label className="text-xs font-medium text-muted-foreground">
 										Nights
 									</label>
-									<p className="text-sm">× {reservation.nights}</p>
+									<p className="text-sm">× {nights}</p>
 								</div>
 								<Separator />
 								<div className="flex justify-between items-center">
@@ -541,8 +613,8 @@ export function ViewReservationDialog({
 										Total Amount
 									</label>
 									<p className="text-sm font-bold">
-										{getCurrencySymbol(reservation.currency)}{" "}
-										{reservation.total_amount.toLocaleString()}
+										{getCurrencySymbol(currency)}{" "}
+										{totalAmount.toLocaleString()}
 									</p>
 								</div>
 								<div className="flex justify-between items-center">
@@ -550,8 +622,8 @@ export function ViewReservationDialog({
 										Paid Amount
 									</label>
 									<p className="text-sm text-emerald-600 font-semibold">
-										{getCurrencySymbol(reservation.currency)}{" "}
-										{(reservation.paid_amount || 0).toLocaleString()}
+										{getCurrencySymbol(currency)}{" "}
+										{(paidAmount || 0).toLocaleString()}
 									</p>
 								</div>
 								{getPaidExpenses() > 0 && (
@@ -560,7 +632,7 @@ export function ViewReservationDialog({
 											Paid Additional Services
 										</label>
 										<p className="text-sm text-emerald-600">
-											{getCurrencySymbol(reservation.currency)}{" "}
+											{getCurrencySymbol(currency)}{" "}
 											{getPaidExpenses().toLocaleString()}
 										</p>
 									</div>
@@ -571,7 +643,7 @@ export function ViewReservationDialog({
 											Pending Additional Services
 										</label>
 										<p className="text-sm text-orange-600">
-											{getCurrencySymbol(reservation.currency)}{" "}
+											{getCurrencySymbol(currency)}{" "}
 											{getPendingExpenses().toLocaleString()}
 										</p>
 									</div>
@@ -582,7 +654,7 @@ export function ViewReservationDialog({
 									<p
 										className={`text-base font-bold ${getTotalBalance() > 0 ? "text-red-600" : "text-emerald-600"}`}
 									>
-										{getCurrencySymbol(reservation.currency)}{" "}
+										{getCurrencySymbol(currency)}{" "}
 										{getTotalBalance().toLocaleString()}
 									</p>
 								</div>
@@ -590,8 +662,8 @@ export function ViewReservationDialog({
 						</Card>
 					</div>
 
-					{/* Commission Details (if applicable) */}
-					{(reservation.guides || reservation.agents) && (
+					{/* Commission Details (if applicable) - only for direct reservations */}
+					{!isExternalBooking && (reservation.guides || reservation.agents) && (
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2 text-sm md:text-base lg:text-lg">
@@ -611,7 +683,7 @@ export function ViewReservationDialog({
 											</p>
 											{reservation.guide_commission && (
 												<p className="text-sm text-muted-foreground">
-													Commission: {getCurrencySymbol(reservation.currency)}{" "}
+													Commission: {getCurrencySymbol(currency)}{" "}
 													{reservation.guide_commission.toLocaleString()}
 												</p>
 											)}
@@ -632,7 +704,7 @@ export function ViewReservationDialog({
 											)}
 											{reservation.agent_commission && (
 												<p className="text-sm text-muted-foreground">
-													Commission: {getCurrencySymbol(reservation.currency)}{" "}
+													Commission: {getCurrencySymbol(currency)}{" "}
 													{reservation.agent_commission.toLocaleString()}
 												</p>
 											)}
