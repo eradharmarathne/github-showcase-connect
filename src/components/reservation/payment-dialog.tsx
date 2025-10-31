@@ -293,10 +293,12 @@ export function PaymentDialog({
 			}
 		}
 
-		if (paymentAmountInReservationCurrency > remainingBalance) {
+		// Add tolerance for rounding errors (0.10 variance allowed)
+		const tolerance = 0.10;
+		if (paymentAmountInReservationCurrency > remainingBalance + tolerance) {
 			toast({
 				title: "Payment Amount Exceeds Balance",
-				description: `Payment amount (${formData.currency} ${formData.amount}) exceeds remaining balance (${reservation.currency} ${remainingBalance.toFixed(2)}). Please adjust the amount.`,
+				description: `Payment amount (${formData.currency} ${formData.amount.toFixed(2)}) exceeds remaining balance (${reservation.currency} ${remainingBalance.toFixed(2)}). Please adjust the amount.`,
 				variant: "destructive",
 			});
 			setSubmitting(false);
