@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export function PrintSettingsTab() {
 	const { printSettings, saveSettings, isSubmitting, isLoading } = usePrintSettings();
-	const { tenant } = useTenant();
+	const { tenant, refetch: refreshTenant } = useTenant();
 	const { toast } = useToast();
 	
 	const [formData, setFormData] = useState({
@@ -91,6 +91,9 @@ export function PrintSettingsTab() {
 				.eq("id", tenant.id);
 
 			if (updateError) throw updateError;
+
+			// Refresh tenant data to get the new logo URL
+			await refreshTenant();
 
 			toast({
 				title: "Success",
