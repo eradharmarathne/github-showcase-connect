@@ -77,6 +77,19 @@ export default function Onboarding() {
 			setHasExistingTenant(true);
 		}
 
+		// Handle return from payment via URL parameters
+		const paymentStatusParam = searchParams.get("payment_status");
+		const tenantIdParam = searchParams.get("tenant_id");
+
+		if (paymentStatusParam === "checking" && tenantIdParam) {
+			console.log(
+				"🔄 [ONBOARDING] Returning from payment, starting verification...",
+			);
+			setPendingTenantId(tenantIdParam);
+			setAwaitingPayment(true);
+			setCurrentStep(4); // Ensure we're on the payment step
+		}
+
 		// Pre-fill user email if available
 		if (user.email && !formData.email) {
 			setFormData((prev) => ({
@@ -120,23 +133,17 @@ export default function Onboarding() {
 	// Handle payment verification
 	useEffect(() => {
 		if (isVerified && pendingTenantId) {
-			console.log("✅ [ONBOARDING] Payment verified, completing onboarding...");
+			console.log(
+				"✅ [ONBOARDING] Payment verified, advancing to completion...",
+			);
 			toast({
 				title: "Payment Verified! 🎉",
-				description:
-					"Your payment has been confirmed. Setting up your account...",
+				description: "Your payment has been confirmed. Almost done!",
 			});
 
-			// Mark tenant as onboarding complete
-			supabase
-				.from("tenants")
-				.update({ onboarding_completed: true })
-				.eq("id", pendingTenantId)
-				.then(() => {
-					setTimeout(() => {
-						navigate("/dashboard", { replace: true });
-					}, 2000);
-				});
+			// Advance to completion step (step 5)
+			setCurrentStep(5);
+			setAwaitingPayment(false);
 		} else if (isFailed && pendingTenantId) {
 			console.error("❌ [ONBOARDING] Payment verification failed or timed out");
 			toast({
@@ -148,7 +155,7 @@ export default function Onboarding() {
 			setAwaitingPayment(false);
 			setPendingTenantId(null);
 		}
-	}, [isVerified, isFailed, pendingTenantId, navigate, toast]);
+	}, [isVerified, isFailed, pendingTenantId, toast]);
 
 	// Early return for users with existing tenant - don't render onboarding UI
 	if (hasExistingTenant) {
@@ -163,25 +170,92 @@ export default function Onboarding() {
 	}
 
 	const handleNext = () => {
+		// Validate the current step before advancing
+		if (!validateStep()) {
+			toast({
+				title: "Incomplete Information",
+				description: "Please complete all required fields before continuing.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		// Special handling for payment step (step 4)
+		if (currentStep === 4) {
+			// Step 4 requires payment verification - show appropriate message
+			if (!isVerified || !pendingTenantId) {
+				toast({
+					title: "Payment Required",
+					description:
+						"Please click 'Subscribe & Start Trial' and complete payment to continue.",
+					variant: "destructive",
+				});
+				return;
+			}
+		}
+
 		if (currentStep < STEPS.length) {
 			setCurrentStep(currentStep + 1);
 		}
 	};
 
 	const handlePrevious = () => {
+		// Prevent going back from completion step (step 5)
+		if (currentStep === 5) {
+			toast({
+				title: "Cannot Go Back",
+				description:
+					"Payment has been completed. Please finish the onboarding.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		// Prevent going back if payment is being processed or verified
+		if (currentStep === 4 && (awaitingPayment || isVerified)) {
+			toast({
+				title: "Cannot Go Back",
+				description:
+					"Payment is being processed. Please wait for verification.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		if (currentStep > 1) {
 			setCurrentStep(currentStep - 1);
 		}
 	};
 
 	const handlePayNow = async () => {
-		if (!selectedPlanId) return;
+		// Prevent double-submission
+		if (processingPayment || awaitingPayment) {
+			toast({
+				title: "Payment Already in Progress",
+				description: "Please wait for the current payment to complete.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		if (!selectedPlanId) {
+			toast({
+				title: "No Plan Selected",
+				description: "Please select a subscription plan first.",
+				variant: "destructive",
+			});
+			return;
+		}
 
 		try {
 			setProcessingPayment(true);
 
 			// ✅ SECURE: Create tenant with "pending_payment" status BEFORE payment
 			const tenantId = await createPendingPaymentTenant();
+			if (!tenantId) {
+				throw new Error("Failed to create tenant");
+			}
+
 			setPendingTenantId(tenantId);
 
 			const selectedPlan = plans.find((p) => p.id === selectedPlanId);
@@ -221,13 +295,28 @@ export default function Onboarding() {
 			} else {
 				throw new Error("No checkout URL received from Creem");
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Error creating checkout session:", error);
+
+			// Clean up pending tenant if payment initiation failed
+			if (pendingTenantId) {
+				supabase
+					.from("tenants")
+					.delete()
+					.eq("id", pendingTenantId)
+					.then(() => {
+						console.log("🧹 [ONBOARDING] Cleaned up failed tenant");
+					});
+				setPendingTenantId(null);
+			}
+
 			toast({
 				title: "Payment Error",
-				description: "Failed to initiate payment. Please try again.",
+				description:
+					error.message || "Failed to initiate payment. Please try again.",
 				variant: "destructive",
 			});
+			setAwaitingPayment(false);
 		} finally {
 			setProcessingPayment(false);
 		}
@@ -236,6 +325,18 @@ export default function Onboarding() {
 	const createPendingPaymentTenant = async (): Promise<string> => {
 		try {
 			setLoading(true);
+
+			// Validate required form data
+			if (
+				!formData.companyName ||
+				!formData.contactName ||
+				!formData.email ||
+				!formData.propertyType
+			) {
+				throw new Error(
+					"Missing required information. Please complete all previous steps.",
+				);
+			}
 
 			// Generate collision-resistant slug with client-side logic
 			const generateUniqueSlug = async (name: string): Promise<string> => {
@@ -262,7 +363,11 @@ export default function Onboarding() {
 				let counter = 2;
 				let candidateSlug = `${baseSlug}-${counter}`;
 
-				while (true) {
+				// Prevent infinite loops
+				const maxAttempts = 100;
+				let attempts = 0;
+
+				while (attempts < maxAttempts) {
 					const { data: existingCandidate } = await supabase
 						.from("tenants")
 						.select("slug")
@@ -274,8 +379,12 @@ export default function Onboarding() {
 					}
 
 					counter++;
+					attempts++;
 					candidateSlug = `${baseSlug}-${counter}`;
 				}
+
+				// Fallback to UUID if we can't find a unique slug
+				return `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
 			};
 
 			const slug = await generateUniqueSlug(formData.companyName);
@@ -383,8 +492,21 @@ export default function Onboarding() {
 		try {
 			setLoading(true);
 
-			// At this point, tenant, location, and permissions should already be created
-			// Just show success message and redirect to dashboard
+			// Verify we have a tenant ID (should be set from payment flow)
+			if (!pendingTenantId) {
+				throw new Error("No tenant found. Please complete payment first.");
+			}
+
+			// Mark tenant as onboarding complete
+			const { error: updateError } = await supabase
+				.from("tenants")
+				.update({ onboarding_completed: true })
+				.eq("id", pendingTenantId);
+
+			if (updateError) throw updateError;
+
+			console.log("✅ [ONBOARDING] Onboarding completed successfully");
+
 			toast({
 				title: "Welcome aboard! 🎉",
 				description:
@@ -393,13 +515,14 @@ export default function Onboarding() {
 
 			// Small delay to show the toast, then redirect
 			setTimeout(() => {
-				navigate("/dashboard");
-			}, 1000);
+				navigate("/dashboard", { replace: true });
+			}, 1500);
 		} catch (error: any) {
 			console.error("Final completion error:", error);
 			toast({
 				title: "Setup Error",
-				description: "Failed to complete setup. Please try again.",
+				description:
+					error.message || "Failed to complete setup. Please try again.",
 				variant: "destructive",
 			});
 		} finally {
@@ -420,7 +543,10 @@ export default function Onboarding() {
 			case 3:
 				return formData.selectedFeatures.length > 0;
 			case 4:
-				return selectedPlanId !== null;
+				// CRITICAL: Step 4 (payment) should NOT allow "Next" - payment verification auto-advances
+				// User must click "Subscribe & Start Trial" and complete payment
+				// Only allow proceeding if payment is verified
+				return isVerified && pendingTenantId !== null;
 			default:
 				return true;
 		}

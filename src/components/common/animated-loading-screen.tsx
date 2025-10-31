@@ -78,7 +78,7 @@ export function AnimatedLoadingScreen({
 				</div>
 
 				{/* Floating dots */}
-				<div className="relative w-20 h-6">
+				<div className="relative w-22 h-6">
 					<div className="absolute left-0 w-2 h-2 bg-primary rounded-full animate-bounce" />
 					<div
 						className="absolute left-4 w-2 h-2 bg-primary/80 rounded-full animate-bounce"

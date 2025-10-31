@@ -1,33 +1,25 @@
 import { format } from "date-fns";
-import { ArrowLeft, CreditCard, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { CurrencySelector } from "@/components/common/currency-selector";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+	PaymentDetailsForm,
+	ReservationSummaryCard,
+	TravelerExpensesCard,
+} from "@/components/payment";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
-import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import type { PaymentFormData, PaymentAccount } from "@/types/payment";
 import { convertCurrency } from "@/utils/currency";
 
 type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations">;
 	rooms: Tables<"rooms">;
 };
-type Account = Tables<"accounts">;
 
 export default function PaymentForm() {
 	const navigate = useNavigate();
@@ -35,26 +27,25 @@ export default function PaymentForm() {
 	const [searchParams] = useSearchParams();
 	const { user } = useAuth();
 	const { tenant } = useTenant();
-	const { selectedLocation } = useLocationContext();
 
 	const reservationId = searchParams.get("reservation");
 	const initialAmount = parseFloat(searchParams.get("amount") || "0");
 	const initialCurrency = searchParams.get("currency") || "LKR";
 
 	const [reservation, setReservation] = useState<Reservation | null>(null);
-	const [accounts, setAccounts] = useState<Account[]>([]);
+	const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
 	const [location, setLocation] = useState<any>(null);
 	const [incomeRecords, setIncomeRecords] = useState<any[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 
-	const [formData, setFormData] = useState({
+	const [formData, setFormData] = useState<PaymentFormData>({
 		payment_type: "room_payment",
 		payment_method: "cash",
 		amount: initialAmount,
 		account_id: "",
 		notes: "",
-		currency: initialCurrency as any,
+		currency: initialCurrency,
 		reference_number: "",
 	});
 
@@ -103,7 +94,7 @@ export default function PaymentForm() {
 					.single(),
 				supabase
 					.from("accounts")
-					.select("*")
+					.select("id, name, currency")
 					.eq("tenant_id", tenant.id)
 					.order("name"),
 				supabase
@@ -144,8 +135,8 @@ export default function PaymentForm() {
 				try {
 					const convertedAmount = await convertCurrency(
 						totalAmount,
-						reservationRes.data.currency as any,
-						initialCurrency as any,
+						reservationRes.data.currency,
+						initialCurrency,
 						tenant.id,
 						reservationRes.data.location_id,
 					);
@@ -194,6 +185,13 @@ export default function PaymentForm() {
 		}
 	}, [accounts, formData.currency, formData.account_id]);
 
+	const handleFormChange = (
+		field: keyof PaymentFormData,
+		value: string | number,
+	) => {
+		setFormData((prev) => ({ ...prev, [field]: value }));
+	};
+
 	const handleCurrencyChange = async (newCurrency: string) => {
 		if (!reservation) return;
 
@@ -202,8 +200,8 @@ export default function PaymentForm() {
 			if (formData.currency !== newCurrency) {
 				newAmount = await convertCurrency(
 					formData.amount,
-					formData.currency as any,
-					newCurrency as any,
+					formData.currency,
+					newCurrency,
 					tenant?.id!,
 					reservation.location_id,
 				);
@@ -216,7 +214,7 @@ export default function PaymentForm() {
 
 			setFormData((prev) => ({
 				...prev,
-				currency: newCurrency as any,
+				currency: newCurrency,
 				amount: newAmount,
 				account_id:
 					compatibleAccountsForCurrency.length > 0
@@ -238,7 +236,7 @@ export default function PaymentForm() {
 
 			setFormData((prev) => ({
 				...prev,
-				currency: newCurrency as any,
+				currency: newCurrency,
 				account_id:
 					compatibleAccountsForCurrency.length > 0
 						? compatibleAccountsForCurrency[0].id
@@ -311,8 +309,8 @@ export default function PaymentForm() {
 			if (formData.currency !== reservation.currency) {
 				paymentAmountInReservationCurrency = await convertCurrency(
 					formData.amount,
-					formData.currency as any,
-					reservation.currency as any,
+					formData.currency,
+					reservation.currency,
 					tenant?.id!,
 					reservation.location_id,
 				);
@@ -460,304 +458,28 @@ export default function PaymentForm() {
 			</div>
 
 			{/* Reservation Summary */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<CreditCard className="size-5" />
-						Reservation Summary
-					</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-2">
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Guest:</span>
-						<span className="font-medium">{reservation.guest_name}</span>
-					</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Room:</span>
-						<span className="font-medium">
-							{reservation.rooms?.room_number} - {reservation.rooms?.room_type}
-						</span>
-					</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Total Amount:</span>
-						<span className="font-medium">
-							{reservation.currency} {reservation.total_amount.toLocaleString()}
-						</span>
-					</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Paid Amount:</span>
-						<span className="font-medium text-green-600">
-							{reservation.currency}{" "}
-							{(reservation.paid_amount || 0).toLocaleString()}
-						</span>
-					</div>
-					<div className="flex justify-between">
-						<span className="text-muted-foreground">Balance:</span>
-						<span className="font-bold text-red-600">
-							{reservation.currency}{" "}
-							{(reservation.balance_amount || 0).toLocaleString()}
-						</span>
-					</div>
-					{incomeRecords.filter((inc) => inc.payment_method === "pending")
-						.length > 0 && (
-						<>
-							<div className="flex justify-between border-t pt-2">
-								<span className="text-muted-foreground">Pending Expenses:</span>
-								<span className="font-semibold text-yellow-600">
-									{reservation.currency}{" "}
-									{incomeRecords
-										.filter((inc) => inc.payment_method === "pending")
-										.reduce((sum, inc) => sum + Number(inc.amount), 0)
-										.toLocaleString()}
-								</span>
-							</div>
-							<div className="flex justify-between border-t pt-2">
-								<span className="text-muted-foreground font-semibold">
-									Total to Pay (Room + Expenses):
-								</span>
-								<span className="font-bold text-blue-600 text-lg">
-									{reservation.currency}{" "}
-									{(
-										(reservation.balance_amount || 0) +
-										incomeRecords
-											.filter((inc) => inc.payment_method === "pending")
-											.reduce((sum, inc) => sum + Number(inc.amount), 0)
-									).toLocaleString()}
-								</span>
-							</div>
-						</>
-					)}
-				</CardContent>
-			</Card>
+			<ReservationSummaryCard
+				reservation={reservation}
+				incomeRecords={incomeRecords}
+			/>
 
 			{/* Traveler Expenses Breakdown */}
 			{incomeRecords.length > 0 && (
-				<Card>
-					<CardHeader>
-						<CardTitle>Traveler Expenses</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-2">
-							<div className="flex justify-between font-semibold border-b pb-2">
-								<span>Expense Type</span>
-								<span>Amount</span>
-								<span>Status</span>
-							</div>
-							{incomeRecords.map((income) => (
-								<div
-									key={income.id}
-									className="flex justify-between items-center py-2 border-b"
-								>
-									<div className="flex-1">
-										<p className="font-medium">
-											{income.income_types?.type_name || income.type}
-										</p>
-										{income.note && (
-											<p className="text-sm text-muted-foreground">
-												{income.note}
-											</p>
-										)}
-										<p className="text-xs text-muted-foreground">
-											{format(new Date(income.created_at), "MMM dd, yyyy")}
-										</p>
-									</div>
-									<div className="flex-1 text-right">
-										<p className="font-semibold">
-											{income.currency} {income.amount.toLocaleString()}
-										</p>
-										{income.accounts && (
-											<p className="text-xs text-muted-foreground">
-												via {income.accounts.name}
-											</p>
-										)}
-									</div>
-									<div className="flex-1 text-right">
-										{income.payment_method === "pending" ? (
-											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-												Pending
-											</span>
-										) : (
-											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-												Paid
-											</span>
-										)}
-									</div>
-								</div>
-							))}
-						</div>
-						<div className="pt-4 border-t space-y-2">
-							<div className="flex justify-between text-sm">
-								<span className="text-muted-foreground">Total Expenses:</span>
-								<span className="font-semibold">
-									{reservation.currency}{" "}
-									{incomeRecords
-										.reduce((sum, inc) => sum + Number(inc.amount), 0)
-										.toLocaleString()}
-								</span>
-							</div>
-							<div className="flex justify-between text-sm">
-								<span className="text-muted-foreground">Paid Expenses:</span>
-								<span className="font-semibold text-green-600">
-									{reservation.currency}{" "}
-									{incomeRecords
-										.filter((inc) => inc.payment_method !== "pending")
-										.reduce((sum, inc) => sum + Number(inc.amount), 0)
-										.toLocaleString()}
-								</span>
-							</div>
-							<div className="flex justify-between text-sm">
-								<span className="text-muted-foreground">Pending Expenses:</span>
-								<span className="font-semibold text-yellow-600">
-									{reservation.currency}{" "}
-									{incomeRecords
-										.filter((inc) => inc.payment_method === "pending")
-										.reduce((sum, inc) => sum + Number(inc.amount), 0)
-										.toLocaleString()}
-								</span>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
+				<TravelerExpensesCard
+					reservation={reservation}
+					incomeRecords={incomeRecords}
+				/>
 			)}
 
 			{/* Payment Form */}
 			<form id="payment-form" onSubmit={handleSubmit}>
-				<Card>
-					<CardHeader>
-						<CardTitle>Payment Details</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<Label>Payment Type</Label>
-								<Select
-									value={formData.payment_type}
-									onValueChange={(value) =>
-										setFormData((prev) => ({ ...prev, payment_type: value }))
-									}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="room_payment">Room Payment</SelectItem>
-										<SelectItem value="advance_payment">
-											Advance Payment
-										</SelectItem>
-										<SelectItem value="balance_payment">
-											Balance Payment
-										</SelectItem>
-										<SelectItem value="Payment Type">Payment Type</SelectItem>
-										<SelectItem value="refund">Refund</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-
-							<div>
-								<Label>Payment Method *</Label>
-								<Select
-									value={formData.payment_method || undefined}
-									onValueChange={(value) =>
-										setFormData((prev) => ({ ...prev, payment_method: value }))
-									}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Select method" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="cash">Cash</SelectItem>
-										<SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-										<SelectItem value="card">Credit/Debit Card</SelectItem>
-										<SelectItem value="cheque">Cheque</SelectItem>
-										<SelectItem value="online">Online Payment</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-
-						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<CurrencySelector
-									currency={formData.currency}
-									onCurrencyChange={handleCurrencyChange}
-									label="Payment Currency"
-								/>
-							</div>
-
-							<div>
-								<Label htmlFor="amount">Amount *</Label>
-								<Input
-									id="amount"
-									type="number"
-									step="0.01"
-									min="0"
-									value={formData.amount}
-									onChange={(e) =>
-										setFormData((prev) => ({
-											...prev,
-											amount: parseFloat(e.target.value) || 0,
-										}))
-									}
-									required
-								/>
-							</div>
-						</div>
-
-						<div>
-							<Label>Account *</Label>
-							<Select
-								value={formData.account_id || undefined}
-								onValueChange={(value) =>
-									setFormData((prev) => ({ ...prev, account_id: value }))
-								}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select account" />
-								</SelectTrigger>
-								<SelectContent>
-									{compatibleAccounts.map((account) => (
-										<SelectItem key={account.id} value={account.id}>
-											{account.name} ({account.currency})
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							{compatibleAccounts.length === 0 && (
-								<p className="text-sm text-red-600 mt-1">
-									No {formData.currency} accounts available. Please create a{" "}
-									{formData.currency} account first.
-								</p>
-							)}
-						</div>
-
-						<div>
-							<Label htmlFor="reference_number">Reference Number</Label>
-							<Input
-								id="reference_number"
-								value={formData.reference_number}
-								onChange={(e) =>
-									setFormData((prev) => ({
-										...prev,
-										reference_number: e.target.value,
-									}))
-								}
-								placeholder="Optional reference number"
-							/>
-						</div>
-
-						<div>
-							<Label htmlFor="notes">Notes</Label>
-							<Textarea
-								id="notes"
-								value={formData.notes}
-								onChange={(e) =>
-									setFormData((prev) => ({ ...prev, notes: e.target.value }))
-								}
-								placeholder="Additional notes..."
-							/>
-						</div>
-					</CardContent>
-				</Card>
+				<PaymentDetailsForm
+					formData={formData}
+					accounts={accounts}
+					compatibleAccounts={compatibleAccounts}
+					onFormChange={handleFormChange}
+					onCurrencyChange={handleCurrencyChange}
+				/>
 			</form>
 		</div>
 	);

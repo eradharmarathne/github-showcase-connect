@@ -335,19 +335,20 @@ export function PaymentDialog({
 
 			if (paymentError) throw paymentError;
 
-		// If marked as complete, update reservation status to checked_out
-		if (formData.markAsComplete && tenant?.id) {
-			const { error: statusError } = await supabase
-				.from("reservations")
-				.update({ status: "checked_out" })
-				.eq("id", reservation.id)
-				.eq("tenant_id", tenant.id);
+			// If marked as complete, update reservation status to checked_out
+			if (formData.markAsComplete && tenant?.id) {
+				const { error: statusError } = await supabase
+					.from("reservations")
+					.update({ status: "checked_out" })
+					.eq("id", reservation.id)
+					.eq("tenant_id", tenant.id);
 
-			if (statusError) {
-				console.error("Error updating reservation status:", statusError);
-				// Don't throw error - payment was successful, just status update failed
+				if (statusError) {
+					console.error("Error updating reservation status:", statusError);
+					// Don't throw error - payment was successful, just status update failed
+				}
 			}
-		}			toast({
+			toast({
 				title: "Payment Recorded",
 				description: formData.markAsComplete
 					? `Payment recorded and reservation marked as completed!`

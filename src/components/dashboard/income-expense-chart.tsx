@@ -143,60 +143,67 @@ export function IncomeExpenseChart({
 						.match(locationFilter),
 				]);
 
-			// Process data for chart
-			const processedData: ChartData[] = await Promise.all(
-				dateRange.map(async (date) => {
-					const dayIncome =
-						incomeData.data?.filter((item) => item.date === date) || [];
-					const dayExpenses =
-						expensesData.data?.filter((item) => item.date === date) || [];
+				// Process data for chart
+				const processedData: ChartData[] = await Promise.all(
+					dateRange.map(async (date) => {
+						const dayIncome =
+							incomeData.data?.filter((item) => item.date === date) || [];
+						const dayExpenses =
+							expensesData.data?.filter((item) => item.date === date) || [];
 
-					// Convert currencies and sum amounts
-					let totalIncome = 0;
-					let totalExpenses = 0;
+						// Convert currencies and sum amounts
+						let totalIncome = 0;
+						let totalExpenses = 0;
 
-					for (const income of dayIncome) {
-						try {
-							const convertedAmount = await convertCurrency(
-								income.amount,
-								income.currency || "LKR",
-								displayCurrency,
-								tenant.id,
-								selectedLocation,
-							);
-							totalIncome += convertedAmount;
-						} catch (error) {
-							console.error(`Error converting income currency for date ${date}:`, error);
-							// Use original amount as fallback if conversion fails
-							totalIncome += income.amount;
+						for (const income of dayIncome) {
+							try {
+								const convertedAmount = await convertCurrency(
+									income.amount,
+									income.currency || "LKR",
+									displayCurrency,
+									tenant.id,
+									selectedLocation,
+								);
+								totalIncome += convertedAmount;
+							} catch (error) {
+								console.error(
+									`Error converting income currency for date ${date}:`,
+									error,
+								);
+								// Use original amount as fallback if conversion fails
+								totalIncome += income.amount;
+							}
 						}
-					}
 
-					for (const expense of dayExpenses) {
-						try {
-							const convertedAmount = await convertCurrency(
-								expense.amount,
-								expense.currency || "LKR",
-								displayCurrency,
-								tenant.id,
-								selectedLocation,
-							);
-							totalExpenses += convertedAmount;
-						} catch (error) {
-							console.error(`Error converting expense currency for date ${date}:`, error);
-							// Use original amount as fallback if conversion fails
-							totalExpenses += expense.amount;
+						for (const expense of dayExpenses) {
+							try {
+								const convertedAmount = await convertCurrency(
+									expense.amount,
+									expense.currency || "LKR",
+									displayCurrency,
+									tenant.id,
+									selectedLocation,
+								);
+								totalExpenses += convertedAmount;
+							} catch (error) {
+								console.error(
+									`Error converting expense currency for date ${date}:`,
+									error,
+								);
+								// Use original amount as fallback if conversion fails
+								totalExpenses += expense.amount;
+							}
 						}
-					}
 
-					return {
-						date,
-						income: totalIncome,
-						expenses: -totalExpenses, // Negative for chart display
-						net: totalIncome - totalExpenses,
-					};
-				}),
-			);				setChartData(processedData);
+						return {
+							date,
+							income: totalIncome,
+							expenses: -totalExpenses, // Negative for chart display
+							net: totalIncome - totalExpenses,
+						};
+					}),
+				);
+				setChartData(processedData);
 
 				// Calculate today's data
 				const today = new Date().toISOString().split("T")[0];

@@ -76,19 +76,20 @@ export const useIncomeData = (): UseIncomeDataReturn => {
 						.eq("location_id", selectedLocation)
 						.eq("is_active", true);
 
-		// Fetch accounts
-		const accountsQuery = supabase
-			.from("accounts")
-			.select("*")
-			.eq("tenant_id", tenant.id);
+			// Fetch accounts
+			const accountsQuery = supabase
+				.from("accounts")
+				.select("*")
+				.eq("tenant_id", tenant.id);
 
-		// Fetch payments - simplified query to avoid type issues
-		const paymentsQuery = supabase
-			.from("payments")
-			.select("*")
-			.eq("tenant_id", tenant.id)
-			.order("created_at", { ascending: false })
-			.limit(10);			const [
+			// Fetch payments - simplified query to avoid type issues
+			const paymentsQuery = supabase
+				.from("payments")
+				.select("*")
+				.eq("tenant_id", tenant.id)
+				.order("created_at", { ascending: false })
+				.limit(10);
+			const [
 				reservationsRes,
 				locationsRes,
 				roomsRes,

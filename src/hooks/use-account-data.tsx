@@ -62,14 +62,14 @@ export function useAccountData(baseCurrency: Currency) {
 					.eq("location_id", selectedLocation)
 					.order("date", { ascending: true });
 
-			// Fetch expense transactions
-			const { data: expenseData } = await supabase
-				.from("expenses")
-				.select("id, date, amount, main_type, sub_type, note, currency")
-				.eq("account_id", account.id)
-				.eq("tenant_id", tenant.id)
-				.eq("location_id", selectedLocation)
-				.order("date", { ascending: true });				// Fetch transfers from this account
+				// Fetch expense transactions
+				const { data: expenseData } = await supabase
+					.from("expenses")
+					.select("id, date, amount, main_type, sub_type, note, currency")
+					.eq("account_id", account.id)
+					.eq("tenant_id", tenant.id)
+					.eq("location_id", selectedLocation)
+					.order("date", { ascending: true }); // Fetch transfers from this account
 				const { data: transfersFromData } = await supabase
 					.from("account_transfers")
 					.select("id, created_at, amount, note")
