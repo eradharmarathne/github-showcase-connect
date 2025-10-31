@@ -510,13 +510,21 @@ serve(async (req) => {
 				console.log(`💰 Booking ${externalId}: Total ${totalAmount} ${currency}, Paid ${depositAmount} ${currency}, Balance ${balanceAmount} ${currency} (property: ${propId})`);
 			}
 
-			const externalBookingData: Record<string, unknown> = {
+			// Calculate nights for the reservation
+			const nights = Math.ceil(
+				(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+			);
+			const roomRate = nights > 0 ? totalAmount / nights : 0;
+
+			const reservationData: Record<string, unknown> = {
 				external_id: externalId,
 				property_id: propId,
-				source,
+				source_channel: source,
 				guest_name: guestName,
-				check_in: checkInDate.toISOString(),
-				check_out: checkOutDate.toISOString(),
+				check_in_timestamp: checkInDate.toISOString(),
+				check_out_timestamp: checkOutDate.toISOString(),
+				check_in_date: checkInDate.toISOString().split('T')[0], // Extract date only
+				check_out_date: checkOutDate.toISOString().split('T')[0], // Extract date only
 				status,
 				total_amount: totalAmount,
 				paid_amount: depositAmount,
@@ -528,14 +536,18 @@ serve(async (req) => {
 				room_name: roomName ?? null,
 				adults,
 				children,
+				nights,
+				room_rate: roomRate,
+				is_external: true, // ✅ Mark as external booking
+				booking_source: source,
 				raw_data: b as JsonRecord,
 				last_synced_at: new Date().toISOString(),
 			};
 
 			const { error: upsertError } = await supabase
-				.from("external_bookings")
-				.upsert(externalBookingData, {
-					onConflict: "external_id,property_id,source",
+				.from("reservations")
+				.upsert(reservationData, {
+					onConflict: "external_id,property_id,source_channel",
 				});
 
 			if (upsertError) {

@@ -125,30 +125,46 @@ serve(async (req) => {
 
 				// Generate a unique external ID based on the event details
 				const externalId = `ical-${source}-${event.dtstart}-${event.dtend}-${event.summary.replace(/[^a-zA-Z0-9]/g, "")}`;
+				
+				// Calculate check-in/out dates for nights calculation
+				const checkInDate = new Date(checkIn);
+				const nights = Math.ceil(
+					(checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+				);
 
 				// Check if booking already exists
 				const { data: existingBooking } = await supabase
-					.from("external_bookings")
+					.from("reservations")
 					.select("id")
 					.eq("external_id", externalId)
 					.eq("property_id", propertyId)
+					.eq("is_external", true)
 					.single();
 
 				if (!existingBooking) {
 					const { error: insertError } = await supabase
-						.from("external_bookings")
+						.from("reservations")
 						.insert({
 							external_id: externalId,
 							guest_name: event.summary,
 							location_id: locationId,
 							property_id: propertyId,
 							room_id: roomId || null,
-							check_in: checkIn,
-							check_out: adjustedCheckOut,
+							check_in_timestamp: checkIn,
+							check_out_timestamp: adjustedCheckOut,
+							check_in_date: checkInDate.toISOString().split('T')[0],
+							check_out_date: checkOutDate.toISOString().split('T')[0],
 							total_amount: 0,
-							source: source || "ical",
+							source_channel: source || "ical",
+							booking_source: source || "ical",
 							status: "confirmed",
 							tenant_id: tenantId,
+							is_external: true,
+							nights,
+							room_rate: 0,
+							currency: "USD",
+							adults: 1,
+							children: 0,
 							last_synced_at: new Date().toISOString(),
 						});
 
@@ -160,7 +176,7 @@ serve(async (req) => {
 				} else {
 					// Update last_synced_at for existing booking
 					await supabase
-						.from("external_bookings")
+						.from("reservations")
 						.update({ last_synced_at: new Date().toISOString() })
 						.eq("id", existingBooking.id);
 				}
