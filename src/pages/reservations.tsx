@@ -179,7 +179,7 @@ export default function Reservations() {
 	};
 
 	return (
-		<div className="max-w-full w-full pb-20 sm:pb-0">
+		<div className="max-w-full w-full pb-20 sm:pb-12">
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
 				<ReservationsHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
