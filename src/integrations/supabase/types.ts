@@ -1997,6 +1997,86 @@ export type Database = {
         }
         Relationships: []
       }
+      print_settings: {
+        Row: {
+          created_at: string | null
+          custom_css: string | null
+          font_family: string | null
+          font_size: string | null
+          footer_text: string | null
+          header_text: string | null
+          id: string
+          logo_position: string | null
+          paper_size: string | null
+          primary_color: string | null
+          qr_code_content: string | null
+          show_border: boolean | null
+          show_hotel_info: boolean | null
+          show_logo: boolean | null
+          show_qr_code: boolean | null
+          show_signature_line: boolean | null
+          show_terms_and_conditions: boolean | null
+          signature_label: string | null
+          tenant_id: string
+          terms_and_conditions: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_css?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          footer_text?: string | null
+          header_text?: string | null
+          id?: string
+          logo_position?: string | null
+          paper_size?: string | null
+          primary_color?: string | null
+          qr_code_content?: string | null
+          show_border?: boolean | null
+          show_hotel_info?: boolean | null
+          show_logo?: boolean | null
+          show_qr_code?: boolean | null
+          show_signature_line?: boolean | null
+          show_terms_and_conditions?: boolean | null
+          signature_label?: string | null
+          tenant_id: string
+          terms_and_conditions?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_css?: string | null
+          font_family?: string | null
+          font_size?: string | null
+          footer_text?: string | null
+          header_text?: string | null
+          id?: string
+          logo_position?: string | null
+          paper_size?: string | null
+          primary_color?: string | null
+          qr_code_content?: string | null
+          show_border?: boolean | null
+          show_hotel_info?: boolean | null
+          show_logo?: boolean | null
+          show_qr_code?: boolean | null
+          show_signature_line?: boolean | null
+          show_terms_and_conditions?: boolean | null
+          signature_label?: string | null
+          tenant_id?: string
+          terms_and_conditions?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

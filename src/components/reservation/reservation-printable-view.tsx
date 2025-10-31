@@ -3,6 +3,7 @@ import { Printer } from "lucide-react";
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
 import { Button } from "@/components/ui/button";
+import { PrintTemplate } from "@/components/common/print-template";
 
 interface ReservationPrintableData {
 	id: string;

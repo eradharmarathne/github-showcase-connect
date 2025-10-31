@@ -354,7 +354,7 @@ export function ReservationsDesktopTable({
 														<div className="flex-1">
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-900 text-sm">
-																	{reservation.guest_name || "Unknown Guest"} - {reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																	{reservation.guest_name} - {reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
 																</span>
 																<Badge
 																	variant="outline"
@@ -629,7 +629,7 @@ export function ReservationsDesktopTable({
 														<div className="flex-1">
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-700 text-sm">
-																	{reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																	{reservation.guest_name} - {reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
 																</span>
 																<Badge
 																	variant="outline"
