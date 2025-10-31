@@ -1,25 +1,14 @@
 import { format } from "date-fns";
-import {
-	AlertCircle,
-	Bed,
-	Calendar,
-	CheckCircle,
-	Clock,
-	Delete,
-	DollarSign,
-	Eye,
-	Key,
-	MapPin,
-	RefreshCw,
-	Settings as SettingsIcon,
-	Trash2,
-	Users,
-	Wifi,
-} from "lucide-react";
+import { RefreshCw, Wifi } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { RoomMappingsTab, SettingsTab } from "@/components/booking-channels";
+import {
+	BookingStatsCards,
+	BookingsTable,
+	RoomMappingsTab,
+	SettingsTab,
+} from "@/components/booking-channels";
 import { BookingChannelsSkeleton } from "@/components/skeleton/booking-channels-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,111 +25,32 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
-
-// Helper functions
-const getGuestName = (booking: ExternalBooking): string => {
-	return booking.guest_name || booking.raw_data?.guest?.name || "Unknown Guest";
-};
-
-const getEmail = (booking: ExternalBooking): string | null => {
-	return booking.raw_data?.guest?.email || null;
-};
-
-const formatDate = (dateString: string): string => {
-	return format(new Date(dateString), "MMM dd");
-};
-
-const calculateNights = (checkIn: string, checkOut: string): number => {
-	const start = new Date(checkIn);
-	const end = new Date(checkOut);
-	const diffTime = Math.abs(end.getTime() - start.getTime());
-	return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-};
-
-const formatPrice = (booking: ExternalBooking): string => {
-	return `${booking.total_amount?.toLocaleString() || 0} ${booking.currency || "USD"}`;
-};
-
-const getPaymentInfo = (booking: ExternalBooking): any => {
-	if (booking.source === "airbnb" && booking.raw_data?.pricing) {
-		const pricing = booking.raw_data.pricing;
-		return {
-			type: "airbnb",
-			basePrice: pricing.basePrice || 0,
-			hostFee: pricing.hostFee || 0,
-			payout: pricing.hostPayout || 0,
-		};
-	}
-	return null;
-};
-
-interface ExternalBooking {
-	id: string;
-	external_id: string;
-	property_id: string;
-	source: string;
-	guest_name: string;
-	check_in: string;
-	check_out: string;
-	status: string;
-	total_amount: number;
-	currency: string;
-	adults: number;
-	children: number;
-	room_name?: string;
-	room_id?: string | null;
-	location_id?: string;
-	location?: {
-		name: string;
-	};
-	room?: {
-		id: string;
-		room_number: string;
-		room_type: string;
-	} | null;
-	last_synced_at: string;
-	raw_data?: any;
-	mappedLocation?: Location | null;
-}
+import {
+	calculateNights,
+	calculateStats,
+	formatDate,
+	formatPrice,
+	getEmail,
+	getGuestName,
+	getPaymentInfo,
+	getSourceColor,
+	getStatusColor,
+} from "@/lib/booking-channels-utils";
+import type {
+	ExternalBooking,
+	PropertyMapping,
+	Room,
+	SyncStats,
+} from "@/types/booking-channels";
 
 interface Location {
 	id: string;
 	name: string;
 	is_active: boolean;
-}
-
-interface PropertyMapping {
-	locationId: string;
-	locationName: string;
-	channelProperties: string[];
-}
-
-interface SyncStats {
-	totalBookings: number;
-	recentSync: string | null;
-	sourceBreakdown: Record<string, number>;
-	statusBreakdown: Record<string, number>;
 }
 
 export default function BookingChannelsIntegration() {
@@ -173,38 +83,7 @@ export default function BookingChannelsIntegration() {
 	const [icalInputValues, setIcalInputValues] = useState<
 		Record<string, { url: string; source: string; room_id: string | null }>
 	>({});
-	const [rooms, setRooms] = useState<
-		Array<{ id: string; room_number: string; room_type: string }>
-	>([]);
-	const [mappingRoomId, setMappingRoomId] = useState<string | null>(null);
-
-	const calculateStats = (bookings: ExternalBooking[]): SyncStats => {
-		const sourceBreakdown: Record<string, number> = {};
-		const statusBreakdown: Record<string, number> = {};
-		let recentSync: string | null = null;
-
-		bookings.forEach((booking) => {
-			// Source breakdown
-			sourceBreakdown[booking.source] =
-				(sourceBreakdown[booking.source] || 0) + 1;
-
-			// Status breakdown
-			statusBreakdown[booking.status] =
-				(statusBreakdown[booking.status] || 0) + 1;
-
-			// Find most recent sync
-			if (!recentSync || booking.last_synced_at > recentSync) {
-				recentSync = booking.last_synced_at;
-			}
-		});
-
-		return {
-			totalBookings: bookings.length,
-			recentSync,
-			sourceBreakdown,
-			statusBreakdown,
-		};
-	};
+	const [rooms, setRooms] = useState<Room[]>([]);
 
 	const fetchData = async () => {
 		if (!selectedLocation || !tenant?.id) {
@@ -786,7 +665,6 @@ export default function BookingChannelsIntegration() {
 			if (error) throw error;
 
 			toast.success(t("bookingChannels.bookingsTable.roomMappedSuccess"));
-			setMappingRoomId(null);
 			fetchData();
 		} catch (error: any) {
 			console.error("Error updating room mapping:", error);
@@ -845,82 +723,10 @@ export default function BookingChannelsIntegration() {
 			</div>
 
 			{/* Stats Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
-							{t("bookingChannels.stats.totalBookings")}
-						</CardTitle>
-						<Calendar className="size-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-lg sm:text-2xl font-bold">
-							{syncStats.totalBookings}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							{t("bookingChannels.stats.externalBookingsSynced")}
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
-							{t("bookingChannels.stats.lastSync")}
-						</CardTitle>
-						<Clock className="size-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-lg sm:text-2xl font-bold">
-							{syncStats.recentSync
-								? format(new Date(syncStats.recentSync), "MMM dd")
-								: t("bookingChannels.stats.never")}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							{syncStats.recentSync
-								? format(new Date(syncStats.recentSync), "HH:mm")
-								: t("bookingChannels.stats.noSyncYet")}
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
-							{t("bookingChannels.stats.revenue")}
-						</CardTitle>
-						<DollarSign className="size-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-lg sm:text-2xl font-bold">
-							$
-							{bookings
-								.reduce((sum, booking) => sum + (booking.total_amount || 0), 0)
-								.toLocaleString()}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							{t("bookingChannels.stats.totalBookingValue")}
-						</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium">
-							{t("bookingChannels.stats.activeSources")}
-						</CardTitle>
-						<Wifi className="size-4 text-muted-foreground" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-lg sm:text-2xl font-bold">
-							{Object.keys(syncStats.sourceBreakdown).length}
-						</div>
-						<p className="text-xs text-muted-foreground">
-							{t("bookingChannels.stats.bookingChannels")}
-						</p>
-					</CardContent>
-				</Card>
-			</div>
+			<BookingStatsCards
+				syncStats={syncStats}
+				lastSyncTime={lastSyncTime}
+			/>
 
 			{/* Main Content */}
 			<Tabs defaultValue="bookings" className="space-y-4">
@@ -939,238 +745,14 @@ export default function BookingChannelsIntegration() {
 
 				<TabsContent value="bookings" className="space-y-4">
 					{/* Bookings Table - filtered by selected location from AppSidebar */}
-					<Card>
-						<CardHeader>
-							<CardTitle>{t("bookingChannels.bookingsTable.title")}</CardTitle>
-							<CardDescription>
-								{t("bookingChannels.bookingsTable.description")}
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="overflow-x-auto">
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.property")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.location")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.guest")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.dates")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.guests")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.amount")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.source")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.status")}
-											</TableHead>
-											<TableHead>
-												{t("bookingChannels.bookingsTable.headers.actions")}
-											</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{filteredBookings.map((booking) => (
-											<TableRow key={booking.id} className="hover:bg-muted/50">
-												<TableCell className="font-medium">
-													<div className="space-y-1">
-														{!booking.room_id &&
-														mappingRoomId === booking.id ? (
-															<div className="flex items-center gap-2">
-																<Select
-																	onValueChange={(value) =>
-																		updateBookingRoomMapping(booking.id, value)
-																	}
-																>
-																	<SelectTrigger className="w-full h-8 text-xs">
-																		<SelectValue
-																			placeholder={t(
-																				"bookingChannels.bookingsTable.selectRoom",
-																			)}
-																		/>
-																	</SelectTrigger>
-																	<SelectContent>
-																		{rooms.map((room) => (
-																			<SelectItem key={room.id} value={room.id}>
-																				{room.room_number} - {room.room_type}
-																			</SelectItem>
-																		))}
-																	</SelectContent>
-																</Select>
-																<Button
-																	variant="ghost"
-																	size="sm"
-																	className="h-8 px-2"
-																	onClick={() => setMappingRoomId(null)}
-																>
-																	{t("bookingChannels.bookingsTable.cancel")}
-																</Button>
-															</div>
-														) : (
-															<div>
-																<div className="text-sm font-medium flex items-center gap-2">
-																	{booking.room_id && booking.room ? (
-																		<>
-																			{booking.room.room_number} -{" "}
-																			{booking.room.room_type}
-																		</>
-																	) : (
-																		<>
-																			{booking.room_name ||
-																				t(
-																					"bookingChannels.bookingsTable.unknownProperty",
-																				)}
-																			{rooms.length > 0 && (
-																				<Button
-																					variant="outline"
-																					size="sm"
-																					className="h-6 text-xs px-2"
-																					onClick={() =>
-																						setMappingRoomId(booking.id)
-																					}
-																				>
-																					<Bed className="size-3 mr-1" />
-																					{t(
-																						"bookingChannels.bookingsTable.mapRoom",
-																					)}
-																				</Button>
-																			)}
-																		</>
-																	)}
-																</div>
-																<div className="text-xs text-muted-foreground">
-																	ID: {booking.external_id}
-																</div>
-															</div>
-														)}
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-2">
-														<MapPin className="size-4 text-muted-foreground" />
-														<span className="text-sm">
-															{booking.mappedLocation?.name || "Unmapped"}
-														</span>
-														{!booking.mappedLocation && (
-															<Badge variant="secondary" className="text-xs">
-																Needs Mapping
-															</Badge>
-														)}
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="space-y-1">
-														<div className="font-medium text-sm">
-															{getGuestName(booking)}
-														</div>
-														{getEmail(booking) && (
-															<div className="text-xs text-muted-foreground">
-																{getEmail(booking)}
-															</div>
-														)}
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="space-y-1">
-														<div className="text-sm">
-															{formatDate(booking.check_in)} -{" "}
-															{formatDate(booking.check_out)}
-														</div>
-														<div className="text-xs text-muted-foreground">
-															{calculateNights(
-																booking.check_in,
-																booking.check_out,
-															)}{" "}
-															nights
-														</div>
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="flex items-center gap-1">
-														<Users className="size-4 text-muted-foreground" />
-														<span className="text-sm">
-															{booking.adults + booking.children}
-															<span className="text-xs text-muted-foreground ml-1">
-																({booking.adults}A + {booking.children}C)
-															</span>
-														</span>
-													</div>
-												</TableCell>
-												<TableCell>
-													<div className="space-y-1">
-														<div className="font-medium text-sm">
-															{formatPrice(booking)}
-														</div>
-														{getPaymentInfo(booking) && (
-															<div className="text-xs text-green-600">
-																Payout: {getPaymentInfo(booking)?.payout} LKR
-															</div>
-														)}
-													</div>
-												</TableCell>
-												<TableCell>
-													<Badge className={getSourceColor(booking.source)}>
-														{booking.source.replace("_", ".")}
-													</Badge>
-												</TableCell>
-												<TableCell>
-													<Badge className={getStatusColor(booking.status)}>
-														{booking.status.replace("_", " ")}
-													</Badge>
-												</TableCell>
-												<TableCell>
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => openBookingDetails(booking)}
-													>
-														<Eye className="size-4" />
-													</Button>
-												</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
-
-								{filteredBookings.length === 0 && (
-									<div className="text-center py-8">
-										<p className="text-muted-foreground">
-											{t("bookingChannels.bookingsTable.noBookings")}
-										</p>
-										<Button
-											onClick={syncChannelData}
-											variant="outline"
-											className="mt-4"
-											disabled={syncing}
-										>
-											{syncing ? (
-												<>
-													<RefreshCw className="size-4 mr-2 animate-spin" />
-													{t("bookingChannels.header.syncing")}
-												</>
-											) : (
-												<>
-													<RefreshCw className="size-4 mr-2" />
-													{t("bookingChannels.header.syncNow")}
-												</>
-											)}
-										</Button>
-									</div>
-								)}
-							</div>
-						</CardContent>
-					</Card>
+					<BookingsTable
+						bookings={filteredBookings}
+						rooms={rooms}
+						syncing={syncing}
+						onViewDetails={openBookingDetails}
+						onUpdateRoomMapping={updateBookingRoomMapping}
+						onSync={syncChannelData}
+					/>
 				</TabsContent>
 
 				{/* Booking Details Dialog */}
