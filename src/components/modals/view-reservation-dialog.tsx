@@ -278,11 +278,14 @@ export function ViewReservationDialog({
 	const guestIdNumber = isExternalBooking ? null : currentBooking.guest_id_number;
 	const adults = currentBooking.adults || 0;
 	const children = currentBooking.children || 0;
-	const checkInDate = isExternalBooking ? currentBooking.check_in : currentBooking.check_in_date;
-	const checkOutDate = isExternalBooking ? currentBooking.check_out : currentBooking.check_out_date;
-	const nights = isExternalBooking 
-		? Math.ceil((new Date(currentBooking.check_out).getTime() - new Date(currentBooking.check_in).getTime()) / (1000 * 60 * 60 * 24))
-		: currentBooking.nights;
+	// For external bookings, prefer timestamp fields, fall back to date fields
+	const checkInDate = isExternalBooking 
+		? (currentBooking.check_in_timestamp || currentBooking.check_in_date)
+		: currentBooking.check_in_date;
+	const checkOutDate = isExternalBooking 
+		? (currentBooking.check_out_timestamp || currentBooking.check_out_date)
+		: currentBooking.check_out_date;
+	const nights = currentBooking.nights || Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24));
 	const arrivalTime = isExternalBooking ? null : currentBooking.arrival_time;
 	const specialRequests = isExternalBooking 
 		? currentBooking.raw_data?.notes || null
