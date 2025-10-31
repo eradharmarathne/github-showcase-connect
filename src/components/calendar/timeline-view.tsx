@@ -140,11 +140,11 @@ export function TimelineView({
 		staleTime: 30000, // Cache for 30 seconds
 	});
 
-	// Fetch external bookings (Booking.com, Airbnb, etc.)
+	// Fetch external bookings (Booking.com, Airbnb, etc.) from unified reservations table
 	const { data: externalBookings = [], isLoading: externalBookingsLoading } =
 		useQuery({
 			queryKey: [
-				"external_bookings",
+				"reservations_external",
 				selectedLocation,
 				tenant?.id,
 				currentDate,
@@ -156,18 +156,26 @@ export function TimelineView({
 				const viewEnd = addDays(viewStart, 29);
 
 				const { data, error } = await supabase
-					.from("external_bookings")
+					.from("reservations")
 					.select(
-						"id, room_id, external_id, property_id, source, guest_name, check_in, check_out, status, total_amount, currency, adults, children, room_name",
+						"id, room_id, external_id, property_id, source_channel, guest_name, check_in_timestamp, check_out_timestamp, check_in_date, check_out_date, status, total_amount, currency, adults, children, room_name, is_external",
 					)
 					.eq("tenant_id", tenant.id)
 					.eq("location_id", selectedLocation)
+					.eq("is_external", true)
 					.or(
-						`check_in.lte.${format(viewEnd, "yyyy-MM-dd")},check_out.gte.${format(viewStart, "yyyy-MM-dd")}`,
+						`check_in_date.lte.${format(viewEnd, "yyyy-MM-dd")},check_out_date.gte.${format(viewStart, "yyyy-MM-dd")}`,
 					)
-					.order("check_in", { ascending: true });
+					.order("check_in_date", { ascending: true });
 				if (error) throw error;
-				return data || [];
+				
+				// Transform to match expected format
+				return (data || []).map(booking => ({
+					...booking,
+					source: booking.source_channel || 'unknown',
+					check_in: booking.check_in_timestamp || booking.check_in_date,
+					check_out: booking.check_out_timestamp || booking.check_out_date,
+				}));
 			},
 			enabled: !!selectedLocation && !!tenant?.id,
 			staleTime: 30000, // Cache for 30 seconds

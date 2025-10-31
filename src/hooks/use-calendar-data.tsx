@@ -7,7 +7,6 @@ import { Tables } from "@/integrations/supabase/types";
 type Location = Tables<"locations">;
 type Room = Tables<"rooms">;
 type Reservation = Tables<"reservations">;
-type ExternalBooking = Tables<"external_bookings">;
 
 interface PropertyMapping {
 	locationId: string;
@@ -19,7 +18,7 @@ interface UseCalendarDataReturn {
 	locations: Location[];
 	rooms: Room[];
 	reservations: Reservation[];
-	externalBookings: ExternalBooking[];
+	externalBookings: Reservation[];  // Now returns external bookings from unified table
 	propertyMappings: PropertyMapping[];
 	loading: boolean;
 	refetch: () => Promise<void>;
@@ -29,9 +28,7 @@ export const useCalendarData = (): UseCalendarDataReturn => {
 	const [locations, setLocations] = useState<Location[]>([]);
 	const [rooms, setRooms] = useState<Room[]>([]);
 	const [reservations, setReservations] = useState<Reservation[]>([]);
-	const [externalBookings, setExternalBookings] = useState<ExternalBooking[]>(
-		[],
-	);
+	const [externalBookings, setExternalBookings] = useState<Reservation[]>([]);  // Now uses Reservation type
 	const [propertyMappings, setPropertyMappings] = useState<PropertyMapping[]>(
 		[],
 	);
@@ -67,7 +64,7 @@ export const useCalendarData = (): UseCalendarDataReturn => {
 						.eq("location_id", selectedLocation)
 						.eq("is_active", true);
 
-			// Fetch reservations with location filtering
+			// Fetch reservations with location filtering (all types)
 			const reservationsQuery = !selectedLocation
 				? supabase
 						.from("reservations")
@@ -81,18 +78,22 @@ export const useCalendarData = (): UseCalendarDataReturn => {
 						.eq("location_id", selectedLocation)
 						.order("check_in_date", { ascending: true });
 
-			// Fetch external bookings with location filtering
-			// Note: external_bookings table doesn't have tenant_id column
+			// Fetch external bookings from unified reservations table
+			// Note: External bookings are now stored in reservations with is_external = true
 			const externalBookingsQuery = !selectedLocation
 				? supabase
-						.from("external_bookings")
+						.from("reservations")
 						.select("*")
-						.order("check_in", { ascending: true })
+						.eq("tenant_id", tenant.id)
+						.eq("is_external", true)
+						.order("check_in_date", { ascending: true })
 				: supabase
-						.from("external_bookings")
+						.from("reservations")
 						.select("*")
+						.eq("tenant_id", tenant.id)
 						.eq("location_id", selectedLocation)
-						.order("check_in", { ascending: true });
+						.eq("is_external", true)
+						.order("check_in_date", { ascending: true });
 
 			const [roomsData, reservationsData, externalBookingsData, locationsData] =
 				await Promise.all([

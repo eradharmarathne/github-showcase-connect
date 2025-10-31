@@ -52,9 +52,9 @@ export const useReservationFinancials = () => {
 
 			if (error) throw error;
 
-			// Get external bookings (channel manager bookings)
+			// Get external bookings (channel manager bookings) from unified reservations table
 			const { data: externalBookings, error: externalError } = await supabase
-				.from("external_bookings")
+				.from("reservations")
 				.select(`
 					*,
 					rooms(room_number, room_type),
@@ -62,41 +62,42 @@ export const useReservationFinancials = () => {
 				`)
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
+				.eq("is_external", true)
 				.order("last_synced_at", { ascending: false });
 
 			if (externalError) throw externalError;
 
 			// Transform external bookings to match reservation format
 			const transformedExternalBookings = (externalBookings || []).map(
-				(booking) => ({
-					id: booking.id,
-					reservation_number: `${booking.source.toUpperCase()}-${booking.external_id}`,
-					guest_name: booking.guest_name,
-					status: booking.status,
-					currency: booking.currency || "USD",
-					check_in_date: booking.check_in,
-					check_out_date: booking.check_out,
-					nights: Math.ceil(
-						(new Date(booking.check_out).getTime() -
-							new Date(booking.check_in).getTime()) /
+				(booking) => {
+					// For external bookings, use check_in_timestamp if available, otherwise check_in_date
+					const checkInDate = booking.check_in_timestamp || booking.check_in_date;
+					const checkOutDate = booking.check_out_timestamp || booking.check_out_date;
+					const nights = Math.ceil(
+						(new Date(checkOutDate).getTime() -
+							new Date(checkInDate).getTime()) /
 							(1000 * 60 * 60 * 24),
-					),
-					room_rate: booking.total_amount
-						? Number(booking.total_amount) /
-							Math.ceil(
-								(new Date(booking.check_out).getTime() -
-									new Date(booking.check_in).getTime()) /
-									(1000 * 60 * 60 * 24),
-							)
-						: 0,
-					total_amount: Number(booking.total_amount) || 0,
-					paid_amount: Number(booking.paid_amount) || 0, // Use actual paid amount from Beds24
-					balance_amount: Number(booking.balance_amount) || 0, // Use actual balance from Beds24
-					rooms: booking.rooms,
-					locations: booking.locations,
-					tenant_id: booking.tenant_id,
-					location_id: booking.location_id,
-				}),
+					);
+					
+					return {
+						id: booking.id,
+						reservation_number: booking.reservation_number || `${booking.source_channel?.toUpperCase()}-${booking.external_id}`,
+						guest_name: booking.guest_name,
+						status: booking.status,
+						currency: booking.currency || "USD",
+						check_in_date: checkInDate,
+						check_out_date: checkOutDate,
+						nights,
+						room_rate: booking.room_rate || (booking.total_amount ? Number(booking.total_amount) / nights : 0),
+						total_amount: Number(booking.total_amount) || 0,
+						paid_amount: Number(booking.paid_amount) || 0,
+						balance_amount: Number(booking.balance_amount) || 0,
+						rooms: booking.rooms,
+						locations: booking.locations,
+						tenant_id: booking.tenant_id,
+						location_id: booking.location_id,
+					};
+				},
 			);
 
 			// Combine both reservation types
