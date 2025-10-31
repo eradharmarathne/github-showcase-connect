@@ -90,8 +90,8 @@ export const useReservationFinancials = () => {
 							)
 						: 0,
 					total_amount: Number(booking.total_amount) || 0,
-					paid_amount: Number(booking.total_amount) || 0, // Channel bookings are typically pre-paid
-					balance_amount: 0,
+					paid_amount: Number(booking.paid_amount) || 0, // Use actual paid amount from Beds24
+					balance_amount: Number(booking.balance_amount) || 0, // Use actual balance from Beds24
 					rooms: booking.rooms,
 					locations: booking.locations,
 					tenant_id: booking.tenant_id,
