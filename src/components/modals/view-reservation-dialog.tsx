@@ -262,7 +262,7 @@ export function ViewReservationDialog({
 
 	// For external bookings, map field names
 	const bookingNumber = isExternalBooking 
-		? `${currentBooking.source.toUpperCase()}-${currentBooking.external_id}`
+		? currentBooking.reservation_number || `${(currentBooking.source_channel || 'EXTERNAL').toUpperCase()}-${currentBooking.external_id}`
 		: currentBooking.reservation_number;
 	
 	const guestName = currentBooking.guest_name;
@@ -287,7 +287,7 @@ export function ViewReservationDialog({
 	const specialRequests = isExternalBooking 
 		? currentBooking.raw_data?.notes || null
 		: currentBooking.special_requests;
-	const bookingSource = isExternalBooking ? currentBooking.source : currentBooking.booking_source;
+	const bookingSource = isExternalBooking ? currentBooking.source_channel : currentBooking.booking_source;
 	
 	// Room information
 	const roomInfo = currentBooking.rooms || null;
