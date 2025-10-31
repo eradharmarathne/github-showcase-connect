@@ -1,70 +1,31 @@
-import {
-	AlertTriangle,
-	Bed,
-	Building2,
-	Calendar,
-	CheckCircle,
-	CreditCard,
-	Crown,
-	Download,
-	FileText,
-	History,
-	RefreshCw,
-	TrendingUp,
-	Users,
-	XCircle,
-} from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
+import {
+	CurrentSubscriptionCard,
+	PaymentProcessingInfo,
+	SubscriptionPlansGrid,
+	TrialStatusAlert,
+} from "@/components/subscription";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
+import type {
+	Invoice,
+	PaymentMethod,
+	Plan,
+	PlanWithCreemProduct,
+	UsageData,
+} from "@/types/subscription";
 import {
 	cancelSubscription,
 	createCheckoutSession,
 	getProduct,
 } from "@/lib/creem";
 
-type Plan = Tables<"plans">;
-
-interface PlanWithCreemProduct extends Plan {
-	creemProduct?: any;
-}
-
-interface Invoice {
-	id: string;
-	amount: number;
-	currency: string;
-	status: "paid" | "open" | "failed" | "draft";
-	created: string;
-	due_date?: string;
-	invoice_pdf?: string;
-	description?: string;
-}
-
-interface PaymentMethod {
-	id: string;
-	type: "card" | "bank_account";
-	last4: string;
-	brand?: string;
-	exp_month?: number;
-	exp_year?: number;
-	is_default: boolean;
-}
-
-interface UsageData {
-	period: string;
-	usage: number;
-	limit?: number;
-	unit: string;
-}
 
 export default function BillingSubscription() {
 	const { t } = useTranslation("common");
@@ -400,36 +361,6 @@ export default function BillingSubscription() {
 		}
 	};
 
-	const getStatusColor = (status: string) => {
-		switch (status) {
-			case "active":
-				return "bg-green-100 text-green-800";
-			case "trialing":
-				return "bg-blue-100 text-blue-800";
-			case "past_due":
-				return "bg-yellow-100 text-yellow-800";
-			case "cancelled":
-				return "bg-red-100 text-red-800";
-			default:
-				return "bg-gray-100 text-gray-800";
-		}
-	};
-
-	const getStatusIcon = (status: string) => {
-		switch (status) {
-			case "active":
-				return <CheckCircle className="size-4 text-green-600" />;
-			case "trialing":
-				return <Calendar className="size-4 text-blue-600" />;
-			case "past_due":
-				return <AlertTriangle className="size-4 text-yellow-600" />;
-			case "cancelled":
-				return <XCircle className="size-4 text-red-600" />;
-			default:
-				return <AlertTriangle className="size-4 text-gray-600" />;
-		}
-	};
-
 	// Show loading spinner while data is being fetched
 	if (loading || subscriptionLoading) {
 		return (
@@ -477,194 +408,26 @@ export default function BillingSubscription() {
 			{/* Trial Status Alert */}
 			{(tenant?.subscription_status === "trial" ||
 				currentSubscription?.status === "trialing") && (
-				<Alert
-					className={
-						trialDaysRemaining === 0
-							? "border-red-200 bg-red-50"
-							: trialDaysRemaining && trialDaysRemaining <= 2
-								? "border-yellow-200 bg-yellow-50"
-								: "border-blue-200 bg-blue-50"
-					}
-				>
-					<AlertTriangle
-						className={`h-4 w-4 ${
-							trialDaysRemaining === 0
-								? "text-red-600"
-								: trialDaysRemaining && trialDaysRemaining <= 2
-									? "text-yellow-600"
-									: "text-blue-600"
-						}`}
-					/>
-					<AlertDescription
-						className={
-							trialDaysRemaining === 0
-								? "text-red-800"
-								: trialDaysRemaining && trialDaysRemaining <= 2
-									? "text-yellow-800"
-									: "text-blue-800"
-						}
-					>
-						{trialDaysRemaining === 0
-							? "Your 7-day free trial has expired. Please subscribe to continue using the service."
-							: trialDaysRemaining === 1
-								? "Your 7-day free trial expires tomorrow. Subscribe now to continue using all features."
-								: `Your 7-day free trial expires in ${trialDaysRemaining} days. Subscribe now to continue using all features.`}
-					</AlertDescription>
-				</Alert>
+				<TrialStatusAlert trialDaysRemaining={trialDaysRemaining} />
 			)}
 
 			{/* Current Subscription Status */}
-			{currentSubscription && (
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							<Crown className="size-5 text-yellow-600" />
-							{t("billing.currentSubscription.title")}
-						</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-2">
-								{getStatusIcon(currentSubscription.status)}
-								<Badge className={getStatusColor(currentSubscription.status)}>
-									{currentSubscription.status.toUpperCase()}
-								</Badge>
-							</div>
-							{currentSubscription.status === "active" && (
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleCancelSubscription}
-									disabled={cancelling}
-								>
-									{cancelling
-										? t("billing.currentSubscription.cancelling")
-										: t("billing.currentSubscription.cancelSubscription")}
-								</Button>
-							)}
-						</div>
-
-						{currentSubscription.current_period_end && (
-							<p className="text-sm text-muted-foreground">
-								{currentSubscription.status === "active" ? "Renews" : "Expires"}{" "}
-								on:{" "}
-								{new Date(
-									currentSubscription.current_period_end,
-								).toLocaleDateString()}
-							</p>
-						)}
-					</CardContent>
-				</Card>
-			)}
+			<CurrentSubscriptionCard
+				subscription={currentSubscription}
+				onCancel={handleCancelSubscription}
+				cancelling={cancelling}
+			/>
 
 			{/* Available Plans */}
-			<div className="space-y-4">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-semibold">
-					{t("billing.plans.title")}
-				</h2>
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{plans.map((plan) => {
-						const isCurrentPlan = currentSubscription?.plan_id === plan.id;
-						const price = plan.price_cents / 100;
-
-						return (
-							<Card
-								key={plan.id}
-								className={`relative ${isCurrentPlan ? "ring-0 ring-blue-500" : ""}`}
-							>
-								{isCurrentPlan && (
-									<Badge className="absolute -top-2 -right-2 bg-blue-600">
-										Current Plan
-									</Badge>
-								)}
-								<CardHeader>
-									<CardTitle className="flex items-center justify-between">
-										<span>{plan.name}</span>
-										<div className="text-right">
-											<div className="text-2xl font-bold">
-												${price.toFixed(2)}
-											</div>
-											<div className="text-sm text-muted-foreground">
-												/{plan.billing_interval}
-											</div>
-										</div>
-									</CardTitle>
-									{plan.description && (
-										<p className="text-sm text-muted-foreground">
-											{plan.description}
-										</p>
-									)}
-								</CardHeader>
-								<CardContent className="space-y-4">
-									{/* Plan Features */}
-									<div className="space-y-2">
-										{plan.max_locations && (
-											<div className="flex items-center gap-2 text-sm">
-												<Building2 className="size-4 text-muted-foreground" />
-												<span>{plan.max_locations} locations</span>
-											</div>
-										)}
-										{plan.max_rooms && (
-											<div className="flex items-center gap-2 text-sm">
-												<Bed className="size-4 text-muted-foreground" />
-												<span>{plan.max_rooms} rooms</span>
-											</div>
-										)}
-										<div className="flex items-center gap-2 text-sm">
-											<Users className="size-4 text-muted-foreground" />
-											<span>Unlimited users</span>
-										</div>
-										<div className="flex items-center gap-2 text-sm">
-											<CheckCircle className="size-4 text-green-600" />
-											<span>24/7 Support</span>
-										</div>
-									</div>
-
-									{/* Action Button */}
-									{!isCurrentPlan && (
-										<Button
-											className="w-full"
-											onClick={() => handleSubscribe(plan)}
-											disabled={processingPlanId === plan.id}
-										>
-											<CreditCard className="size-4 mr-2" />
-											{processingPlanId === plan.id
-												? t("billing.plans.processing")
-												: t("billing.plans.subscribe")}
-										</Button>
-									)}
-								</CardContent>
-							</Card>
-						);
-					})}
-				</div>
-			</div>
+			<SubscriptionPlansGrid
+				plans={plans}
+				currentPlanId={currentSubscription?.plan_id}
+				onSubscribe={handleSubscribe}
+				processingPlanId={processingPlanId}
+			/>
 
 			{/* Creem.io Integration Info */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<CreditCard className="size-5" />
-						Payment Processing
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<p className="text-sm text-muted-foreground">
-						Payments are processed securely through Creem.io. All major credit
-						cards are accepted. Your payment information is never stored on our
-						servers.
-					</p>
-					{!import.meta.env.VITE_CREEM_API_KEY && (
-						<Alert className="mt-4">
-							<AlertTriangle className="h-4 w-4" />
-							<AlertDescription>
-								<strong>Demo Mode:</strong> Set VITE_CREEM_API_KEY environment
-								variable to enable real payment processing.
-							</AlertDescription>
-						</Alert>
-					)}
-				</CardContent>
-			</Card>
+			<PaymentProcessingInfo />
 		</div>
 	);
 }
