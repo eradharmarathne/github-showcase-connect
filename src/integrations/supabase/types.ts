@@ -195,13 +195,6 @@ export type Database = {
             foreignKeyName: "additional_services_reservation_id_fkey"
             columns: ["reservation_id"]
             isOneToOne: false
-            referencedRelation: "external_bookings_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "additional_services_reservation_id_fkey"
-            columns: ["reservation_id"]
-            isOneToOne: false
             referencedRelation: "reservation_financials"
             referencedColumns: ["id"]
           },
@@ -985,103 +978,6 @@ export type Database = {
           },
         ]
       }
-      external_bookings: {
-        Row: {
-          adults: number | null
-          balance_amount: number | null
-          check_in: string
-          check_out: string
-          children: number | null
-          created_at: string
-          currency: string | null
-          external_id: string
-          guest_name: string
-          id: string
-          last_synced_at: string | null
-          location_id: string | null
-          paid_amount: number | null
-          property_id: string
-          raw_data: Json | null
-          room_id: string | null
-          room_name: string | null
-          source: string
-          status: string
-          tenant_id: string
-          total_amount: number | null
-          updated_at: string
-        }
-        Insert: {
-          adults?: number | null
-          balance_amount?: number | null
-          check_in: string
-          check_out: string
-          children?: number | null
-          created_at?: string
-          currency?: string | null
-          external_id: string
-          guest_name: string
-          id?: string
-          last_synced_at?: string | null
-          location_id?: string | null
-          paid_amount?: number | null
-          property_id: string
-          raw_data?: Json | null
-          room_id?: string | null
-          room_name?: string | null
-          source: string
-          status: string
-          tenant_id: string
-          total_amount?: number | null
-          updated_at?: string
-        }
-        Update: {
-          adults?: number | null
-          balance_amount?: number | null
-          check_in?: string
-          check_out?: string
-          children?: number | null
-          created_at?: string
-          currency?: string | null
-          external_id?: string
-          guest_name?: string
-          id?: string
-          last_synced_at?: string | null
-          location_id?: string | null
-          paid_amount?: number | null
-          property_id?: string
-          raw_data?: Json | null
-          room_id?: string | null
-          room_name?: string | null
-          source?: string
-          status?: string
-          tenant_id?: string
-          total_amount?: number | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "external_bookings_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "external_bookings_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "external_bookings_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       financial_audit_log: {
         Row: {
           change_amount: number | null
@@ -1547,13 +1443,6 @@ export type Database = {
             foreignKeyName: "income_reservation_id_fkey"
             columns: ["booking_id"]
             isOneToOne: false
-            referencedRelation: "external_bookings_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "income_reservation_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: false
             referencedRelation: "reservation_financials"
             referencedColumns: ["id"]
           },
@@ -1964,13 +1853,6 @@ export type Database = {
             foreignKeyName: "payments_reservation_id_fkey"
             columns: ["reservation_id"]
             isOneToOne: false
-            referencedRelation: "external_bookings_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payments_reservation_id_fkey"
-            columns: ["reservation_id"]
-            isOneToOne: false
             referencedRelation: "reservation_financials"
             referencedColumns: ["id"]
           },
@@ -2261,13 +2143,6 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "public_bookings_converted_reservation_id_fkey"
-            columns: ["converted_reservation_id"]
-            isOneToOne: false
-            referencedRelation: "external_bookings_view"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "public_bookings_converted_reservation_id_fkey"
             columns: ["converted_reservation_id"]
@@ -3016,103 +2891,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "accounts_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      external_bookings_view: {
-        Row: {
-          adults: number | null
-          balance_amount: number | null
-          check_in: string | null
-          check_out: string | null
-          children: number | null
-          created_at: string | null
-          currency: string | null
-          external_id: string | null
-          guest_name: string | null
-          id: string | null
-          last_synced_at: string | null
-          location_id: string | null
-          paid_amount: number | null
-          property_id: string | null
-          raw_data: Json | null
-          room_id: string | null
-          room_name: string | null
-          source: string | null
-          status: string | null
-          tenant_id: string | null
-          total_amount: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          adults?: number | null
-          balance_amount?: number | null
-          check_in?: string | null
-          check_out?: string | null
-          children?: number | null
-          created_at?: string | null
-          currency?: string | null
-          external_id?: string | null
-          guest_name?: string | null
-          id?: string | null
-          last_synced_at?: string | null
-          location_id?: string | null
-          paid_amount?: number | null
-          property_id?: string | null
-          raw_data?: Json | null
-          room_id?: string | null
-          room_name?: string | null
-          source?: string | null
-          status?: never
-          tenant_id?: string | null
-          total_amount?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          adults?: number | null
-          balance_amount?: number | null
-          check_in?: string | null
-          check_out?: string | null
-          children?: number | null
-          created_at?: string | null
-          currency?: string | null
-          external_id?: string | null
-          guest_name?: string | null
-          id?: string | null
-          last_synced_at?: string | null
-          location_id?: string | null
-          paid_amount?: number | null
-          property_id?: string | null
-          raw_data?: Json | null
-          room_id?: string | null
-          room_name?: string | null
-          source?: string | null
-          status?: never
-          tenant_id?: string | null
-          total_amount?: number | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reservations_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reservations_room_id_fkey"
-            columns: ["room_id"]
-            isOneToOne: false
-            referencedRelation: "rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "reservations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
