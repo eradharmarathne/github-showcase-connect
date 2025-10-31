@@ -1,5 +1,7 @@
 import {
 	Calendar,
+	ChevronDown,
+	ChevronRight,
 	CreditCard,
 	DollarSign,
 	Edit,
@@ -44,17 +46,17 @@ const formatCurrency = (amount: number, currency: Currency) => {
 const getStatusColor = (status: string) => {
 	switch (status?.toLowerCase()) {
 		case "confirmed":
-			return "bg-green-100 text-green-800";
+			return "bg-emerald-50 text-emerald-700 border-emerald-200";
 		case "checked_in":
-			return "bg-blue-100 text-blue-800";
+			return "bg-blue-50 text-blue-700 border-blue-200";
 		case "checked_out":
-			return "bg-gray-100 text-gray-800";
+			return "bg-slate-50 text-slate-600 border-slate-200";
 		case "cancelled":
-			return "bg-red-100 text-red-800";
+			return "bg-rose-50 text-rose-700 border-rose-200";
 		case "tentative":
-			return "bg-yellow-100 text-yellow-800";
+			return "bg-amber-50 text-amber-700 border-amber-200";
 		default:
-			return "bg-gray-100 text-gray-800";
+			return "bg-slate-50 text-slate-600 border-slate-200";
 	}
 };
 
@@ -108,6 +110,9 @@ export function ReservationsDesktopTable({
 	const { data: reservations, isLoading, error } = useReservationFinancials();
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
+
+	// State for expanded rows
+	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
 	// State for converted amounts
 	const [convertedAmounts, setConvertedAmounts] = useState<
@@ -229,6 +234,40 @@ export function ReservationsDesktopTable({
 		);
 	};
 
+	const toggleRowExpansion = (reservationId: string) => {
+		setExpandedRows((prev) => {
+			const newSet = new Set(prev);
+			if (newSet.has(reservationId)) {
+				newSet.delete(reservationId);
+			} else {
+				newSet.add(reservationId);
+			}
+			return newSet;
+		});
+	};
+
+	const formatDateRange = (checkIn: string, checkOut: string) => {
+		const start = new Date(checkIn);
+		const end = new Date(checkOut);
+		const nights = Math.ceil(
+			(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+		);
+
+		return {
+			startDate: start.toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			}),
+			endDate: end.toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			}),
+			nights,
+		};
+	};
+
 	if (isLoading) {
 		return <ReservationsListSkeleton />;
 	}
@@ -253,184 +292,273 @@ export function ReservationsDesktopTable({
 		<div className="hidden lg:block space-y-6">
 			{/* Active Reservations Section */}
 			{activeReservations.length > 0 && (
-				<Card>
-					<CardHeader className="pb-3">
-						<CardTitle className="text-lg flex items-center gap-2">
+				<Card className="border-none shadow-sm">
+					<CardHeader className="pb-3 bg-slate-50/50">
+						<CardTitle className="text-base font-medium flex items-center gap-2 text-slate-700">
 							<span className="h-2 w-2 rounded-full bg-blue-500"></span>
 							{t("reservations.sections.active")} ({activeReservations.length})
 						</CardTitle>
 					</CardHeader>
-					<CardContent>
+					<CardContent className="p-0">
 						<Table data-testid="reservations-table-active">
 							<TableHeader>
-								<TableRow>
-									<TableHead>
+								<TableRow className="bg-slate-50/50 border-b hover:bg-slate-50/50">
+									<TableHead className="w-8"></TableHead>
+									<TableHead className="font-medium text-slate-700">
 										{t("reservations.table.headers.reservation")}
 									</TableHead>
-									<TableHead>{t("reservations.table.headers.amount")}</TableHead>
-									<TableHead>{t("reservations.expenses.title")}</TableHead>
-									<TableHead>{t("reservations.table.headers.paid")}</TableHead>
-									<TableHead>{t("reservations.table.headers.balance")}</TableHead>
-									<TableHead>
-										{t("reservations.reservationActions.quickActions")}
+									<TableHead className="font-medium text-slate-700 text-right">
+										{t("reservations.table.headers.amount")}
 									</TableHead>
-									<TableHead className="text-right">
+									<TableHead className="font-medium text-slate-700 text-right">
+										{t("reservations.table.headers.paid")}
+									</TableHead>
+									<TableHead className="font-medium text-slate-700 text-right">
+										{t("reservations.table.headers.balance")}
+									</TableHead>
+									<TableHead className="font-medium text-slate-700 text-right">
 										{t("reservations.reservationActions.moreActions")}
 									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{activeReservations.map((reservation) => (
-									<TableRow key={reservation.id} className="hover:bg-blue-50/50">
-										<TableCell>
-											<div className="space-y-1">
-												<div className="flex items-center gap-2">
-													<span className="font-medium text-blue-600">
-														{reservation.reservation_number}
-													</span>
-													<Badge
-														className={`text-xs ${getStatusColor(reservation.status)}`}
+								{activeReservations.map((reservation) => {
+									const dateRange = formatDateRange(
+										reservation.check_in_date,
+										reservation.check_out_date,
+									);
+									const isExpanded = expandedRows.has(reservation.id);
+
+									return (
+										<React.Fragment key={reservation.id}>
+											<TableRow className="hover:bg-slate-50/50 cursor-pointer border-b">
+												<TableCell className="w-8 p-2">
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => toggleRowExpansion(reservation.id)}
+														className="h-6 w-6 p-0"
 													>
-														{getStatusText(reservation.status, t)}
-													</Badge>
-												</div>
-												<div className="text-sm text-gray-600">
-													{reservation.guest_name}
-												</div>
-												<div className="flex flex-col items-start pt-4 gap-1 text-xs text-gray-500">
-													<div className="flex items-center gap-1">
-														<MapPin className="h-3 w-3" />
-														{reservation.rooms?.room_number || "N/A"} -{" "}
-														{reservation.rooms?.room_type || "N/A"}
-													</div>
-													<div className="flex items-center gap-1">
-														<Calendar className="h-3 w-3" />
-														{formatDate(reservation.check_in_date)} -{" "}
-														{formatDate(reservation.check_out_date)}
-													</div>
-													<div className="text-xs">
-														({reservation.nights}{" "}
-														{reservation.nights === 1 ? "night" : "nights"})
-													</div>
-												</div>
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="font-medium text-green-600">
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.roomAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-											<div className="text-xs text-gray-500">
-												{reservation.nights} nights
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="font-medium text-orange-600">
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.expensesAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="font-medium text-blue-600">
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.paidAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div
-												className={`font-medium ${
-													reservation.needs_to_pay_usd > 0
-														? "text-red-600"
-														: "text-green-600"
-												}`}
-											>
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.balanceAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() => onAddIncome(reservation)}
-													className="text-blue-600 hover:text-blue-700 cursor-pointer"
-													disabled={reservation.status === "checked_out"}
-													title={
-														reservation.status === "checked_out"
-															? t(
-																	"reservations.table.actions.reservationCompleted",
-																)
-															: ""
-													}
+														{isExpanded ? (
+															<ChevronDown className="h-4 w-4 text-slate-600" />
+														) : (
+															<ChevronRight className="h-4 w-4 text-slate-600" />
+														)}
+													</Button>
+												</TableCell>
+												<TableCell 
+													className="py-3"
+													onClick={() => toggleRowExpansion(reservation.id)}
 												>
-													<DollarSign className="size-4 mr-1" />
-													{t("reservations.table.actions.addIncome")}
-												</Button>
-												{canShowPaymentButton(reservation) &&
-													reservation.status !== "checked_out" && (
+													<div className="flex items-center gap-3">
+														<div className="flex-1">
+															<div className="flex items-center gap-2 mb-1">
+																<span className="font-medium text-slate-900 text-sm">
+																	{reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																</span>
+																<Badge
+																	variant="outline"
+																	className={`text-xs font-normal ${getStatusColor(reservation.status)}`}
+																>
+																	{getStatusText(reservation.status, t)}
+																</Badge>
+															</div>
+															<div className="text-xs text-slate-600">
+																{dateRange.startDate} - {dateRange.endDate}
+																<span className="text-slate-400 ml-1">
+																	({dateRange.nights} {dateRange.nights === 1 ? "night" : "nights"})
+																</span>
+															</div>
+														</div>
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div className="font-medium text-slate-900 text-sm">
+														{getCurrencySymbol(selectedCurrency)}
+														{(
+															(convertedAmounts[reservation.id]?.roomAmount || 0) +
+															(convertedAmounts[reservation.id]?.expensesAmount || 0)
+														).toLocaleString()}
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div className="font-medium text-slate-900 text-sm">
+														{getCurrencySymbol(selectedCurrency)}
+														{(convertedAmounts[reservation.id]?.paidAmount || 0).toLocaleString()}
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div
+														className={`font-medium text-sm ${
+															(convertedAmounts[reservation.id]?.balanceAmount || 0) > 0
+																? "text-rose-600"
+																: "text-emerald-600"
+														}`}
+													>
+														{getCurrencySymbol(selectedCurrency)}
+														{(convertedAmounts[reservation.id]?.balanceAmount || 0).toLocaleString()}
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div className="flex gap-1 justify-end">
 														<Button
-															variant="outline"
+															variant="ghost"
 															size="sm"
-															onClick={() =>
-																onPayment(
-																	reservation.id,
-																	reservation.needs_to_pay_usd,
-																	"USD",
-																)
-															}
-															className="text-green-600 hover:text-green-700 cursor-pointer"
+															onClick={(e) => {
+																e.stopPropagation();
+																onViewReservation(reservation.id);
+															}}
+															className="h-7 w-7 p-0 hover:bg-slate-100"
 														>
-															<CreditCard className="size-4 mr-1" />
-															{t("reservations.table.actions.payNow")}
+															<Eye className="h-3.5 w-3.5 text-slate-600" />
 														</Button>
-													)}
-											</div>
-										</TableCell>
-										<TableCell className="text-right">
-											<div className="flex gap-1 justify-end">
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => onViewReservation(reservation.id)}
-													className="h-8 w-8 p-0"
-												>
-													<Eye className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => onEditReservation(reservation)}
-													className="h-8 w-8 p-0"
-												>
-													<Edit className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() =>
-														onPrint({
-															...reservation,
-															convertedAmounts: convertedAmounts[reservation.id],
-															selectedCurrency: selectedCurrency,
-														})
-													}
-													className="h-8 w-8 p-0"
-												>
-													<Printer className="h-4 w-4" />
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))}
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={(e) => {
+																e.stopPropagation();
+																onEditReservation(reservation);
+															}}
+															className="h-7 w-7 p-0 hover:bg-slate-100"
+														>
+															<Edit className="h-3.5 w-3.5 text-slate-600" />
+														</Button>
+														{canShowPaymentButton(reservation) && (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	onPayment(
+																		reservation.id,
+																		reservation.needs_to_pay_usd,
+																		"USD",
+																	);
+																}}
+																className="h-7 w-7 p-0 hover:bg-emerald-50"
+															>
+																<CreditCard className="h-3.5 w-3.5 text-emerald-600" />
+															</Button>
+														)}
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={(e) => {
+																e.stopPropagation();
+																onPrint({
+																	...reservation,
+																	convertedAmounts: convertedAmounts[reservation.id],
+																	selectedCurrency: selectedCurrency,
+																});
+															}}
+															className="h-7 w-7 p-0 hover:bg-slate-100"
+														>
+															<Printer className="h-3.5 w-3.5 text-slate-600" />
+														</Button>
+													</div>
+												</TableCell>
+											</TableRow>
+
+											{/* Expanded Row Details */}
+											{isExpanded && (
+												<TableRow className="bg-slate-50/30 border-b">
+													<TableCell colSpan={6} className="py-4">
+														<div className="grid grid-cols-3 gap-6 pl-8">
+															<div className="space-y-3">
+																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																	Guest Information
+																</h4>
+																<div className="space-y-2">
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">Name:</span>
+																		<span className="font-medium text-slate-900">
+																			{reservation.guest_name}
+																		</span>
+																	</div>
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">
+																			Reservation #:
+																		</span>
+																		<span className="font-medium text-slate-900">
+																			{reservation.reservation_number}
+																		</span>
+																	</div>
+																</div>
+															</div>
+
+															<div className="space-y-3">
+																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																	Financial Details
+																</h4>
+																<div className="space-y-2">
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">Room Amount:</span>
+																		<span className="font-medium text-slate-900">
+																			{getCurrencySymbol(selectedCurrency)}
+																			{(convertedAmounts[reservation.id]?.roomAmount || 0).toLocaleString()}
+																		</span>
+																	</div>
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">Services:</span>
+																		<span className="font-medium text-slate-900">
+																			{getCurrencySymbol(selectedCurrency)}
+																			{(convertedAmounts[reservation.id]?.expensesAmount || 0).toLocaleString()}
+																		</span>
+																	</div>
+																	<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
+																		<span className="text-slate-700 font-medium">Total:</span>
+																		<span className="font-semibold text-slate-900">
+																			{getCurrencySymbol(selectedCurrency)}
+																			{(
+																				(convertedAmounts[reservation.id]?.roomAmount || 0) +
+																				(convertedAmounts[reservation.id]?.expensesAmount || 0)
+																			).toLocaleString()}
+																		</span>
+																	</div>
+																</div>
+															</div>
+
+															<div className="space-y-3">
+																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																	Quick Actions
+																</h4>
+																<div className="flex flex-col gap-2">
+																	<Button
+																		variant="outline"
+																		size="sm"
+																		onClick={() => onAddIncome(reservation)}
+																		disabled={reservation.status === "checked_out"}
+																		className="justify-start text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+																	>
+																		<DollarSign className="size-4 mr-2" />
+																		{t("reservations.table.actions.addIncome")}
+																	</Button>
+																	{canShowPaymentButton(reservation) && (
+																		<Button
+																			variant="outline"
+																			size="sm"
+																			onClick={() =>
+																				onPayment(
+																					reservation.id,
+																					reservation.needs_to_pay_usd,
+																					"USD",
+																				)
+																			}
+																			className="justify-start text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+																		>
+																			<CreditCard className="size-4 mr-2" />
+																			{t("reservations.table.actions.payNow")}
+																		</Button>
+																	)}
+																</div>
+															</div>
+														</div>
+													</TableCell>
+												</TableRow>
+											)}
+										</React.Fragment>
+									);
+								})}
 							</TableBody>
 						</Table>
 					</CardContent>
@@ -439,184 +567,219 @@ export function ReservationsDesktopTable({
 
 			{/* Completed Reservations Section */}
 			{completedReservations.length > 0 && (
-				<Card className="bg-gray-50/50">
-					<CardHeader className="pb-3">
-						<CardTitle className="text-lg flex items-center gap-2 text-gray-600">
-							<span className="h-2 w-2 rounded-full bg-gray-400"></span>
+				<Card className="border-none shadow-sm">
+					<CardHeader className="pb-3 bg-slate-50/50">
+						<CardTitle className="text-base font-medium flex items-center gap-2 text-slate-500">
+							<span className="h-2 w-2 rounded-full bg-slate-400"></span>
 							{t("reservations.sections.completed")} ({completedReservations.length})
 						</CardTitle>
 					</CardHeader>
-					<CardContent>
+					<CardContent className="p-0">
 						<Table data-testid="reservations-table-completed">
 							<TableHeader>
-								<TableRow>
-									<TableHead>
+								<TableRow className="bg-slate-50/50 border-b hover:bg-slate-50/50">
+									<TableHead className="w-8"></TableHead>
+									<TableHead className="font-medium text-slate-700">
 										{t("reservations.table.headers.reservation")}
 									</TableHead>
-									<TableHead>{t("reservations.table.headers.amount")}</TableHead>
-									<TableHead>{t("reservations.expenses.title")}</TableHead>
-									<TableHead>{t("reservations.table.headers.paid")}</TableHead>
-									<TableHead>{t("reservations.table.headers.balance")}</TableHead>
-									<TableHead>
-										{t("reservations.reservationActions.quickActions")}
+									<TableHead className="font-medium text-slate-700 text-right">
+										{t("reservations.table.headers.amount")}
 									</TableHead>
-									<TableHead className="text-right">
+									<TableHead className="font-medium text-slate-700 text-right">
+										{t("reservations.table.headers.paid")}
+									</TableHead>
+									<TableHead className="font-medium text-slate-700 text-right">
+										{t("reservations.table.headers.balance")}
+									</TableHead>
+									<TableHead className="font-medium text-slate-700 text-right">
 										{t("reservations.reservationActions.moreActions")}
 									</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{completedReservations.map((reservation) => (
-									<TableRow key={reservation.id} className="hover:bg-gray-100/50 opacity-75">
-										<TableCell>
-											<div className="space-y-1">
-												<div className="flex items-center gap-2">
-													<span className="font-medium text-gray-600">
-														{reservation.reservation_number}
-													</span>
-													<Badge
-														className={`text-xs ${getStatusColor(reservation.status)}`}
+								{completedReservations.map((reservation) => {
+									const dateRange = formatDateRange(
+										reservation.check_in_date,
+										reservation.check_out_date,
+									);
+									const isExpanded = expandedRows.has(reservation.id);
+
+									return (
+										<React.Fragment key={reservation.id}>
+											<TableRow className="hover:bg-slate-50/50 cursor-pointer border-b opacity-70">
+												<TableCell className="w-8 p-2">
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={() => toggleRowExpansion(reservation.id)}
+														className="h-6 w-6 p-0"
 													>
-														{getStatusText(reservation.status, t)}
-													</Badge>
-												</div>
-												<div className="text-sm text-gray-600">
-													{reservation.guest_name}
-												</div>
-												<div className="flex flex-col items-start pt-4 gap-1 text-xs text-gray-500">
-													<div className="flex items-center gap-1">
-														<MapPin className="h-3 w-3" />
-														{reservation.rooms?.room_number || "N/A"} -{" "}
-														{reservation.rooms?.room_type || "N/A"}
-													</div>
-													<div className="flex items-center gap-1">
-														<Calendar className="h-3 w-3" />
-														{formatDate(reservation.check_in_date)} -{" "}
-														{formatDate(reservation.check_out_date)}
-													</div>
-													<div className="text-xs">
-														({reservation.nights}{" "}
-														{reservation.nights === 1 ? "night" : "nights"})
-													</div>
-												</div>
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="font-medium text-green-600">
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.roomAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-											<div className="text-xs text-gray-500">
-												{reservation.nights} nights
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="font-medium text-orange-600">
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.expensesAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="font-medium text-blue-600">
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.paidAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div
-												className={`font-medium ${
-													reservation.needs_to_pay_usd > 0
-														? "text-red-600"
-														: "text-green-600"
-												}`}
-											>
-												{formatCurrency(
-													convertedAmounts[reservation.id]?.balanceAmount || 0,
-													selectedCurrency,
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												<Button
-													variant="outline"
-													size="sm"
-													onClick={() => onAddIncome(reservation)}
-													className="text-blue-600 hover:text-blue-700 cursor-pointer"
-													disabled={reservation.status === "checked_out"}
-													title={
-														reservation.status === "checked_out"
-															? t(
-																	"reservations.table.actions.reservationCompleted",
-																)
-															: ""
-													}
+														{isExpanded ? (
+															<ChevronDown className="h-4 w-4 text-slate-600" />
+														) : (
+															<ChevronRight className="h-4 w-4 text-slate-600" />
+														)}
+													</Button>
+												</TableCell>
+												<TableCell 
+													className="py-3"
+													onClick={() => toggleRowExpansion(reservation.id)}
 												>
-													<DollarSign className="size-4 mr-1" />
-													{t("reservations.table.actions.addIncome")}
-												</Button>
-												{canShowPaymentButton(reservation) &&
-													reservation.status !== "checked_out" && (
+													<div className="flex items-center gap-3">
+														<div className="flex-1">
+															<div className="flex items-center gap-2 mb-1">
+																<span className="font-medium text-slate-700 text-sm">
+																	{reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																</span>
+																<Badge
+																	variant="outline"
+																	className={`text-xs font-normal ${getStatusColor(reservation.status)}`}
+																>
+																	{getStatusText(reservation.status, t)}
+																</Badge>
+															</div>
+															<div className="text-xs text-slate-500">
+																{dateRange.startDate} - {dateRange.endDate}
+																<span className="text-slate-400 ml-1">
+																	({dateRange.nights} {dateRange.nights === 1 ? "night" : "nights"})
+																</span>
+															</div>
+														</div>
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div className="font-medium text-slate-700 text-sm">
+														{getCurrencySymbol(selectedCurrency)}
+														{(
+															(convertedAmounts[reservation.id]?.roomAmount || 0) +
+															(convertedAmounts[reservation.id]?.expensesAmount || 0)
+														).toLocaleString()}
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div className="font-medium text-slate-700 text-sm">
+														{getCurrencySymbol(selectedCurrency)}
+														{(convertedAmounts[reservation.id]?.paidAmount || 0).toLocaleString()}
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div
+														className={`font-medium text-sm ${
+															(convertedAmounts[reservation.id]?.balanceAmount || 0) > 0
+																? "text-rose-600"
+																: "text-slate-600"
+														}`}
+													>
+														{getCurrencySymbol(selectedCurrency)}
+														{(convertedAmounts[reservation.id]?.balanceAmount || 0).toLocaleString()}
+													</div>
+												</TableCell>
+												<TableCell className="text-right py-3">
+													<div className="flex gap-1 justify-end">
 														<Button
-															variant="outline"
+															variant="ghost"
 															size="sm"
-															onClick={() =>
-																onPayment(
-																	reservation.id,
-																	reservation.needs_to_pay_usd,
-																	"USD",
-																)
-															}
-															className="text-green-600 hover:text-green-700 cursor-pointer"
+															onClick={(e) => {
+																e.stopPropagation();
+																onViewReservation(reservation.id);
+															}}
+															className="h-7 w-7 p-0 hover:bg-slate-100"
 														>
-															<CreditCard className="size-4 mr-1" />
-															{t("reservations.table.actions.payNow")}
+															<Eye className="h-3.5 w-3.5 text-slate-600" />
 														</Button>
-													)}
-											</div>
-										</TableCell>
-										<TableCell className="text-right">
-											<div className="flex gap-1 justify-end">
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => onViewReservation(reservation.id)}
-													className="h-8 w-8 p-0"
-												>
-													<Eye className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => onEditReservation(reservation)}
-													className="h-8 w-8 p-0"
-												>
-													<Edit className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() =>
-														onPrint({
-															...reservation,
-															convertedAmounts: convertedAmounts[reservation.id],
-															selectedCurrency: selectedCurrency,
-														})
-													}
-													className="h-8 w-8 p-0"
-												>
-													<Printer className="h-4 w-4" />
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))}
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={(e) => {
+																e.stopPropagation();
+																onPrint({
+																	...reservation,
+																	convertedAmounts: convertedAmounts[reservation.id],
+																	selectedCurrency: selectedCurrency,
+																});
+															}}
+															className="h-7 w-7 p-0 hover:bg-slate-100"
+														>
+															<Printer className="h-3.5 w-3.5 text-slate-600" />
+														</Button>
+													</div>
+												</TableCell>
+											</TableRow>
+
+											{/* Expanded Row Details */}
+											{isExpanded && (
+												<TableRow className="bg-slate-50/30 border-b opacity-70">
+													<TableCell colSpan={6} className="py-4">
+														<div className="grid grid-cols-3 gap-6 pl-8">
+															<div className="space-y-3">
+																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																	Guest Information
+																</h4>
+																<div className="space-y-2">
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">Name:</span>
+																		<span className="font-medium text-slate-900">
+																			{reservation.guest_name}
+																		</span>
+																	</div>
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">
+																			Reservation #:
+																		</span>
+																		<span className="font-medium text-slate-900">
+																			{reservation.reservation_number}
+																		</span>
+																	</div>
+																</div>
+															</div>
+
+															<div className="space-y-3">
+																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																	Financial Details
+																</h4>
+																<div className="space-y-2">
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">Room Amount:</span>
+																		<span className="font-medium text-slate-900">
+																			{getCurrencySymbol(selectedCurrency)}
+																			{(convertedAmounts[reservation.id]?.roomAmount || 0).toLocaleString()}
+																		</span>
+																	</div>
+																	<div className="flex justify-between text-sm">
+																		<span className="text-slate-600">Services:</span>
+																		<span className="font-medium text-slate-900">
+																			{getCurrencySymbol(selectedCurrency)}
+																			{(convertedAmounts[reservation.id]?.expensesAmount || 0).toLocaleString()}
+																		</span>
+																	</div>
+																	<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
+																		<span className="text-slate-700 font-medium">Total:</span>
+																		<span className="font-semibold text-slate-900">
+																			{getCurrencySymbol(selectedCurrency)}
+																			{(
+																				(convertedAmounts[reservation.id]?.roomAmount || 0) +
+																				(convertedAmounts[reservation.id]?.expensesAmount || 0)
+																			).toLocaleString()}
+																		</span>
+																	</div>
+																</div>
+															</div>
+
+															<div className="space-y-3">
+																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																	Status
+																</h4>
+																<div className="text-sm text-slate-600">
+																	This reservation is completed.
+																</div>
+															</div>
+														</div>
+													</TableCell>
+												</TableRow>
+											)}
+										</React.Fragment>
+									);
+								})}
 							</TableBody>
 						</Table>
 					</CardContent>

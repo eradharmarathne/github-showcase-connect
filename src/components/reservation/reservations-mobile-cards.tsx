@@ -83,14 +83,14 @@ export function ReservationsMobileCards({
 	}, [reservations, selectedCurrency, tenant?.id, selectedLocation]); // Utility functions
 	const getStatusColor = (status: string): string => {
 		const colors: Record<string, string> = {
-			confirmed: "bg-green-100 text-green-800",
-			pending: "bg-yellow-100 text-yellow-800",
-			cancelled: "bg-red-100 text-red-800",
-			checked_in: "bg-blue-100 text-blue-800",
-			checked_out: "bg-gray-100 text-gray-800",
-			tentative: "bg-orange-100 text-orange-800",
+			confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+			pending: "bg-amber-50 text-amber-700 border-amber-200",
+			cancelled: "bg-rose-50 text-rose-700 border-rose-200",
+			checked_in: "bg-blue-50 text-blue-700 border-blue-200",
+			checked_out: "bg-slate-50 text-slate-600 border-slate-200",
+			tentative: "bg-amber-50 text-amber-700 border-amber-200",
 		};
-		return colors[status] || "bg-gray-100 text-gray-800";
+		return colors[status] || "bg-slate-50 text-slate-600 border-slate-200";
 	};
 
 	const getStatusText = (status: string) => {
@@ -194,63 +194,77 @@ export function ReservationsMobileCards({
 		<div className="lg:hidden space-y-6">
 			{/* Active Reservations Section */}
 			{activeReservations.length > 0 && (
-				<div className="space-y-4">
-					<div className="flex items-center gap-2">
-						<h3 className="text-sm font-semibold text-gray-900">
+				<div className="space-y-3">
+					<div className="flex items-center gap-2 px-1">
+						<span className="h-2 w-2 rounded-full bg-blue-500"></span>
+						<h3 className="text-sm font-medium text-slate-700">
 							{t("reservations.sections.active")} ({activeReservations.length})
 						</h3>
 					</div>
-					<div className="grid gap-4">
+					<div className="grid gap-3">
 						{activeReservations.map((reservation) => (
-							<Card key={reservation.id} className="w-full border-l-4 border-l-blue-500">
+							<Card 
+								key={reservation.id} 
+								className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow"
+							>
 								<CardContent className="p-4">
 									<div className="flex justify-between items-start mb-3">
-										<div>
-											<h3 className="font-semibold text-sm">
-												{reservation.reservation_number}
-											</h3>
-											<p className="text-muted-foreground text-xs">
+										<div className="flex-1">
+											<div className="flex items-center gap-2 mb-1">
+												<h3 className="font-semibold text-sm text-slate-900">
+													{reservation.rooms?.room_number} - {reservation.rooms?.room_type}
+												</h3>
+												<Badge
+													variant="outline"
+													className={`text-xs font-normal ${getStatusColor(reservation.status)}`}
+												>
+													{getStatusText(reservation.status)}
+												</Badge>
+											</div>
+											<p className="text-slate-600 text-xs">
 												{reservation.guest_name}
 											</p>
 										</div>
-										<Badge
-											className={`${getStatusColor(reservation.status)} text-xs`}
-										>
-											{getStatusText(reservation.status)}
-										</Badge>
 									</div>
 
-									<div className="space-y-2 text-xs">
-										<div className="flex items-center gap-2">
-											<MapPin className="h-3 w-3" />
-											<span>
-												{reservation.rooms?.room_number} -{" "}
-												{reservation.rooms?.room_type}
-											</span>
-										</div>
-										<div className="flex items-center gap-2">
+									<div className="space-y-2 text-xs mb-3">
+										<div className="flex items-center gap-2 text-slate-600">
 											<Calendar className="h-3 w-3" />
 											<span>
-												{new Date(reservation.check_in_date).toLocaleDateString()} -{" "}
-												{new Date(reservation.check_out_date).toLocaleDateString()}
+												{new Date(reservation.check_in_date).toLocaleDateString("en-US", {
+													month: "short",
+													day: "numeric",
+													year: "numeric",
+												})} - {new Date(reservation.check_out_date).toLocaleDateString("en-US", {
+													month: "short",
+													day: "numeric",
+													year: "numeric",
+												})}
 											</span>
 										</div>
-										<div className="flex items-center gap-2">
-											<DollarSign className="h-3 w-3" />
-											<span>
-												Room: {getCurrencySymbol(selectedCurrency)}{" "}
+										<div className="flex items-center gap-2 text-slate-600">
+											<span className="text-slate-400">
+												({reservation.nights} {reservation.nights === 1 ? "night" : "nights"})
+											</span>
+										</div>
+									</div>
+
+									<div className="flex justify-between items-center pt-3 border-t border-slate-100 mb-3">
+										<div className="flex flex-col gap-1">
+											<span className="text-xs text-slate-600">Total Amount</span>
+											<span className="font-semibold text-sm text-slate-900">
+												{getCurrencySymbol(selectedCurrency)}{" "}
 												{(convertedAmounts[reservation.id] || 0).toLocaleString()}
 											</span>
 										</div>
-
-										{/* Additional Services display */}
-										<div className="flex items-center gap-2">
-											<DollarSign className="h-3 w-3" />
-											<ReservationExpensesDisplay
-												reservationId={reservation.id}
-												currency={selectedCurrency}
-												isCompact={true}
-											/>
+										<div className="flex flex-col gap-1 items-end">
+											<span className="text-xs text-slate-600">Balance</span>
+											<span className={`font-semibold text-sm ${
+												reservation.balance_amount > 0 ? "text-rose-600" : "text-emerald-600"
+											}`}>
+												{getCurrencySymbol(selectedCurrency)}{" "}
+												{(reservation.balance_amount || 0).toLocaleString()}
+											</span>
 										</div>
 									</div>
 
@@ -280,63 +294,75 @@ export function ReservationsMobileCards({
 
 			{/* Completed Reservations Section */}
 			{completedReservations.length > 0 && (
-				<div className="space-y-4">
-					<div className="flex items-center gap-2 pt-4 border-t">
-						<h3 className="text-sm font-semibold text-gray-600">
+				<div className="space-y-3">
+					<div className="flex items-center gap-2 px-1 pt-2">
+						<span className="h-2 w-2 rounded-full bg-slate-400"></span>
+						<h3 className="text-sm font-medium text-slate-500">
 							{t("reservations.sections.completed")} ({completedReservations.length})
 						</h3>
 					</div>
-					<div className="grid gap-4">
+					<div className="grid gap-3">
 						{completedReservations.map((reservation) => (
-							<Card key={reservation.id} className="w-full opacity-75 bg-gray-50">
+							<Card 
+								key={reservation.id} 
+								className="border-slate-200 shadow-sm opacity-70"
+							>
 								<CardContent className="p-4">
 									<div className="flex justify-between items-start mb-3">
-										<div>
-											<h3 className="font-semibold text-sm">
-												{reservation.reservation_number}
-											</h3>
-											<p className="text-muted-foreground text-xs">
+										<div className="flex-1">
+											<div className="flex items-center gap-2 mb-1">
+												<h3 className="font-semibold text-sm text-slate-700">
+													{reservation.rooms?.room_number} - {reservation.rooms?.room_type}
+												</h3>
+												<Badge
+													variant="outline"
+													className={`text-xs font-normal ${getStatusColor(reservation.status)}`}
+												>
+													{getStatusText(reservation.status)}
+												</Badge>
+											</div>
+											<p className="text-slate-500 text-xs">
 												{reservation.guest_name}
 											</p>
 										</div>
-										<Badge
-											className={`${getStatusColor(reservation.status)} text-xs`}
-										>
-											{getStatusText(reservation.status)}
-										</Badge>
 									</div>
 
-									<div className="space-y-2 text-xs">
-										<div className="flex items-center gap-2">
-											<MapPin className="h-3 w-3" />
-											<span>
-												{reservation.rooms?.room_number} -{" "}
-												{reservation.rooms?.room_type}
-											</span>
-										</div>
-										<div className="flex items-center gap-2">
+									<div className="space-y-2 text-xs mb-3">
+										<div className="flex items-center gap-2 text-slate-600">
 											<Calendar className="h-3 w-3" />
 											<span>
-												{new Date(reservation.check_in_date).toLocaleDateString()} -{" "}
-												{new Date(reservation.check_out_date).toLocaleDateString()}
+												{new Date(reservation.check_in_date).toLocaleDateString("en-US", {
+													month: "short",
+													day: "numeric",
+													year: "numeric",
+												})} - {new Date(reservation.check_out_date).toLocaleDateString("en-US", {
+													month: "short",
+													day: "numeric",
+													year: "numeric",
+												})}
 											</span>
 										</div>
-										<div className="flex items-center gap-2">
-											<DollarSign className="h-3 w-3" />
-											<span>
-												Room: {getCurrencySymbol(selectedCurrency)}{" "}
+										<div className="flex items-center gap-2 text-slate-600">
+											<span className="text-slate-400">
+												({reservation.nights} {reservation.nights === 1 ? "night" : "nights"})
+											</span>
+										</div>
+									</div>
+
+									<div className="flex justify-between items-center pt-3 border-t border-slate-100 mb-3">
+										<div className="flex flex-col gap-1">
+											<span className="text-xs text-slate-600">Total Amount</span>
+											<span className="font-semibold text-sm text-slate-700">
+												{getCurrencySymbol(selectedCurrency)}{" "}
 												{(convertedAmounts[reservation.id] || 0).toLocaleString()}
 											</span>
 										</div>
-
-										{/* Additional Services display */}
-										<div className="flex items-center gap-2">
-											<DollarSign className="h-3 w-3" />
-											<ReservationExpensesDisplay
-												reservationId={reservation.id}
-												currency={selectedCurrency}
-												isCompact={true}
-											/>
+										<div className="flex flex-col gap-1 items-end">
+											<span className="text-xs text-slate-600">Balance</span>
+											<span className="font-semibold text-sm text-slate-600">
+												{getCurrencySymbol(selectedCurrency)}{" "}
+												{(reservation.balance_amount || 0).toLocaleString()}
+											</span>
 										</div>
 									</div>
 
@@ -366,7 +392,7 @@ export function ReservationsMobileCards({
 
 			{/* Empty state */}
 			{activeReservations.length === 0 && completedReservations.length === 0 && (
-				<div className="text-center py-8 text-gray-500">
+				<div className="text-center py-8 text-slate-500">
 					{t("reservations.noReservationsFound")}
 				</div>
 			)}
