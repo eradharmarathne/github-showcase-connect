@@ -125,31 +125,42 @@ export function ReservationsMobileCards({
 		return (reservation.paid_amount || 0) + (reservation.balance_amount || 0);
 	};
 
+	// Helper function to get room display text
+	const getRoomDisplay = (reservation: any): string => {
+		const roomNumber = reservation.rooms?.room_number || reservation.room_name || 'N/A';
+		const roomType = reservation.rooms?.room_type || '';
+		return roomType ? `${roomNumber} - ${roomType}` : roomNumber;
+	};
+
 	// Transform reservation data for printing
 	const transformToPrintableData = (reservation: any) => {
+		// Safely extract room and location data
+		const roomData = reservation.rooms || {};
+		const locationData = reservation.locations || {};
+		
 		return {
 			...reservation,
 			// Enhanced hotel/tenant information from context
-			tenant_name: tenant?.hotel_name || tenant?.name,
-			hotel_name: tenant?.hotel_name || tenant?.name,
-			hotel_address: tenant?.hotel_address,
-			hotel_phone: tenant?.hotel_phone,
-			hotel_email: tenant?.hotel_email,
-			hotel_website: tenant?.hotel_website,
-			logo_url: tenant?.logo_url,
+			tenant_name: tenant?.hotel_name || tenant?.name || '',
+			hotel_name: tenant?.hotel_name || tenant?.name || '',
+			hotel_address: tenant?.hotel_address || '',
+			hotel_phone: tenant?.hotel_phone || '',
+			hotel_email: tenant?.hotel_email || '',
+			hotel_website: tenant?.hotel_website || null,
+			logo_url: tenant?.logo_url || null,
 
 			// Enhanced location information
-			location_name: reservation.locations?.name || "Unknown Location",
-			location_address: reservation.locations?.address || null,
-			location_phone: reservation.locations?.phone || null,
-			location_email: reservation.locations?.email || null,
+			location_name: locationData.name || "Unknown Location",
+			location_address: locationData.address || null,
+			location_phone: locationData.phone || null,
+			location_email: locationData.email || null,
 
-			// Room details
-			room_number: reservation.rooms?.room_number || "Unknown Room",
-			room_type: reservation.rooms?.room_type || "Unknown Type",
-			bed_type: reservation.rooms?.bed_type || null,
-			room_description: reservation.rooms?.description || null,
-			amenities: reservation.rooms?.amenities || [],
+			// Room details with fallbacks
+			room_number: roomData.room_number || reservation.room_name || "Unknown Room",
+			room_type: roomData.room_type || "Unknown Type",
+			bed_type: roomData.bed_type || null,
+			room_description: roomData.description || null,
+			amenities: roomData.amenities || [],
 		};
 	};
 
@@ -238,7 +249,7 @@ export function ReservationsMobileCards({
 										<div className="flex-1">
 											<div className="flex items-center gap-2 mb-1">
 												<h3 className="font-semibold text-sm text-slate-900">
-													{reservation.rooms?.room_number} - {reservation.rooms?.room_type}
+													{getRoomDisplay(reservation)}
 												</h3>
 												<Badge
 													variant="outline"
@@ -338,7 +349,7 @@ export function ReservationsMobileCards({
 										<div className="flex-1">
 											<div className="flex items-center gap-2 mb-1">
 												<h3 className="font-semibold text-sm text-slate-700">
-													{reservation.rooms?.room_number} - {reservation.rooms?.room_type}
+													{getRoomDisplay(reservation)}
 												</h3>
 												<Badge
 													variant="outline"
