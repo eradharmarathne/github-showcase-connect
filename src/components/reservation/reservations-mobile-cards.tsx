@@ -8,6 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
 import { useReservationPrint } from "@/hooks/use-reservation-print";
 import { useReservationsData } from "@/hooks/use-reservations-data";
+import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 import { ReservationActions } from "./reservation-actions";
@@ -35,6 +36,7 @@ export function ReservationsMobileCards({
 	onAddIncome,
 }: ReservationsMobileCardsProps) {
 	const { t } = useTranslation();
+	const { toast } = useToast();
 	const { reservations, loading } = useReservationsData();
 	const { printReservation } = useReservationPrint();
 	const { tenant } = useAuth();
@@ -152,6 +154,30 @@ export function ReservationsMobileCards({
 	};
 
 	const handlePrintReservation = (reservation: any) => {
+		// Validate that we have the required data before printing
+		if (!reservation) {
+			console.error("[Print] No reservation data provided");
+			toast({
+				title: t("common.error"),
+				description: "Cannot print: No reservation data available",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		if (!reservation.id || !reservation.reservation_number) {
+			console.error("[Print] Missing required fields:", {
+				id: reservation.id,
+				reservation_number: reservation.reservation_number,
+			});
+			toast({
+				title: t("common.error"),
+				description: "Cannot print: Incomplete reservation data",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		const printableData = transformToPrintableData(reservation);
 		printReservation(printableData);
 	};
