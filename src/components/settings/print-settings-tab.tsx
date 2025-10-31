@@ -8,10 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePrintSettings } from "@/hooks/use-print-settings";
-import { Loader2, Printer, Upload } from "lucide-react";
+import { Loader2, Printer, Upload, Eye } from "lucide-react";
 import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PrintPreviewSample } from "./print-preview-sample";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
 
 export function PrintSettingsTab() {
 	const { printSettings, saveSettings, isSubmitting, isLoading } = usePrintSettings();
@@ -40,6 +43,11 @@ export function PrintSettingsTab() {
 
 	const [logoFile, setLogoFile] = useState<File | null>(null);
 	const [uploadingLogo, setUploadingLogo] = useState(false);
+	const printPreviewRef = useRef<HTMLDivElement>(null);
+
+	const handlePrintPreview = useReactToPrint({
+		contentRef: printPreviewRef,
+	});
 
 	useEffect(() => {
 		if (printSettings) {
@@ -140,11 +148,12 @@ export function PrintSettingsTab() {
 				</CardHeader>
 				<CardContent>
 					<Tabs defaultValue="header" className="w-full">
-						<TabsList className="grid w-full grid-cols-4">
+						<TabsList className="grid w-full grid-cols-5">
 							<TabsTrigger value="header">Header</TabsTrigger>
 							<TabsTrigger value="content">Content</TabsTrigger>
 							<TabsTrigger value="footer">Footer</TabsTrigger>
 							<TabsTrigger value="styling">Styling</TabsTrigger>
+							<TabsTrigger value="preview">Preview</TabsTrigger>
 						</TabsList>
 
 						{/* Header Tab */}
@@ -489,6 +498,39 @@ export function PrintSettingsTab() {
 										For advanced users: Add custom CSS to further customize print templates
 									</p>
 								</div>
+							</div>
+						</TabsContent>
+
+						{/* Preview Tab */}
+						<TabsContent value="preview" className="space-y-4 mt-4">
+							<div className="space-y-4">
+								<div className="flex items-center justify-between mb-4">
+									<div>
+										<h3 className="text-lg font-semibold">Print Preview</h3>
+										<p className="text-sm text-muted-foreground">
+											See how your reservation printouts will look with current settings
+										</p>
+									</div>
+									<Button
+										type="button"
+										onClick={() => handlePrintPreview()}
+										variant="outline"
+										size="sm"
+									>
+										<Printer className="h-4 w-4 mr-2" />
+										Print Preview
+									</Button>
+								</div>
+
+								{/* Live Preview */}
+								<div className="border rounded-lg p-4 bg-white" ref={printPreviewRef}>
+									<PrintPreviewSample printSettings={formData} />
+								</div>
+
+								<p className="text-xs text-muted-foreground">
+									💡 Tip: Make changes in other tabs and see them reflected here in real-time.
+									Click "Save Print Settings" to apply changes permanently.
+								</p>
 							</div>
 						</TabsContent>
 					</Tabs>

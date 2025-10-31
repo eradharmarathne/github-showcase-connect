@@ -9,11 +9,23 @@
 - [x] Storage policies for SELECT, INSERT, UPDATE, DELETE operations
 
 ### Components & Hooks
-- [x] `PrintSettingsTab` component created
+- [x] `PrintSettingsTab` component created with 5 tabs (Header, Content, Footer, Styling, **Preview**)
 - [x] `PrintTemplate` wrapper component created
+- [x] `PrintPreviewSample` component created for live preview
 - [x] `usePrintSettings` hook created
 - [x] Logo upload functionality with `refreshTenant()` call
 - [x] Settings page updated with Print Settings tab
+- [x] Live preview with print button integration
+
+### New Feature: Live Preview 🎉
+The Print Settings now includes a **Preview** tab that shows a live sample reservation with all your customizations applied in real-time!
+
+**Features:**
+- ✅ Real-time preview of all customization changes
+- ✅ Sample reservation data to demonstrate print layout
+- ✅ "Print Preview" button to test actual print output
+- ✅ All settings (logo, colors, fonts, header, footer) visible in preview
+- ✅ No need to create actual reservation to test print settings
 
 ### Logo Flow Verification
 
@@ -40,6 +52,14 @@
 5. Printed document includes logo
 
 ## 🧪 Manual Testing Steps
+
+### Test 0: Live Preview (NEW!)
+1. Navigate to Settings → Print Settings → **Preview** tab
+2. See sample reservation with current settings applied
+3. Make changes in other tabs (Header, Content, Footer, Styling)
+4. Switch back to Preview tab - changes should reflect immediately
+5. Click "Print Preview" button to test actual print output
+6. Verify all customizations appear in print preview
 
 ### Test 1: Logo Upload
 1. Navigate to Settings → Print Settings
@@ -161,6 +181,9 @@ const refreshTenant = async () => {
 - [x] Storage policies allow authenticated uploads
 - [x] Logo persists across sessions
 - [x] Logo can be toggled on/off via print settings
+- [x] **Live preview tab shows all customizations in real-time**
+- [x] **Print Preview button works from settings page**
+- [x] **Changes reflect immediately in preview (no save needed)**
 
 ## 🚀 Production Readiness
 
