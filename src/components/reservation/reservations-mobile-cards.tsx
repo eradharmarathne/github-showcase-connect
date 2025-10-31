@@ -156,7 +156,7 @@ export function ReservationsMobileCards({
 		printReservation(printableData);
 	};
 
-	// Filter reservations
+	// Filter and organize reservations
 	const filteredReservations = reservations.filter((reservation) => {
 		const matchesSearch =
 			searchQuery === "" ||
@@ -171,84 +171,205 @@ export function ReservationsMobileCards({
 		return matchesSearch && matchesStatus;
 	});
 
+	// Separate active and checked-out reservations
+	const activeReservations = filteredReservations
+		.filter((r) => r.status !== "checked_out" && r.status !== "cancelled")
+		.sort((a, b) => {
+			// Sort by check-in date (upcoming first)
+			return new Date(a.check_in_date).getTime() - new Date(b.check_in_date).getTime();
+		});
+
+	const completedReservations = filteredReservations
+		.filter((r) => r.status === "checked_out" || r.status === "cancelled")
+		.sort((a, b) => {
+			// Sort by check-out date (most recent first)
+			return new Date(b.check_out_date).getTime() - new Date(a.check_out_date).getTime();
+		});
+
 	if (loading) {
 		return <ReservationsListSkeleton />;
 	}
+
 	return (
-		<div className="lg:hidden grid gap-4">
-			{filteredReservations.map((reservation) => (
-				<Card key={reservation.id} className="w-full">
-					<CardContent className="p-4">
-						<div className="flex justify-between items-start mb-3">
-							<div>
-								<h3 className="font-semibold text-sm">
-									{reservation.reservation_number}
-								</h3>
-								<p className="text-muted-foreground text-xs">
-									{reservation.guest_name}
-								</p>
-							</div>
-							<Badge
-								className={`${getStatusColor(reservation.status)} text-xs`}
-							>
-								{getStatusText(reservation.status)}
-							</Badge>
-						</div>
+		<div className="lg:hidden space-y-6">
+			{/* Active Reservations Section */}
+			{activeReservations.length > 0 && (
+				<div className="space-y-4">
+					<div className="flex items-center gap-2">
+						<h3 className="text-sm font-semibold text-gray-900">
+							{t("reservations.sections.active")} ({activeReservations.length})
+						</h3>
+					</div>
+					<div className="grid gap-4">
+						{activeReservations.map((reservation) => (
+							<Card key={reservation.id} className="w-full border-l-4 border-l-blue-500">
+								<CardContent className="p-4">
+									<div className="flex justify-between items-start mb-3">
+										<div>
+											<h3 className="font-semibold text-sm">
+												{reservation.reservation_number}
+											</h3>
+											<p className="text-muted-foreground text-xs">
+												{reservation.guest_name}
+											</p>
+										</div>
+										<Badge
+											className={`${getStatusColor(reservation.status)} text-xs`}
+										>
+											{getStatusText(reservation.status)}
+										</Badge>
+									</div>
 
-						<div className="space-y-2 text-xs">
-							<div className="flex items-center gap-2">
-								<MapPin className="h-3 w-3" />
-								<span>
-									{reservation.rooms?.room_number} -{" "}
-									{reservation.rooms?.room_type}
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<Calendar className="h-3 w-3" />
-								<span>
-									{new Date(reservation.check_in_date).toLocaleDateString()} -{" "}
-									{new Date(reservation.check_out_date).toLocaleDateString()}
-								</span>
-							</div>
-							<div className="flex items-center gap-2">
-								<DollarSign className="h-3 w-3" />
-								<span>
-									Room: {getCurrencySymbol(selectedCurrency)}{" "}
-									{(convertedAmounts[reservation.id] || 0).toLocaleString()}
-								</span>
-							</div>
+									<div className="space-y-2 text-xs">
+										<div className="flex items-center gap-2">
+											<MapPin className="h-3 w-3" />
+											<span>
+												{reservation.rooms?.room_number} -{" "}
+												{reservation.rooms?.room_type}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<Calendar className="h-3 w-3" />
+											<span>
+												{new Date(reservation.check_in_date).toLocaleDateString()} -{" "}
+												{new Date(reservation.check_out_date).toLocaleDateString()}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<DollarSign className="h-3 w-3" />
+											<span>
+												Room: {getCurrencySymbol(selectedCurrency)}{" "}
+												{(convertedAmounts[reservation.id] || 0).toLocaleString()}
+											</span>
+										</div>
 
-							{/* Additional Services display - Always show the component as it handles its own display logic */}
-							<div className="flex items-center gap-2">
-								<DollarSign className="h-3 w-3" />
-								<ReservationExpensesDisplay
-									reservationId={reservation.id}
-									currency={selectedCurrency}
-									isCompact={true}
-								/>
-							</div>
-						</div>
+										{/* Additional Services display */}
+										<div className="flex items-center gap-2">
+											<DollarSign className="h-3 w-3" />
+											<ReservationExpensesDisplay
+												reservationId={reservation.id}
+												currency={selectedCurrency}
+												isCompact={true}
+											/>
+										</div>
+									</div>
 
-						<ReservationActions
-							reservation={reservation}
-							onView={() => onViewReservation(reservation.id)}
-							onEdit={() => onEditReservation(reservation)}
-							onPayment={() =>
-								onPayment(
-									reservation.id,
-									getTotalPayableAmount(reservation),
-									reservation.currency,
-								)
-							}
-							onAddIncome={() => onAddIncome(reservation)}
-							onPrint={() => handlePrintReservation(reservation)}
-							canShowPayment={canShowPaymentButton(reservation)}
-							isMobile={true}
-							showPaymentAndIncome={true}
-						/>
-					</CardContent>
-				</Card>
-			))}
+									<ReservationActions
+										reservation={reservation}
+										onView={() => onViewReservation(reservation.id)}
+										onEdit={() => onEditReservation(reservation)}
+										onPayment={() =>
+											onPayment(
+												reservation.id,
+												getTotalPayableAmount(reservation),
+												reservation.currency,
+											)
+										}
+										onAddIncome={() => onAddIncome(reservation)}
+										onPrint={() => handlePrintReservation(reservation)}
+										canShowPayment={canShowPaymentButton(reservation)}
+										isMobile={true}
+										showPaymentAndIncome={true}
+									/>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Completed Reservations Section */}
+			{completedReservations.length > 0 && (
+				<div className="space-y-4">
+					<div className="flex items-center gap-2 pt-4 border-t">
+						<h3 className="text-sm font-semibold text-gray-600">
+							{t("reservations.sections.completed")} ({completedReservations.length})
+						</h3>
+					</div>
+					<div className="grid gap-4">
+						{completedReservations.map((reservation) => (
+							<Card key={reservation.id} className="w-full opacity-75 bg-gray-50">
+								<CardContent className="p-4">
+									<div className="flex justify-between items-start mb-3">
+										<div>
+											<h3 className="font-semibold text-sm">
+												{reservation.reservation_number}
+											</h3>
+											<p className="text-muted-foreground text-xs">
+												{reservation.guest_name}
+											</p>
+										</div>
+										<Badge
+											className={`${getStatusColor(reservation.status)} text-xs`}
+										>
+											{getStatusText(reservation.status)}
+										</Badge>
+									</div>
+
+									<div className="space-y-2 text-xs">
+										<div className="flex items-center gap-2">
+											<MapPin className="h-3 w-3" />
+											<span>
+												{reservation.rooms?.room_number} -{" "}
+												{reservation.rooms?.room_type}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<Calendar className="h-3 w-3" />
+											<span>
+												{new Date(reservation.check_in_date).toLocaleDateString()} -{" "}
+												{new Date(reservation.check_out_date).toLocaleDateString()}
+											</span>
+										</div>
+										<div className="flex items-center gap-2">
+											<DollarSign className="h-3 w-3" />
+											<span>
+												Room: {getCurrencySymbol(selectedCurrency)}{" "}
+												{(convertedAmounts[reservation.id] || 0).toLocaleString()}
+											</span>
+										</div>
+
+										{/* Additional Services display */}
+										<div className="flex items-center gap-2">
+											<DollarSign className="h-3 w-3" />
+											<ReservationExpensesDisplay
+												reservationId={reservation.id}
+												currency={selectedCurrency}
+												isCompact={true}
+											/>
+										</div>
+									</div>
+
+									<ReservationActions
+										reservation={reservation}
+										onView={() => onViewReservation(reservation.id)}
+										onEdit={() => onEditReservation(reservation)}
+										onPayment={() =>
+											onPayment(
+												reservation.id,
+												getTotalPayableAmount(reservation),
+												reservation.currency,
+											)
+										}
+										onAddIncome={() => onAddIncome(reservation)}
+										onPrint={() => handlePrintReservation(reservation)}
+										canShowPayment={canShowPaymentButton(reservation)}
+										isMobile={true}
+										showPaymentAndIncome={true}
+									/>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+				</div>
+			)}
+
+			{/* Empty state */}
+			{activeReservations.length === 0 && completedReservations.length === 0 && (
+				<div className="text-center py-8 text-gray-500">
+					{t("reservations.noReservationsFound")}
+				</div>
+			)}
 		</div>
 	);
 }

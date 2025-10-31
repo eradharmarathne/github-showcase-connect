@@ -203,6 +203,11 @@
       "reservations": "Reservations",
       "payments": "Payments"
     },
+    "sections": {
+      "active": "Active Reservations",
+      "completed": "Completed Reservations"
+    },
+    "noReservationsFound": "No reservations found",
     "filters": {
       "selectLocation": "Select location",
       "searchPlaceholder": "Search reservations...",

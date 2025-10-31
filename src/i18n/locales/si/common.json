@@ -203,6 +203,11 @@
       "reservations": "වෙන්කරණය",
       "payments": "ගෙවීම්"
     },
+    "sections": {
+      "active": "ක්‍රියාකාරී වෙන්කරණයන්",
+      "completed": "සම්පූර්ණ වෙන්කරණයන්"
+    },
+    "noReservationsFound": "වෙන්කරණයන් සොයාගත නොහැක",
     "filters": {
       "selectLocation": "ස්ථානය තෝරන්න",
       "searchPlaceholder": "වෙන්කරණය සොයන්න...",
