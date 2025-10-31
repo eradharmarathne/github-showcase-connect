@@ -85,7 +85,7 @@ const App = () => (
 					<Route path="/ui" element={<Design />} />
 					
 					{/* Public Booking Page - No Auth Required */}
-					<Route path="/r/:username" element={<PublicBookingPage />} />
+					<Route path="/r/:locationSlug" element={<PublicBookingPage />} />
 															<Route
 											path="/auth/forgot-password"
 											element={<ForgotPassword />}

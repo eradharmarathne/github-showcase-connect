@@ -1668,9 +1668,14 @@ export type Database = {
           name: string
           phone: string | null
           property_type: string | null
+          public_booking_email: string | null
           public_booking_enabled: boolean | null
+          public_booking_message: string | null
           public_booking_page_title: string | null
+          public_booking_phone: string | null
           public_booking_slug: string | null
+          require_booking_approval: boolean | null
+          show_room_prices: boolean | null
           slug: string | null
           tenant_id: string
           updated_at: string | null
@@ -1684,9 +1689,14 @@ export type Database = {
           name: string
           phone?: string | null
           property_type?: string | null
+          public_booking_email?: string | null
           public_booking_enabled?: boolean | null
+          public_booking_message?: string | null
           public_booking_page_title?: string | null
+          public_booking_phone?: string | null
           public_booking_slug?: string | null
+          require_booking_approval?: boolean | null
+          show_room_prices?: boolean | null
           slug?: string | null
           tenant_id: string
           updated_at?: string | null
@@ -1700,9 +1710,14 @@ export type Database = {
           name?: string
           phone?: string | null
           property_type?: string | null
+          public_booking_email?: string | null
           public_booking_enabled?: boolean | null
+          public_booking_message?: string | null
           public_booking_page_title?: string | null
+          public_booking_phone?: string | null
           public_booking_slug?: string | null
+          require_booking_approval?: boolean | null
+          show_room_prices?: boolean | null
           slug?: string | null
           tenant_id?: string
           updated_at?: string | null
@@ -2693,6 +2708,7 @@ export type Database = {
             | null
           trial_ends_at: string | null
           updated_at: string | null
+          username: string
         }
         Insert: {
           created_at?: string | null
@@ -2713,6 +2729,7 @@ export type Database = {
             | null
           trial_ends_at?: string | null
           updated_at?: string | null
+          username: string
         }
         Update: {
           created_at?: string | null
@@ -2733,6 +2750,7 @@ export type Database = {
             | null
           trial_ends_at?: string | null
           updated_at?: string | null
+          username?: string
         }
         Relationships: [
           {

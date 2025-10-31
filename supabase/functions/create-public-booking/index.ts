@@ -8,8 +8,7 @@ const corsHeaders = {
 };
 
 interface PublicBookingRequest {
-	username: string;
-	locationId: string;
+	locationSlug: string;
 	guestName: string;
 	guestEmail: string;
 	guestPhone?: string;
@@ -39,8 +38,7 @@ serve(async (req) => {
 
 		// Validate required fields
 		if (
-			!bookingData.username ||
-			!bookingData.locationId ||
+			!bookingData.locationSlug ||
 			!bookingData.guestName ||
 			!bookingData.guestEmail ||
 			!bookingData.checkInDate ||
@@ -50,8 +48,7 @@ serve(async (req) => {
 				JSON.stringify({
 					error: "Missing required fields",
 					required: [
-						"username",
-						"locationId",
+						"locationSlug",
 						"guestName",
 						"guestEmail",
 						"checkInDate",
@@ -79,11 +76,29 @@ serve(async (req) => {
 			);
 		}
 
-		// Find tenant by username
+		// Find location by slug
+		const { data: location, error: locationError } = await supabase
+			.from("locations")
+			.select("id, name, tenant_id, public_booking_enabled")
+			.eq("slug", bookingData.locationSlug)
+			.eq("public_booking_enabled", true)
+			.single();
+
+		if (locationError || !location) {
+			return new Response(
+				JSON.stringify({ error: "Location not found or public booking is not enabled" }),
+				{
+					status: 404,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				},
+			);
+		}
+
+		// Get tenant info
 		const { data: tenant, error: tenantError } = await supabase
 			.from("tenants")
 			.select("id, name")
-			.eq("username", bookingData.username)
+			.eq("id", location.tenant_id)
 			.single();
 
 		if (tenantError || !tenant) {
@@ -91,35 +106,6 @@ serve(async (req) => {
 				JSON.stringify({ error: "Hotel not found" }),
 				{
 					status: 404,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				},
-			);
-		}
-
-		// Find location by ID and verify it belongs to tenant
-		const { data: location, error: locationError } = await supabase
-			.from("locations")
-			.select("id, name, public_booking_enabled")
-			.eq("id", bookingData.locationId)
-			.eq("tenant_id", tenant.id)
-			.single();
-
-		if (locationError || !location) {
-			return new Response(
-				JSON.stringify({ error: "Location not found" }),
-				{
-					status: 404,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				},
-			);
-		}
-
-		// Check if public booking is enabled for this location
-		if (!location.public_booking_enabled) {
-			return new Response(
-				JSON.stringify({ error: "Public booking is not enabled for this location" }),
-				{
-					status: 403,
 					headers: { ...corsHeaders, "Content-Type": "application/json" },
 				},
 			);
