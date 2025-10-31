@@ -36,7 +36,6 @@ import PaymentForm from "./pages/payment-form";
 import PendingInvitation from "./pages/pending-invitation";
 import PublicBookingPage from "./pages/public-page";
 import Reports from "./pages/reports";
-import ReservationDetails from "./pages/reservation-details";
 import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
 import Settings from "./pages/settings";
@@ -238,23 +237,6 @@ const App = () => (
 												element={
 													<PermissionRoute permission={["access_bookings"]}>
 														<Reservations />
-													</PermissionRoute>
-												}
-											/>
-										</Route>
-										<Route
-											path="/reservations/:id"
-											element={
-												<ProtectedRoute>
-													<Layout />
-												</ProtectedRoute>
-											}
-										>
-											<Route
-												index
-												element={
-													<PermissionRoute permission={["access_bookings"]}>
-														<ReservationDetails />
 													</PermissionRoute>
 												}
 											/>

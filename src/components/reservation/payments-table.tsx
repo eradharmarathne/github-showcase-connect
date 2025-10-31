@@ -6,8 +6,9 @@ import {
 	MapPin,
 	User,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
+import { ViewReservationDialog } from "@/components/modals/view-reservation-dialog";
 import { ReservationsListSkeleton } from "@/components/skeleton/reservations-list-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,8 +24,9 @@ import { usePaymentsData } from "@/hooks/use-payments-data";
 
 export function PaymentsTable() {
 	const { t } = useTranslation();
-	const navigate = useNavigate();
 	const { payments, loading, refetch } = usePaymentsData();
+	const [viewingReservationId, setViewingReservationId] = useState<string | null>(null);
+	const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
 	// Utility functions
 	const getCurrencySymbol = (currency: string): string => {
@@ -88,7 +90,8 @@ export function PaymentsTable() {
 
 	const handleViewReservation = (bookingId: string | null) => {
 		if (bookingId) {
-			navigate(`/reservations/${bookingId}`);
+			setViewingReservationId(bookingId);
+			setIsViewDialogOpen(true);
 		}
 	};
 
@@ -339,10 +342,19 @@ export function PaymentsTable() {
 									))}
 								</TableBody>
 							</Table>
-						</div>
-					)}
-				</div>
+					</div>
+				)}
 			</div>
 		</div>
+
+		<ViewReservationDialog
+			isOpen={isViewDialogOpen}
+			onClose={() => {
+				setIsViewDialogOpen(false);
+				setViewingReservationId(null);
+			}}
+			reservationId={viewingReservationId || ""}
+		/>
+	</div>
 	);
 }
