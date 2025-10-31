@@ -46,12 +46,14 @@ interface BookingFormData {
 }
 
 export default function PublicBookingPage() {
-	const { username, locationId } = useParams<{ username: string; locationId: string }>();
+	const { username } = useParams<{ username: string }>();
 	const { toast } = useToast();
 
 	const [loading, setLoading] = useState(true);
 	const [submitting, setSubmitting] = useState(false);
 	const [tenant, setTenant] = useState<Tenant | null>(null);
+	const [locations, setLocations] = useState<Location[]>([]);
+	const [selectedLocationId, setSelectedLocationId] = useState<string>("");
 	const [location, setLocation] = useState<Location | null>(null);
 	const [roomTypes, setRoomTypes] = useState<string[]>([]);
 
@@ -69,7 +71,7 @@ export default function PublicBookingPage() {
 		specialRequests: "",
 	});
 
-	// Fetch tenant and location data
+	// Fetch tenant and locations data
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -85,8 +87,8 @@ export default function PublicBookingPage() {
 				if (tenantError) throw tenantError;
 				setTenant(tenantData);
 
-				// Fetch location by ID
-				const { data: locationData, error: locationError } = await supabase
+				// Fetch all locations for this tenant with public booking enabled
+				const { data: locationsData, error: locationsError } = await supabase
 					.from("locations")
 					.select(`
 						id, 
@@ -98,32 +100,22 @@ export default function PublicBookingPage() {
 						public_booking_phone,
 						show_room_prices
 					`)
-					.eq("id", locationId)
 					.eq("tenant_id", tenantData.id)
-					.single();
+					.eq("public_booking_enabled", true);
 
-				if (locationError) throw locationError;
+				if (locationsError) throw locationsError;
 				
-				// Check if public booking is enabled
-				if (!locationData.public_booking_enabled) {
-					throw new Error("Public booking is not enabled for this location");
+				if (!locationsData || locationsData.length === 0) {
+					throw new Error("No locations available for public booking");
 				}
 				
-				setLocation(locationData);
-
-				// Fetch available room types
-				const { data: roomsData, error: roomsError } = await supabase
-					.from("rooms")
-					.select("room_type")
-					.eq("tenant_id", tenantData.id)
-					.eq("location_id", locationData.id)
-					.eq("is_active", true);
-
-				if (roomsError) throw roomsError;
-
-				// Get unique room types
-				const uniqueTypes = [...new Set(roomsData?.map((r) => r.room_type) || [])];
-				setRoomTypes(uniqueTypes);
+				setLocations(locationsData);
+				
+				// Auto-select first location if only one available
+				if (locationsData.length === 1) {
+					setSelectedLocationId(locationsData[0].id);
+					setLocation(locationsData[0]);
+				}
 			} catch (error) {
 				console.error("Error fetching data:", error);
 				toast({
@@ -136,13 +128,55 @@ export default function PublicBookingPage() {
 			}
 		};
 
-		if (username && locationId) {
+		if (username) {
 			fetchData();
 		}
-	}, [username, locationId, toast]);
+	}, [username, toast]);
+
+	// Fetch room types when location is selected
+	useEffect(() => {
+		const fetchRoomTypes = async () => {
+			if (!selectedLocationId || !tenant) return;
+
+			try {
+				const { data: roomsData, error: roomsError } = await supabase
+					.from("rooms")
+					.select("room_type")
+					.eq("tenant_id", tenant.id)
+					.eq("location_id", selectedLocationId)
+					.eq("is_active", true);
+
+				if (roomsError) throw roomsError;
+
+				// Get unique room types
+				const uniqueTypes = [...new Set(roomsData?.map((r) => r.room_type) || [])];
+				setRoomTypes(uniqueTypes);
+				
+				// Update location object
+				const selectedLoc = locations.find(loc => loc.id === selectedLocationId);
+				if (selectedLoc) {
+					setLocation(selectedLoc);
+				}
+			} catch (error) {
+				console.error("Error fetching room types:", error);
+			}
+		};
+
+		fetchRoomTypes();
+	}, [selectedLocationId, tenant, locations]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+
+		// Validate location is selected
+		if (!selectedLocationId) {
+			toast({
+				title: "Location Required",
+				description: "Please select a location.",
+				variant: "destructive",
+			});
+			return;
+		}
 
 		// Validate required fields
 		if (!formData.guestName || !formData.guestEmail || !formData.checkInDate || !formData.checkOutDate) {
@@ -178,7 +212,7 @@ export default function PublicBookingPage() {
 					},
 					body: JSON.stringify({
 						username,
-						locationId,
+						locationId: selectedLocationId,
 						guestName: formData.guestName,
 						guestEmail: formData.guestEmail,
 						guestPhone: formData.guestPhone || undefined,
@@ -250,7 +284,7 @@ export default function PublicBookingPage() {
 		);
 	}
 
-	if (!tenant || !location) {
+	if (!tenant) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100">
 				<Card className="max-w-md">
@@ -279,10 +313,8 @@ export default function PublicBookingPage() {
 							</div>
 						</div>
 						<CardTitle className="text-3xl">{tenant.name}</CardTitle>
-						<CardDescription className="flex items-center justify-center gap-2 text-base">
-							<MapPin className="h-4 w-4" />
-							{location.name}
-							{location.address && ` • ${location.address}`}
+						<CardDescription className="text-base">
+							Book your stay with us
 						</CardDescription>
 					</CardHeader>
 				</Card>
@@ -297,6 +329,53 @@ export default function PublicBookingPage() {
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-6">
+							{/* Location Selection - Only show if multiple locations */}
+							{locations.length > 1 && (
+								<div className="space-y-2">
+									<Label htmlFor="location">
+										Select Location <span className="text-red-500">*</span>
+									</Label>
+									<Select
+										value={selectedLocationId}
+										onValueChange={(value) => setSelectedLocationId(value)}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Choose a location" />
+										</SelectTrigger>
+										<SelectContent>
+											{locations.map((loc) => (
+												<SelectItem key={loc.id} value={loc.id}>
+													<div className="flex items-center gap-2">
+														<MapPin className="h-4 w-4" />
+														<span>{loc.name}</span>
+														{loc.address && (
+															<span className="text-xs text-muted-foreground">• {loc.address}</span>
+														)}
+													</div>
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+							)}
+
+							{/* Show location info if only one location or one is selected */}
+							{location && (
+								<div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+									<MapPin className="h-4 w-4 text-primary" />
+									<div>
+										<p className="font-medium">{location.name}</p>
+										{location.address && <p className="text-sm text-muted-foreground">{location.address}</p>}
+									</div>
+								</div>
+							)}
+
+							{location?.public_booking_message && (
+								<div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+									<p className="text-sm text-blue-900">{location.public_booking_message}</p>
+								</div>
+							)}
+
 							{/* Guest Information */}
 							<div className="space-y-4">
 								<h3 className="text-lg font-semibold flex items-center gap-2">

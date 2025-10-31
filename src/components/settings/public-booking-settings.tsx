@@ -216,7 +216,7 @@ export function PublicBookingSettings() {
 	};
 
 	const currentLocation = locations.find(l => l.id === selectedLocation);
-	const publicUrl = `${window.location.origin}/r/${username}/${selectedLocation}`;
+	const publicUrl = `${window.location.origin}/r/${username}`;
 
 	const copyToClipboard = () => {
 		navigator.clipboard.writeText(publicUrl);
@@ -328,6 +328,9 @@ export function PublicBookingSettings() {
 								<div className="flex-1">
 									<p className="text-sm font-medium text-blue-900 dark:text-blue-100">
 										Your Public Booking URL
+									</p>
+									<p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+										This URL is shared across all your locations. Guests can select their preferred location on the booking page.
 									</p>
 									<div className="flex items-center gap-2 mt-2">
 										<code className="flex-1 text-sm bg-white dark:bg-gray-800 px-3 py-2 rounded border">
