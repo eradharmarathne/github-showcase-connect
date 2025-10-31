@@ -130,7 +130,7 @@ export function ImmediatePaymentForm({
 				.insert({
 					booking_id: reservation.id, // Link to reservation for tracking
 					amount: convertedAmount,
-					currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+					currency: accountCurrency,
 					payment_method: formData.payment_method, // Set as paid (not pending)
 					account_id: formData.account_id,
 					income_type_id: formData.income_type_id || null,
@@ -156,8 +156,8 @@ export function ImmediatePaymentForm({
 					.insert({
 						transaction_type: "income",
 						transaction_id: incomeData.id,
-						from_currency: formData.currency as "LKR" | "USD" | "EUR" | "GBP",
-						to_currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+						from_currency: formData.currency,
+						to_currency: accountCurrency,
 						from_amount: formData.amount,
 						to_amount: convertedAmount,
 						exchange_rate: convertedAmount / formData.amount,

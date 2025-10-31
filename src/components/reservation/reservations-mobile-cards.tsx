@@ -13,7 +13,7 @@ import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 import { ReservationActions } from "./reservation-actions";
 import { ReservationExpensesDisplay } from "./reservation-expenses-display";
 
-type Currency = Database["public"]["Enums"]["currency_type"];
+type Currency = string;
 
 interface ReservationsMobileCardsProps {
 	searchQuery: string;

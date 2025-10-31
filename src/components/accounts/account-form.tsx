@@ -45,7 +45,7 @@ export function AccountForm({
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [formData, setFormData] = useState({
 		name: editingAccount?.name || "",
-		currency: (editingAccount?.currency as "LKR" | "USD") || "LKR",
+		currency: editingAccount?.currency || "LKR",
 		initial_balance: editingAccount?.initial_balance || 0,
 		location_access: editingAccount?.location_access || ([] as string[]),
 	});
@@ -140,7 +140,7 @@ export function AccountForm({
 		if (editingAccount) {
 			setFormData({
 				name: editingAccount.name,
-				currency: editingAccount.currency as "LKR" | "USD",
+				currency: editingAccount.currency,
 				initial_balance: editingAccount.initial_balance,
 				location_access: editingAccount.location_access,
 			});

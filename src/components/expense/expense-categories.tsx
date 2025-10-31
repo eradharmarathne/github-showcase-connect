@@ -18,7 +18,7 @@ interface ExpenseFormData {
 	accountId: string;
 	date: string;
 	note: string;
-	currency: "LKR" | "USD" | "EUR" | "GBP";
+	currency: string;
 }
 
 interface ExpenseCategoriesProps {

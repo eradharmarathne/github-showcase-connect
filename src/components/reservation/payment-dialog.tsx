@@ -325,7 +325,7 @@ export function PaymentDialog({
 				reservation_id: reservation.id,
 				tenant_id: tenant?.id!,
 				amount: convertedAmount,
-				currency: accountCurrency as "LKR" | "USD" | "EUR" | "GBP",
+				currency: accountCurrency,
 				payment_method: formData.payment_method,
 				payment_type: formData.payment_type,
 				payment_number: `PAY-${Date.now()}`, // Generate unique payment number

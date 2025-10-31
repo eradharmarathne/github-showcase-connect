@@ -22,7 +22,7 @@ interface ExpenseFormData {
 	accountId: string;
 	date: string;
 	note: string;
-	currency: "LKR" | "USD" | "EUR" | "GBP";
+	currency: string;
 }
 
 interface ExpenseDetailsProps {
@@ -69,7 +69,7 @@ export function ExpenseDetails({
 					<Label htmlFor="currency">{t("expense.form.fields.currency")}</Label>
 					<Select
 						value={formData.currency}
-						onValueChange={(value: "LKR" | "USD" | "EUR" | "GBP") =>
+						onValueChange={(value: string) =>
 							onFormDataChange({ currency: value })
 						}
 					>

@@ -30,7 +30,7 @@ type EnhancedReservation = {
 	advance_amount?: number | null;
 	paid_amount?: number | null;
 	balance_amount?: number | null;
-	currency: "LKR" | "USD" | "EUR" | "GBP";
+	currency: string;
 	status:
 		| "pending"
 		| "confirmed"

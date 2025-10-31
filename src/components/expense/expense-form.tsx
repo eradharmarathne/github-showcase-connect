@@ -49,7 +49,7 @@ export function ExpenseForm({
 		accountId: "",
 		date: format(new Date(), "yyyy-MM-dd"),
 		note: "",
-		currency: "LKR" as "LKR" | "USD" | "EUR" | "GBP",
+		currency: "LKR",
 	});
 
 	const [receipts, setReceipts] = useState<ReceiptFile[]>([]);

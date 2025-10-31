@@ -37,7 +37,7 @@ import { cn } from "@/lib/utils";
 import { convertCurrency } from "@/utils/currency";
 
 type Room = Tables<"rooms">;
-type Currency = "LKR" | "USD" | "EUR" | "GBP";
+type Currency = string;
 
 interface CompactReservationDialogProps {
 	isOpen: boolean;

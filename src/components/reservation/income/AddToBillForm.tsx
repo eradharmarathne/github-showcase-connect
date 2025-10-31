@@ -86,7 +86,7 @@ export function AddToBillForm({
 			const { error: incomeError } = await supabase.from("income").insert({
 				booking_id: reservation.id,
 				amount: formData.amount,
-				currency: formData.currency as "LKR" | "USD" | "EUR" | "GBP",
+				currency: formData.currency,
 				note:
 					formData.note ||
 					`Additional service for reservation ${reservation.reservation_number}`,

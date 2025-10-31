@@ -25,7 +25,7 @@ export type ReservationWithJoins = {
 	advance_amount?: number | null;
 	paid_amount?: number | null;
 	balance_amount?: number | null;
-	currency: "LKR" | "USD" | "EUR" | "GBP";
+	currency: string;
 	status:
 		| "pending"
 		| "confirmed"
@@ -169,22 +169,18 @@ export function useReservationsData() {
 					children: booking.children || 0,
 					check_in_date: booking.check_in,
 					check_out_date: booking.check_out,
-					nights: Math.ceil(
-						(new Date(booking.check_out).getTime() -
-							new Date(booking.check_in).getTime()) /
-							(1000 * 60 * 60 * 24),
-					),
-					room_rate: 0,
-					total_amount: booking.total_amount || 0,
-					advance_amount: null,
-					paid_amount: booking.paid_amount || 0, // Deposit amount paid from Beds24
-					balance_amount: booking.balance_amount || 0, // Remaining balance
-					currency: (booking.currency || "USD") as
-						| "LKR"
-						| "USD"
-						| "EUR"
-						| "GBP",
-					status: booking.status as any,
+				nights: Math.ceil(
+					(new Date(booking.check_out).getTime() -
+						new Date(booking.check_in).getTime()) /
+						(1000 * 60 * 60 * 24),
+				),
+				room_rate: 0,
+				total_amount: booking.total_amount || 0,
+				advance_amount: null,
+				paid_amount: booking.paid_amount || 0, // Deposit amount paid from Beds24
+				balance_amount: booking.balance_amount || 0, // Remaining balance
+				currency: booking.currency || "USD",
+				status: booking.status as any,
 					special_requests: rawData?.notes || null,
 					arrival_time: null,
 					created_by: null,

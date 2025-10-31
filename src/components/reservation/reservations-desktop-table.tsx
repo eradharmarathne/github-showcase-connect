@@ -32,7 +32,7 @@ import { useTenant } from "@/hooks/use-tenant";
 import type { Database } from "@/integrations/supabase/types";
 import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
 
-type Currency = Database["public"]["Enums"]["currency_type"];
+type Currency = string;
 
 const formatCurrency = (amount: number, currency: Currency) => {
 	return new Intl.NumberFormat("en-US", {
@@ -354,7 +354,7 @@ export function ReservationsDesktopTable({
 														<div className="flex-1">
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-900 text-sm">
-																	{reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																	{reservation.guest_name || "Unknown Guest"} - {reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
 																</span>
 																<Badge
 																	variant="outline"
@@ -522,13 +522,13 @@ export function ReservationsDesktopTable({
 																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
 																	Quick Actions
 																</h4>
-																<div className="flex flex-col gap-2">
+																<div className="flex flex-row gap-2">
 																	<Button
 																		variant="outline"
 																		size="sm"
 																		onClick={() => onAddIncome(reservation)}
 																		disabled={reservation.status === "checked_out"}
-																		className="justify-start text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+																		className="justify-start cursor-pointer text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
 																	>
 																		<DollarSign className="size-4 mr-2" />
 																		{t("reservations.table.actions.addIncome")}
@@ -544,7 +544,7 @@ export function ReservationsDesktopTable({
 																					"USD",
 																				)
 																			}
-																			className="justify-start text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+																			className="justify-start cursor-pointer text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:bg-emerald-50"
 																		>
 																			<CreditCard className="size-4 mr-2" />
 																			{t("reservations.table.actions.payNow")}
