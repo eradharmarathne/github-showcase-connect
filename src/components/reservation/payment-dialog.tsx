@@ -161,20 +161,19 @@ export function PaymentDialog({
 				return;
 			}
 
-			// Check if it's an external booking
-			const isExternal = reservationRes.data.is_external === true;
-			setIsExternalBooking(isExternal);
-			
-			if (isExternal) {
-				setExternalBooking(reservationRes.data);
-			} else {
-				setReservation(reservationRes.data);
-			}
-			
-			setAccounts(accountsRes.data || []);
-			setIncomeRecords(incomeRes.data || []);
-
-			// Calculate display amounts
+		// Check if it's an external booking
+		const isExternal = reservationRes.data.is_external === true;
+		setIsExternalBooking(isExternal);
+		
+		// Set reservation data for both external and direct bookings
+		// This ensures the form renders correctly for all booking types
+		setReservation(reservationRes.data);
+		if (isExternal) {
+			setExternalBooking(reservationRes.data);
+		}
+		
+		setAccounts(accountsRes.data || []);
+		setIncomeRecords(incomeRes.data || []);			// Calculate display amounts
 			const totalAmount = reservationRes.data.total_amount || 0;
 			const paidAmount = reservationRes.data.paid_amount || 0;
 			const balanceAmount = reservationRes.data.balance_amount || 0;
