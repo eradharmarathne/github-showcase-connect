@@ -26,9 +26,8 @@ import {
 	useReservationsData,
 } from "@/hooks/use-reservations-data";
 import { useTenant } from "@/hooks/use-tenant";
-import type { Database } from "@/integrations/supabase/types";
 
-type Currency = Database["public"]["Enums"]["currency_type"];
+type Currency = string;
 
 export default function Reservations() {
 	const { t } = useTranslation();

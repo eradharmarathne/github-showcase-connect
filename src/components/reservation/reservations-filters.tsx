@@ -16,9 +16,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import type { Database } from "@/integrations/supabase/types";
 
-type Currency = Database["public"]["Enums"]["currency_type"];
+type Currency = string;
 
 interface Location {
 	id: string;
