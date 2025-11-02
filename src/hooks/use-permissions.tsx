@@ -52,7 +52,9 @@ export const usePermissions = () => {
 		};
 
 		fetchPermissions();
-	}, [user, profile, tenant?.owner_profile_id]); // Check if user is tenant owner (highest level access)
+	}, [user?.id, profile?.tenant_id]); // Only re-fetch when user ID or tenant changes
+	
+	// Check if user is tenant owner (highest level access)
 	const isTenantOwner = profile?.id === tenant?.owner_profile_id;
 
 	const hasPermission = (
