@@ -1,7 +1,10 @@
 # Public Booking Page RLS Fix
 
-## Issue
+## Issue 1: 406 Error - Cannot Access Location Data
 The public booking page (`/r/:locationSlug`) was returning a 406 error when accessed by unauthenticated users:
+
+## Issue 2: 401 Error - Cannot Submit Booking Request
+When trying to submit a booking request, users (both logged-in and logged-out) were receiving a 401 Unauthorized error when calling the `create-public-booking` Edge Function.
 ```
 Failed to load resource: the server responded with a status of 406 ()
 Error fetching data: code: "PGRST116"
@@ -103,10 +106,44 @@ After applying these policies, you can test by:
    - The booking form is accessible and functional
    - Submission creates a record in `public_bookings`
 
-## Migration Applied
-Migration file: `supabase/migrations/20251102_add_public_booking_rls_policies.sql`
+## Fix 2: Edge Function Authentication (401 Error)
 
-The migration has been applied to the production database and committed to version control.
+### Root Cause
+The `create-public-booking` Edge Function was configured to verify JWT tokens by default. This caused a 401 error because:
+- The function is meant to be publicly accessible (no authentication required)
+- When users submitted booking requests, the function rejected them due to JWT verification
+
+### Solution
+Added JWT verification bypass in `supabase/config.toml`:
+
+```toml
+[functions.create-public-booking]
+verify_jwt = false
+```
+
+This configuration tells Supabase to:
+- Allow the Edge Function to be called without authentication
+- Skip JWT token verification for this specific function
+- Enable both logged-in and logged-out users to submit booking requests
+
+### Deployment
+After updating the config, redeploy the Edge Function:
+
+```bash
+supabase functions deploy create-public-booking --no-verify-jwt
+```
+
+Or deploy all functions with the updated config:
+
+```bash
+supabase functions deploy
+```
+
+## Migration Applied
+- **RLS Policies**: `supabase/migrations/20251102_add_public_booking_rls_policies.sql`
+- **Edge Function Config**: Updated `supabase/config.toml` with `verify_jwt = false`
+
+Both changes have been applied to the production database and committed to version control.
 
 ## Related Files
 - `/src/pages/public-page.tsx` - Public booking page component
