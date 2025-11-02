@@ -18,7 +18,7 @@ interface PublicBookingRequest {
 	checkOutDate: string;
 	adults: number;
 	children: number;
-	roomTypePreference?: string;
+	roomId: string;
 	specialRequests?: string;
 }
 
@@ -132,7 +132,7 @@ serve(async (req) => {
 				check_out_date: bookingData.checkOutDate,
 				adults: bookingData.adults || 1,
 				children: bookingData.children || 0,
-				room_type_preference: bookingData.roomTypePreference || null,
+				assigned_room_id: bookingData.roomId,
 				special_requests: bookingData.specialRequests || null,
 				status: "pending",
 				source: "public_form",

@@ -22,7 +22,15 @@ interface Location {
 	public_booking_message?: string | null;
 	public_booking_email?: string | null;
 	public_booking_phone?: string | null;
-	show_room_prices: boolean;
+}
+
+interface Room {
+	id: string;
+	room_number: string;
+	room_type: string;
+	base_price: number;
+	currency: string;
+	description?: string | null;
 }
 
 interface Tenant {
@@ -41,7 +49,6 @@ interface BookingFormData {
 	checkOutDate: Date | undefined;
 	adults: number;
 	children: number;
-	roomTypePreference: string;
 	specialRequests: string;
 }
 
@@ -53,7 +60,8 @@ export default function PublicBookingPage() {
 	const [submitting, setSubmitting] = useState(false);
 	const [tenant, setTenant] = useState<Tenant | null>(null);
 	const [location, setLocation] = useState<Location | null>(null);
-	const [roomTypes, setRoomTypes] = useState<string[]>([]);
+	const [rooms, setRooms] = useState<Room[]>([]);
+	const [selectedRoomId, setSelectedRoomId] = useState<string>("");
 
 	const [formData, setFormData] = useState<BookingFormData>({
 		guestName: "",
@@ -65,7 +73,6 @@ export default function PublicBookingPage() {
 		checkOutDate: undefined,
 		adults: 1,
 		children: 0,
-		roomTypePreference: "",
 		specialRequests: "",
 	});
 
@@ -111,19 +118,19 @@ export default function PublicBookingPage() {
 				if (tenantError) throw tenantError;
 				setTenant(tenantData);
 
-				// Fetch available room types for this location
-				const { data: roomsData, error: roomsError } = await supabase
-					.from("rooms")
-					.select("room_type")
-					.eq("tenant_id", locationData.tenant_id)
-					.eq("location_id", locationData.id)
-					.eq("is_active", true);
+			// Fetch available rooms for this location with full details
+			const { data: roomsData, error: roomsError } = await supabase
+				.from("rooms")
+				.select("id, room_number, room_type, base_price, currency, description")
+				.eq("tenant_id", locationData.tenant_id)
+				.eq("location_id", locationData.id)
+				.eq("is_active", true)
+				.order("room_type")
+				.order("room_number");
 
-				if (roomsError) throw roomsError;
+			if (roomsError) throw roomsError;
 
-				// Get unique room types
-				const uniqueTypes = [...new Set(roomsData?.map((r) => r.room_type) || [])];
-				setRoomTypes(uniqueTypes);
+			setRooms(roomsData || []);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 				toast({
@@ -164,6 +171,16 @@ export default function PublicBookingPage() {
 			return;
 		}
 
+		// Validate room selection
+		if (!selectedRoomId) {
+			toast({
+				title: "Room Required",
+				description: "Please select a room for your booking.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		// Validate email
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(formData.guestEmail)) {
@@ -199,7 +216,7 @@ export default function PublicBookingPage() {
 					checkOutDate: format(formData.checkOutDate, "yyyy-MM-dd"),
 					adults: formData.adults,
 					children: formData.children,
-					roomTypePreference: formData.roomTypePreference || undefined,
+					roomId: selectedRoomId,
 					specialRequests: formData.specialRequests || undefined,
 				}),
 			},
@@ -225,9 +242,9 @@ export default function PublicBookingPage() {
 				checkOutDate: undefined,
 				adults: 1,
 				children: 0,
-				roomTypePreference: "",
 				specialRequests: "",
 			});
+			setSelectedRoomId("");
 		} catch (error) {
 			console.error("Error submitting booking:", error);
 			toast({
@@ -524,32 +541,56 @@ export default function PublicBookingPage() {
 											</SelectContent>
 										</Select>
 									</div>
-
-									{/* Room Type Preference */}
-									{roomTypes.length > 0 && (
-										<div className="md:col-span-2">
-											<Label htmlFor="roomType">Room Type Preference (Optional)</Label>
-											<Select
-												value={formData.roomTypePreference}
-												onValueChange={(value) => setFormData({ ...formData, roomTypePreference: value })}
-											>
-												<SelectTrigger id="roomType">
-													<SelectValue placeholder="Select room type (optional)" />
-												</SelectTrigger>
-												<SelectContent>
-													{roomTypes.map((type) => (
-														<SelectItem key={type} value={type}>
-															{type}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-										</div>
-									)}
 								</div>
 
+								{/* Available Rooms */}
+								{rooms.length > 0 && (
+									<div>
+										<Label className="text-base font-semibold">Select a Room *</Label>
+										<p className="text-sm text-muted-foreground mb-4">
+											Choose from our available rooms. All bookings require approval.
+										</p>
+										<div className="grid gap-3 sm:grid-cols-2">
+											{rooms.map((room) => (
+												<button
+													key={room.id}
+													type="button"
+													onClick={() => setSelectedRoomId(room.id)}
+													className={cn(
+														"p-4 rounded-lg border-2 text-left transition-all hover:border-primary/50",
+														selectedRoomId === room.id
+															? "border-primary bg-primary/5"
+															: "border-border bg-card"
+													)}
+												>
+													<div className="flex justify-between items-start mb-2">
+														<div>
+															<h4 className="font-semibold">{room.room_type}</h4>
+															<p className="text-sm text-muted-foreground">Room {room.room_number}</p>
+														</div>
+														<div className="text-right">
+															<p className="text-lg font-bold">{room.currency} {room.base_price}</p>
+															<p className="text-xs text-muted-foreground">per night</p>
+														</div>
+													</div>
+													{room.description && (
+														<p className="text-sm text-muted-foreground mt-2">{room.description}</p>
+													)}
+													{nights > 0 && selectedRoomId === room.id && (
+														<div className="mt-3 pt-3 border-t">
+															<p className="text-sm font-medium">
+																Total for {nights} {nights === 1 ? "night" : "nights"}: {room.currency} {(room.base_price * nights).toFixed(2)}
+															</p>
+														</div>
+													)}
+												</button>
+											))}
+										</div>
+									</div>
+								)}
+
 								{/* Show nights if dates selected */}
-								{nights > 0 && (
+								{nights > 0 && selectedRoomId && (
 									<div className="p-4 bg-primary/5 rounded-lg">
 										<p className="text-sm font-medium flex items-center gap-2">
 											<Users className="h-4 w-4" />
