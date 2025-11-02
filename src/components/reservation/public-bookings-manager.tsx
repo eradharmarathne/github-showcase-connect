@@ -13,6 +13,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
@@ -33,11 +35,23 @@ interface PublicBooking {
 	room_type_preference: string | null;
 	special_requests: string | null;
 	status: "pending" | "confirmed" | "rejected" | "converted";
+	assigned_room_id: string | null;
 	created_at: string;
 	location_id: string;
 	locations?: {
 		name: string;
 	};
+	rooms?: {
+		room_number: string;
+		room_type: string;
+	};
+}
+
+interface Room {
+	id: string;
+	room_number: string;
+	room_type: string;
+	base_price: number;
 }
 
 export function PublicBookingsManager() {
@@ -46,6 +60,8 @@ export function PublicBookingsManager() {
 	const { selectedLocation } = useLocationContext();
 	const [selectedBooking, setSelectedBooking] = useState<PublicBooking | null>(null);
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [selectedRoomId, setSelectedRoomId] = useState<string>("");
+	const [isConfirming, setIsConfirming] = useState(false);
 
 	// Fetch public bookings
 	const { data: bookings = [], isLoading, refetch } = useQuery({
@@ -57,35 +73,72 @@ export function PublicBookingsManager() {
 				.from("public_bookings")
 				.select(`
 					*,
-					locations(name)
+					locations(name),
+					assigned_room:rooms!public_bookings_assigned_room_id_fkey(room_number, room_type)
 				`)
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
 				.order("created_at", { ascending: false });
 
 			if (error) throw error;
-			return data as PublicBooking[];
+			return data as any[];
+		},
+		enabled: !!tenant?.id && !!selectedLocation,
+	});
+
+	// Fetch available rooms for the selected location
+	const { data: rooms = [] } = useQuery({
+		queryKey: ["rooms", tenant?.id, selectedLocation],
+		queryFn: async () => {
+			if (!tenant?.id || !selectedLocation) return [];
+
+			const { data, error } = await supabase
+				.from("rooms")
+				.select("id, room_number, room_type, base_price")
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.eq("is_active", true)
+				.order("room_number");
+
+			if (error) throw error;
+			return data as Room[];
 		},
 		enabled: !!tenant?.id && !!selectedLocation,
 	});
 
 	const handleUpdateStatus = async (bookingId: string, status: "confirmed" | "rejected") => {
 		try {
+			// Prepare update data
+			const updateData: any = { status };
+			
+			// If confirming and a room is selected, save the room assignment
+			if (status === "confirmed" && selectedRoomId && selectedRoomId !== "none") {
+				updateData.assigned_room_id = selectedRoomId;
+			}
+
 			const { error } = await supabase
 				.from("public_bookings")
-				.update({ status })
+				.update(updateData)
 				.eq("id", bookingId)
 				.eq("tenant_id", tenant?.id);
 
 			if (error) throw error;
 
+			const roomInfo = selectedRoomId && selectedRoomId !== "none" 
+				? rooms.find(r => r.id === selectedRoomId)
+				: null;
+
 			toast({
 				title: "Status Updated",
-				description: `Booking request ${status === "confirmed" ? "confirmed" : "rejected"} successfully.`,
+				description: `Booking request ${status === "confirmed" ? "confirmed" : "rejected"} successfully.${
+					roomInfo ? ` Room ${roomInfo.room_number} assigned.` : ""
+				}`,
 			});
 
 			refetch();
 			setIsDialogOpen(false);
+			setSelectedRoomId("");
+			setIsConfirming(false);
 		} catch (error) {
 			console.error("Error updating status:", error);
 			toast({
@@ -93,6 +146,7 @@ export function PublicBookingsManager() {
 				description: "Failed to update booking status.",
 				variant: "destructive",
 			});
+			setIsConfirming(false);
 		}
 	};
 
@@ -137,18 +191,19 @@ export function PublicBookingsManager() {
 				) : (
 					<div className="border rounded-lg">
 						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Guest Name</TableHead>
-									<TableHead>Contact</TableHead>
-									<TableHead>Check-in</TableHead>
-									<TableHead>Check-out</TableHead>
-									<TableHead>Guests</TableHead>
-									<TableHead>Status</TableHead>
-									<TableHead>Submitted</TableHead>
-									<TableHead>Actions</TableHead>
-								</TableRow>
-							</TableHeader>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Guest Name</TableHead>
+								<TableHead>Contact</TableHead>
+								<TableHead>Check-in</TableHead>
+								<TableHead>Check-out</TableHead>
+								<TableHead>Guests</TableHead>
+								<TableHead>Room</TableHead>
+								<TableHead>Status</TableHead>
+								<TableHead>Submitted</TableHead>
+								<TableHead>Actions</TableHead>
+							</TableRow>
+						</TableHeader>
 							<TableBody>
 								{bookings.map((booking) => (
 									<TableRow key={booking.id}>
@@ -163,14 +218,24 @@ export function PublicBookingsManager() {
 										</TableCell>
 										<TableCell>{format(new Date(booking.check_in_date), "MMM dd, yyyy")}</TableCell>
 										<TableCell>{format(new Date(booking.check_out_date), "MMM dd, yyyy")}</TableCell>
-										<TableCell>
-											{booking.adults}A
-											{booking.children > 0 && `, ${booking.children}C`}
-											<div className="text-xs text-muted-foreground">
-												{calculateNights(booking.check_in_date, booking.check_out_date)} nights
+									<TableCell>
+										{booking.adults}A
+										{booking.children > 0 && `, ${booking.children}C`}
+										<div className="text-xs text-muted-foreground">
+											{calculateNights(booking.check_in_date, booking.check_out_date)} nights
+										</div>
+									</TableCell>
+									<TableCell>
+										{(booking as any).assigned_room ? (
+											<div className="text-sm">
+												<div className="font-medium">{(booking as any).assigned_room.room_number}</div>
+												<div className="text-xs text-muted-foreground">{(booking as any).assigned_room.room_type}</div>
 											</div>
-										</TableCell>
-										<TableCell>{getStatusBadge(booking.status)}</TableCell>
+										) : (
+											<span className="text-xs text-muted-foreground">Not assigned</span>
+										)}
+									</TableCell>
+									<TableCell>{getStatusBadge(booking.status)}</TableCell>
 										<TableCell className="text-sm text-muted-foreground">
 											{format(new Date(booking.created_at), "MMM dd, HH:mm")}
 										</TableCell>
@@ -281,11 +346,74 @@ export function PublicBookingsManager() {
 								</div>
 							)}
 
-							{/* Status */}
+						{/* Status */}
+						<div>
+							<h3 className="font-semibold mb-2">Status</h3>
+							{getStatusBadge(selectedBooking.status)}
+						</div>
+
+						{/* Assigned Room - Show for confirmed bookings */}
+						{selectedBooking.status !== "pending" && (selectedBooking as any).assigned_room && (
 							<div>
-								<h3 className="font-semibold mb-2">Status</h3>
-								{getStatusBadge(selectedBooking.status)}
+								<h3 className="font-semibold mb-2">Assigned Room</h3>
+								<div className="flex items-center gap-2">
+									<Badge variant="outline" className="bg-blue-50">
+										Room {(selectedBooking as any).assigned_room.room_number} - {(selectedBooking as any).assigned_room.room_type}
+									</Badge>
+								</div>
 							</div>
+						)}
+
+						{/* Room Assignment - Only show for pending bookings */}
+						{selectedBooking.status === "pending" && (
+							<div>
+								<h3 className="font-semibold mb-2">Assign Room (Optional)</h3>
+								<p className="text-sm text-muted-foreground mb-3">
+									Select a room to assign for this booking. You can skip this and assign later.
+								</p>
+									<div className="space-y-2">
+										<Label htmlFor="room-select">Select Room</Label>
+										<Select value={selectedRoomId} onValueChange={setSelectedRoomId}>
+											<SelectTrigger id="room-select">
+												<SelectValue placeholder="Choose a room (optional)" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="none">No room assigned yet</SelectItem>
+												{rooms
+													.filter((room) => 
+														!selectedBooking.room_type_preference || 
+														room.room_type === selectedBooking.room_type_preference
+													)
+													.map((room) => (
+														<SelectItem key={room.id} value={room.id}>
+															{room.room_number} - {room.room_type}
+														</SelectItem>
+													))}
+												{selectedBooking.room_type_preference && 
+													rooms.filter(r => r.room_type !== selectedBooking.room_type_preference).length > 0 && (
+													<>
+														<SelectItem value="divider" disabled>
+															─── Other Room Types ───
+														</SelectItem>
+														{rooms
+															.filter((room) => room.room_type !== selectedBooking.room_type_preference)
+															.map((room) => (
+																<SelectItem key={room.id} value={room.id}>
+																	{room.room_number} - {room.room_type}
+																</SelectItem>
+															))}
+													</>
+												)}
+											</SelectContent>
+										</Select>
+										{selectedRoomId && selectedRoomId !== "none" && (
+											<p className="text-sm text-muted-foreground">
+												Room {rooms.find(r => r.id === selectedRoomId)?.room_number} will be assigned to this booking.
+											</p>
+										)}
+									</div>
+								</div>
+							)}
 						</div>
 					)}
 
@@ -295,19 +423,28 @@ export function PublicBookingsManager() {
 								<Button
 									variant="outline"
 									onClick={() => handleUpdateStatus(selectedBooking.id, "rejected")}
+									disabled={isConfirming}
 								>
 									<XCircle className="h-4 w-4 mr-2" />
 									Reject
 								</Button>
 								<Button
-									onClick={() => handleUpdateStatus(selectedBooking.id, "confirmed")}
+									onClick={() => {
+										setIsConfirming(true);
+										handleUpdateStatus(selectedBooking.id, "confirmed");
+									}}
+									disabled={isConfirming}
 								>
 									<CheckCircle className="h-4 w-4 mr-2" />
-									Confirm
+									{isConfirming ? "Confirming..." : "Confirm Booking"}
 								</Button>
 							</>
 						)}
-						<Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+						<Button variant="ghost" onClick={() => {
+							setIsDialogOpen(false);
+							setSelectedRoomId("");
+							setIsConfirming(false);
+						}}>
 							Close
 						</Button>
 					</DialogFooter>
