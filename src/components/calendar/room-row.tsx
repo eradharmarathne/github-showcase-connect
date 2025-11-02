@@ -163,38 +163,38 @@ export function RoomRow({
 										>
 											{/* Colored background based on booking status */}
 											
-											{/* Handle checkout booking (end of booking) */}
-											{getBookingDayType(checkoutBooking) === "checkout" && (
+											{/* Handle checkout booking (left half triangle) */}
+											{checkoutBooking && (
 												<div
 													className={cn(
-														"absolute inset-0",
+														"absolute inset-y-0 left-0 w-1/2",
 														checkoutBooking.isExternal ? "opacity-60" : "opacity-90",
 														getStatusColor(checkoutBooking.status)
 													)}
-													style={{ clipPath: "polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%)" }}
+													style={{ clipPath: "polygon(100% 0, 0 0, 0 100%)" }}
 												/>
 											)}
 
-											{/* Handle checkin booking (start of booking) */}
-											{getBookingDayType(checkinBooking) === "checkin" && (
+											{/* Handle checkin booking (right half triangle) */}
+											{checkinBooking && (
 												<>
 													<div
 														className={cn(
-															"absolute inset-0",
+															"absolute inset-y-0 right-0 w-1/2",
 															checkinBooking.isExternal ? "opacity-60" : "opacity-90",
 															getStatusColor(checkinBooking.status)
 														)}
-														style={{ clipPath: "polygon(10% 0, 100% 0, 100% 100%, 10% 100%, 0 50%)" }}
+														style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%)" }}
 													/>
 													{/* Guest name for checkin */}
-													<div className="absolute left-4 top-0 bottom-0 flex items-center z-10 pointer-events-none">
+													<div className="absolute right-2 top-0 bottom-0 flex items-center z-10 pointer-events-none">
 														<span className="text-white text-[10px] sm:text-xs drop-shadow-md truncate">
 															{checkinBooking.guest_name?.split(" ")[0]}
 														</span>
 													</div>
 													{/* External booking badge */}
 													{checkinBooking.isExternal && "source" in checkinBooking && (
-														<div className="absolute top-0.5 right-1 z-20">
+														<div className="absolute top-0.5 left-1/2 ml-1 z-20">
 															<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
 																{checkinBooking.source === "booking_com" && "B"}
 																{checkinBooking.source === "airbnb" && "A"}
@@ -208,7 +208,7 @@ export function RoomRow({
 											)}
 
 											{/* Handle middle day booking (full width) */}
-											{getBookingDayType(middleBooking) === "middle" && (
+											{middleBooking && !checkoutBooking && !checkinBooking && (
 												<div
 													className={cn(
 														"absolute inset-0",
@@ -218,8 +218,8 @@ export function RoomRow({
 												/>
 											)}
 
-											{/* Handle single day booking (parallelogram) */}
-											{getBookingDayType(singleBooking) === "single" && (
+											{/* Handle single day booking (diamond shape) */}
+											{singleBooking && !checkoutBooking && !checkinBooking && !middleBooking && (
 												<>
 													<div
 														className={cn(
@@ -227,7 +227,7 @@ export function RoomRow({
 															singleBooking.isExternal ? "opacity-60" : "opacity-90",
 															getStatusColor(singleBooking.status)
 														)}
-														style={{ clipPath: "polygon(10% 0, 90% 0, 100% 50%, 90% 100%, 10% 100%, 0 50%)" }}
+														style={{ clipPath: "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)" }}
 													/>
 													{/* Guest name for single day */}
 													<div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
