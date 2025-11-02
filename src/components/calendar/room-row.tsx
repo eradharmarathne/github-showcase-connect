@@ -171,7 +171,7 @@ export function RoomRow({
 														checkoutBooking.isExternal ? "opacity-60" : "opacity-90",
 														getStatusColor(checkoutBooking.status)
 													)}
-													style={{ clipPath: "polygon(100% 0, 0 0, 0 100%)" }}
+													style={{ clipPath: "polygon(100% 0, 0 0, 0 100%, 50% 100%)" }}
 												/>
 											)}
 
@@ -184,14 +184,8 @@ export function RoomRow({
 															checkinBooking.isExternal ? "opacity-60" : "opacity-90",
 															getStatusColor(checkinBooking.status)
 														)}
-														style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%)" }}
+														style={{ clipPath: "polygon(50% 0, 100% 0, 100% 100%, 0% 100%)" }}
 													/>
-													{/* Guest name for checkin */}
-													<div className="absolute right-2 top-0 bottom-0 flex items-center z-10 pointer-events-none">
-														<span className="text-white text-[10px] sm:text-xs drop-shadow-md truncate">
-															{checkinBooking.guest_name?.split(" ")[0]}
-														</span>
-													</div>
 													{/* External booking badge */}
 													{checkinBooking.isExternal && "source" in checkinBooking && (
 														<div className="absolute top-0.5 left-1/2 ml-1 z-20">
