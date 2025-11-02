@@ -36,8 +36,10 @@ interface PublicBooking {
 	special_requests: string | null;
 	status: "pending" | "confirmed" | "rejected" | "converted";
 	assigned_room_id: string | null;
+	converted_reservation_id: string | null;
 	created_at: string;
 	location_id: string;
+	tenant_id: string;
 	locations?: {
 		name: string;
 	};
@@ -144,6 +146,79 @@ export function PublicBookingsManager() {
 			toast({
 				title: "Error",
 				description: "Failed to update booking status.",
+				variant: "destructive",
+			});
+			setIsConfirming(false);
+		}
+	};
+
+	const handleConvertToReservation = async (booking: PublicBooking) => {
+		if (!booking.assigned_room_id) {
+			toast({
+				title: "Room Not Assigned",
+				description: "Please assign a room before converting to reservation.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		try {
+			setIsConfirming(true);
+
+			// Calculate nights
+			const nights = calculateNights(booking.check_in_date, booking.check_out_date);
+
+			// Create a reservation from the public booking
+			const { data: reservation, error: reservationError } = await supabase
+				.from("reservations")
+				.insert({
+					tenant_id: booking.tenant_id,
+					location_id: booking.location_id,
+					room_id: booking.assigned_room_id,
+					guest_name: booking.guest_name,
+					guest_email: booking.guest_email,
+					guest_phone: booking.guest_phone,
+					guest_address: booking.guest_address,
+					guest_nationality: booking.guest_nationality,
+					check_in_date: booking.check_in_date,
+					check_out_date: booking.check_out_date,
+					adults: booking.adults,
+					children: booking.children,
+					nights: nights,
+					total_amount: 0, // Admin can update this later
+					special_requests: booking.special_requests,
+					status: "confirmed",
+					booking_source: "public_form",
+				})
+				.select()
+				.single();
+
+			if (reservationError) throw reservationError;
+
+			// Update public booking status to converted and link to reservation
+			const { error: updateError } = await supabase
+				.from("public_bookings")
+				.update({
+					status: "converted",
+					converted_reservation_id: reservation.id,
+				})
+				.eq("id", booking.id);
+
+			if (updateError) throw updateError;
+
+			toast({
+				title: "Reservation Created!",
+				description: `Public booking has been converted to reservation #${reservation.id?.substring(0, 8)}.`,
+			});
+
+			refetch();
+			setIsDialogOpen(false);
+			setIsConfirming(false);
+		} catch (error) {
+			console.error("Error converting to reservation:", error);
+			toast({
+				title: "Error",
+				description: "Failed to convert booking to reservation.",
 				variant: "destructive",
 			});
 			setIsConfirming(false);
@@ -439,6 +514,20 @@ export function PublicBookingsManager() {
 									{isConfirming ? "Confirming..." : "Confirm Booking"}
 								</Button>
 							</>
+						)}
+						{selectedBooking?.status === "confirmed" && (
+							<Button
+								onClick={() => handleConvertToReservation(selectedBooking)}
+								disabled={isConfirming || !selectedBooking.assigned_room_id}
+							>
+								<CheckCircle className="h-4 w-4 mr-2" />
+								{isConfirming ? "Converting..." : "Convert to Reservation"}
+							</Button>
+						)}
+						{selectedBooking?.status === "converted" && (
+							<div className="text-sm text-muted-foreground">
+								✓ Converted to Reservation
+							</div>
 						)}
 						<Button variant="ghost" onClick={() => {
 							setIsDialogOpen(false);
