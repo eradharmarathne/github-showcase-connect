@@ -134,10 +134,13 @@ export function ReservationEditDialog({
 		};
 
 		const fetchAgents = async () => {
+			if (!profile?.tenant_id) return;
+
 			try {
 				const { data, error } = await supabase
 					.from("agents")
 					.select("id, name, commission_rate")
+					.eq("tenant_id", profile.tenant_id)
 					.eq("is_active", true);
 
 				if (error) {
@@ -152,10 +155,13 @@ export function ReservationEditDialog({
 		};
 
 		const fetchGuides = async () => {
+			if (!profile?.tenant_id) return;
+
 			try {
 				const { data, error } = await supabase
 					.from("guides")
 					.select("id, name, commission_rate")
+					.eq("tenant_id", profile.tenant_id)
 					.eq("is_active", true);
 
 				if (error) {

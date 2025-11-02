@@ -69,21 +69,29 @@ export function useAccountData(baseCurrency: Currency) {
 					.eq("account_id", account.id)
 					.eq("tenant_id", tenant.id)
 					.eq("location_id", selectedLocation)
-					.order("date", { ascending: true }); // Fetch transfers from this account
-				const { data: transfersFromData } = await supabase
-					.from("account_transfers")
-					.select("id, created_at, amount, note")
-					.eq("from_account_id", account.id)
-					.eq("tenant_id", tenant.id)
-					.order("created_at", { ascending: true });
+					.order("date", { ascending: true });
+
+				// Fetch transfers from this account
+				const { data: transfersFromData, error: transfersFromError } =
+					await supabase
+						.from("account_transfers")
+						.select("id, created_at, amount, note")
+						.eq("from_account_id", account.id)
+						.eq("tenant_id", tenant.id)
+						.order("created_at", { ascending: true });
+
+				if (transfersFromError) throw transfersFromError;
 
 				// Fetch transfers to this account
-				const { data: transfersToData } = await supabase
-					.from("account_transfers")
-					.select("id, created_at, amount, conversion_rate, note")
-					.eq("to_account_id", account.id)
-					.eq("tenant_id", tenant.id)
-					.order("created_at", { ascending: true });
+				const { data: transfersToData, error: transfersToError } =
+					await supabase
+						.from("account_transfers")
+						.select("id, created_at, amount, conversion_rate, note")
+						.eq("to_account_id", account.id)
+						.eq("tenant_id", tenant.id)
+						.order("created_at", { ascending: true });
+
+				if (transfersToError) throw transfersToError;
 
 				// Process transactions and calculate running balances
 				const transactions: TransactionWithBalance[] = [];
@@ -170,7 +178,7 @@ export function useAccountData(baseCurrency: Currency) {
 				if (transfersToData) {
 					for (const transfer of transfersToData) {
 						const amount =
-							Number(transfer.amount) * Number(transfer.conversion_rate);
+							Number(transfer.amount) * Number(transfer.conversion_rate ?? 1);
 						allTransactions.push({
 							id: transfer.id,
 							date: transfer.created_at,

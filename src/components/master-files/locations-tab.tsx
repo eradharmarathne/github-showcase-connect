@@ -302,6 +302,7 @@ export default function LocationsTab() {
 					await supabase
 						.from("bookings")
 						.select("id")
+						.eq("tenant_id", tenant.id)
 						.eq("location_id", deleteAlert.locationId)
 				).data?.map((b) => b.id) || [],
 			);
@@ -310,29 +311,34 @@ export default function LocationsTab() {
 		await supabase
 			.from("reservations")
 			.delete()
+			.eq("tenant_id", tenant.id)
 			.eq("location_id", deleteAlert.locationId)
 			.eq("is_external", true);			// 3. Delete income records
 			await supabase
 				.from("income")
 				.delete()
+				.eq("tenant_id", tenant.id)
 				.eq("location_id", deleteAlert.locationId);
 
 			// 4. Delete expense records
 			await supabase
 				.from("expenses")
 				.delete()
+				.eq("tenant_id", tenant.id)
 				.eq("location_id", deleteAlert.locationId);
 
 			// 5. Delete bookings
 			await supabase
 				.from("bookings")
 				.delete()
+				.eq("tenant_id", tenant.id)
 				.eq("location_id", deleteAlert.locationId);
 
 			// 6. Delete reservations
 			await supabase
 				.from("reservations")
 				.delete()
+				.eq("tenant_id", tenant.id)
 				.eq("location_id", deleteAlert.locationId);
 
 			// 7. Finally delete the location (rooms and user_permissions will cascade automatically)

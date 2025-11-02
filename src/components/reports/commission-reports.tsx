@@ -28,6 +28,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -49,6 +50,7 @@ type CommissionData = {
 
 export default function CommissionReports() {
 	const { t } = useTranslation();
+	const { tenant } = useTenant();
 	const [commissions, setCommissions] = useState<CommissionData[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [dateFrom, setDateFrom] = useState("");
@@ -120,18 +122,24 @@ export default function CommissionReports() {
 	};
 
 	const fetchGuides = async () => {
+		if (!tenant?.id) return;
+
 		const { data } = await supabase
 			.from("guides")
 			.select("id, name")
+			.eq("tenant_id", tenant.id)
 			.eq("is_active", true)
 			.order("name");
 		setGuides(data || []);
 	};
 
 	const fetchAgents = async () => {
+		if (!tenant?.id) return;
+
 		const { data } = await supabase
 			.from("agents")
 			.select("id, name")
+			.eq("tenant_id", tenant.id)
 			.eq("is_active", true)
 			.order("name");
 		setAgents(data || []);

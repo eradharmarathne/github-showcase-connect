@@ -121,9 +121,14 @@ export default function AgentsTab() {
 
 		try {
 			if (editingAgent) {
+				if (!tenant?.id) {
+					throw new Error("No tenant selected");
+				}
+
 				const { error } = await supabase
 					.from("agents")
 					.update(formData)
+					.eq("tenant_id", tenant.id)
 					.eq("id", editingAgent.id);
 
 				if (error) throw error;
@@ -214,9 +219,14 @@ export default function AgentsTab() {
 		setIsDeleting(true);
 
 		try {
+			if (!tenant?.id) {
+				throw new Error("No tenant selected");
+			}
+
 			const { error } = await supabase
 				.from("agents")
 				.delete()
+				.eq("tenant_id", tenant.id)
 				.eq("id", agentToDelete);
 
 			if (error) throw error;

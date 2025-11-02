@@ -56,12 +56,17 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 		fetchLocations();
 	}, [fetchLocations]);
 
+	// Reset selected location when tenant changes
+	useEffect(() => {
+		setSelectedLocation("");
+	}, [tenantId]);
+
 	// Auto-select first location when locations are loaded
 	useEffect(() => {
 		if (locations.length > 0 && !selectedLocation) {
 			setSelectedLocation(locations[0].id);
 		}
-	}, [locations, selectedLocation]);
+	}, [locations]);
 
 	const getSelectedLocationData = () => {
 		if (!selectedLocation) return null;

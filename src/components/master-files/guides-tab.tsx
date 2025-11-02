@@ -118,9 +118,14 @@ export default function GuidesTab() {
 
 		try {
 			if (editingGuide) {
+				if (!tenant?.id) {
+					throw new Error("No tenant selected");
+				}
+
 				const { error } = await supabase
 					.from("guides")
 					.update(formData)
+					.eq("tenant_id", tenant.id)
 					.eq("id", editingGuide.id);
 
 				if (error) throw error;
@@ -205,9 +210,14 @@ export default function GuidesTab() {
 		}
 
 		try {
+			if (!tenant?.id) {
+				throw new Error("No tenant selected");
+			}
+
 			const { error } = await supabase
 				.from("guides")
 				.delete()
+				.eq("tenant_id", tenant.id)
 				.eq("id", guideToDelete);
 
 			if (error) throw error;
