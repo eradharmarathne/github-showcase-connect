@@ -175,41 +175,41 @@ export default function PublicBookingPage() {
 			return;
 		}
 
-		setSubmitting(true);
+	setSubmitting(true);
 
-		try {
-			const response = await fetch(
-				`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-public-booking`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-					},
-					body: JSON.stringify({
-						locationSlug,
-						guestName: formData.guestName,
-						guestEmail: formData.guestEmail,
-						guestPhone: formData.guestPhone || undefined,
-						guestAddress: formData.guestAddress || undefined,
-						guestNationality: formData.guestNationality || undefined,
-						checkInDate: format(formData.checkInDate, "yyyy-MM-dd"),
-						checkOutDate: format(formData.checkOutDate, "yyyy-MM-dd"),
-						adults: formData.adults,
-						children: formData.children,
-						roomTypePreference: formData.roomTypePreference || undefined,
-						specialRequests: formData.specialRequests || undefined,
-					}),
+	try {
+		// Create a fresh fetch request without any auth headers
+		// to ensure this works for both logged-in and logged-out users
+		const response = await fetch(
+			`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-public-booking`,
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
 				},
-			);
+				body: JSON.stringify({
+					locationSlug,
+					guestName: formData.guestName,
+					guestEmail: formData.guestEmail,
+					guestPhone: formData.guestPhone || undefined,
+					guestAddress: formData.guestAddress || undefined,
+					guestNationality: formData.guestNationality || undefined,
+					checkInDate: format(formData.checkInDate, "yyyy-MM-dd"),
+					checkOutDate: format(formData.checkOutDate, "yyyy-MM-dd"),
+					adults: formData.adults,
+					children: formData.children,
+					roomTypePreference: formData.roomTypePreference || undefined,
+					specialRequests: formData.specialRequests || undefined,
+				}),
+			},
+		);
 
-			const result = await response.json();
+		const result = await response.json();
 
-			if (!response.ok) {
-				throw new Error(result.error || "Failed to submit booking request");
-			}
-
-			toast({
+		if (!response.ok) {
+			throw new Error(result.error || "Failed to submit booking request");
+		}			toast({
 				title: "Booking Request Submitted!",
 				description: result.message || "The hotel will contact you soon to confirm your booking.",
 			});

@@ -1,5 +1,8 @@
 project_id = "takovelbhvoqnvfmnhaq"
 
+[functions.create-public-booking]
+verify_jwt = false
+
 [functions.beds24-token-exchange]
 verify_jwt = false
 
