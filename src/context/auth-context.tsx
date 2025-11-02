@@ -1,5 +1,6 @@
+
 import { Session, User } from "@supabase/supabase-js";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 
@@ -45,6 +46,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	const [loading, setLoading] = useState(true);
 	const [profileLoading, setProfileLoading] = useState(false);
 	const [tenantLoading, setTenantLoading] = useState(false);
+
+	// Use refs to track current state and prevent stale closures
+	const profileRef = useRef<Profile | null>(null);
+	const tenantIdRef = useRef<string | null>(null);
 
 	const fetchProfile = async (userId: string) => {
 		console.log("🔍 [AUTH] Fetching profile for user:", userId);
@@ -147,6 +152,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 			await fetchSubscription(profile.tenant_id);
 		}
 	};
+
+	// Keep refs in sync with state to prevent stale closures
+	useEffect(() => {
+		profileRef.current = profile;
+		if (profile?.tenant_id !== tenantIdRef.current) {
+			tenantIdRef.current = profile?.tenant_id || null;
+		}
+	}, [profile, tenant]);
+
+	// Separate effect to fetch tenant data when tenant_id changes
+	useEffect(() => {
+		const fetchTenantData = async () => {
+			if (profile?.tenant_id && profile.tenant_id !== tenantIdRef.current) {
+				tenantIdRef.current = profile.tenant_id;
+				await fetchTenant(profile.tenant_id);
+				await fetchSubscription(profile.tenant_id);
+			}
+		};
+
+		fetchTenantData();
+	}, [profile?.tenant_id]);
 
 	useEffect(() => {
 		const subscription = supabase.auth.onAuthStateChange(
