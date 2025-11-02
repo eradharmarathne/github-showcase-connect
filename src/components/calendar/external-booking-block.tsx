@@ -104,48 +104,49 @@ export function ExternalBookingBlock({
 					<div
 						className="absolute flex items-center z-10 cursor-pointer transition-all hover:brightness-110 overflow-visible"
 						style={{
-							left: "50%",
-							width: `${(spanDays - 1) * 40}px`,
-							top: "0",
-							bottom: "0",
-							opacity: 0.8,
+							left: "2px",
+							right: "auto",
+							width: `calc(${spanDays * 100}% - 4px)`,
+							top: "4px",
+							bottom: "4px",
+							opacity: 0.85,
 						}}
 						onClick={() => onClick(booking)}
 					>
 						{/* Start indicator dot */}
 						<div
-							className={`absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white shadow-sm z-30 ${colors.badge}`}
-							style={{ left: "-4px" }}
+							className={`absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm z-30 ${colors.badge}`}
+							style={{ left: "0px" }}
 						/>
 						{/* End indicator dot */}
 						<div
-							className={`absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full border-2 border-white shadow-sm z-30 ${colors.badge}`}
-							style={{ right: "-4px" }}
+							className={`absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-2 border-white shadow-sm z-30 ${colors.badge}`}
+							style={{ right: "0px" }}
 						/>
-						{/* Main booking shape */}
+						{/* Main booking shape with rounded edges */}
 						<div
-							className={`absolute inset-0 shadow-sm ${colors.bg} border-t-2 border-b-2 ${colors.border}`}
+							className={`absolute inset-0 shadow-md rounded-md ${colors.bg} border-2 ${colors.border}`}
 						/>
 						{/* Content */}
 						<div className="absolute inset-0 flex items-center px-2 py-1 z-10">
 							{/* Channel badge */}
 							<div
-								className={`absolute top-0 left-0 ${colors.badge} text-white text-[8px] px-1 py-0.5 font-bold uppercase leading-none`}
+								className={`absolute top-0.5 left-0.5 ${colors.badge} text-white text-[8px] px-1 py-0.5 font-bold uppercase leading-none rounded`}
 							>
 								{colors.label}
 							</div>
 
 							{/* Guest name and count */}
 							<span
-								className={`text-xs font-semibold truncate flex-1 ${colors.text}`}
+								className={`text-xs font-semibold truncate flex-1 ${colors.text} mt-2`}
 							>
 								{booking.guest_name}
 							</span>
-							{spanDays >= 2 && (
+							{spanDays >= 3 && (
 								<span
 									className={`text-[10px] font-medium ml-1 shrink-0 ${colors.text}`}
 								>
-									({adults + children})
+									{adults + children}p
 								</span>
 							)}
 

@@ -107,188 +107,243 @@ export function RoomRow({
 					{/* Calendar Grid - Full width responsive */}
 					<div className="flex flex-1 relative">
 						{calendarDays.map((day, dayIndex) => {
-							// Find booking that starts on this day
-							const bookingStartingToday = roomBookings.find(
-								(booking) => booking.span.startIndex === dayIndex,
+							// Find ALL bookings that occupy this day
+							const allBookingsHere = [
+								...roomBookings.map(b => ({ ...b, isExternal: false })),
+								...roomExternalBookings.map(b => ({ ...b, isExternal: true }))
+							].filter(
+								(booking) =>
+									dayIndex >= booking.span.startIndex &&
+									dayIndex < booking.span.startIndex + booking.span.spanDays
 							);
 
-							// Find external booking that starts on this day
-							const externalBookingStartingToday = roomExternalBookings.find(
-								(booking) => booking.span.startIndex === dayIndex,
-							);
+							// Determine what type of day this is for each booking
+							const getBookingDayType = (booking: any) => {
+								if (!booking) return null;
+								const isFirstDay = dayIndex === booking.span.startIndex;
+								const isLastDay = dayIndex === booking.span.startIndex + booking.span.spanDays - 1;
+								
+								if (isFirstDay && isLastDay) return "single"; // 1-day booking
+								if (isFirstDay) return "checkin"; // Check-in day
+								if (isLastDay) return "checkout"; // Check-out day
+								return "middle"; // Middle day (fully occupied)
+							};
 
-							// Check if this day is occupied by any booking
-							const isOccupied =
-								roomBookings.some(
-									(booking) =>
-										dayIndex >= booking.span.startIndex &&
-										dayIndex < booking.span.startIndex + booking.span.spanDays,
-								) ||
-								roomExternalBookings.some(
-									(booking) =>
-										dayIndex >= booking.span.startIndex &&
-										dayIndex < booking.span.startIndex + booking.span.spanDays,
-								);
+							// Separate bookings by their day type
+							const checkoutBooking = allBookingsHere.find(b => getBookingDayType(b) === "checkout");
+							const checkinBooking = allBookingsHere.find(b => getBookingDayType(b) === "checkin");
+							const middleBooking = allBookingsHere.find(b => getBookingDayType(b) === "middle");
+							const singleBooking = allBookingsHere.find(b => getBookingDayType(b) === "single");
+
+							// Priority: single > middle > checkout/checkin split
+							const hasMultipleBookings = allBookingsHere.length > 1;
+							const primaryBooking = singleBooking || middleBooking || checkoutBooking || checkinBooking;
+
+							console.log("Rendering day:", format(day, "yyyy-MM-dd"), {
+								dayIndex,
+								allBookingsCount: allBookingsHere.length,
+								hasCheckout: !!checkoutBooking,
+								hasCheckin: !!checkinBooking,
+								hasMiddle: !!middleBooking,
+								hasSingle: !!singleBooking,
+							});
 
 							return (
-								<div
-									key={dayIndex}
-									className={cn(
-										"flex-1 h-12 border-r last:border-r-0 relative flex items-center justify-center",
-										isOccupied &&
-											!bookingStartingToday &&
-											!externalBookingStartingToday &&
-											"bg-muted/10",
-									)}
-									style={{ minWidth: "32px" }}
-								>
-									{/* Render external bookings first (below direct bookings) */}
-									{externalBookingStartingToday && (
-										<ExternalBookingBlock
-											booking={externalBookingStartingToday}
-											startIndex={dayIndex}
-											spanDays={externalBookingStartingToday.span.spanDays}
-											totalDays={calendarDays.length}
-											getCurrencySymbol={getCurrencySymbol}
-											onClick={onBookingClick}
-										/>
-									)}
-
-									{/* Render direct bookings on top */}
-									{bookingStartingToday && (
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div
-													className="absolute cursor-pointer transition-all z-20 flex items-center justify-center overflow-visible hover:brightness-110"
-													style={{
-														left: "50%",
-														width: `${(bookingStartingToday.span.spanDays - 1) * 40}px`,
-														top: "0",
-														bottom: "0",
-														opacity: 0.8,
-													}}
-													onClick={() => onBookingClick(bookingStartingToday)}
-												>
-													{/* Start indicator dot */}
-													<div
-														className={cn(
-															"absolute left-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30",
-															getStatusColor(bookingStartingToday.status),
-														)}
-														style={{ left: "-5px" }}
-													/>
-													{/* End indicator dot */}
-													<div
-														className={cn(
-															"absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[2.5px] border-white shadow-md z-30",
-															getStatusColor(bookingStartingToday.status),
-														)}
-														style={{ right: "-5px" }}
-													/>
-													{/* Main booking shape */}
-													<div
-														className={cn(
-															"absolute inset-0 shadow-sm",
-															getStatusColor(bookingStartingToday.status),
-														)}
-													/>
-													{/* Content */}
-													<div className="absolute inset-0 flex items-center px-2 py-1 z-10">
-														<span className="text-white text-xs font-semibold truncate flex-1 drop-shadow-sm">
-															{bookingStartingToday.guest_name}
-														</span>
-														{bookingStartingToday.span.spanDays >= 2 && (
-															<span className="text-white text-[10px] font-medium ml-1 drop-shadow-sm shrink-0">
-																(
-																{bookingStartingToday.adults +
-																	(bookingStartingToday.children || 0)}
-																)
-															</span>
-														)}
-													</div>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent
-												side="top"
-												align="center"
-												className="p-3 text-xs min-w-[200px]"
-											>
-												<div className="font-semibold text-sm mb-2">
-													{bookingStartingToday.guest_name}
-													{bookingStartingToday.span.spanDays}
-												</div>
-												<div className="space-y-1">
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Check-in:
-														</span>
-														<span className="font-medium">
-															{format(
-																parseISO(bookingStartingToday.check_in_date),
-																"MMM dd, yyyy",
-															)}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Check-out:
-														</span>
-														<span className="font-medium">
-															{format(
-																parseISO(bookingStartingToday.check_out_date),
-																"MMM dd, yyyy",
-															)}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Status:
-														</span>
-														<span className="font-medium capitalize">
-															{bookingStartingToday.status.replace("_", " ")}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Guests:
-														</span>
-														<span className="font-medium">
-															{bookingStartingToday.adults +
-																(bookingStartingToday.children || 0)}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Amount:
-														</span>
-														<span className="font-medium">
-															{getCurrencySymbol(bookingStartingToday.currency)}
-															{bookingStartingToday.total_amount.toLocaleString()}
-														</span>
-													</div>
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">
-															Booking #:
-														</span>
-														<span className="font-medium text-xs">
-															{bookingStartingToday.reservation_number}
-														</span>
-													</div>
-												</div>
-											</TooltipContent>
-										</Tooltip>
-									)}
-
-									{!isOccupied && (
-										<button
-											className="w-full h-full hover:bg-primary/10 transition-colors flex items-center justify-center group"
-											onClick={() => onQuickBook(room, day)}
-											title={`Book ${room.room_number} for ${format(day, "MMM dd, yyyy")}`}
+								<Tooltip key={dayIndex}>
+									<TooltipTrigger asChild>
+										<div
+											className={cn(
+												"flex-1 h-12 relative cursor-pointer transition-all overflow-hidden",
+												primaryBooking && "hover:brightness-110",
+												// Add subtle right border only when cell is empty (for day separation)
+												!primaryBooking && "border-r border-border/30"
+											)}
+											style={{ minWidth: "32px" }}
+											onClick={() => primaryBooking && onBookingClick(primaryBooking)}
 										>
-											<Plus className="size-4 text-muted-foreground/40 group-hover:text-primary group-hover:scale-125 transition-all" />
-										</button>
+											{/* Colored background based on booking status */}
+											
+											{/* Handle checkout booking (left half) */}
+											{checkoutBooking && (
+												<div className="absolute inset-y-0 left-0 w-1/2">
+													<div
+														className={cn(
+															"w-full h-full",
+															checkoutBooking.isExternal ? "opacity-60" : "opacity-90",
+															getStatusColor(checkoutBooking.status)
+														)}
+													/>
+												</div>
+											)}
+
+											{/* Handle checkin booking (right half) */}
+											{checkinBooking && (
+												<div className="absolute inset-y-0 right-0 w-1/2">
+													<div
+														className={cn(
+															"w-full h-full",
+															checkinBooking.isExternal ? "opacity-60" : "opacity-90",
+															getStatusColor(checkinBooking.status)
+														)}
+													/>
+													{/* Guest name for checkin */}
+													{/* <div className="absolute rotate-90 left-2 top-4 flex items-center justify-center z-10 pointer-events-none">
+														<span className="text-white text-[10px] sm:text-xs drop-shadow-md truncate text-center">
+															{checkinBooking.guest_name?.split(" ")[0]}
+														</span>
+													</div> */}
+													{/* External booking badge */}
+													{checkinBooking.isExternal && "source" in checkinBooking && (
+														<div className="absolute top-0.5 left-0.5 z-20">
+															<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
+																{checkinBooking.source === "booking_com" && "B"}
+																{checkinBooking.source === "airbnb" && "A"}
+																{checkinBooking.source === "expedia" && "E"}
+																{checkinBooking.source === "beds24" && "B24"}
+																{checkinBooking.source === "ical" && "iCal"}
+															</div>
+														</div>
+													)}
+												</div>
+											)}
+
+											{/* Handle middle day booking (full width) */}
+											{middleBooking && !checkoutBooking && !checkinBooking && (
+												<div className="absolute inset-0">
+													<div
+														className={cn(
+															"w-full h-full",
+															middleBooking.isExternal ? "opacity-60" : "opacity-90",
+															getStatusColor(middleBooking.status)
+														)}
+													/>
+												</div>
+											)}
+
+											{/* Handle single day booking (full width) */}
+											{singleBooking && !checkoutBooking && !checkinBooking && !middleBooking && (
+												<>
+													<div className="absolute inset-0">
+														<div
+															className={cn(
+																"w-full h-full",
+																singleBooking.isExternal ? "opacity-60" : "opacity-90",
+																getStatusColor(singleBooking.status)
+															)}
+														/>
+													</div>
+													{/* Guest name for single day */}
+													<div className="absolute rotate-90 left-2 top-4 flex items-center justify-center z-10 pointer-events-none">
+														<span className="text-white text-[10px] sm:text-xs drop-shadow-md truncate text-center">
+															{singleBooking.guest_name?.split(" ")[0]}
+														</span>
+													</div>
+													{/* External booking badge */}
+													{singleBooking.isExternal && "source" in singleBooking && (
+														<div className="absolute top-0.5 left-0.5 z-20">
+															<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
+																{singleBooking.source === "booking_com" && "B"}
+																{singleBooking.source === "airbnb" && "A"}
+																{singleBooking.source === "expedia" && "E"}
+																{singleBooking.source === "beds24" && "B24"}
+																{singleBooking.source === "ical" && "iCal"}
+															</div>
+														</div>
+													)}
+												</>
+											)}
+
+											{/* Quick book button when cell is empty */}
+											{!primaryBooking && (
+												<button
+													className="w-full h-full hover:bg-primary/10 transition-colors flex items-center justify-center group"
+													onClick={() => onQuickBook(room, day)}
+													title={`Book ${room.room_number} for ${format(day, "MMM dd, yyyy")}`}
+												>
+													<Plus className="size-4 text-muted-foreground/40 group-hover:text-primary group-hover:scale-125 transition-all" />
+												</button>
+											)}
+										</div>
+									</TooltipTrigger>
+
+									{/* Tooltip with booking details */}
+									{primaryBooking && (
+										<TooltipContent
+											side="top"
+											align="center"
+											className="p-3 text-xs min-w-[200px]"
+										>
+											<div className="font-semibold text-sm mb-2">
+												{primaryBooking.guest_name}
+											</div>
+											<div className="space-y-1">
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Check-in:</span>
+													<span className="font-medium">
+														{format(
+															parseISO(
+																"check_in_date" in primaryBooking
+																	? primaryBooking.check_in_date
+																	: primaryBooking.check_in
+															),
+															"MMM dd, yyyy"
+														)}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Check-out:</span>
+													<span className="font-medium">
+														{format(
+															parseISO(
+																"check_out_date" in primaryBooking
+																	? primaryBooking.check_out_date
+																	: primaryBooking.check_out
+															),
+															"MMM dd, yyyy"
+														)}
+													</span>
+												</div>
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Status:</span>
+													<span className="font-medium capitalize">
+														{primaryBooking.status.replace("_", " ")}
+													</span>
+												</div>
+												{primaryBooking.isExternal && "source" in primaryBooking && (
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Source:</span>
+														<span className="font-medium capitalize">
+															{primaryBooking.source.replace("_", ".")}
+														</span>
+													</div>
+												)}
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Guests:</span>
+													<span className="font-medium">
+														{primaryBooking.adults + (primaryBooking.children || 0)}
+													</span>
+												</div>
+												{primaryBooking.total_amount > 0 && (
+													<div className="flex justify-between gap-4">
+														<span className="text-muted-foreground">Amount:</span>
+														<span className="font-medium">
+															{getCurrencySymbol(primaryBooking.currency || "USD")}
+															{primaryBooking.total_amount.toLocaleString()}
+														</span>
+													</div>
+												)}
+												<div className="flex justify-between gap-4">
+													<span className="text-muted-foreground">Booking #:</span>
+													<span className="font-medium text-xs">
+														{"reservation_number" in primaryBooking
+															? primaryBooking.reservation_number
+															: primaryBooking.external_id}
+													</span>
+												</div>
+											</div>
+										</TooltipContent>
 									)}
-								</div>
+								</Tooltip>
 							);
 						})}
 					</div>
