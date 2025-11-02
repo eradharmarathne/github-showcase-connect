@@ -11,6 +11,7 @@ import { ReservationEditDialog } from "@/components/modals/reservation-edit-dial
 import { AddIncomeDialog } from "@/components/reservation";
 import { PaymentDialog } from "@/components/reservation/payment-dialog";
 import { PaymentsTable } from "@/components/reservation/payments-table";
+import { PublicBookingsManager } from "@/components/reservation/public-bookings-manager";
 import { ReservationsDesktopTable } from "@/components/reservation/reservations-desktop-table";
 import { useReservationPrint } from "@/components/reservation/reservation-print";
 import { ReservationsFilters } from "@/components/reservation/reservations-filters";
@@ -225,13 +226,15 @@ export default function Reservations() {
 						/>
 					</TabsContent>
 
-					<TabsContent value="payments" className="space-y-4">
-						<PaymentsTable />
-					</TabsContent>
-				</div>
-			</Tabs>
+				<TabsContent value="payments" className="space-y-4">
+					<PaymentsTable />
+				</TabsContent>
 
-			{/* Dialogs */}
+				<TabsContent value="public-requests" className="space-y-4">
+					<PublicBookingsManager />
+				</TabsContent>
+			</div>
+		</Tabs>			{/* Dialogs */}
 			{showOTPVerification && otpData && (
 				<Dialog
 					open={showOTPVerification}

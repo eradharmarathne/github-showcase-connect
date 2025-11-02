@@ -21,12 +21,15 @@ export function ReservationsHeader({
 				<p className="text-muted-foreground">{t("reservations.subtitle")}</p>
 			</div>
 
-			<TabsList className="grid w-full grid-cols-2">
+			<TabsList className="grid w-full grid-cols-3">
 				<TabsTrigger value="reservations">
 					{t("reservations.tabs.reservations")}
 				</TabsTrigger>
 				<TabsTrigger value="payments">
 					{t("reservations.tabs.payments")}
+				</TabsTrigger>
+				<TabsTrigger value="public-requests">
+					Public Requests
 				</TabsTrigger>
 			</TabsList>
 		</div>
