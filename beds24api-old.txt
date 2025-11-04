@@ -1,0 +1,1448 @@
+# Beds24 API v2 - Complete API Reference
+
+**Generated:** November 4, 2025
+**Source:** Official Beds24 Wiki (https://wiki.beds24.com/index.php/Category:API_V2)
+**Interactive Swagger:** https://beds24.com/api/v2/
+**API Base URL:** `https://api.beds24.com/v2` or `https://beds24.com/api/v2`
+
+---
+
+## TABLE OF CONTENTS
+
+1. [Authentication](#authentication)
+2. [Headers & Rate Limiting](#headers--rate-limiting)
+3. [Bookings API](#bookings-api)
+4. [Properties API](#properties-api)
+5. [Rooms API](#rooms-api)
+6. [Inventory API](#inventory-api)
+7. [Invoices API](#invoices-api)
+8. [Messages API](#messages-api)
+9. [Webhooks](#webhooks)
+10. [Channel Settings](#channel-settings)
+11. [Data Schemas](#data-schemas)
+12. [Enums & Constants](#enums--constants)
+
+---
+
+## AUTHENTICATION
+
+### Overview
+Beds24 API V2 uses two types of tokens:
+1. **Long-life tokens** - Read-only access, do not expire if used within 90 days
+2. **Refresh tokens** - Generate short-lived access tokens (24 hours), do not expire if used within 30 days
+
+### Step 1: Get an Invite Code
+Generate invite codes at: https://beds24.com/control3.php?pagetype=apiv2
+
+**Scopes** (permissions) are set when creating the invite code:
+- `read:bookings`, `write:bookings`, `delete:bookings`, `all:bookings`
+- `read:bookings-personal` (guest names, email, phone)
+- `read:bookings-financial` (invoice data)
+- `read:inventory`, `write:inventory`
+- `read:properties`, `write:properties`
+- `read:accounts`, `write:accounts`
+
+**Invite Code Settings:**
+- Linked Properties: Allow/deny access to linked properties
+- IP Whitelisting: Optional IP restriction (comma-separated)
+- Expires after: 24 hours
+
+### Step 2: Exchange Invite Code for Refresh Token
+**Endpoint:** `GET /authentication/setup`
+
+**Headers:**
+```http
+accept: application/json
+code: {inviteCode}
+```
+
+**Response:**
+```json
+{
+  "refreshToken": "Ea6DftE50aYYRe/qAd9SkQaSmTF6kaLQxH6gtRxO1h10yVC64d4qIj4BGiQOU+y5",
+  "token": "wEoJHQIwRrLwHqTqAsn0/XjzaZkVk4E8sSDwbRN2HKDlulkt6n7aHQCcvdqfX+y5",
+  "expiresIn": 3600
+}
+```
+
+**Note:** Save the `refreshToken` securely. It never expires if used within 30 days.
+
+### Step 3: Refresh Access Token
+**Endpoint:** `GET /authentication/token`
+
+**Headers:**
+```http
+accept: application/json
+refreshToken: {refreshToken}
+```
+
+**Response:**
+```json
+{
+  "token": "new-access-token",
+  "expiresIn": 3600
+}
+```
+
+**Token expires after:** 24 hours
+
+**Token size:** 152-172 characters
+
+### Step 4: Authenticate API Calls
+
+**Required Header:**
+```http
+token: {access-token}
+```
+
+**Optional Header (for integration partners only):**
+```http
+organization: YourOrgName
+```
+
+**Example cURL:**
+```bash
+curl -X 'GET' \
+  'https://api.beds24.com/v2/bookings' \
+  -H 'accept: application/json' \
+  -H 'token: your-access-token-here'
+```
+
+---
+
+## HEADERS & RATE LIMITING
+
+### API Credit Limits
+- **Limit Type:** 5-minute rolling window
+- **Per:** Account level (all tokens under same account share limit)
+- **Limit:** Varies by account (check headers)
+- **Cost:** Dynamic, based on request complexity
+
+### Response Headers
+
+**X-FiveMinCreditLimit:**
+- Description: Maximum credits you can use in 5 minutes
+- Type: Integer
+- Example: `100`
+
+**X-FiveMinCreditLimit-ResetsIn:**
+- Description: Seconds until credit limit resets
+- Type: Integer
+- Example: `280`
+
+**X-FiveMinCreditLimit-Remaining:**
+- Description: Remaining credits for current 5-minute window
+- Type: Integer
+- Example: `85`
+
+**X-RequestCost:**
+- Description: Credits consumed by this request
+- Type: Integer
+- Example: `1`
+
+**Note:** Monitor `X-FiveMinCreditLimit-Remaining` to avoid hitting rate limits.
+
+### Pagination
+
+**Query Parameter: `page`**
+- Description: Get results beyond the first page
+- Type: Integer
+- Default: `1`
+- Example: `?page=2`
+
+**Response includes pagination info:**
+```json
+{
+  "success": true,
+  "pages": {
+    "current": 1,
+    "total": 5
+  },
+  "data": [...]
+}
+```
+
+### Request Limits
+- **Max POST payload:** ~1MB
+- **Max array items per POST:** 10,000 top-level items
+
+---
+
+## BOOKINGS API
+
+### POST Request Patterns (IMPORTANT)
+
+**Creating/Modifying Multiple Items:**
+- All POST endpoints accept an **array** of items
+- Can create and modify multiple items in one request
+- Items identified by `id` field:
+  - **No `id`** = Create new item
+  - **With `id`** = Update existing item
+
+**Subitems (Invoice Items, Info Items):**
+- Subitems work the same way as parent items
+- **Add subitem:** Include without `id`
+- **Update subitem:** Include with `id`
+- **Delete subitem:** Include only `id` field (empty object)
+- Deleting subitem requires WRITE scope, deleting parent requires DELETE scope
+
+**Response Structure:**
+```json
+[
+  {
+    "success": true/false,
+    "new": {...},        // Newly created items/subitems with IDs
+    "modified": {...},   // Modified items/subitems
+    "errors": [...],     // Fatal issues (action failed)
+    "warnings": [...],   // Non-fatal issues (action succeeded with warnings)
+    "info": [...]        // General information
+  }
+]
+```
+
+**Response Order:** Matches request order (index-by-index)
+
+---
+
+### GET /bookings
+
+Get bookings matching specified criteria. **By default, only upcoming bookings returned.**
+
+**Endpoint:** `GET /bookings`
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `filter` | string | arrivals, departures, new, current |
+| `propertyId` | integer[] | Multiple property IDs |
+| `roomId` | integer[] | Multiple room IDs |
+| `id` | integer[] | Booking IDs |
+| `masterId` | integer[] | Master booking IDs |
+| `apiReference` | string[] | API references |
+| `channel` | string | Channel name (see channel enum) |
+| `arrival` | date | YYYY-MM-DD |
+| `arrivalFrom` | date | YYYY-MM-DD |
+| `arrivalTo` | date | YYYY-MM-DD |
+| `departure` | date | YYYY-MM-DD |
+| `departureFrom` | date | YYYY-MM-DD |
+| `departureTo` | date | YYYY-MM-DD |
+| `bookingTimeFrom` | datetime | YYYY-MM-DDTHH:MM:SS (UTC) |
+| `bookingTimeTo` | datetime | YYYY-MM-DDTHH:MM:SS (UTC) |
+| `modifiedFrom` | datetime | YYYY-MM-DDTHH:MM:SS |
+| `modifiedTo` | datetime | YYYY-MM-DDTHH:MM:SS |
+| `searchString` | string | Guest name, email, apiref, bookingId |
+| `includeInvoiceItems` | boolean | Include invoice items |
+| `includeInfoItems` | boolean | Include info items |
+| `includeGuests` | boolean | Include guest data (requires scope) |
+| `includeBookingGroup` | boolean | Include booking group IDs |
+| `status` | string[] | confirmed, request, new, cancelled, black, inquiry |
+| `page` | integer | Page number |
+
+**Filter Values:**
+- `arrivals` - Bookings arriving today
+- `departures` - Bookings departing today (confirmed, new, request)
+- `new` - Bookings created in past 24 hours
+- `current` - Bookings checked in (arrival ≤ today, departure ≥ today)
+
+**Channel Enum:**
+```
+agoda, airbnb, asiatravel, atraveode, booking, bookingpage, despegar, 
+direct, edreamsodigeo, expedia, feratel, goibibo, hometogo, hostelworld, 
+hotelbeds, hrs, jomres, marriott, ostrovokru, ota, tiket, tomastravel, 
+traveloka, travia, traum, trip, tripadvisorrentals, vacationstay, vrbo, 
+airbnbical, bedandbreakfasteu, bedandbreakfastnl, bookeasycomau, 
+bookitconz, flipkey, googlecal, googleads, guestlinkcouk, 
+holidaylettingscouk, hostelinternational, hostelsclub, housetripcom, 
+icalimport1, icalimport2, icalimport3, lastminute, nzaa, reserva, 
+rezintelnet, tablethotels, traumferienwohnungen, trivagocom, 
+visitscotlandcom, vrboical, webroomsconz
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "booking",
+  "pages": {
+    "current": 1,
+    "total": 5
+  },
+  "data": [
+    {
+      "id": 12345,
+      "propertyId": 1001,
+      "roomId": 322790,
+      "status": "confirmed",
+      "arrival": "2021-01-01",
+      "departure": "2021-01-05",
+      "numAdult": 2,
+      "numChild": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "johndoe@example.com",
+      "price": 500.00,
+      "channel": "direct",
+      "bookingTime": "2020-12-15T10:30:00Z",
+      "modifiedTime": "2020-12-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+### POST /bookings
+
+Create or update bookings. Can create multiple bookings in single request.
+
+**Endpoint:** `POST /bookings`
+
+**Request Body:**
+```json
+[
+  {
+    "roomId": 1234567,
+    "status": "confirmed",
+    "arrival": "2021-01-01",
+    "departure": "2021-01-05",
+    "numAdult": 2,
+    "numChild": 1,
+    "title": "Mr",
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "johndoe@example.com",
+    "mobile": "123456789",
+    "address": "123 Fake St",
+    "city": "Melbourne",
+    "state": "Victoria",
+    "postcode": "3000",
+    "country": "Australia",
+    "comments": "Early check-in requested",
+    "apiReference": "CCO-RES-001"
+  }
+]
+```
+
+**Update Existing Booking:**
+```json
+[
+  {
+    "id": 12345,
+    "status": "cancelled",
+    "departure": "2021-01-04"
+  }
+]
+```
+
+**Create Booking with Invoice Item:**
+```json
+[
+  {
+    "roomId": 322790,
+    "arrival": "2022-06-29",
+    "departure": "2022-07-09",
+    "numAdult": 2,
+    "invoiceItems": [
+      {
+        "type": "charge",
+        "qty": 2,
+        "amount": 50
+      }
+    ]
+  }
+]
+```
+
+**Required Fields for New Booking:**
+- `roomId` (integer)
+- `arrival` (date: YYYY-MM-DD)
+- `departure` (date: YYYY-MM-DD)
+
+**Optional Fields:**
+- `masterId` - Master booking ID for grouping
+- `unitId` - Specific unit ID
+- `roomQty` - Number of rooms
+- `status` - confirmed, request, new, cancelled, black, inquiry
+- `numAdult` (0-99)
+- `numChild` (0-99)
+- `title`, `firstName`, `lastName` (max 100 chars)
+- `email` (max 100 chars)
+- `phone`, `mobile`, `fax` (max 100 chars)
+- `company` (max 100 chars)
+- `address` (max 250 chars)
+- `city`, `state`, `postcode` (max 100 chars)
+- `country` - Free text (max 100)
+- `country2` - 2-letter code (e.g., "DE")
+- `arrivalTime` (max 100 chars)
+- `voucher` (max 100 chars)
+- `comments` (max 1000 chars)
+- `notes` (max 2000 chars)
+- `message` (max 1000 chars)
+- `groupNote` (max 5000 chars)
+- `custom1` - `custom10` (max 1000 chars each)
+- `flagColor` - 6-char hex color (e.g., "FF0000")
+- `flagText` (max 32 chars)
+- `lang` - 2-char code (e.g., "en")
+- `price` (0 - 99999999.99)
+- `deposit` (0 - 99999999.99)
+
+**Response:**
+```json
+[
+  {
+    "success": true,
+    "id": 12345,
+    "message": "Booking created successfully"
+  }
+]
+```
+
+### DELETE /bookings
+
+Delete bookings by ID.
+
+**Endpoint:** `DELETE /bookings?id=12345&id=12346`
+
+**Query Parameters:**
+- `id` - Booking ID (can include multiple)
+
+**Response:**
+```json
+[
+  {
+    "success": true,
+    "id": 12345,
+    "message": "Booking deleted"
+  }
+]
+```
+
+### Booking Info Items
+
+**Add Info Item to Booking:**
+```json
+[
+  {
+    "id": 12345,
+    "infoItems": [
+      {
+        "code": "BREAKFAST",
+        "text": "Add breakfast for 2"
+      }
+    ]
+  }
+]
+```
+
+**Update Info Item:**
+```json
+[
+  {
+    "id": 12345,
+    "infoItems": [
+      {
+        "id": 111,
+        "code": "BREAKFAST",
+        "text": "Add breakfast for 2 adults"
+      }
+    ]
+  }
+]
+```
+
+**Delete Info Item:**
+```json
+[
+  {
+    "id": 12345,
+    "infoItems": [
+      {
+        "id": 111
+      }
+    ]
+  }
+]
+```
+
+### Booking Actions
+
+**Make Booking Group:**
+```json
+[
+  {
+    "arrival": "2021-01-01",
+    "departure": "2021-01-05",
+    "actions": {
+      "makeGroup": true
+    }
+  }
+]
+```
+
+---
+
+## PROPERTIES API
+
+### GET /properties
+
+**Beta** - Get properties matching specified criteria.
+
+**Endpoint:** `GET /properties`
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer[] | Property IDs |
+| `includeLanguages` | string[] | all, en, ar, bg, ca, cs, da, de, el, es, etc. |
+| `includeTexts` | string[] | all, property, roomType |
+| `includePictures` | boolean | Include pictures |
+| `includeOffers` | boolean | Include offers |
+| `includePriceRules` | boolean | Include price rules |
+| `includeUpsellItems` | boolean | Include upsell items |
+| `includeAllRooms` | boolean | Include all rooms |
+| `includeUnitDetails` | boolean | Include unit details (default: only names) |
+| `roomId` | integer[] | Filter by room IDs |
+| `page` | integer | Page number |
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "property",
+  "pages": {
+    "current": 1,
+    "total": 1
+  },
+  "data": [
+    {
+      "id": 1001,
+      "name": "My Hotel",
+      "propertyType": "hotel",
+      "currency": "USD",
+      "address": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "country": "US",
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "email": "info@myhotel.com",
+      "phone": "+1234567890"
+    }
+  ]
+}
+```
+
+### POST /properties
+
+**Beta** - Create or modify properties.
+
+**Endpoint:** `POST /properties`
+
+**Request Body (Create New Property):**
+```json
+[
+  {
+    "name": "My New Property",
+    "propertyType": "apartment",
+    "currency": "USD",
+    "address": "123 Main St",
+    "city": "New York",
+    "country": "US"
+  }
+]
+```
+
+**Property Type Enum:**
+```
+apartment, bedAndBreakfast, cabin, guesthouse, hostel, hotel, house, 
+villa, aparthotel, barn, boat, boutiqueHotel, building, bungalow, 
+camping, caravan, casaParticular, castle, chacara, chalet, chateau, 
+condo, cottage, House, estate, farmhouse, heritageHotel, houseBoat, 
+lodge, loft, mas, mill, mobileHome, recreationalVehicle, resort, 
+riad, servicedApartment, studio, tent, tour, tower, townhome, 
+treeHouse, yacht
+```
+
+**Currency Enum:**
+```
+AED, ALL, AMD, ARS, AUD, AZN, BDT, BGN, BHD, BND, BRL, CAD, CHF, 
+CLP, CNY, COP, CRC, CZK, DKK, DOP, EGP, EUR, FJD, GBP, GEL, HKD, 
+HRK, HUF, INR, IDR, IRR, ILS, ISK, JOD, JPY, KES, KRW, LBP, LKR, 
+MAD, MMK, MXN, MYR, MZN, NOK, NZD, OMR, PHP, PLN, RON, RSD, RUB, 
+SAR, SEK, SGD, TWD, THB, TND, TRY, TZS, UAH, USD, VND, XOF, XPF, 
+YER, ZAR
+```
+
+**Property Fields:**
+- `id` (update existing)
+- `name`
+- `propertyType` (enum)
+- `currency` (enum)
+- `address`, `city`, `state`, `postcode`
+- `country` (free text)
+- `country2` (2-letter code)
+- `latitude`, `longitude`
+- `phone`, `mobile`, `fax`
+- `email`, `web`
+- `contactFirstName`, `contactLastName`
+- `checkInStart`, `checkInEnd`, `checkOutEnd` (time enum: "00:00" to "24:00" in 15-min increments)
+- `offerType` - perRoom, perProperty
+- `sellPriority` (1-100, nullable)
+- `controlPriority` (1-100, nullable)
+- `bookingPageMultiplier`
+- `permit`
+- `roomChargeDisplay` - onePerBooking, onePerDate
+- `templates` - template1 through template8
+- `bookingRules` (see booking rules schema)
+
+---
+
+## ROOMS API
+
+### GET /properties/rooms
+
+**Coming soon** - Get rooms matching specified criteria.
+
+### POST /properties (with rooms)
+
+**Coming soon** - Create or modify rooms within properties.
+
+### DELETE /properties/rooms
+
+**Coming soon** - Delete rooms by ID.
+
+---
+
+## INVENTORY API
+
+### GET /inventory/rooms/availability
+
+Get availability status for rooms on specified dates.
+
+**Endpoint:** `GET /inventory/rooms/availability`
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `roomId` | integer[] | No | Room IDs |
+| `propertyId` | integer[] | No | Property IDs |
+| `startDate` | date | Yes | YYYY-MM-DD |
+| `endDate` | date | Yes | YYYY-MM-DD (last bookable night) |
+| `page` | integer | No | Page number |
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "availability",
+  "pages": {
+    "current": 1,
+    "total": 1
+  },
+  "data": [
+    {
+      "roomId": 322790,
+      "date": "2021-01-01",
+      "numAvail": 5,
+      "status": "available"
+    }
+  ]
+}
+```
+
+### GET /inventory/rooms/unitBookings
+
+**Beta** - Get information about which dates units have bookings.
+
+**Endpoint:** `GET /inventory/rooms/unitBookings`
+
+**Query Parameters:**
+- `roomId` - integer[]
+- `propertyId` - integer[]
+- `startDate` - date (YYYY-MM-DD)
+- `endDate` - date (last bookable night)
+- `page` - integer
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "unitBookings",
+  "data": [
+    {
+      "roomId": 322790,
+      "unitId": 12345,
+      "date": "2021-01-01",
+      "hasBooking": true
+    }
+  ]
+}
+```
+
+### GET /inventory/rooms/calendar
+
+Get per-day calendar values (availability, pricing, restrictions).
+
+**Endpoint:** `GET /inventory/rooms/calendar`
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `startDate` | date | Yes | YYYY-MM-DD |
+| `endDate` | date | Yes | YYYY-MM-DD |
+| `roomId` | integer[] | No | Room IDs |
+| `propertyId` | integer[] | No | Property IDs |
+| `includeNumAvail` | boolean | No | Include availability count |
+| `includeMinStay` | boolean | No | Include min stay |
+| `includeMaxStay` | boolean | No | Include max stay |
+| `includeMultiplier` | boolean | No | Include price multiplier |
+| `includeOverride` | boolean | No | Include override status |
+| `includePrices` | boolean | No | Include all 16 price tiers |
+| `includeChannels` | boolean | No | Include channel limits |
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "calendar",
+  "data": [
+    {
+      "roomId": 322790,
+      "calendar": [
+        {
+          "from": "2021-01-01",
+          "to": "2021-01-05",
+          "numAvail": 5,
+          "minStay": 2,
+          "maxStay": 14,
+          "multiplier": 1.2,
+          "override": "none",
+          "price1": 100.00,
+          "channels": {
+            "airbnb": {
+              "maxBookings": 2
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Calendar Override Enum:**
+- `none` - No restriction
+- `blackout` - Blocked dates
+- `exception` - Exception period
+- `noCheckIn` - No check-in allowed
+- `noCheckOut` - No check-out allowed
+- `noCheckInOrCheckOut` - No check-in or check-out
+
+**Calendar Fields:**
+- `from`, `to` - Date range (YYYY-MM-DD)
+- `numAvail` - Available units (can be negative if overbooked)
+- `minStay` - Minimum nights (1-365)
+- `maxStay` - Maximum nights (1-364)
+- `multiplier` - Price multiplier (0.1-100, default: 1)
+- `override` - Restriction enum
+- `price1` through `price16` - Rate plan prices
+- `channels` - Per-channel max bookings (agoda, airbnb, etc.)
+
+### POST /inventory/rooms/calendar
+
+Update calendar values. Set property to null to remove.
+
+**Request Body:**
+```json
+[
+  {
+    "roomId": 322790,
+    "calendar": [
+      {
+        "from": "2021-12-20",
+        "to": "2021-12-31",
+        "numAvail": 0,
+        "override": "blackout"
+      }
+    ]
+  }
+]
+```
+
+### GET /inventory/rooms/offers
+
+Get room offers based on search criteria.
+
+**Endpoint:** `GET /inventory/rooms/offers`
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `arrival` | string | Yes | YYYY-MM-DD |
+| `departure` | string | Yes | YYYY-MM-DD |
+| `numAdults` | integer | Yes | Number of adults |
+| `numChildren` | integer | No | Number of children |
+| `propertyId` | integer[] | No | Property IDs |
+| `roomId` | integer[] | No | Room IDs |
+| `offerId` | integer[] | No | Offer IDs |
+| `agentCode` | string | No | Agent code |
+| `includeTexts` | string[] | No | Language codes (2-char: en, de, fr) |
+| `page` | integer | No | Page number |
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "offer",
+  "data": [
+    {
+      "roomId": 322790,
+      "propertyId": 1001,
+      "offers": [
+        {
+          "offerId": 5001,
+          "price": 500.00,
+          "currency": "USD",
+          "available": true
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## INVOICES API
+
+### GET /bookings/invoices
+
+**Alpha** - Get invoices for bookings.
+
+**Endpoint:** `GET /bookings/invoices`
+
+**Query Parameters:**
+- `bookingId` - integer[] - Booking IDs
+- `page` - integer - Page number
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "invoice",
+  "data": [
+    {
+      "invoiceId": 9001,
+      "bookingId": 12345,
+      "invoiceDate": "2021-01-01",
+      "invoiceItems": [
+        {
+          "id": 1001,
+          "description": "Room charge",
+          "qty": 4,
+          "amount": 100.00,
+          "vatRate": 10.0,
+          "lineTotal": 440.00
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Invoice Items Operations
+
+**Add Invoice Item:**
+```json
+[
+  {
+    "id": 12345,
+    "invoiceItems": [
+      {
+        "type": "charge",
+        "qty": 2,
+        "amount": 50.00,
+        "description": "Extra towels"
+      }
+    ]
+  }
+]
+```
+
+**Modify Invoice Item:**
+```json
+[
+  {
+    "id": 12345,
+    "invoiceItems": [
+      {
+        "id": 2222222,
+        "qty": 3
+      }
+    ]
+  }
+]
+```
+
+**Delete Invoice Item:**
+```json
+[
+  {
+    "id": 12345,
+    "invoiceItems": [
+      {
+        "id": 2222222
+      }
+    ]
+  }
+]
+```
+
+---
+
+## MESSAGES API
+
+### GET /bookings/messages
+
+Get messages for bookings.
+
+**Endpoint:** `GET /bookings/messages`
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | integer[] | Message IDs |
+| `propertyId` | integer[] | Property IDs |
+| `roomId` | integer[] | Room IDs |
+| `bookingId` | integer[] | Booking IDs |
+| `masterId` | integer[] | Master booking IDs |
+| `filter` | string | read, unread |
+| `maxAge` | integer | Max age in days (1-999) |
+| `source` | string | host, guest, internalNote, system |
+| `page` | integer | Page number |
+
+**Response:**
+```json
+{
+  "success": true,
+  "type": "message",
+  "data": [
+    {
+      "id": 8001,
+      "bookingId": 12345,
+      "source": "guest",
+      "message": "Can we check in early?",
+      "time": "2021-01-01T10:30:00Z",
+      "read": false
+    }
+  ]
+}
+```
+
+### POST /bookings/messages
+
+Send messages or mark as read.
+
+**Request Body (Send Message):**
+```json
+[
+  {
+    "bookingId": 12345,
+    "source": "host",
+    "message": "Yes, early check-in is available.",
+    "attachment": "base64-encoded-file",
+    "attachmentName": "floor-plan.pdf",
+    "attachmentMimeType": "application/pdf"
+  }
+]
+```
+
+**Supported Attachment MIME Types:**
+- Airbnb: `image/jpeg`, `image/png`, `image/gif`
+- Booking.com: `image/jpeg`, `image/png`
+- VRBO: `image/jpeg`, `image/png`, `image/gif`, `application/pdf`
+
+**Request Body (Mark as Read):**
+```json
+[
+  {
+    "id": 8001,
+    "read": true
+  }
+]
+```
+
+### PATCH /bookings/messages
+
+Make bulk changes to messages.
+
+**Request Body:**
+```json
+{
+  "bookingId": [12345, 12346],
+  "markAsRead": true
+}
+```
+
+---
+
+## WEBHOOKS
+
+### Booking Webhook
+
+**Endpoint:** `POST {your-webhook-url}`
+
+Configure under: Settings → Properties → Access → Booking Webhook
+
+**Webhook Payload:**
+```json
+{
+  "timeStamp": "2021-01-01T10:30:00Z",
+  "booking": {
+    "id": 12345,
+    "bookingGroup": {
+      "master": 12340,
+      "ids": [12341, 12342, 12343]
+    },
+    "masterId": 12340,
+    "propertyId": 1001,
+    "roomId": 322790,
+    "unitId": 9001,
+    "roomQty": 1,
+    "offerId": 5001,
+    "status": "confirmed",
+    "subStatus": "none",
+    "arrival": "2021-01-05",
+    "departure": "2021-01-10"
+  }
+}
+```
+
+**Webhook Events:**
+- New booking created
+- Booking updated
+- Booking cancelled
+- Status changed
+
+**Security:**
+- Webhooks sent via POST with JSON payload
+- Configure webhook URL in Beds24 dashboard
+- Recommend verifying request origin
+
+---
+
+## CHANNEL SETTINGS
+
+### GET /channels/settings
+
+**Alpha** - Get channel settings for properties.
+
+**Endpoint:** `GET /channels/settings`
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `propertyId` | string | Yes | Property ID |
+| `roomId` | integer[] | No | Room IDs |
+| `channel` | string[] | No | iCalExport, iCalImport, airbnb, vrbo |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "propertyId": 1001,
+      "channel": "airbnb",
+      "settings": {
+        "enabled": true,
+        "multiplier": "1.1",
+        "currency": "USD"
+      }
+    }
+  ]
+}
+```
+
+### POST /channels/settings
+
+Configure channel settings (e.g., Airbnb).
+
+**Request Body (Airbnb Settings):**
+```json
+{
+  "channel": "airbnb",
+  "properties": [
+    {
+      "id": 1001,
+      "multiplier": "1.1",
+      "currency": "USD",
+      "inquiryAndRequests": "importAll",
+      "invoiceeId": "12345",
+      "roomTypes": [
+        {
+          "id": 322790,
+          "publish": true,
+          "propertyTypeGroup": "apartments",
+          "listingType": "entireHome",
+          "updateAddress": true,
+          "bathroomShared": "private",
+          "commonSpacesShared": "host",
+          "checkinType": "keypad",
+          "checkinInstructions": "Code is 1234",
+          "houseManual": "Welcome to our property..."
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Airbnb Property Type Groups:**
+- apartments
+- bnb
+- boutiqueHotelsAndMore
+- houses
+- secondayUnits
+- uniqueHomes
+
+**Airbnb Listing Types:**
+- entireHome
+- privateRoom
+- sharedRoom
+
+**Shared Space Options:**
+- private
+- host
+- roommates
+- guests
+- host-roommates
+- host-guests
+- roommates-guests
+- host-roommates-guests
+
+**Check-in Types:**
+- host
+- doorman
+- keypad
+- lockbox
+- smartlock
+- other
+
+---
+
+## DATA SCHEMAS
+
+### Booking Object
+
+**Full Booking Schema:**
+```typescript
+{
+  id: integer,
+  propertyId: integer,
+  roomId: integer,
+  unitId?: integer,
+  roomQty?: integer,
+  masterId?: integer,
+  offerId?: integer,
+  status: "confirmed" | "request" | "new" | "cancelled" | "black" | "inquiry",
+  subStatus: "actionRequired" | "allotment" | "cancelledByGuest" | "cancelledByHost" 
+             | "noShow" | "waitlist" | "walkin" | "none" | "nonPayment",
+  arrival: "YYYY-MM-DD",
+  departure: "YYYY-MM-DD",
+  numAdult: integer (0-99),
+  numChild: integer (0-99),
+  title: string (max 100),
+  firstName: string (max 100),
+  lastName: string (max 100),
+  email: string (max 100),
+  phone: string (max 100),
+  mobile: string (max 100),
+  company: string (max 100),
+  address: string (max 250),
+  city: string (max 100),
+  state: string (max 100),
+  postcode: string (max 100),
+  country: string (max 100),
+  country2: string (2-letter),
+  arrivalTime: string (max 100),
+  voucher: string (max 100),
+  comments: string (max 1000),
+  notes: string (max 2000),
+  message: string (max 1000),
+  groupNote: string (max 5000),
+  custom1-10: string (max 1000 each),
+  flagColor: string (6-char hex),
+  flagText: string (max 32),
+  lang: string (2-char),
+  price: number (0 - 99999999.99),
+  deposit: number (0+),
+  channel: string (enum),
+  apiSourceId: integer,
+  apiSource: string,
+  apiReference: string (max 100),
+  bookingTime: datetime,
+  modifiedTime: datetime,
+  cancelTime?: datetime,
+  bookingGroup?: {
+    master: integer,
+    ids: integer[]
+  },
+  invoiceItems: InvoiceItem[],
+  infoItems: InfoItem[]
+}
+```
+
+### Room Object
+
+**Room Schema:**
+```typescript
+{
+  id: integer,
+  propertyId: integer,
+  name: string,
+  roomType: "single" | "double" | "twin" | "twinDouble" | "triple" 
+            | "quadruple" | "apartment" | "family" | "suite" | "studio" 
+            | "dormitoryRoom" | "bedInDormitory" | "bungalow" | "chalet" 
+            | "holidayHome" | "villa" | "mobileHome" | "tent" | "campSite" 
+            | "activity" | "tour" | "carRental",
+  qty: integer (1-99),
+  minPrice: number,
+  maxPeople: integer,
+  maxAdult?: integer (1-99),
+  maxChildren?: integer (0-99),
+  minStay?: integer (1-365),
+  maxStay?: integer (1-365),
+  restrictionStrategy: "firstNight" | "stayThrough",
+  taxPercentage: number,
+  taxPerson: number,
+  rackRate: number,
+  cleaningFee: number,
+  securityDeposit: number,
+  sellPriority?: integer (1-100),
+  roomSize?: integer (1-2000 sqm),
+  highlightColor: string,
+  includeReports: boolean,
+  overbookingProtection: "room" | "property",
+  blockAfterCheckOutDays: integer (0-7),
+  controlPriority?: integer (1-100)
+}
+```
+
+### Property Object
+
+**Property Schema:**
+```typescript
+{
+  id: integer,
+  name: string,
+  propertyType: enum (see property type enum),
+  currency: enum (see currency enum),
+  address: string,
+  city: string,
+  state: string,
+  postcode: string,
+  country: string,
+  country2: string (2-letter),
+  latitude: number,
+  longitude: number,
+  phone: string,
+  mobile: string,
+  email: string,
+  web: string,
+  contactFirstName: string,
+  contactLastName: string,
+  checkInStart: time (15-min increments),
+  checkInEnd: time,
+  checkOutEnd: time,
+  offerType: "perRoom" | "perProperty",
+  sellPriority?: integer (1-100),
+  controlPriority?: integer (1-100),
+  bookingPageMultiplier: string,
+  permit: string,
+  roomChargeDisplay: "onePerBooking" | "onePerDate"
+}
+```
+
+---
+
+## ENUMS & CONSTANTS
+
+### Booking Status
+```
+confirmed, request, new, cancelled, black, inquiry
+```
+
+### Booking Sub-Status
+```
+actionRequired, allotment, cancelledByGuest, cancelledByHost, 
+noShow, waitlist, walkin, none, nonPayment
+```
+
+### Room Types
+```
+single, double, twin, twinDouble, triple, quadruple, apartment, 
+family, suite, studio, dormitoryRoom, bedInDormitory, bungalow, 
+chalet, holidayHome, villa, mobileHome, tent, campSite, activity, 
+tour, carRental
+```
+
+### Booking Types
+```
+default, requestWithManualConfirmation, requestWithCreditCard, 
+confirmedWithCreditCard, confirmedWithDepositCollection1, 
+confirmedWithDepositCollection2
+```
+
+### Channel Management
+```
+notUsed, exportPrice, normalPrice
+```
+
+### Restriction Strategy
+```
+firstNight, stayThrough
+```
+
+### Overbooking Protection
+```
+room, property
+```
+
+### Calendar Override
+```
+none, blackout, exception, noCheckIn, noCheckOut, noCheckInOrCheckOut
+```
+
+### Message Source
+```
+host, guest, internalNote, system
+```
+
+### Language Codes
+```
+en, ar, bg, ca, cs, da, de, el, es, et, fi, fr, hr, he, hu, id, 
+is, it, ja, ko, lt, mn, my, nl, no, pl, pt, ro, ru, sk, sl, sr, 
+sv, th, tr, vi, zh, zt
+```
+
+### Time Slots (15-minute increments)
+```
+00:00, 00:15, 00:30, 00:45, 01:00, ..., 23:45, 24:00
+```
+
+---
+
+## IMPORTANT NOTES
+
+### Date Formats
+- **Dates:** YYYY-MM-DD (e.g., "2021-01-05")
+- **Datetimes:** YYYY-MM-DDTHH:MM:SS (e.g., "2021-01-05T14:30:00")
+- **UTC for bookingTime:** Times in UTC timezone
+
+### Timezones
+- All dates are in property's timezone
+- bookingTime and modifiedTime are in UTC
+
+### Pagination
+- Use `page` parameter to navigate results
+- Response includes `pages.current` and `pages.total`
+- Default page size varies by endpoint
+
+### Rate Limiting
+- Credit-based system (5-minute windows)
+- Monitor X-FiveMinCreditLimit headers
+- Implement exponential backoff on limit reached
+
+### Error Handling
+- 200: Success
+- 400: Bad request (check error message)
+- 401: Unauthorized (check token)
+- 429: Rate limit exceeded
+- 500: Server error
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "error": "Error description",
+  "field": "fieldName",
+  "message": "Detailed error message"
+}
+```
+
+### Best Practices
+
+1. **Token Management:**
+   - Store refresh token securely
+   - Refresh access token before expiry
+   - Cache access token with expiry timestamp
+
+2. **Rate Limiting:**
+   - Monitor credit headers
+   - Implement request queuing
+   - Batch operations when possible
+
+3. **Booking Creation:**
+   - Always include `apiReference` for tracking
+   - Validate dates before sending
+   - Check room availability first
+
+4. **Data Sync:**
+   - Use `modifiedFrom` to get updates
+   - Poll regularly for new bookings
+   - Implement webhook for real-time updates
+
+5. **Error Recovery:**
+   - Retry failed requests with exponential backoff
+   - Log all API interactions
+   - Validate data before sending
+
+---
+
+## QUICK REFERENCE
+
+### Common Operations
+
+**Get Today's Arrivals:**
+```
+GET /bookings?filter=arrivals
+```
+
+**Get Bookings Modified in Last Hour:**
+```
+GET /bookings?modifiedFrom=2021-01-01T10:00:00
+```
+
+**Create Direct Booking:**
+```
+POST /bookings
+[{"roomId":123,"arrival":"2021-01-05","departure":"2021-01-10","status":"confirmed","numAdult":2,"firstName":"John","lastName":"Doe"}]
+```
+
+**Block Dates:**
+```
+POST /inventory/rooms/calendar
+[{"roomId":123,"calendar":[{"from":"2021-12-20","to":"2021-12-31","override":"blackout","numAvail":0}]}]
+```
+
+**Get Property Details:**
+```
+GET /properties?id=1001&includeAllRooms=true
+```
+
+**Search Bookings by Guest Name:**
+```
+GET /bookings?searchString=John+Doe
+```
+
+---
+
+**END OF BEDS24 API V2 REFERENCE**
+
+For the most up-to-date information, always refer to the official Beds24 API documentation at https://beds24.com/api/v2/
