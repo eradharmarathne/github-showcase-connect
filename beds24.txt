@@ -1,0 +1,731 @@
+# Beds24 Integration - Complete Implementation Map
+
+**Generated:** November 4, 2025
+**Purpose:** Document all Beds24 integration points across the CheckingCheckout system
+
+---
+
+## 1. DATABASE SCHEMA
+
+### Tables
+
+#### beds24_credentials
+**Location:** `supabase/migrations/20251020_add_beds24_channel_integration.sql`
+**Purpose:** Store Beds24 OAuth credentials per location (property)
+**Columns:**
+- `id` (UUID, primary key)
+- `tenant_id` (UUID, FK to tenants)
+- `location_id` (UUID, FK to locations) - Added in migration 20251020_update_beds24_credentials_add_location_id.sql
+- `refresh_token` (TEXT) - Long-lived OAuth token
+- `access_token` (TEXT) - Short-lived API token
+- `token_expires_at` (TIMESTAMPTZ)
+- `is_active` (BOOLEAN)
+- `sync_status` (TEXT)
+- `last_synced_at` (TIMESTAMPTZ)
+- `created_at`, `updated_at`, `created_by`, `updated_by`
+
+**Constraints:**
+- `unique_tenant_location_beds24` - One Beds24 connection per location
+- RLS policies for tenant isolation
+
+**Indexes:**
+- `idx_beds24_credentials_tenant_location` - Query by tenant and location
+- `idx_beds24_credentials_active` - Filter active credentials
+- `idx_beds24_credentials_sync_status` - Track sync status
+
+**RLS Policies:**
+- Tenants can view own Beds24 credentials
+- Tenants can insert own Beds24 credentials
+- Tenants can update own Beds24 credentials
+- Tenants can delete own Beds24 credentials
+
+#### beds24_property_mappings
+**Location:** Various migrations
+**Purpose:** Map Beds24 properties to CheckingCheckout locations
+**Columns:**
+- `id` (UUID, primary key)
+- `tenant_id` (UUID, FK to tenants)
+- `location_id` (UUID, FK to locations)
+- `room_id` (UUID, FK to rooms, nullable)
+- `beds24_property_id` (TEXT)
+- `beds24_property_name` (TEXT)
+- `created_at`, `updated_at`
+
+**RLS Policies (Fixed in 20251020155826):**
+- Users can view own tenant beds24_property_mappings
+- Users can insert own tenant beds24_property_mappings
+- Users can update own tenant beds24_property_mappings
+- Users can delete own tenant beds24_property_mappings
+
+#### reservations (Beds24-related columns)
+**Columns:**
+- `beds24_booking_id` (BIGINT) - ID from Beds24 system
+- `beds24_sync_status` (ENUM: 'pending', 'synced', 'failed', 'not_applicable')
+- `beds24_synced_at` (TIMESTAMPTZ)
+- `beds24_sync_error` (TEXT)
+- `beds24_dates_blocked` (BOOLEAN) - Whether dates blocked in Beds24 calendar
+- `beds24_dates_blocked_at` (TIMESTAMPTZ) - When dates were blocked
+
+**Migration:** `20251030_add_beds24_date_blocking_fields.sql`
+
+**Index:**
+- `idx_reservations_beds24_dates_blocked` - Filter blocked reservations
+
+### Database Functions
+
+#### get_beds24_credentials(p_location_id UUID DEFAULT NULL)
+**Location:** `20251020_update_beds24_credentials_add_location_id.sql`
+**Purpose:** Get active Beds24 credentials for current user's tenant
+**Returns:** Credentials record (refresh_token, access_token, etc.)
+**Security:** Filtered by user's tenant_id via RLS
+**Parameters:**
+- `p_location_id` (optional) - Filter by specific location
+
+### Enums
+
+#### beds24_sync_status
+**Values:**
+- `pending` - Waiting to sync
+- `synced` - Successfully synced
+- `failed` - Sync failed
+- `not_applicable` - External booking, no sync needed
+
+#### booking_source (includes Beds24)
+**Values:** `direct`, `airbnb`, `booking_com`, `beds24`, `manual`, `expedia`, `agoda`, `hostelworld`, `other`
+
+---
+
+## 2. EDGE FUNCTIONS (Supabase Functions)
+
+### beds24-token-exchange
+**Path:** `supabase/functions/beds24-token-exchange/index.ts`
+**Purpose:** Exchange Beds24 invite code for OAuth refresh token
+**Method:** POST
+**Authentication:** Requires user auth token
+**Request Body:**
+```typescript
+{
+  inviteCode: string,
+  locationId: string,
+  tenantId: string
+}
+```
+**Flow:**
+1. Receives invite code from Beds24 setup
+2. Calls Beds24 API `/authentication/setup` with code header
+3. Gets refresh_token and access_token
+4. Stores in beds24_credentials table
+5. Links to specific location
+
+**API Endpoint:** `https://beds24.com/api/v2/authentication/setup`
+
+### fetch-beds24-bookings
+**Path:** `supabase/functions/fetch-beds24-bookings/index.ts`
+**Purpose:** Fetch bookings from Beds24 and sync to external_bookings table
+**Method:** POST
+**Lines:** 602 total
+**Key Features:**
+- Token refresh management (refreshAccessToken function)
+- Supports multiple properties via property mappings
+- Maps Beds24 booking fields to CheckingCheckout format
+- Handles currency conversion
+- Source mapping (apiSourceId: 1=direct, 2=airbnb, 3=booking.com)
+- Room mapping via beds24_property_mappings
+
+**API Endpoint:** `https://beds24.com/api/v2/bookings`
+
+**Token Management:**
+- Uses refresh token to get access token
+- Caches access token with expiry
+- Auto-refreshes when expired
+
+### sync-reservation-to-beds24
+**Path:** `supabase/functions/sync-reservation-to-beds24/index.ts`
+**Purpose:** Push direct CheckingCheckout reservations TO Beds24 (bi-directional sync)
+**Method:** POST
+**Lines:** 453 total
+**Request Body:**
+```typescript
+{
+  reservation_id: string,
+  force?: boolean  // Force resync even if already synced
+}
+```
+
+**Flow:**
+1. Fetch reservation with room and location data
+2. Check if already synced (skip if synced unless force=true)
+3. Map CheckingCheckout room to Beds24 roomId
+4. Create Beds24 booking payload
+5. POST to Beds24 API `/bookings`
+6. Update reservation with beds24_booking_id and sync status
+7. Beds24 propagates to all channels automatically
+
+**Beds24 Payload:**
+```typescript
+{
+  roomId: number,
+  status: "confirmed" | "request" | "cancelled",
+  arrival: "YYYY-MM-DD",
+  departure: "YYYY-MM-DD",
+  numAdult: number,
+  numChild: number,
+  firstName?: string,
+  lastName?: string,
+  email?: string,
+  mobile?: string,
+  apiReference: string,  // Our reservation ID
+  comment?: string
+}
+```
+
+**API Endpoint:** `https://api.beds24.com/v2/bookings`
+
+### setup-beds24-integration
+**Path:** `supabase/functions/setup-beds24-integration/`
+**Purpose:** Initial Beds24 setup and configuration
+
+### beds24-booking-webhook
+**Path:** `supabase/functions/beds24-booking-webhook/`
+**Purpose:** Handle incoming webhooks from Beds24 for booking updates
+
+### fetch-beds24-rooms
+**Path:** `supabase/functions/fetch-beds24-rooms/`
+**Purpose:** Fetch room list from Beds24 for room mapping configuration
+
+---
+
+## 3. FRONTEND COMPONENTS
+
+### Pages
+
+#### booking-channels-integration.tsx
+**Path:** `src/pages/booking-channels-integration.tsx`
+**Purpose:** Main page for Beds24 integration management
+**Features:**
+- Token exchange (connect Beds24 account)
+- Manual sync trigger
+- Property mappings display
+- Integration status display
+
+**Key Functions:**
+- `handleTokenExchange()` - Connect Beds24 account with invite code
+- `handleManualSync()` - Trigger manual booking sync
+- Uses Edge Function: `beds24-token-exchange`, `fetch-beds24-bookings`
+
+**State:**
+- Property mappings from `beds24_property_mappings` table
+- Integration status
+
+#### calendar.tsx
+**Path:** `src/pages/calendar.tsx`
+**Purpose:** Calendar view with Beds24 booking filter
+**Features:**
+- Toggle to show/hide Beds24 bookings
+- Passes `beds24: showBeds24` to TimelineView
+
+**State:**
+```typescript
+const [showBeds24, setShowBeds24] = useState(true);
+```
+
+### Components
+
+#### booking-channels/room-mappings-tab.tsx
+**Path:** `src/components/booking-channels/room-mappings-tab.tsx`
+**Purpose:** Manage room mappings between Beds24 and CheckingCheckout
+**Features:**
+- Fetch Beds24 rooms via Edge Function
+- Map Beds24 rooms to CheckingCheckout rooms
+- Smart suggestions for room matching
+- Save mappings to `channel_room_mappings` table
+
+**Interfaces:**
+```typescript
+interface Beds24Room {
+  id: number;
+  name: string;
+  propertyId: string;
+  propertyName: string;
+  maxOccupancy?: number;
+  mappingStatus: "mapped" | "unmapped";
+  currentMapping?: any;
+  suggestions?: any[];
+}
+```
+
+**Key Functions:**
+- `fetchBeds24Rooms()` - Calls `fetch-beds24-rooms` Edge Function
+- `handleMappingChange()` - Update room mappings
+- `handleSaveMappings()` - Save to database
+
+**Edge Function:** `fetch-beds24-rooms`
+
+#### booking-channels/room-mapping-row.tsx
+**Path:** `src/components/booking-channels/room-mapping-row.tsx`
+**Purpose:** Single row for Beds24 room mapping UI
+**Props:**
+```typescript
+{
+  beds24Room: Beds24Room,
+  ccoRooms: Array,
+  onMappingChange: (beds24RoomId: number, ccoRoomId: string | null) => void
+}
+```
+
+#### calendar/external-booking-block.tsx
+**Path:** `src/components/calendar/external-booking-block.tsx`
+**Purpose:** Display external bookings on calendar (including Beds24)
+**Features:**
+- Renders Beds24 bookings with purple color
+- Shows booking details on hover
+
+**Source Mapping:**
+```typescript
+case "beds24":
+  return {
+    color: "bg-purple-500",
+    icon: <Building className="h-3 w-3" />,
+    label: "Beds24",
+  };
+```
+
+#### calendar/unmapped-bookings-row.tsx
+**Path:** `src/components/calendar/unmapped-bookings-row.tsx`
+**Purpose:** Display unmapped Beds24 bookings
+**Similar to external-booking-block.tsx**
+
+#### calendar/room-row.tsx
+**Path:** `src/components/calendar/room-row.tsx`
+**Purpose:** Display room timeline with bookings
+**Features:**
+- Shows "B24" badge for Beds24 bookings
+- Renders Beds24 bookings in timeline
+
+**Badge Logic:**
+```typescript
+{checkinBooking.source === "beds24" && "B24"}
+{singleBooking.source === "beds24" && "B24"}
+```
+
+#### calendar/timeline-view.tsx
+**Path:** `src/components/calendar/timeline-view.tsx`
+**Purpose:** Main calendar timeline component
+**Features:**
+- Filter Beds24 bookings via sourceFilters
+- Renders external bookings from Beds24
+
+**Source Filters:**
+```typescript
+interface SourceFilters {
+  beds24: boolean;
+  // ... other sources
+}
+```
+
+**Filter Logic:**
+```typescript
+if (source === "beds24" && !sourceFilters.beds24) return false;
+```
+
+#### calendar/calendar-legend.tsx
+**Path:** `src/components/calendar/calendar-legend.tsx`
+**Purpose:** Show legend for booking sources
+**Feature:** Displays "Beds24" label with purple color
+
+#### reservation/beds24-sync-status.tsx
+**Path:** `src/components/reservation/beds24-sync-status.tsx`
+**Purpose:** Display Beds24 sync status badge on reservations
+**Components:**
+- `Beds24SyncStatus` - Full status with details
+- `Beds24SyncStatusCompact` - Compact badge version
+
+**Props:**
+```typescript
+interface Beds24SyncStatusProps {
+  reservation: {
+    beds24_booking_id?: number | null;
+    beds24_sync_status?: string | null;
+    beds24_synced_at?: string | null;
+    beds24_sync_error?: string | null;
+  };
+  onSyncComplete?: () => void;
+}
+```
+
+**Status Icons:**
+- `not_applicable` - External booking (no sync needed)
+- `pending` - Clock icon (waiting)
+- `synced` - CheckCircle icon (success)
+- `failed` - AlertCircle icon (error with retry button)
+
+**Retry Function:**
+- Calls `sync-reservation-to-beds24` Edge Function
+- Updates status after retry
+
+#### dashboard/booking-source-chart.tsx
+**Path:** `src/components/dashboard/booking-source-chart.tsx`
+**Purpose:** Chart showing booking sources including Beds24
+**Features:**
+- Displays Beds24 bookings in green color
+- Shows booking distribution by source
+
+**Color Map:**
+```typescript
+beds24: "hsl(120, 60%, 45%)" // Green
+```
+
+**Label Map:**
+```typescript
+beds24: "Beds24"
+```
+
+#### modals/reservation-edit-dialog.tsx
+**Path:** `src/components/modals/reservation-edit-dialog.tsx`
+**Purpose:** Edit reservation dialog
+**Features:**
+- Select "Beds24" as booking source
+
+**Booking Source Select:**
+```typescript
+<SelectItem value="beds24">Beds24</SelectItem>
+```
+
+#### modals/compact-reservation-dialog.tsx
+**Path:** `src/components/modals/compact-reservation-dialog.tsx`
+**Purpose:** Create/edit reservation in compact dialog
+**Features:**
+- Sync direct bookings to Beds24 after creation
+- Select "Beds24" as booking source
+
+**Sync Logic (after save):**
+```typescript
+if (formData.source === "direct") {
+  console.log("Syncing direct reservation to Beds24:", savedReservation.id);
+  const result = await supabase.functions.invoke("sync-reservation-to-beds24", {
+    body: { reservation_id: savedReservation.id }
+  });
+}
+```
+
+#### modals/new-reservation-dialog.tsx
+**Path:** `src/components/modals/new-reservation-dialog.tsx`
+**Purpose:** Multi-step reservation creation wizard
+**Features:**
+- Sync direct bookings to Beds24 after creation
+- Batch sync for multi-room reservations
+
+**Sync Logic:**
+```typescript
+if (formData.source === "direct") {
+  console.log(`Syncing ${createdReservations.length} direct reservation(s) to Beds24`);
+  for (const reservation of createdReservations) {
+    const result = await supabase.functions.invoke("sync-reservation-to-beds24", {
+      body: { reservation_id: reservation.id }
+    });
+  }
+}
+```
+
+#### reservation/new/GuestInformationStep.tsx
+**Path:** `src/components/reservation/new/GuestInformationStep.tsx`
+**Purpose:** Guest information step in reservation wizard
+**Features:**
+- Select "Beds24" as booking source
+
+---
+
+## 4. LIBRARY/UTILITY FILES
+
+### lib/booking-channels-utils.ts
+**Path:** `src/lib/booking-channels-utils.ts`
+**Purpose:** Utility functions for booking channels
+**Features:**
+- Source color mapping
+- Beds24 color: `bg-purple-500 hover:bg-purple-600 text-white`
+
+### integrations/supabase/types.ts
+**Path:** `src/integrations/supabase/types.ts`
+**Purpose:** Auto-generated TypeScript types from database schema
+**Beds24 Types:**
+- `beds24_credentials` table type
+- `beds24_property_mappings` table type
+- `beds24_sync_status` enum
+- Reservation columns: `beds24_booking_id`, `beds24_sync_status`, etc.
+
+---
+
+## 5. LOCALIZATION
+
+### i18n/locales/en/common.json
+**Path:** `src/i18n/locales/en/common.json`
+**Beds24 Strings:**
+```json
+{
+  "tokenExchangeSuccess": "Beds24 connected successfully! Your credentials are securely stored and ready to sync bookings."
+}
+```
+
+---
+
+## 6. DOCUMENTATION FILES
+
+Located in `docs/`:
+
+1. **BEDS24_BIDIRECTIONAL_SYNC.md** - Bi-directional sync setup
+2. **BEDS24_CURRENCY_AND_SYNC_FIX.md** - Currency handling fixes
+3. **BEDS24_DIRECT_BOOKING_DATE_BLOCKING.md** - Date blocking for direct bookings
+4. **BEDS24_EXTERNAL_BOOKINGS_PRINT_FIX.md** - Print template fixes
+5. **BEDS24_INTEGRATION_GUIDE.md** - Complete integration guide
+6. **BEDS24_INTEGRATION_PRODUCTION_AUDIT.md** - Production readiness audit
+7. **BEDS24_OPTIMIZATION.md** - Performance optimizations
+8. **BEDS24_PROPERTY_MAPPINGS_RLS_FIX.md** - RLS policy fixes
+9. **BEDS24_ROOM_MAPPING_COMPLETE.md** - Room mapping completion
+10. **BEDS24_ROOM_MAPPING_GUIDE.md** - Room mapping guide
+11. **BEDS24_ROOMS_FETCH_TROUBLESHOOTING.md** - Troubleshooting guide
+12. **BEDS24_SYNC_FIX.md** - Sync issues and fixes
+13. **BEDS24_WEBHOOK_SETUP.md** - Webhook configuration
+14. **TROUBLESHOOTING_BEDS24.md** - General troubleshooting
+
+---
+
+## 7. INTEGRATION FLOW SUMMARY
+
+### A. Initial Setup Flow
+1. User navigates to Booking Channels Integration page
+2. User generates invite code in Beds24 dashboard
+3. User pastes invite code in CheckingCheckout
+4. Frontend calls `beds24-token-exchange` Edge Function
+5. Edge Function exchanges code for OAuth tokens
+6. Tokens stored in `beds24_credentials` table (linked to location)
+7. Success message displayed
+
+### B. Property Mapping Flow
+1. User configures property mappings (Beds24 property → CCO location)
+2. Mappings stored in `beds24_property_mappings` table
+3. Required for sync to work
+
+### C. Room Mapping Flow
+1. User clicks "Fetch Rooms" in Room Mappings tab
+2. Frontend calls `fetch-beds24-rooms` Edge Function
+3. Edge Function fetches rooms from Beds24 API
+4. User maps Beds24 rooms to CheckingCheckout rooms
+5. Mappings saved to `channel_room_mappings` table (channel='beds24')
+
+### D. Incoming Sync Flow (Beds24 → CheckingCheckout)
+1. User triggers manual sync OR scheduled job runs
+2. Frontend/Scheduler calls `fetch-beds24-bookings` Edge Function
+3. Edge Function:
+   - Refreshes access token if needed
+   - Fetches bookings from Beds24 API for all mapped properties
+   - Maps Beds24 fields to CheckingCheckout format
+   - Looks up room mappings
+   - Inserts/updates `external_bookings` table
+4. Bookings appear on calendar with "B24" badge and purple color
+
+### E. Outgoing Sync Flow (CheckingCheckout → Beds24)
+1. User creates direct reservation in CheckingCheckout
+2. After save, frontend calls `sync-reservation-to-beds24` Edge Function
+3. Edge Function:
+   - Fetches reservation details
+   - Maps CCO room to Beds24 roomId
+   - Creates Beds24 booking payload
+   - POSTs to Beds24 API `/bookings`
+   - Updates reservation with `beds24_booking_id` and sync status
+4. Beds24 propagates booking to all connected channels
+5. Dates blocked on Airbnb, Booking.com, etc. automatically
+
+### F. Calendar Display Flow
+1. User views calendar
+2. Calendar fetches reservations and external_bookings
+3. Filters applied based on source toggles (including Beds24)
+4. Beds24 bookings rendered with purple color and "B24" badge
+5. Unmapped bookings shown in separate row
+
+---
+
+## 8. API ENDPOINTS USED
+
+### Beds24 API v2 Endpoints
+
+1. **Authentication Setup**
+   - URL: `https://beds24.com/api/v2/authentication/setup`
+   - Method: GET
+   - Headers: `{ code: inviteCode }`
+   - Returns: `{ refreshToken, token, expiresIn }`
+
+2. **Token Refresh**
+   - URL: `https://beds24.com/api/v2/authentication/token`
+   - Method: GET
+   - Headers: `{ refreshToken }`
+   - Returns: `{ token, expiresIn }`
+
+3. **Fetch Bookings**
+   - URL: `https://beds24.com/api/v2/bookings`
+   - Method: GET
+   - Headers: `{ token: accessToken }`
+   - Query Params: `{ propertyId, from, to }`
+   - Returns: Array of bookings
+
+4. **Create Booking**
+   - URL: `https://api.beds24.com/v2/bookings`
+   - Method: POST
+   - Headers: `{ token: accessToken, Content-Type: application/json }`
+   - Body: Beds24BookingPayload
+   - Returns: Created booking with ID
+
+5. **Fetch Rooms**
+   - URL: `https://beds24.com/api/v2/rooms` (inferred)
+   - Method: GET
+   - Headers: `{ token: accessToken }`
+   - Returns: Array of rooms
+
+---
+
+## 9. DATABASE MIGRATIONS CHRONOLOGY
+
+1. **20251008090813_drop_duplicate_updated_at_triggers.sql**
+   - Dropped duplicate trigger on beds24_property_mappings
+
+2. **20251020_add_beds24_channel_integration.sql**
+   - Created beds24_credentials table
+   - Added RLS policies
+   - Created get_beds24_credentials() function
+   - One credential per tenant initially
+
+3. **20251020_update_beds24_credentials_add_location_id.sql**
+   - Added location_id to beds24_credentials
+   - Changed from one-per-tenant to one-per-location
+   - Updated get_beds24_credentials(p_location_id) function
+   - Added unique constraint on (tenant_id, location_id)
+
+4. **20251020155826_fix_beds24_property_mappings_rls_policies.sql**
+   - Fixed RLS policies for beds24_property_mappings
+   - Proper tenant isolation
+
+5. **20251030_add_beds24_date_blocking_fields.sql**
+   - Added beds24_dates_blocked column to reservations
+   - Added beds24_dates_blocked_at column to reservations
+   - Added index for blocked dates
+
+6. **clear_all_data_except_accounts.sql**
+   - Cleanup script that deletes beds24_property_mappings data
+
+---
+
+## 10. KEY ISSUES & FIXES NEEDED
+
+### Potential Issues to Investigate:
+
+1. **Token Expiry Management**
+   - Current implementation caches access token in Edge Function memory
+   - May not handle concurrent requests well
+   - Consider Redis or database-based token caching
+
+2. **Room Mapping Validation**
+   - No validation that Beds24 room exists before saving mapping
+   - Could lead to sync failures
+
+3. **Webhook Implementation**
+   - beds24-booking-webhook function exists but integration unclear
+   - Real-time sync may not be working
+
+4. **Error Handling**
+   - Sync failures update beds24_sync_error but no retry mechanism
+   - Manual retry only via UI button
+
+5. **Currency Handling**
+   - Beds24 uses multiple currency fields (currency, ucurrency)
+   - May have conversion issues (documented in BEDS24_CURRENCY_AND_SYNC_FIX.md)
+
+6. **Date Blocking**
+   - beds24_dates_blocked field exists but blocking logic unclear
+   - May not be preventing double bookings effectively
+
+7. **Multi-Property Support**
+   - Property mappings support multiple properties
+   - But UI may not handle multiple properties per tenant well
+
+8. **Sync Schedule**
+   - No visible scheduled sync job
+   - Relies on manual sync trigger
+
+9. **Bi-directional Sync Conflicts**
+   - No conflict resolution if same room booked in both systems
+   - Could lead to double bookings
+
+10. **RLS Policy Completeness**
+    - Fixed in 20251020155826 but needs audit
+    - Ensure all queries properly filtered by tenant_id
+
+---
+
+## 11. CONFIGURATION REQUIREMENTS
+
+### Environment Variables (Edge Functions)
+- `SUPABASE_URL` - Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key for database access
+
+### Beds24 Setup Requirements
+1. Beds24 account with API access
+2. Invite code generated from Beds24 dashboard
+3. Property configured in Beds24
+4. Rooms configured in Beds24
+
+### CheckingCheckout Setup Requirements
+1. Location created in CheckingCheckout
+2. Rooms created and mapped to location
+3. Beds24 integration connected (token exchange)
+4. Property mappings configured
+5. Room mappings configured
+
+---
+
+## 12. TESTING CHECKLIST
+
+- [ ] Token exchange with valid invite code
+- [ ] Token exchange with invalid invite code
+- [ ] Token refresh when access token expires
+- [ ] Fetch bookings from Beds24
+- [ ] Room mapping suggestions accuracy
+- [ ] Save room mappings
+- [ ] Sync direct reservation to Beds24
+- [ ] Sync status display on reservation
+- [ ] Retry failed sync
+- [ ] Calendar display of Beds24 bookings
+- [ ] Filter Beds24 bookings on calendar
+- [ ] Unmapped bookings row
+- [ ] Webhook receiving updates from Beds24
+- [ ] Multi-property support
+- [ ] Currency conversion accuracy
+- [ ] Date blocking for direct bookings
+- [ ] Conflict resolution for double bookings
+- [ ] RLS policy enforcement
+- [ ] Performance with large booking datasets
+
+---
+
+## SUMMARY
+
+The Beds24 integration is a **comprehensive, bi-directional channel manager integration** that:
+
+1. **Connects** CheckingCheckout to Beds24 via OAuth
+2. **Syncs** bookings FROM Beds24 to CheckingCheckout (display external bookings)
+3. **Pushes** direct CheckingCheckout bookings TO Beds24 (close dates on all channels)
+4. **Maps** rooms and properties between systems
+5. **Displays** Beds24 bookings on calendar with visual indicators
+6. **Tracks** sync status and handles errors
+
+**Total Files Involved:** 40+ files across database, backend, frontend, and documentation
+**Total Lines of Code:** 2000+ lines (estimated)
+**Edge Functions:** 6 functions
+**Database Tables:** 3 tables (beds24_credentials, beds24_property_mappings, plus reservation columns)
+**Frontend Components:** 15+ components
+**Documentation Files:** 14 files
+
+**Critical Dependencies:**
+- Beds24 API v2
+- Supabase Edge Functions
+- Row Level Security policies
+- OAuth token management
+- Room mapping configuration
