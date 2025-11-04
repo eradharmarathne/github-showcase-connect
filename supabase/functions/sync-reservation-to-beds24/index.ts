@@ -16,8 +16,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.0";
-
-const BEDS24_API_URL = "https://api.beds24.com/v2";
+import {
+	BEDS24_API_URL,
+	getBeds24Token,
+	beds24ApiRequest,
+} from "../_shared/beds24-auth.ts";
 
 interface SyncReservationRequest {
 	reservation_id: string;
@@ -206,54 +209,32 @@ serve(async (req) => {
 			);
 		}
 
-		// Check if access token needs refresh (expires within 5 minutes)
-		let accessToken = beds24Creds.access_token;
-		if (
-			!accessToken ||
-			new Date(beds24Creds.token_expires_at) < new Date(Date.now() + 5 * 60000)
-		) {
-			// Refresh the token
-			const tokenResponse = await fetch(
-				`${BEDS24_API_URL}/authentication/token`,
-				{
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						grant_type: "refresh_token",
-						refresh_token: beds24Creds.refresh_token,
-					}),
-				},
+		// Get valid access token, auto-refreshes if needed using shared helper
+		let accessToken: string;
+		try {
+			accessToken = await getBeds24Token(
+				supabase,
+				beds24Creds.id,
+				beds24Creds.access_token,
+				beds24Creds.token_expires_at ? new Date(beds24Creds.token_expires_at) : null,
+				beds24Creds.refresh_token,
 			);
-
-			if (!tokenResponse.ok) {
-				const errorMsg = "Failed to refresh Beds24 access token";
-				await supabase
-					.from("reservations")
-					.update({
-						beds24_sync_status: "failed",
-						beds24_sync_error: errorMsg,
-					})
-					.eq("id", reservation_id);
-
-				return new Response(JSON.stringify({ error: errorMsg }), {
-					status: 500,
-					headers: { "Content-Type": "application/json" },
-				});
-			}
-
-			const tokenData = await tokenResponse.json();
-			accessToken = tokenData.access_token;
-
-			// Update credentials
+		} catch (tokenError) {
+			const errorMsg = `Failed to get Beds24 access token: ${tokenError instanceof Error ? tokenError.message : String(tokenError)}`;
+			console.error("❌ Token error:", tokenError);
+			
 			await supabase
-				.from("beds24_credentials")
+				.from("reservations")
 				.update({
-					access_token: tokenData.access_token,
-					token_expires_at: new Date(
-						Date.now() + tokenData.expires_in * 1000,
-					).toISOString(),
+					beds24_sync_status: "failed",
+					beds24_sync_error: errorMsg,
 				})
-				.eq("location_id", reservation.location_id);
+				.eq("id", reservation_id);
+
+			return new Response(JSON.stringify({ error: errorMsg }), {
+				status: 500,
+				headers: { "Content-Type": "application/json" },
+			});
 		}
 
 		// Map reservation status to Beds24 status
@@ -306,9 +287,10 @@ serve(async (req) => {
 		const beds24Data = await beds24Response.json();
 		console.log("Beds24 response:", beds24Data);
 
-		if (!beds24Response.ok) {
+		// ✅ ADDED: Validate response structure
+		if (!beds24Response.ok || beds24Data.success === false) {
 			const errorMsg =
-				beds24Data.message || "Failed to create booking in Beds24";
+				beds24Data.message || beds24Data.error || "Failed to create booking in Beds24";
 			await supabase
 				.from("reservations")
 				.update({
@@ -374,18 +356,23 @@ serve(async (req) => {
 				JSON.stringify(calendarPayload),
 			);
 
-			const calendarResponse = await fetch(`${BEDS24_API_URL}/calendar`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					token: accessToken,
+			// ✅ FIXED: Use correct endpoint /inventory/rooms/calendar
+			const calendarResponse = await fetch(
+				`${BEDS24_API_URL}/inventory/rooms/calendar`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						token: accessToken,
+					},
+					body: JSON.stringify(calendarPayload),
 				},
-				body: JSON.stringify(calendarPayload),
-			});
+			);
 
 			const calendarData = await calendarResponse.json();
 
-			if (!calendarResponse.ok) {
+			// ✅ ADDED: Validate response structure
+			if (!calendarResponse.ok || calendarData.success === false) {
 				console.error("Failed to block dates in calendar:", calendarData);
 				blockingError = JSON.stringify(calendarData);
 				// Don't fail entire sync - booking is already created

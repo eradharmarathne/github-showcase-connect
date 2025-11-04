@@ -1,12 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
-
-// Beds24 API V2 base URL
-const BEDS24_API_BASE = "https://beds24.com/api/v2";
-
-// Token management
-let ACCESS_TOKEN = "";
-let EXPIRES_AT = 0;
+import {
+	BEDS24_API_URL,
+	BEDS24_AUTH_URL,
+	getBeds24Token,
+} from "../_shared/beds24-auth.ts";
 
 const corsHeaders = {
 	"Access-Control-Allow-Origin": "*",
@@ -128,7 +126,7 @@ async function beds24Request(
 		currentToken = refreshed.token;
 	}
 
-	let response = await fetch(`${BEDS24_API_BASE}${path}`, {
+	let response = await fetch(`${BEDS24_API_URL}${path}`, {
 		headers: {
 			accept: "application/json",
 			token: currentToken,
@@ -145,7 +143,7 @@ async function beds24Request(
 		);
 		currentToken = refreshed.token;
 
-		response = await fetch(`${BEDS24_API_BASE}${path}`, {
+		response = await fetch(`${BEDS24_API_URL}${path}`, {
 			headers: {
 				accept: "application/json",
 				token: currentToken,
@@ -360,6 +358,25 @@ serve(async (req) => {
 			tokenExpiresAt,
 			credentials.refresh_token,
 		);
+		
+		// ✅ ADDED: Validate response structure
+		if (typeof bookingsJson === 'object' && bookingsJson !== null) {
+			const response = bookingsJson as any;
+			if (response.success === false) {
+				console.error("Beds24 API returned error:", response);
+				return new Response(
+					JSON.stringify({
+						error: "Failed to fetch bookings from Beds24",
+						details: response,
+					}),
+					{
+						status: 500,
+						headers: { ...corsHeaders, "Content-Type": "application/json" },
+					},
+				);
+			}
+		}
+		
 		const bookings: V2Booking[] = Array.isArray((bookingsJson as any)?.data)
 			? (bookingsJson as any).data
 			: Array.isArray(bookingsJson)
