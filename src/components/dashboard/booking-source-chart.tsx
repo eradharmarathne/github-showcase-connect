@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { logger } from "@/lib/logger";
 import { Cell, Pie, PieChart } from "recharts";
 import { BookingSourceChartSkeleton } from "@/components/skeleton/booking-source-chart-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +66,7 @@ const SOURCE_DISPLAY_NAMES: Record<string, string> = {
 	ical: "iCal",
 };
 
-export function BookingSourceChart({
+function BookingSourceChartComponent({
 	selectedLocation,
 	selectedMonth,
 }: BookingSourceChartProps) {
@@ -142,7 +143,7 @@ export function BookingSourceChart({
 
 				setSourceData(chartData);
 			} catch (error) {
-				console.error("Error fetching booking source data:", error);
+				logger.error("Error fetching booking source data", error);
 			} finally {
 				setLoading(false);
 			}
@@ -248,3 +249,5 @@ export function BookingSourceChart({
 		</Card>
 	);
 }
+
+export const BookingSourceChart = memo(BookingSourceChartComponent);

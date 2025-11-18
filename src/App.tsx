@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Analytics } from "@vercel/analytics/react";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -12,6 +13,7 @@ import { ErrorBoundary } from "./components/error-boundary";
 import { Layout } from "./components/layout/layout";
 import { PermissionRoute } from "./components/routing/permission-route";
 import { ProtectedRoute } from "./components/routing/protected-route";
+import { RouteErrorBoundaryWrapper } from "./components/routing/route-error-boundary";
 import { SmartRedirect } from "./components/routing/smart-redirect";
 import AuthProvider from "./context/auth-context";
 import { LocationProvider } from "./context/location-context";
@@ -132,7 +134,9 @@ const App = () => (
 												index
 												element={
 													<PermissionRoute permission={["access_dashboard"]}>
-														<Dashboard />
+														<RouteErrorBoundaryWrapper routeName="Dashboard">
+															<Dashboard />
+														</RouteErrorBoundaryWrapper>
 													</PermissionRoute>
 												}
 											/>
@@ -236,7 +240,9 @@ const App = () => (
 												index
 												element={
 													<PermissionRoute permission={["access_bookings"]}>
-														<Reservations />
+														<RouteErrorBoundaryWrapper routeName="Reservations">
+															<Reservations />
+														</RouteErrorBoundaryWrapper>
 													</PermissionRoute>
 												}
 											/>
@@ -270,7 +276,9 @@ const App = () => (
 												index
 												element={
 													<PermissionRoute permission={["access_reports"]}>
-														<FinancialReports />
+														<RouteErrorBoundaryWrapper routeName="Financial Reports">
+															<FinancialReports />
+														</RouteErrorBoundaryWrapper>
 													</PermissionRoute>
 												}
 											/>
@@ -385,6 +393,7 @@ const App = () => (
 				</AuthProvider>
 			</TooltipProvider>
 		</ThemeProvider>
+		{import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
 	</QueryClientProvider>
 );
 

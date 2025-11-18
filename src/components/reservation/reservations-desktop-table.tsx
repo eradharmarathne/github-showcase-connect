@@ -9,7 +9,7 @@ import {
 	MapPin,
 	Printer,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReservationsListSkeleton } from "@/components/skeleton/reservations-list-skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +96,7 @@ interface ReservationsDesktopTableProps {
 	onPrint: (reservation: any) => void;
 }
 
-export function ReservationsDesktopTable({
+function ReservationsDesktopTableComponent({
 	searchQuery,
 	statusFilter,
 	selectedCurrency,
@@ -797,3 +797,5 @@ export function ReservationsDesktopTable({
 		</div>
 	);
 }
+
+export const ReservationsDesktopTable = memo(ReservationsDesktopTableComponent);

@@ -1,6 +1,7 @@
 import { DollarSign } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { logger } from "@/lib/logger";
 import { AccountBalancesSkeleton } from "@/components/skeleton/account-balances-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ interface AccountBalancesProps {
 	selectedLocation: string;
 }
 
-export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
+function AccountBalancesComponent({ selectedLocation }: AccountBalancesProps) {
 	const [loading, setLoading] = useState(true);
 	const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
 	const { tenant } = useAuth();
@@ -64,7 +65,7 @@ export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
 
 			if (error) {
 				// If RPC doesn't exist, fall back to optimized SQL query
-				console.log("RPC not found, using direct SQL query");
+				logger.debug("RPC not found, using direct SQL query");
 
 				const { data: directBalanceData, error: directError } = await supabase
 					.from("accounts")
@@ -138,7 +139,7 @@ export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
 				setAccountBalances(filteredBalances);
 			}
 		} catch (error) {
-			console.error("Error fetching account balances:", error);
+			logger.error("Error fetching account balances", error);
 			setAccountBalances([]);
 		} finally {
 			setLoading(false);
@@ -190,3 +191,5 @@ export function AccountBalances({ selectedLocation }: AccountBalancesProps) {
 		</Card>
 	);
 }
+
+export const AccountBalances = memo(AccountBalancesComponent);

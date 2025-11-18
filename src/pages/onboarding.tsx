@@ -1,6 +1,7 @@
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { logger } from "@/lib/logger";
 import {
 	CompanyInfoStep,
 	CompletionStep,
@@ -82,9 +83,7 @@ export default function Onboarding() {
 		const tenantIdParam = searchParams.get("tenant_id");
 
 		if (paymentStatusParam === "checking" && tenantIdParam) {
-			console.log(
-				"🔄 [ONBOARDING] Returning from payment, starting verification...",
-			);
+			logger.debug("Returning from payment, starting verification...");
 			setPendingTenantId(tenantIdParam);
 			setAwaitingPayment(true);
 			setCurrentStep(4); // Ensure we're on the payment step
@@ -111,7 +110,7 @@ export default function Onboarding() {
 				if (error) throw error;
 				setPlans(plansData || []);
 			} catch (error) {
-				console.error("Error fetching plans:", error);
+				logger.error("Error fetching plans", error);
 				toast({
 					title: "Error",
 					description: "Failed to load subscription plans",
@@ -133,9 +132,7 @@ export default function Onboarding() {
 	// Handle payment verification
 	useEffect(() => {
 		if (isVerified && pendingTenantId) {
-			console.log(
-				"✅ [ONBOARDING] Payment verified, advancing to completion...",
-			);
+			logger.info("Payment verified, advancing to completion...");
 			toast({
 				title: "Payment Verified! 🎉",
 				description: "Your payment has been confirmed. Almost done!",
@@ -145,7 +142,7 @@ export default function Onboarding() {
 			setCurrentStep(5);
 			setAwaitingPayment(false);
 		} else if (isFailed && pendingTenantId) {
-			console.error("❌ [ONBOARDING] Payment verification failed or timed out");
+			logger.error("Payment verification failed or timed out");
 			toast({
 				title: "Payment Verification Failed",
 				description:
@@ -295,8 +292,8 @@ export default function Onboarding() {
 			} else {
 				throw new Error("No checkout URL received from Creem");
 			}
-		} catch (error: any) {
-			console.error("Error creating checkout session:", error);
+		} catch (error: unknown) {
+			logger.error("Error creating checkout session", error);
 
 			// Clean up pending tenant if payment initiation failed
 			if (pendingTenantId) {
@@ -305,15 +302,16 @@ export default function Onboarding() {
 					.delete()
 					.eq("id", pendingTenantId)
 					.then(() => {
-						console.log("🧹 [ONBOARDING] Cleaned up failed tenant");
+						logger.debug("Cleaned up failed tenant");
 					});
 				setPendingTenantId(null);
 			}
 
+			const errorObj = error as { message?: string };
 			toast({
 				title: "Payment Error",
 				description:
-					error.message || "Failed to initiate payment. Please try again.",
+					errorObj.message || "Failed to initiate payment. Please try again.",
 				variant: "destructive",
 			});
 			setAwaitingPayment(false);
@@ -471,15 +469,16 @@ export default function Onboarding() {
 
 			if (subscriptionError) throw subscriptionError;
 
-			console.log("✅ [ONBOARDING] Created pending tenant:", tenant.id);
+			logger.info("Created pending tenant", { tenantId: tenant.id });
 
 			return tenant.id;
-		} catch (error: any) {
-			console.error("Pending tenant creation error:", error);
+		} catch (error: unknown) {
+			logger.error("Pending tenant creation error", error);
+			const errorObj = error as { message?: string };
 			toast({
 				title: "Setup Error",
 				description:
-					error.message || "Failed to create tenant. Please try again.",
+					errorObj.message || "Failed to create tenant. Please try again.",
 				variant: "destructive",
 			});
 			throw error;
@@ -505,7 +504,7 @@ export default function Onboarding() {
 
 			if (updateError) throw updateError;
 
-			console.log("✅ [ONBOARDING] Onboarding completed successfully");
+			logger.info("Onboarding completed successfully");
 
 			toast({
 				title: "Welcome aboard! 🎉",
@@ -517,12 +516,13 @@ export default function Onboarding() {
 			setTimeout(() => {
 				navigate("/dashboard", { replace: true });
 			}, 1500);
-		} catch (error: any) {
-			console.error("Final completion error:", error);
+		} catch (error: unknown) {
+			logger.error("Final completion error", error);
+			const errorObj = error as { message?: string };
 			toast({
 				title: "Setup Error",
 				description:
-					error.message || "Failed to complete setup. Please try again.",
+					errorObj.message || "Failed to complete setup. Please try again.",
 				variant: "destructive",
 			});
 		} finally {

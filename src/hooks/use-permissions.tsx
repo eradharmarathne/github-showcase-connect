@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger";
 
 type UserPermissions = Tables<"user_permissions">;
 
@@ -14,9 +15,7 @@ export const usePermissions = () => {
 		const fetchPermissions = async () => {
 			// If no user or no tenant_id, set loading to false immediately
 			if (!user || !profile?.tenant_id) {
-				console.log(
-					"⚠️ [PERMISSIONS] No user or tenant_id, skipping permissions fetch",
-				);
+				logger.debug("No user or tenant_id, skipping permissions fetch");
 				setPermissions(null);
 				setLoading(false);
 				return;
@@ -24,7 +23,7 @@ export const usePermissions = () => {
 
 			try {
 				setLoading(true);
-				console.log("🔍 [PERMISSIONS] Fetching permissions for user:", user.id);
+				logger.debug("Fetching permissions for user", { userId: user.id });
 				const { data, error } = await supabase
 					.from("user_permissions")
 					.select("*")
@@ -34,17 +33,14 @@ export const usePermissions = () => {
 
 				if (error && error.code !== "PGRST116") {
 					// PGRST116 = no rows returned
-					console.error("❌ [PERMISSIONS] Error fetching permissions:", error);
+					logger.error("Error fetching permissions", error);
 					setPermissions(null);
 				} else {
-					console.log("✅ [PERMISSIONS] Permissions fetched:", data);
+					logger.debug("Permissions fetched", { data });
 					setPermissions(data || null);
 				}
 			} catch (error) {
-				console.error(
-					"❌ [PERMISSIONS] Exception fetching permissions:",
-					error,
-				);
+				logger.error("Exception fetching permissions", error);
 				setPermissions(null);
 			} finally {
 				setLoading(false);
@@ -109,13 +105,13 @@ export const usePermissions = () => {
 				.single();
 
 			if (error && error.code !== "PGRST116") {
-				console.error("Error fetching permissions:", error);
+				logger.error("Error fetching permissions", error);
 				setPermissions(null);
 			} else {
 				setPermissions(data || null);
 			}
 		} catch (error) {
-			console.error("Exception fetching permissions:", error);
+			logger.error("Exception fetching permissions", error);
 			setPermissions(null);
 		} finally {
 			setLoading(false);

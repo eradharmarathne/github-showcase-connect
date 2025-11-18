@@ -3,6 +3,7 @@ import { Session, User } from "@supabase/supabase-js";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger";
 
 type Profile = Tables<"profiles">;
 type Tenant = Tables<"tenants">;
@@ -52,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	const tenantIdRef = useRef<string | null>(null);
 
 	const fetchProfile = async (userId: string) => {
-		console.log("🔍 [AUTH] Fetching profile for user:", userId);
+		logger.debug("Fetching profile for user", { userId });
 		setProfileLoading(true);
 		try {
 			const { data, error } = await supabase
@@ -62,11 +63,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				.single();
 
 			if (error) {
-				console.error("❌ [AUTH] Error fetching profile:", error);
+				logger.error("Error fetching profile", error);
 				return null;
 			}
 
-			console.log("✅ [AUTH] Profile fetched:", {
+			logger.debug("Profile fetched", {
 				id: data.id,
 				email: data.email,
 				tenant_id: data.tenant_id,
@@ -75,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 			setProfile(data);
 			return data;
 		} catch (error) {
-			console.error("❌ [AUTH] Exception fetching profile:", error);
+			logger.error("Exception fetching profile", error);
 			return null;
 		} finally {
 			setProfileLoading(false);
@@ -83,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 	};
 
 	const fetchTenant = async (tenantId: string) => {
-		console.log("🏢 [AUTH] Fetching tenant:", tenantId);
+		logger.debug("Fetching tenant", { tenantId });
 		setTenantLoading(true);
 		try {
 			const { data, error } = await supabase
@@ -93,11 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				.single();
 
 			if (error) {
-				console.error("❌ [AUTH] Error fetching tenant:", error);
+				logger.error("Error fetching tenant", error);
 				return null;
 			}
 
-			console.log("✅ [AUTH] Tenant fetched:", {
+			logger.debug("Tenant fetched", {
 				id: data.id,
 				name: data.name,
 				onboarding_completed: data.onboarding_completed,
@@ -105,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 			setTenant(data);
 			return data;
 		} catch (error) {
-			console.error("❌ [AUTH] Exception fetching tenant:", error);
+			logger.error("Exception fetching tenant", error);
 			return null;
 		} finally {
 			setTenantLoading(false);
@@ -122,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				.maybeSingle(); // Use maybeSingle to handle no results gracefully
 
 			if (error) {
-				console.error("Error fetching subscription:", error);
+				logger.error("Error fetching subscription", error);
 				// Don't set subscription to null for 406 errors - they're expected when no subscription exists
 				if (
 					!error.message?.includes("406") &&
@@ -136,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 			setSubscription(data);
 			return data;
 		} catch (error) {
-			console.error("Exception fetching subscription:", error);
+			logger.error("Exception fetching subscription", error);
 			return null;
 		}
 	};
@@ -187,25 +188,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 				}
 
 				if (event === "SIGNED_IN" && session?.user) {
-					console.log("🔐 [AUTH] SIGNED_IN event for:", session.user.email);
+					logger.debug("SIGNED_IN event", { email: session.user.email });
 					// Only create/update profile if we don't already have one for this user
-					if (!profile || profile.id !== session.user.id) {
+					// Use ref to avoid stale closure issues
+					const currentProfile = profileRef.current;
+					if (!currentProfile || currentProfile.id !== session.user.id) {
 						// Small delay to ensure the auth state is fully set
 						setTimeout(async () => {
 							try {
-								console.log(
-									"📝 [AUTH] Checking profile for user:",
-									session.user.email,
-								);
+								logger.debug("Checking profile for user", { email: session.user.email });
 
 								// First, try to fetch the existing profile (trigger might have created it)
 								let profileData = await fetchProfile(session.user.id);
 
 								// If profile doesn't exist, create it (fallback)
 								if (!profileData) {
-									console.log(
-										"🆕 [AUTH] Profile not found, creating new profile...",
-									);
+									logger.debug("Profile not found, creating new profile...");
 
 									const newProfileData = {
 										id: session.user.id,
@@ -222,53 +220,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 										.insert(newProfileData);
 
 									if (profileError) {
-										console.error(
-											"❌ [AUTH] Error creating profile:",
-											profileError,
-										);
+										logger.error("Error creating profile", profileError);
 										// If error is duplicate, that's okay - fetch it instead
 										if (profileError.code === "23505") {
-											console.log(
-												"ℹ️ [AUTH] Profile already exists, fetching...",
-											);
+											logger.debug("Profile already exists, fetching...");
 											profileData = await fetchProfile(session.user.id);
 										}
 									} else {
-										console.log(
-											"✅ [AUTH] Profile created successfully for:",
-											session.user.email,
-										);
+										logger.info("Profile created successfully", { email: session.user.email });
 										// Fetch the newly created profile
 										profileData = await fetchProfile(session.user.id);
 									}
 								} else {
-									console.log(
-										"✅ [AUTH] Profile already exists for:",
-										session.user.email,
-									);
+									logger.debug("Profile already exists", { email: session.user.email });
 								}
 
 								// If the profile has a tenant_id, fetch tenant and subscription data
 								if (profileData?.tenant_id) {
-									console.log(
-										"🔄 [AUTH] Profile has tenant_id, fetching tenant data...",
-									);
+									logger.debug("Profile has tenant_id, fetching tenant data...");
 									await fetchTenant(profileData.tenant_id);
 									await fetchSubscription(profileData.tenant_id);
 								} else {
-									console.warn(
-										"⚠️ [AUTH] Profile has NO tenant_id - user will be redirected to pending-invitation",
-									);
+									logger.warn("Profile has NO tenant_id - user will be redirected to pending-invitation");
 								}
 							} catch (err) {
-								console.error("Exception during profile creation:", err);
+								logger.error("Exception during profile creation", err);
 								// Don't sign out on profile creation errors in SaaS mode
-								console.warn("Continuing despite profile creation error");
+								logger.warn("Continuing despite profile creation error");
 							}
 						}, 0);
 					} else {
 						// Profile already exists for this user, just ensure tenant data is loaded
-						console.log("✅ [AUTH] Profile exists, checking tenant data...");
+						logger.debug("Profile exists, checking tenant data...");
 						// Fetch the profile again to get latest data
 						const latestProfile = await fetchProfile(session.user.id);
 						if (latestProfile?.tenant_id) {
@@ -300,7 +283,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 		});
 
 		return () => subscription.data.subscription.unsubscribe();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const signOut = async () => {

@@ -142,10 +142,12 @@ serve(async (req) => {
 		}
 
 		// Get Beds24 room mapping from channel_room_mappings table
+		// Filter by tenant_id for security
 		const { data: roomMapping, error: mappingError } = await supabase
 			.from("channel_room_mappings")
 			.select("channel_room_id, channel_room_name")
 			.eq("room_id", reservation.room_id)
+			.eq("tenant_id", reservation.tenant_id)
 			.eq("channel", "beds24")
 			.eq("is_active", true)
 			.single();
@@ -185,7 +187,8 @@ serve(async (req) => {
 		// Get Beds24 credentials for this location
 		const { data: beds24Creds, error: credsError } = await supabase
 			.from("beds24_credentials")
-			.select("access_token, refresh_token, token_expires_at")
+			.select("id, access_token, refresh_token, token_expires_at")
+			.eq("tenant_id", reservation.tenant_id)
 			.eq("location_id", reservation.location_id)
 			.eq("is_active", true)
 			.single();
@@ -274,34 +277,41 @@ serve(async (req) => {
 			.update({ beds24_sync_status: "pending" })
 			.eq("id", reservation_id);
 
-		// POST to Beds24 API
-		const beds24Response = await fetch(`${BEDS24_API_URL}/bookings`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				token: accessToken,
-			},
-			body: JSON.stringify([bookingPayload]), // Array of bookings
-		});
-
-		const beds24Data = await beds24Response.json();
-		console.log("Beds24 response:", beds24Data);
-
-		// ✅ ADDED: Validate response structure
-		if (!beds24Response.ok || beds24Data.success === false) {
+		// POST to Beds24 API using shared helper (includes token refresh, rate limit monitoring, response validation)
+		let beds24Data: any;
+		try {
+			beds24Data = await beds24ApiRequest(
+				"/bookings",
+				supabase,
+				beds24Creds.id,
+				accessToken,
+				beds24Creds.token_expires_at ? new Date(beds24Creds.token_expires_at) : null,
+				beds24Creds.refresh_token,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify([bookingPayload]), // Array of bookings
+				},
+			);
+			console.log("Beds24 response:", beds24Data);
+		} catch (apiError) {
 			const errorMsg =
-				beds24Data.message || beds24Data.error || "Failed to create booking in Beds24";
+				apiError instanceof Error
+					? apiError.message
+					: "Failed to create booking in Beds24";
 			await supabase
 				.from("reservations")
 				.update({
 					beds24_sync_status: "failed",
-					beds24_sync_error: JSON.stringify(beds24Data),
+					beds24_sync_error: JSON.stringify(apiError),
 				})
 				.eq("id", reservation_id);
 
 			return new Response(
-				JSON.stringify({ error: errorMsg, details: beds24Data }),
-				{ status: beds24Response.status, headers: { "Content-Type": "application/json" } },
+				JSON.stringify({ error: errorMsg, details: apiError }),
+				{ status: 500, headers: { "Content-Type": "application/json" } },
 			);
 		}
 
@@ -356,29 +366,33 @@ serve(async (req) => {
 				JSON.stringify(calendarPayload),
 			);
 
-			// ✅ FIXED: Use correct endpoint /inventory/rooms/calendar
-			const calendarResponse = await fetch(
-				`${BEDS24_API_URL}/inventory/rooms/calendar`,
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						token: accessToken,
+			// Use shared helper for calendar blocking (includes token refresh, rate limit monitoring, response validation)
+			try {
+				await beds24ApiRequest(
+					"/inventory/rooms/calendar",
+					supabase,
+					beds24Creds.id,
+					accessToken,
+					beds24Creds.token_expires_at ? new Date(beds24Creds.token_expires_at) : null,
+					beds24Creds.refresh_token,
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify(calendarPayload),
 					},
-					body: JSON.stringify(calendarPayload),
-				},
-			);
+				);
 
-			const calendarData = await calendarResponse.json();
-
-			// ✅ ADDED: Validate response structure
-			if (!calendarResponse.ok || calendarData.success === false) {
-				console.error("Failed to block dates in calendar:", calendarData);
-				blockingError = JSON.stringify(calendarData);
-				// Don't fail entire sync - booking is already created
-			} else {
 				console.log("Successfully blocked dates in Beds24 calendar");
 				datesBlocked = true;
+			} catch (calendarError) {
+				console.error("Failed to block dates in calendar:", calendarError);
+				blockingError =
+					calendarError instanceof Error
+						? calendarError.message
+						: JSON.stringify(calendarError);
+				// Don't fail entire sync - booking is already created
 			}
 		} catch (error: any) {
 			console.error("Error blocking dates in calendar:", error);

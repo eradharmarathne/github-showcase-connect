@@ -3,6 +3,7 @@ import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
 import { useInvitations } from "@/hooks/use-invitations";
 import { usePermissions } from "@/hooks/use-permissions";
+import { logger } from "@/lib/logger";
 
 export const SmartRedirect = () => {
 	const { tenant, tenantLoading, profile, profileLoading, user } = useAuth();
@@ -10,7 +11,7 @@ export const SmartRedirect = () => {
 	const { loading: locationsLoading } = useLocationContext();
 	const { hasInvitations, loading: invitationsLoading } = useInvitations();
 
-	console.log("🔀 [REDIRECT] SmartRedirect rendering:", {
+	logger.debug("SmartRedirect rendering", {
 		loading,
 		locationsLoading,
 		tenantLoading,
@@ -32,11 +33,11 @@ export const SmartRedirect = () => {
 		invitationsLoading ||
 		(user && !profile)
 	) {
-		console.log("⏳ [REDIRECT] Still loading, waiting...");
+		logger.debug("Still loading, waiting...");
 		return null;
 	}
 
-	console.log("📊 [REDIRECT] All data loaded:", {
+	logger.debug("All data loaded", {
 		profile: profile
 			? {
 					id: profile.id,
@@ -59,23 +60,17 @@ export const SmartRedirect = () => {
 	// If user doesn't have a tenant_id in their profile, check for pending invitations
 	if (!profile?.tenant_id || !tenant) {
 		if (hasInvitations) {
-			console.log(
-				"🎫 [REDIRECT] No tenant_id but has invitations - redirecting to /pending-invitation",
-			);
+			logger.debug("No tenant_id but has invitations - redirecting to /pending-invitation");
 			return <Navigate to="/pending-invitation" replace />;
 		}
 
-		console.log(
-			"🚀 [REDIRECT] No tenant_id and no invitations - redirecting to /onboarding",
-		);
+		logger.debug("No tenant_id and no invitations - redirecting to /onboarding");
 		return <Navigate to="/onboarding" replace />;
 	}
 
 	// If tenant hasn't completed onboarding, redirect to onboarding
 	if (!tenant.onboarding_completed) {
-		console.log(
-			"🚨 [REDIRECT] Tenant onboarding not completed - redirecting to /onboarding",
-		);
+		logger.debug("Tenant onboarding not completed - redirecting to /onboarding");
 		return <Navigate to="/onboarding" replace />;
 	}
 
@@ -90,17 +85,15 @@ export const SmartRedirect = () => {
 		tenant.subscription_status &&
 		invalidSubscriptionStatuses.includes(tenant.subscription_status)
 	) {
-		console.log(
-			`🚨 [REDIRECT] Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`,
-		);
+		logger.debug(`Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`);
 		return <Navigate to="/onboarding" replace />;
 	}
 
-	console.log("✅ [REDIRECT] Tenant valid, checking permissions...");
+	logger.debug("Tenant valid, checking permissions...");
 
 	// Redirect to the first page the user has access to
 	if (hasAnyPermission(["access_dashboard"])) {
-		console.log("➡️ [REDIRECT] Redirecting to /dashboard");
+		logger.debug("Redirecting to /dashboard");
 		return <Navigate to="/dashboard" replace />;
 	} else if (hasAnyPermission(["access_calendar"])) {
 		return <Navigate to="/calendar" replace />;

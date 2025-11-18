@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { Calendar, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { UpcomingBookingsSkeleton } from "@/components/skeleton/upcoming-bookings-skeleton";
@@ -20,60 +21,49 @@ interface UpcomingBookingsProps {
 	hasCalendarPermission: boolean;
 }
 
-export function UpcomingBookings({
+function UpcomingBookingsComponent({
 	selectedLocation,
 	hasCalendarPermission,
 }: UpcomingBookingsProps) {
-	const [loading, setLoading] = useState(true);
-	const [upcomingReservations, setUpcomingReservations] = useState<
-		Reservation[]
-	>([]);
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
 
-	useEffect(() => {
-		const fetchReservationsData = async () => {
+	const { data: upcomingReservations = [], isLoading: loading } = useQuery({
+		queryKey: ["upcoming-bookings", tenant?.id, selectedLocation],
+		queryFn: async (): Promise<Reservation[]> => {
 			if (!tenant?.id) {
-				setLoading(false);
-				return;
+				return [];
 			}
 
-			try {
-				// Get locations for the tenant first to filter by tenant
-				const { data: tenantLocations } = await supabase
-					.from("locations")
-					.select("id")
-					.eq("tenant_id", tenant.id)
-					.eq("is_active", true);
+			// Get locations for the tenant first to filter by tenant
+			const { data: tenantLocations } = await supabase
+				.from("locations")
+				.select("id")
+				.eq("tenant_id", tenant.id)
+				.eq("is_active", true);
 
-				const tenantLocationIds = tenantLocations?.map((loc) => loc.id) || [];
+			const tenantLocationIds = tenantLocations?.map((loc) => loc.id) || [];
 
-				if (tenantLocationIds.length === 0) {
-					setUpcomingReservations([]);
-					setLoading(false);
-					return;
-				}
-
-				const { data: reservationsData } = await supabase
-					.from("reservations")
-					.select("*, locations(*), rooms(*)")
-					.in("location_id", tenantLocationIds)
-					.match(!selectedLocation ? {} : { location_id: selectedLocation })
-					.gte("check_in_date", new Date().toISOString().split("T")[0]) // Only future/today check-ins
-					.neq("status", "cancelled") // Exclude cancelled reservations
-					.order("check_in_date", { ascending: true })
-					.limit(5);
-
-				setUpcomingReservations(reservationsData || []);
-			} catch (error) {
-				console.error("Error fetching reservations data:", error);
-			} finally {
-				setLoading(false);
+			if (tenantLocationIds.length === 0) {
+				return [];
 			}
-		};
 
-		fetchReservationsData();
-	}, [selectedLocation, tenant?.id]);
+			const { data: reservationsData, error } = await supabase
+				.from("reservations")
+				.select("*, locations(*), rooms(*)")
+				.in("location_id", tenantLocationIds)
+				.match(!selectedLocation ? {} : { location_id: selectedLocation })
+				.gte("check_in_date", new Date().toISOString().split("T")[0]) // Only future/today check-ins
+				.neq("status", "cancelled") // Exclude cancelled reservations
+				.order("check_in_date", { ascending: true })
+				.limit(5);
+
+			if (error) throw error;
+			return reservationsData || [];
+		},
+		enabled: !!tenant?.id,
+		staleTime: 1 * 60 * 1000, // 1 minute - reservations should be fairly fresh
+	});
 
 	if (loading) {
 		return (
@@ -162,3 +152,5 @@ export function UpcomingBookings({
 		</Card>
 	);
 }
+
+export const UpcomingBookings = memo(UpcomingBookingsComponent);

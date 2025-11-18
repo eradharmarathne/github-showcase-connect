@@ -71,27 +71,33 @@ serve(async (req) => {
 
 		// First try to find by our apiReference (if we created this booking)
 		if (booking.apiReference) {
-			const { data } = await supabase
+			const { data, error } = await supabase
 				.from("reservations")
 				.select("*")
 				.eq("id", booking.apiReference)
-				.single();
+				.maybeSingle();
 
-			if (data) {
+			if (data && !error) {
 				existingReservation = data;
+			} else if (error && error.code !== "PGRST116") {
+				// PGRST116 is "not found" which is expected, log other errors
+				console.error("Error finding reservation by apiReference:", error);
 			}
 		}
 
 		// If not found, try finding by Beds24 booking ID
 		if (!existingReservation) {
-			const { data } = await supabase
+			const { data, error } = await supabase
 				.from("reservations")
 				.select("*")
 				.eq("beds24_booking_id", booking.id)
-				.single();
+				.maybeSingle();
 
-			if (data) {
+			if (data && !error) {
 				existingReservation = data;
+			} else if (error && error.code !== "PGRST116") {
+				// PGRST116 is "not found" which is expected, log other errors
+				console.error("Error finding reservation by beds24_booking_id:", error);
 			}
 		}
 

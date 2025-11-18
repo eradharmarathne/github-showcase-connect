@@ -1,6 +1,7 @@
 import { ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { logger } from "@/lib/logger";
 import {
 	Bar,
 	BarChart,
@@ -59,7 +60,7 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-export function IncomeExpenseChart({
+function IncomeExpenseChartComponent({
 	selectedLocation,
 	selectedMonth,
 	locations,
@@ -166,8 +167,8 @@ export function IncomeExpenseChart({
 								);
 								totalIncome += convertedAmount;
 							} catch (error) {
-								console.error(
-									`Error converting income currency for date ${date}:`,
+								logger.error(
+									`Error converting income currency for date ${date}`,
 									error,
 								);
 								// Use original amount as fallback if conversion fails
@@ -186,8 +187,8 @@ export function IncomeExpenseChart({
 								);
 								totalExpenses += convertedAmount;
 							} catch (error) {
-								console.error(
-									`Error converting expense currency for date ${date}:`,
+								logger.error(
+									`Error converting expense currency for date ${date}`,
 									error,
 								);
 								// Use original amount as fallback if conversion fails
@@ -228,7 +229,7 @@ export function IncomeExpenseChart({
 				setWeeklyProfit(profit);
 				setProfitMargin(margin);
 			} catch (error) {
-				console.error("Error fetching financial data:", error);
+				logger.error("Error fetching financial data", error);
 			} finally {
 				setLoading(false);
 			}
@@ -382,3 +383,5 @@ export function IncomeExpenseChart({
 		</div>
 	);
 }
+
+export const IncomeExpenseChart = memo(IncomeExpenseChartComponent);

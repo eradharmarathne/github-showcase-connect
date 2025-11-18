@@ -3,6 +3,7 @@ import { RefreshCw, Wifi } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 import {
 	BookingStatsCards,
 	BookingsTable,
@@ -207,7 +208,7 @@ export default function BookingChannelsIntegration() {
 				setSyncStats(stats);
 			}
 		} catch (error) {
-			console.error("Error fetching data:", error);
+			logger.error("Error fetching data", error);
 			toast.error(t("bookingChannels.messages.fetchError"));
 		} finally {
 			setLoading(false);
@@ -217,7 +218,7 @@ export default function BookingChannelsIntegration() {
 	useEffect(() => {
 		const syncChannelData = async () => {
 			if (!tenant?.id) {
-				console.log("No tenant ID, skipping sync");
+				logger.debug("No tenant ID, skipping sync");
 				return;
 			}
 
@@ -238,17 +239,17 @@ export default function BookingChannelsIntegration() {
 				};
 
 				if (responseData?.code === "NO_MAPPINGS") {
-					console.info("ℹ️ No Beds24 property mappings configured yet");
+					logger.debug("No Beds24 property mappings configured yet");
 					// Don't show error - this is expected on first load
 				} else if (response.error) {
-					console.error("Sync error:", response.error);
+					logger.error("Sync error", response.error);
 					toast.error("Failed to sync booking channel data");
 				} else if (responseData?.success !== false) {
 					// Successful sync - refresh the data
 					fetchData();
 				}
 			} catch (error) {
-				console.error("Error syncing booking channel data:", error);
+				logger.error("Error syncing booking channel data", error);
 				toast.error("Failed to sync booking channel data");
 			} finally {
 				setSyncing(false);
@@ -307,7 +308,7 @@ export default function BookingChannelsIntegration() {
 					"Please configure Beds24 property mappings in the Settings tab first",
 				);
 			} else if (response.error) {
-				console.error("Sync error:", response.error);
+				logger.error("Sync error", response.error);
 				toast.error(t("bookingChannels.messages.syncError"));
 			} else if (responseData?.success !== false) {
 				toast.success(t("bookingChannels.messages.syncSuccess"));
@@ -315,7 +316,7 @@ export default function BookingChannelsIntegration() {
 				fetchData();
 			}
 		} catch (error) {
-			console.error("Error syncing booking channel data:", error);
+			logger.error("Error syncing booking channel data", error);
 			toast.error(t("bookingChannels.messages.syncError"));
 		} finally {
 			setSyncing(false);
@@ -359,8 +360,8 @@ export default function BookingChannelsIntegration() {
 					: data?.error || "Token exchange failed";
 				throw new Error(errorMessage);
 			}
-		} catch (error: any) {
-			console.error("Token exchange error:", error);
+		} catch (error: unknown) {
+			logger.error("Token exchange error", error);
 
 			// Parse Beds24 API errors for better user feedback
 			let userMessage = error.message || "Unknown error";
@@ -556,10 +557,11 @@ export default function BookingChannelsIntegration() {
 
 			// Refresh data
 			fetchData();
-		} catch (error: any) {
-			console.error("Error adding property mapping:", error);
+		} catch (error: unknown) {
+			logger.error("Error adding property mapping", error);
+			const errorObj = error as { message?: string };
 			toast.error(
-				`Failed to add property mapping: ${error.message || "Unknown error"}`,
+				`Failed to add property mapping: ${errorObj.message || "Unknown error"}`,
 			);
 		}
 	};
@@ -612,10 +614,11 @@ export default function BookingChannelsIntegration() {
 
 			// Refresh data
 			fetchData();
-		} catch (error: any) {
-			console.error("Error adding iCal sync URL:", error);
+		} catch (error: unknown) {
+			logger.error("Error adding iCal sync URL", error);
+			const errorObj = error as { message?: string };
 			toast.error(
-				`Failed to add iCal sync URL: ${error.message || "Unknown error"}`,
+				`Failed to add iCal sync URL: ${errorObj.message || "Unknown error"}`,
 			);
 		}
 	};
@@ -635,10 +638,11 @@ export default function BookingChannelsIntegration() {
 
 			toast.success("Sync URL deleted successfully");
 			fetchData();
-		} catch (error: any) {
-			console.error("Error deleting sync URL:", error);
+		} catch (error: unknown) {
+			logger.error("Error deleting sync URL", error);
+			const errorObj = error as { message?: string };
 			toast.error(
-				`Failed to delete sync URL: ${error.message || "Unknown error"}`,
+				`Failed to delete sync URL: ${errorObj.message || "Unknown error"}`,
 			);
 		}
 	};
@@ -668,9 +672,10 @@ export default function BookingChannelsIntegration() {
 				`Successfully synced ${data.eventsCount || 0} bookings from ${syncUrl.source}`,
 			);
 			fetchData();
-		} catch (error: any) {
-			console.error("Error syncing iCal:", error);
-			toast.error(`Failed to sync iCal: ${error.message || "Unknown error"}`);
+		} catch (error: unknown) {
+			logger.error("Error syncing iCal", error);
+			const errorObj = error as { message?: string };
+			toast.error(`Failed to sync iCal: ${errorObj.message || "Unknown error"}`);
 		} finally {
 			setSyncing(false);
 		}
@@ -691,19 +696,18 @@ export default function BookingChannelsIntegration() {
 
 			toast.success(t("bookingChannels.bookingsTable.roomMappedSuccess"));
 			fetchData();
-		} catch (error: any) {
-			console.error("Error updating room mapping:", error);
+		} catch (error: unknown) {
+			logger.error("Error updating room mapping", error);
 			toast.error(t("bookingChannels.bookingsTable.roomMappingError"));
 		}
 	};
 
-	console.log("Bookings:", bookings);
-	console.log("Selected Location:", selectedLocation);
+	logger.debug("Bookings and location", { bookingsCount: bookings.length, selectedLocation });
 
 	// No need to filter bookings - they're already filtered by selectedLocation in the query
 	const filteredBookings = bookings.map((booking) => {
 		const mappedLocation = getLocationFromBooking(booking);
-		console.log("Locations:", mappedLocation);
+		logger.debug("Mapped location", { mappedLocation });
 		return {
 			...booking,
 			mappedLocation: mappedLocation,

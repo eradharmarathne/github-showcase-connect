@@ -2,8 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
 import {
 	BEDS24_API_URL,
-	BEDS24_AUTH_URL,
-	getBeds24Token,
+	beds24ApiRequest,
 } from "../_shared/beds24-auth.ts";
 
 const corsHeaders = {
@@ -57,110 +56,10 @@ interface V2Booking extends JsonRecord {
 	ucurrency?: string; // Alternative currency field name in Beds24 API
 }
 
-// Function to refresh access token using refresh token from database
-async function refreshAccessToken(
-	supabase: any,
-	credentialId: string,
-	refreshToken: string,
-) {
-	console.log("Refreshing Beds24 access token...");
-	const response = await fetch(
-		"https://beds24.com/api/v2/authentication/token",
-		{
-			method: "GET",
-			headers: {
-				accept: "application/json",
-				refreshToken: refreshToken,
-			},
-		},
-	);
-
-	if (!response.ok) {
-		const errorText = await response.text();
-		console.error("Token refresh failed:", response.status, errorText);
-		throw new Error(
-			`Token refresh failed: ${response.status} ${response.statusText}`,
-		);
-	}
-
-	const tokenData = await response.json();
-	const newAccessToken = tokenData.token;
-	const expiresAt = new Date(Date.now() + (tokenData.expiresIn - 60) * 1000);
-
-	// Update the database with new access token and expiry
-	const { error: updateError } = await supabase
-		.from("beds24_credentials")
-		.update({
-			access_token: newAccessToken,
-			token_expires_at: expiresAt.toISOString(),
-		})
-		.eq("id", credentialId);
-
-	if (updateError) {
-		console.error("Failed to update access token in database:", updateError);
-		// Don't throw - we can still use the token for this request
-	}
-
-	console.log("Access token refreshed successfully");
-	return { token: newAccessToken, expiresAt };
-}
-
-// Function to make authenticated requests to Beds24 API
-async function beds24Request(
-	path: string,
-	supabase: any,
-	credentialId: string,
-	accessToken: string,
-	tokenExpiresAt: Date,
-	refreshToken: string,
-) {
-	let currentToken = accessToken;
-
-	// Check if we need to refresh the token
-	if (!currentToken || Date.now() > tokenExpiresAt.getTime()) {
-		const refreshed = await refreshAccessToken(
-			supabase,
-			credentialId,
-			refreshToken,
-		);
-		currentToken = refreshed.token;
-	}
-
-	let response = await fetch(`${BEDS24_API_URL}${path}`, {
-		headers: {
-			accept: "application/json",
-			token: currentToken,
-		},
-	});
-
-	// If we get 401, try refreshing token once more
-	if (response.status === 401) {
-		console.log("Got 401, refreshing token and retrying...");
-		const refreshed = await refreshAccessToken(
-			supabase,
-			credentialId,
-			refreshToken,
-		);
-		currentToken = refreshed.token;
-
-		response = await fetch(`${BEDS24_API_URL}${path}`, {
-			headers: {
-				accept: "application/json",
-				token: currentToken,
-			},
-		});
-	}
-
-	if (!response.ok) {
-		const errorText = await response.text();
-		console.error(`Beds24 API request failed: ${response.status}`, errorText);
-		throw new Error(
-			`Beds24 API request failed: ${response.status} ${response.statusText}`,
-		);
-	}
-
-	return response.json();
-}
+// Using shared helper functions from _shared/beds24-auth.ts
+// - refreshBeds24Token: Token refresh with correct GET method
+// - getBeds24Token: Get valid token with auto-refresh
+// - beds24ApiRequest: Make authenticated requests with rate limit monitoring
 
 serve(async (req) => {
 	// Handle CORS preflight requests
@@ -208,8 +107,8 @@ serve(async (req) => {
 			credQuery = credQuery.eq("location_id", locationId);
 		}
 
-		const { data: credentials, error: credError } = await credQuery.limit(1)
-			.single();
+		const { data: credentials, error: credError } = await credQuery
+			.maybeSingle();
 
 		if (credError || !credentials) {
 			console.error("No active Beds24 credentials found:", credError);
@@ -296,12 +195,12 @@ serve(async (req) => {
 			try {
 				console.log(`🔍 Fetching property details for property ID: ${propertyId}`);
 				
-				const propertyData = await beds24Request(
+				const propertyData = await beds24ApiRequest(
 					`/properties?id=${propertyId}`,
 					supabase,
 					credentials.id,
 					credentials.access_token,
-					new Date(credentials.token_expires_at),
+					credentials.token_expires_at ? new Date(credentials.token_expires_at) : null,
 					credentials.refresh_token,
 				);
 
@@ -327,11 +226,23 @@ serve(async (req) => {
 		console.log(`✅ Loaded currency information for ${propertyIdToCurrency.size} properties`);
 
 		// Fetch room mappings for automatic room assignment
-		const { data: roomMappings } = await supabase
+		// Filter by tenant_id and location_id for security
+		let roomMappingsQuery = supabase
 			.from("channel_room_mappings")
 			.select("channel_room_id, room_id")
 			.eq("channel", "beds24")
 			.eq("is_active", true);
+
+		// Add tenant filter if provided
+		if (tenantId) {
+			roomMappingsQuery = roomMappingsQuery.eq("tenant_id", tenantId);
+		}
+		// Add location filter if provided
+		if (locationId) {
+			roomMappingsQuery = roomMappingsQuery.eq("location_id", locationId);
+		}
+
+		const { data: roomMappings } = await roomMappingsQuery;
 
 		// Build map of Beds24 roomId -> CheckingCheckout room_id
 		const beds24RoomToRoomId = new Map<string, string>();
@@ -346,41 +257,23 @@ serve(async (req) => {
 
 		// Fetch bookings from Beds24 API using credentials from database
 		console.log("Fetching bookings from Beds24 API v2...");
-		const tokenExpiresAt = credentials.token_expires_at
-			? new Date(credentials.token_expires_at)
-			: new Date(0);
 
-		const bookingsJson: unknown = await beds24Request(
+		// Use shared helper which includes token refresh, rate limit monitoring, and response validation
+		const bookingsResponse = await beds24ApiRequest(
 			"/bookings",
 			supabase,
 			credentials.id,
 			credentials.access_token,
-			tokenExpiresAt,
+			credentials.token_expires_at ? new Date(credentials.token_expires_at) : null,
 			credentials.refresh_token,
 		);
 		
-		// ✅ ADDED: Validate response structure
-		if (typeof bookingsJson === 'object' && bookingsJson !== null) {
-			const response = bookingsJson as any;
-			if (response.success === false) {
-				console.error("Beds24 API returned error:", response);
-				return new Response(
-					JSON.stringify({
-						error: "Failed to fetch bookings from Beds24",
-						details: response,
-					}),
-					{
-						status: 500,
-						headers: { ...corsHeaders, "Content-Type": "application/json" },
-					},
-				);
-			}
-		}
-		
-		const bookings: V2Booking[] = Array.isArray((bookingsJson as any)?.data)
-			? (bookingsJson as any).data
-			: Array.isArray(bookingsJson)
-				? (bookingsJson as any)
+		// Extract bookings array from response
+		// beds24ApiRequest already validates success field, so we can safely access data
+		const bookings: V2Booking[] = Array.isArray(bookingsResponse?.data)
+			? bookingsResponse.data
+			: Array.isArray(bookingsResponse)
+				? bookingsResponse
 				: [];
 
 		console.log(`Received ${bookings.length} bookings (pre-filter)`);
