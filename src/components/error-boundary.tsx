@@ -1,7 +1,6 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { logger } from "@/lib/logger";
 import {
 	Card,
 	CardContent,
@@ -9,6 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { logger } from "@/lib/logger";
 
 interface Props {
 	children: ReactNode;

@@ -1,11 +1,6 @@
 import { Calendar, Clock, DollarSign, Wifi } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { SyncStats } from "@/types/booking-channels";
 
 interface BookingStatsCardsProps {

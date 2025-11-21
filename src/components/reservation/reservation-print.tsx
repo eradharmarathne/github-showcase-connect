@@ -186,7 +186,10 @@ export const useReservationPrint = () => {
 		`;
 	};
 
-	const printReservation = (reservation: Reservation, tenant: Tenant | null) => {
+	const printReservation = (
+		reservation: Reservation,
+		tenant: Tenant | null,
+	) => {
 		const printContent = generatePrintContent(reservation, tenant);
 
 		// Create a hidden iframe for printing

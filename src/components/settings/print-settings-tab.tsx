@@ -1,26 +1,38 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePrintSettings } from "@/hooks/use-print-settings";
-import { Loader2, Printer, Upload, Eye } from "lucide-react";
-import { useTenant } from "@/hooks/use-tenant";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { PrintPreviewSample } from "./print-preview-sample";
+import { Eye, Loader2, Printer, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
-import { useRef } from "react";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { usePrintSettings } from "@/hooks/use-print-settings";
+import { useTenant } from "@/hooks/use-tenant";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { PrintPreviewSample } from "./print-preview-sample";
 
 export function PrintSettingsTab() {
-	const { printSettings, saveSettings, isSubmitting, isLoading } = usePrintSettings();
+	const { printSettings, saveSettings, isSubmitting, isLoading } =
+		usePrintSettings();
 	const { tenant, refetch: refreshTenant } = useTenant();
 	const { toast } = useToast();
-	
+
 	const [formData, setFormData] = useState({
 		show_logo: true,
 		logo_position: "left" as "left" | "center" | "right",
@@ -53,20 +65,26 @@ export function PrintSettingsTab() {
 		if (printSettings) {
 			setFormData({
 				show_logo: printSettings.show_logo ?? true,
-				logo_position: (printSettings.logo_position as "left" | "center" | "right") ?? "left",
+				logo_position:
+					(printSettings.logo_position as "left" | "center" | "right") ??
+					"left",
 				header_text: printSettings.header_text ?? "",
 				show_hotel_info: printSettings.show_hotel_info ?? true,
 				show_qr_code: printSettings.show_qr_code ?? false,
 				qr_code_content: printSettings.qr_code_content ?? "reservation_number",
-				show_terms_and_conditions: printSettings.show_terms_and_conditions ?? true,
+				show_terms_and_conditions:
+					printSettings.show_terms_and_conditions ?? true,
 				terms_and_conditions: printSettings.terms_and_conditions ?? "",
 				footer_text: printSettings.footer_text ?? "",
 				show_signature_line: printSettings.show_signature_line ?? true,
-				signature_label: printSettings.signature_label ?? "Authorized Signature",
+				signature_label:
+					printSettings.signature_label ?? "Authorized Signature",
 				primary_color: printSettings.primary_color ?? "#000000",
 				font_family: printSettings.font_family ?? "Arial, sans-serif",
-				font_size: (printSettings.font_size as "small" | "medium" | "large") ?? "medium",
-				paper_size: (printSettings.paper_size as "A4" | "Letter" | "A5") ?? "A4",
+				font_size:
+					(printSettings.font_size as "small" | "medium" | "large") ?? "medium",
+				paper_size:
+					(printSettings.paper_size as "A4" | "Letter" | "A5") ?? "A4",
 				show_border: printSettings.show_border ?? false,
 				custom_css: printSettings.custom_css ?? "",
 			});
@@ -88,9 +106,9 @@ export function PrintSettingsTab() {
 
 			if (uploadError) throw uploadError;
 
-			const { data: { publicUrl } } = supabase.storage
-				.from("tenant-assets")
-				.getPublicUrl(filePath);
+			const {
+				data: { publicUrl },
+			} = supabase.storage.from("tenant-assets").getPublicUrl(filePath);
 
 			// Update tenant logo_url
 			const { error: updateError } = await supabase
@@ -143,7 +161,8 @@ export function PrintSettingsTab() {
 						Print Template Settings
 					</CardTitle>
 					<CardDescription>
-						Customize how your printed documents (invoices, reservations, receipts) appear
+						Customize how your printed documents (invoices, reservations,
+						receipts) appear
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -164,9 +183,9 @@ export function PrintSettingsTab() {
 									<Label>Business Logo</Label>
 									<div className="flex items-center gap-4">
 										{tenant?.logo_url && (
-											<img 
-												src={tenant.logo_url} 
-												alt="Current logo" 
+											<img
+												src={tenant.logo_url}
+												alt="Current logo"
 												className="h-16 w-auto object-contain border rounded p-2"
 											/>
 										)}
@@ -174,7 +193,9 @@ export function PrintSettingsTab() {
 											<Input
 												type="file"
 												accept="image/*"
-												onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+												onChange={(e) =>
+													setLogoFile(e.target.files?.[0] || null)
+												}
 											/>
 										</div>
 										<Button
@@ -192,7 +213,6 @@ export function PrintSettingsTab() {
 										</Button>
 									</div>
 								</div>
-
 								{/* Show Logo Toggle */}
 								<div className="flex items-center justify-between">
 									<div className="space-y-0.5">
@@ -208,26 +228,29 @@ export function PrintSettingsTab() {
 										}
 									/>
 								</div>
-
-							{/* Logo Position */}
-							<div className="space-y-2">
-								<Label>Logo Position</Label>
-								<Select
-									value={formData.logo_position}
-									onValueChange={(value: string) =>
-										setFormData({ ...formData, logo_position: value as "left" | "center" | "right" })
-									}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="left">Left</SelectItem>
-										<SelectItem value="center">Center</SelectItem>
-										<SelectItem value="right">Right</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>								{/* Header Text */}
+								{/* Logo Position */}
+								<div className="space-y-2">
+									<Label>Logo Position</Label>
+									<Select
+										value={formData.logo_position}
+										onValueChange={(value: string) =>
+											setFormData({
+												...formData,
+												logo_position: value as "left" | "center" | "right",
+											})
+										}
+									>
+										<SelectTrigger>
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="left">Left</SelectItem>
+											<SelectItem value="center">Center</SelectItem>
+											<SelectItem value="right">Right</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>{" "}
+								{/* Header Text */}
 								<div className="space-y-2">
 									<Label>Header Text</Label>
 									<Input
@@ -238,7 +261,6 @@ export function PrintSettingsTab() {
 										}
 									/>
 								</div>
-
 								{/* Show Hotel Info */}
 								<div className="flex items-center justify-between">
 									<div className="space-y-0.5">
@@ -290,8 +312,12 @@ export function PrintSettingsTab() {
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="reservation_number">Reservation Number</SelectItem>
-												<SelectItem value="hotel_website">Hotel Website</SelectItem>
+												<SelectItem value="reservation_number">
+													Reservation Number
+												</SelectItem>
+												<SelectItem value="hotel_website">
+													Hotel Website
+												</SelectItem>
 												<SelectItem value="hotel_email">Hotel Email</SelectItem>
 											</SelectContent>
 										</Select>
@@ -309,7 +335,10 @@ export function PrintSettingsTab() {
 									<Switch
 										checked={formData.show_terms_and_conditions}
 										onCheckedChange={(checked) =>
-											setFormData({ ...formData, show_terms_and_conditions: checked })
+											setFormData({
+												...formData,
+												show_terms_and_conditions: checked,
+											})
 										}
 									/>
 								</div>
@@ -322,7 +351,10 @@ export function PrintSettingsTab() {
 											placeholder="Enter your terms and conditions here..."
 											value={formData.terms_and_conditions}
 											onChange={(e) =>
-												setFormData({ ...formData, terms_and_conditions: e.target.value })
+												setFormData({
+													...formData,
+													terms_and_conditions: e.target.value,
+												})
 											}
 											rows={5}
 										/>
@@ -370,7 +402,10 @@ export function PrintSettingsTab() {
 											placeholder="e.g., Authorized Signature"
 											value={formData.signature_label}
 											onChange={(e) =>
-												setFormData({ ...formData, signature_label: e.target.value })
+												setFormData({
+													...formData,
+													signature_label: e.target.value,
+												})
 											}
 										/>
 									</div>
@@ -389,7 +424,10 @@ export function PrintSettingsTab() {
 											type="color"
 											value={formData.primary_color}
 											onChange={(e) =>
-												setFormData({ ...formData, primary_color: e.target.value })
+												setFormData({
+													...formData,
+													primary_color: e.target.value,
+												})
 											}
 											className="w-20 h-10"
 										/>
@@ -397,7 +435,10 @@ export function PrintSettingsTab() {
 											type="text"
 											value={formData.primary_color}
 											onChange={(e) =>
-												setFormData({ ...formData, primary_color: e.target.value })
+												setFormData({
+													...formData,
+													primary_color: e.target.value,
+												})
 											}
 											placeholder="#000000"
 										/>
@@ -418,10 +459,16 @@ export function PrintSettingsTab() {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="Arial, sans-serif">Arial</SelectItem>
-											<SelectItem value="'Times New Roman', serif">Times New Roman</SelectItem>
-											<SelectItem value="'Courier New', monospace">Courier New</SelectItem>
+											<SelectItem value="'Times New Roman', serif">
+												Times New Roman
+											</SelectItem>
+											<SelectItem value="'Courier New', monospace">
+												Courier New
+											</SelectItem>
 											<SelectItem value="Georgia, serif">Georgia</SelectItem>
-											<SelectItem value="Verdana, sans-serif">Verdana</SelectItem>
+											<SelectItem value="Verdana, sans-serif">
+												Verdana
+											</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
@@ -432,7 +479,10 @@ export function PrintSettingsTab() {
 									<Select
 										value={formData.font_size}
 										onValueChange={(value: string) =>
-											setFormData({ ...formData, font_size: value as "small" | "medium" | "large" })
+											setFormData({
+												...formData,
+												font_size: value as "small" | "medium" | "large",
+											})
 										}
 									>
 										<SelectTrigger>
@@ -452,7 +502,10 @@ export function PrintSettingsTab() {
 									<Select
 										value={formData.paper_size}
 										onValueChange={(value: string) =>
-											setFormData({ ...formData, paper_size: value as "A4" | "Letter" | "A5" })
+											setFormData({
+												...formData,
+												paper_size: value as "A4" | "Letter" | "A5",
+											})
 										}
 									>
 										<SelectTrigger>
@@ -460,7 +513,9 @@ export function PrintSettingsTab() {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="A4">A4 (210 × 297 mm)</SelectItem>
-											<SelectItem value="Letter">Letter (8.5 × 11 in)</SelectItem>
+											<SelectItem value="Letter">
+												Letter (8.5 × 11 in)
+											</SelectItem>
 											<SelectItem value="A5">A5 (148 × 210 mm)</SelectItem>
 										</SelectContent>
 									</Select>
@@ -495,7 +550,8 @@ export function PrintSettingsTab() {
 										className="font-mono text-sm"
 									/>
 									<p className="text-xs text-muted-foreground">
-										For advanced users: Add custom CSS to further customize print templates
+										For advanced users: Add custom CSS to further customize
+										print templates
 									</p>
 								</div>
 							</div>
@@ -508,7 +564,8 @@ export function PrintSettingsTab() {
 									<div>
 										<h3 className="text-lg font-semibold">Print Preview</h3>
 										<p className="text-sm text-muted-foreground">
-											See how your reservation printouts will look with current settings
+											See how your reservation printouts will look with current
+											settings
 										</p>
 									</div>
 									<Button
@@ -522,14 +579,18 @@ export function PrintSettingsTab() {
 									</Button>
 								</div>
 
-							{/* Live Preview */}
-							<div className="border rounded-lg p-4 bg-white" ref={printPreviewRef}>
-								<PrintPreviewSample printSettings={formData} />
-							</div>
+								{/* Live Preview */}
+								<div
+									className="border rounded-lg p-4 bg-white"
+									ref={printPreviewRef}
+								>
+									<PrintPreviewSample printSettings={formData} />
+								</div>
 
-							<p className="text-xs text-muted-foreground">
-								💡 Tip: Make changes in other tabs and see them reflected here in real-time. Click "Save Print Settings" to persist changes.
-							</p>
+								<p className="text-xs text-muted-foreground">
+									💡 Tip: Make changes in other tabs and see them reflected here
+									in real-time. Click "Save Print Settings" to persist changes.
+								</p>
 							</div>
 						</TabsContent>
 					</Tabs>

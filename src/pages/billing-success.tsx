@@ -23,7 +23,7 @@ export default function BillingSuccess() {
 
 	const [redirectCountdown, setRedirectCountdown] = useState(5);
 
-	// Get URL parameters from Creem.io callback
+	// Get URL parameters from Polar.sh callback
 	const checkoutId = searchParams.get("checkout_id");
 	const orderId = searchParams.get("order_id");
 	const redirectTo = searchParams.get("redirect_to"); // 'billing' for dashboard billing redirect

@@ -1,7 +1,6 @@
 import { ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { logger } from "@/lib/logger";
 import {
 	Bar,
 	BarChart,
@@ -22,6 +21,7 @@ import { useAuth } from "@/context/auth-context";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger";
 import {
 	convertCurrency,
 	formatAmountWithSymbol,

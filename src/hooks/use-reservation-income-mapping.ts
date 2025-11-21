@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useProfile } from "@/hook/use-profile";
+import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useReservationIncomeMapping() {

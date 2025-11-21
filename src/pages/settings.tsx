@@ -54,10 +54,7 @@ export default function Settings() {
 					>
 						{t("settings.currency")}
 					</TabsTrigger>
-					<TabsTrigger
-						value="print"
-						className="text-xs sm:text-sm px-2 py-2"
-					>
+					<TabsTrigger value="print" className="text-xs sm:text-sm px-2 py-2">
 						Print Settings
 					</TabsTrigger>
 				</TabsList>

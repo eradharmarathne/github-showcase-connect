@@ -36,7 +36,11 @@ export class RouteErrorBoundary extends Component<Props, State> {
 	}
 
 	componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-		logger.error(`RouteErrorBoundary caught an error in ${this.props.routeName || "route"}`, error, errorInfo);
+		logger.error(
+			`RouteErrorBoundary caught an error in ${this.props.routeName || "route"}`,
+			error,
+			errorInfo,
+		);
 	}
 
 	handleReset = () => {
@@ -56,11 +60,13 @@ export class RouteErrorBoundary extends Component<Props, State> {
 						<CardHeader>
 							<div className="flex items-center gap-2 text-destructive">
 								<AlertCircle className="size-5" />
-								<CardTitle>Error loading {this.props.routeName || "page"}</CardTitle>
+								<CardTitle>
+									Error loading {this.props.routeName || "page"}
+								</CardTitle>
 							</div>
 							<CardDescription>
-								An error occurred while loading this page. You can try reloading or
-								go back to the previous page.
+								An error occurred while loading this page. You can try reloading
+								or go back to the previous page.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
@@ -104,6 +110,7 @@ export function RouteErrorBoundaryWrapper({
 	children: ReactNode;
 	routeName?: string;
 }) {
-	return <RouteErrorBoundary routeName={routeName}>{children}</RouteErrorBoundary>;
+	return (
+		<RouteErrorBoundary routeName={routeName}>{children}</RouteErrorBoundary>
+	);
 }
-

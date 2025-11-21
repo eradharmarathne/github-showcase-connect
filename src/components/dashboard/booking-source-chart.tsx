@@ -1,6 +1,5 @@
 import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { logger } from "@/lib/logger";
 import { Cell, Pie, PieChart } from "recharts";
 import { BookingSourceChartSkeleton } from "@/components/skeleton/booking-source-chart-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/chart";
 import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/lib/logger";
 
 interface BookingSourceData {
 	source: string;

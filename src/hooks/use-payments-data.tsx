@@ -123,7 +123,7 @@ export function usePaymentsData() {
 					date: payment.created_at, // Use created_at as date
 					note: payment.notes,
 					created_at: payment.created_at,
-					is_advance: payment.payment_type === 'advance_payment',
+					is_advance: payment.payment_type === "advance_payment",
 					type: payment.payment_type,
 					booking_source: payment.reservations?.booking_source || null,
 					booking_id: payment.reservation_id,

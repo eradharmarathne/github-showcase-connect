@@ -1350,7 +1350,7 @@ export type Database = {
           location_id: string
           note: string | null
           payment_method: string
-          tenant_id: string | null
+          tenant_id: string
           type: Database["public"]["Enums"]["income_type"]
           updated_at: string | null
         }
@@ -1371,7 +1371,7 @@ export type Database = {
           location_id: string
           note?: string | null
           payment_method: string
-          tenant_id?: string | null
+          tenant_id: string
           type: Database["public"]["Enums"]["income_type"]
           updated_at?: string | null
         }
@@ -1392,7 +1392,7 @@ export type Database = {
           location_id?: string
           note?: string | null
           payment_method?: string
-          tenant_id?: string | null
+          tenant_id?: string
           type?: Database["public"]["Enums"]["income_type"]
           updated_at?: string | null
         }
@@ -1505,13 +1505,14 @@ export type Database = {
         Row: {
           amount_cents: number
           created_at: string | null
-          creem_invoice_id: string | null
           currency: string
           description: string | null
           due_date: string | null
           id: string
           invoice_number: string | null
           paid_at: string | null
+          polar_invoice_id: string | null
+          polar_order_id: string | null
           status: string
           subscription_id: string | null
           tenant_id: string | null
@@ -1519,13 +1520,14 @@ export type Database = {
         Insert: {
           amount_cents: number
           created_at?: string | null
-          creem_invoice_id?: string | null
           currency?: string
           description?: string | null
           due_date?: string | null
           id?: string
           invoice_number?: string | null
           paid_at?: string | null
+          polar_invoice_id?: string | null
+          polar_order_id?: string | null
           status?: string
           subscription_id?: string | null
           tenant_id?: string | null
@@ -1533,13 +1535,14 @@ export type Database = {
         Update: {
           amount_cents?: number
           created_at?: string | null
-          creem_invoice_id?: string | null
           currency?: string
           description?: string | null
           due_date?: string | null
           id?: string
           invoice_number?: string | null
           paid_at?: string | null
+          polar_invoice_id?: string | null
+          polar_order_id?: string | null
           status?: string
           subscription_id?: string | null
           tenant_id?: string | null
@@ -1713,9 +1716,6 @@ export type Database = {
           checkout_session_id: string | null
           completed_at: string | null
           created_at: string | null
-          creem_customer_id: string | null
-          creem_order_id: string | null
-          creem_subscription_id: string | null
           currency: string | null
           error_message: string | null
           expires_at: string | null
@@ -1723,6 +1723,10 @@ export type Database = {
           metadata: Json | null
           payment_method: string | null
           plan_id: string | null
+          polar_checkout_id: string | null
+          polar_customer_id: string | null
+          polar_order_id: string | null
+          polar_subscription_id: string | null
           status: string
           tenant_id: string
           updated_at: string | null
@@ -1733,9 +1737,6 @@ export type Database = {
           checkout_session_id?: string | null
           completed_at?: string | null
           created_at?: string | null
-          creem_customer_id?: string | null
-          creem_order_id?: string | null
-          creem_subscription_id?: string | null
           currency?: string | null
           error_message?: string | null
           expires_at?: string | null
@@ -1743,6 +1744,10 @@ export type Database = {
           metadata?: Json | null
           payment_method?: string | null
           plan_id?: string | null
+          polar_checkout_id?: string | null
+          polar_customer_id?: string | null
+          polar_order_id?: string | null
+          polar_subscription_id?: string | null
           status: string
           tenant_id: string
           updated_at?: string | null
@@ -1753,9 +1758,6 @@ export type Database = {
           checkout_session_id?: string | null
           completed_at?: string | null
           created_at?: string | null
-          creem_customer_id?: string | null
-          creem_order_id?: string | null
-          creem_subscription_id?: string | null
           currency?: string | null
           error_message?: string | null
           expires_at?: string | null
@@ -1763,6 +1765,10 @@ export type Database = {
           metadata?: Json | null
           payment_method?: string | null
           plan_id?: string | null
+          polar_checkout_id?: string | null
+          polar_customer_id?: string | null
+          polar_order_id?: string | null
+          polar_subscription_id?: string | null
           status?: string
           tenant_id?: string
           updated_at?: string | null
@@ -1892,8 +1898,9 @@ export type Database = {
           max_locations: number | null
           max_rooms: number | null
           name: string
+          polar_price_id: string | null
+          polar_product_id: string | null
           price_cents: number
-          product_id: string | null
         }
         Insert: {
           billing_interval?: string
@@ -1907,8 +1914,9 @@ export type Database = {
           max_locations?: number | null
           max_rooms?: number | null
           name: string
+          polar_price_id?: string | null
+          polar_product_id?: string | null
           price_cents: number
-          product_id?: string | null
         }
         Update: {
           billing_interval?: string
@@ -1922,8 +1930,45 @@ export type Database = {
           max_locations?: number | null
           max_rooms?: number | null
           name?: string
+          polar_price_id?: string | null
+          polar_product_id?: string | null
           price_cents?: number
-          product_id?: string | null
+        }
+        Relationships: []
+      }
+      polar_webhook_events: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          event_id: string
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string | null
+          retry_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          id?: string
+          payload: Json
+          processed_at?: string | null
+          retry_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+          retry_count?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -2075,6 +2120,7 @@ export type Database = {
       public_bookings: {
         Row: {
           adults: number | null
+          assigned_room_id: string | null
           check_in_date: string
           check_out_date: string
           children: number | null
@@ -2098,6 +2144,7 @@ export type Database = {
         }
         Insert: {
           adults?: number | null
+          assigned_room_id?: string | null
           check_in_date: string
           check_out_date: string
           children?: number | null
@@ -2121,6 +2168,7 @@ export type Database = {
         }
         Update: {
           adults?: number | null
+          assigned_room_id?: string | null
           check_in_date?: string
           check_out_date?: string
           children?: number | null
@@ -2143,6 +2191,13 @@ export type Database = {
           user_agent?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "public_bookings_assigned_room_id_fkey"
+            columns: ["assigned_room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "public_bookings_converted_reservation_id_fkey"
             columns: ["converted_reservation_id"]
@@ -2511,12 +2566,15 @@ export type Database = {
         Row: {
           cancelled_at: string | null
           created_at: string | null
-          creem_customer_id: string | null
-          creem_subscription_id: string | null
           current_period_end: string | null
           current_period_start: string | null
+          ended_at: string | null
+          ends_at: string | null
           id: string
           plan_id: string | null
+          polar_checkout_id: string | null
+          polar_customer_id: string | null
+          polar_subscription_id: string | null
           status: string
           tenant_id: string | null
           trial_end: string | null
@@ -2527,12 +2585,15 @@ export type Database = {
         Insert: {
           cancelled_at?: string | null
           created_at?: string | null
-          creem_customer_id?: string | null
-          creem_subscription_id?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          ended_at?: string | null
+          ends_at?: string | null
           id?: string
           plan_id?: string | null
+          polar_checkout_id?: string | null
+          polar_customer_id?: string | null
+          polar_subscription_id?: string | null
           status?: string
           tenant_id?: string | null
           trial_end?: string | null
@@ -2543,12 +2604,15 @@ export type Database = {
         Update: {
           cancelled_at?: string | null
           created_at?: string | null
-          creem_customer_id?: string | null
-          creem_subscription_id?: string | null
           current_period_end?: string | null
           current_period_start?: string | null
+          ended_at?: string | null
+          ends_at?: string | null
           id?: string
           plan_id?: string | null
+          polar_checkout_id?: string | null
+          polar_customer_id?: string | null
+          polar_subscription_id?: string | null
           status?: string
           tenant_id?: string | null
           trial_end?: string | null
@@ -2785,7 +2849,7 @@ export type Database = {
           id: string
           is_tenant_admin: boolean | null
           location_id: string
-          tenant_id: string | null
+          tenant_id: string
           tenant_role: Database["public"]["Enums"]["tenant_role"] | null
           updated_at: string | null
           user_id: string
@@ -2808,7 +2872,7 @@ export type Database = {
           id?: string
           is_tenant_admin?: boolean | null
           location_id: string
-          tenant_id?: string | null
+          tenant_id: string
           tenant_role?: Database["public"]["Enums"]["tenant_role"] | null
           updated_at?: string | null
           user_id: string
@@ -2831,7 +2895,7 @@ export type Database = {
           id?: string
           is_tenant_admin?: boolean | null
           location_id?: string
-          tenant_id?: string | null
+          tenant_id?: string
           tenant_role?: Database["public"]["Enums"]["tenant_role"] | null
           updated_at?: string | null
           user_id?: string
@@ -2891,6 +2955,36 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_attempts_with_polar: {
+        Row: {
+          amount_cents: number | null
+          checkout_session_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          currency: string | null
+          expires_at: string | null
+          id: string | null
+          plan_id: string | null
+          polar_checkout_id: string | null
+          polar_customer_id: string | null
+          polar_order_id: string | null
+          polar_subscription_id: string | null
+          status: string | null
+          tenant_id: string | null
+          tenant_name: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_attempts_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
@@ -2980,9 +3074,9 @@ export type Database = {
       complete_payment_attempt: {
         Args: {
           p_checkout_session_id: string
-          p_creem_customer_id?: string
-          p_creem_order_id: string
-          p_creem_subscription_id?: string
+          p_polar_customer_id?: string
+          p_polar_order_id: string
+          p_polar_subscription_id?: string
         }
         Returns: boolean
       }
@@ -3042,6 +3136,10 @@ export type Database = {
           initial_balance: number
           location_access: string[]
           name: string
+          total_expenses: number
+          total_income: number
+          total_incoming_transfers: number
+          total_outgoing_transfers: number
         }[]
       }
       get_account_transaction_summary: {
@@ -3168,6 +3266,14 @@ export type Database = {
           p_transaction_id: string
           p_transaction_type: string
         }
+        Returns: string
+      }
+      mark_webhook_processed: {
+        Args: { p_error_message?: string; p_event_id: string }
+        Returns: boolean
+      }
+      record_webhook_event: {
+        Args: { p_event_id: string; p_event_type: string; p_payload: Json }
         Returns: string
       }
       update_account_balance: {

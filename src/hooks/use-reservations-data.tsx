@@ -141,25 +141,29 @@ export function useReservationsData() {
 			).map((booking) => {
 				const isExternal = booking.is_external === true;
 				const rawData = booking.raw_data as any;
-				
+
 				// For external bookings, use timestamp fields; for direct, use date fields
-				const checkInDate = isExternal 
-					? (booking.check_in_timestamp || booking.check_in_date)
+				const checkInDate = isExternal
+					? booking.check_in_timestamp || booking.check_in_date
 					: booking.check_in_date;
 				const checkOutDate = isExternal
-					? (booking.check_out_timestamp || booking.check_out_date)
+					? booking.check_out_timestamp || booking.check_out_date
 					: booking.check_out_date;
-				
+
 				return {
 					id: booking.id,
 					reservation_number: isExternal
-						? `${(booking.source_channel || booking.booking_source || 'EXTERNAL').toUpperCase()}-${booking.external_id}`
+						? `${(booking.source_channel || booking.booking_source || "EXTERNAL").toUpperCase()}-${booking.external_id}`
 						: booking.reservation_number,
 					location_id: booking.location_id,
 					room_id: booking.room_id || "",
 					guest_name: booking.guest_name,
-					guest_email: isExternal ? (rawData?.guest?.email || null) : booking.guest_email,
-					guest_phone: isExternal ? (rawData?.guest?.phone || null) : booking.guest_phone,
+					guest_email: isExternal
+						? rawData?.guest?.email || null
+						: booking.guest_email,
+					guest_phone: isExternal
+						? rawData?.guest?.phone || null
+						: booking.guest_phone,
 					guest_address: booking.guest_address,
 					guest_id_number: booking.guest_id_number,
 					guest_nationality: booking.guest_nationality,
@@ -167,11 +171,13 @@ export function useReservationsData() {
 					children: booking.children || 0,
 					check_in_date: checkInDate,
 					check_out_date: checkOutDate,
-					nights: booking.nights || Math.ceil(
-						(new Date(checkOutDate).getTime() -
-							new Date(checkInDate).getTime()) /
-							(1000 * 60 * 60 * 24),
-					),
+					nights:
+						booking.nights ||
+						Math.ceil(
+							(new Date(checkOutDate).getTime() -
+								new Date(checkInDate).getTime()) /
+								(1000 * 60 * 60 * 24),
+						),
 					room_rate: booking.room_rate || 0,
 					total_amount: booking.total_amount || 0,
 					advance_amount: booking.advance_amount,
@@ -179,7 +185,9 @@ export function useReservationsData() {
 					balance_amount: booking.balance_amount || 0,
 					currency: booking.currency || "USD",
 					status: booking.status as any,
-					special_requests: isExternal ? (rawData?.notes || null) : booking.special_requests,
+					special_requests: isExternal
+						? rawData?.notes || null
+						: booking.special_requests,
 					arrival_time: booking.arrival_time,
 					created_by: booking.created_by,
 					grc_approved: booking.grc_approved || false,
@@ -192,7 +200,8 @@ export function useReservationsData() {
 					agent_id: booking.agent_id,
 					guide_commission: booking.guide_commission,
 					agent_commission: booking.agent_commission,
-					booking_source: booking.source_channel || booking.booking_source || 'direct',
+					booking_source:
+						booking.source_channel || booking.booking_source || "direct",
 					locations: booking.locations,
 					rooms: booking.rooms,
 					guides: booking.guides,

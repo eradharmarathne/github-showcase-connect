@@ -1,6 +1,11 @@
-
 import { Session, User } from "@supabase/supabase-js";
-import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+	createContext,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { logger } from "@/lib/logger";
@@ -196,7 +201,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 						// Small delay to ensure the auth state is fully set
 						setTimeout(async () => {
 							try {
-								logger.debug("Checking profile for user", { email: session.user.email });
+								logger.debug("Checking profile for user", {
+									email: session.user.email,
+								});
 
 								// First, try to fetch the existing profile (trigger might have created it)
 								let profileData = await fetchProfile(session.user.id);
@@ -227,21 +234,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 											profileData = await fetchProfile(session.user.id);
 										}
 									} else {
-										logger.info("Profile created successfully", { email: session.user.email });
+										logger.info("Profile created successfully", {
+											email: session.user.email,
+										});
 										// Fetch the newly created profile
 										profileData = await fetchProfile(session.user.id);
 									}
 								} else {
-									logger.debug("Profile already exists", { email: session.user.email });
+									logger.debug("Profile already exists", {
+										email: session.user.email,
+									});
 								}
 
 								// If the profile has a tenant_id, fetch tenant and subscription data
 								if (profileData?.tenant_id) {
-									logger.debug("Profile has tenant_id, fetching tenant data...");
+									logger.debug(
+										"Profile has tenant_id, fetching tenant data...",
+									);
 									await fetchTenant(profileData.tenant_id);
 									await fetchSubscription(profileData.tenant_id);
 								} else {
-									logger.warn("Profile has NO tenant_id - user will be redirected to pending-invitation");
+									logger.warn(
+										"Profile has NO tenant_id - user will be redirected to pending-invitation",
+									);
 								}
 							} catch (err) {
 								logger.error("Exception during profile creation", err);

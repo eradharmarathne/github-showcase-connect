@@ -28,6 +28,7 @@ import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger";
 import { convertCurrency } from "@/utils/currency";
 
 type Reservation = Tables<"reservations"> & {
@@ -67,13 +68,22 @@ export function PaymentDialog({
 	const [loading, setLoading] = useState(false);
 	const [submitting, setSubmitting] = useState(false);
 
-	const [formData, setFormData] = useState({
+	const [formData, setFormData] = useState<{
+		payment_type: string;
+		payment_method: string;
+		amount: number;
+		account_id: string;
+		notes: string;
+		currency: string;
+		reference_number: string;
+		markAsComplete: boolean;
+	}>({
 		payment_type: "room_payment",
 		payment_method: "cash",
 		amount: initialAmount,
 		account_id: "",
 		notes: "",
-		currency: initialCurrency as any,
+		currency: initialCurrency,
 		reference_number: "",
 		markAsComplete: false,
 	});
@@ -161,19 +171,19 @@ export function PaymentDialog({
 				return;
 			}
 
-		// Check if it's an external booking
-		const isExternal = reservationRes.data.is_external === true;
-		setIsExternalBooking(isExternal);
-		
-		// Set reservation data for both external and direct bookings
-		// This ensures the form renders correctly for all booking types
-		setReservation(reservationRes.data);
-		if (isExternal) {
-			setExternalBooking(reservationRes.data);
-		}
-		
-		setAccounts(accountsRes.data || []);
-		setIncomeRecords(incomeRes.data || []);			// Calculate display amounts
+			// Check if it's an external booking
+			const isExternal = reservationRes.data.is_external === true;
+			setIsExternalBooking(isExternal);
+
+			// Set reservation data for both external and direct bookings
+			// This ensures the form renders correctly for all booking types
+			setReservation(reservationRes.data);
+			if (isExternal) {
+				setExternalBooking(reservationRes.data);
+			}
+
+			setAccounts(accountsRes.data || []);
+			setIncomeRecords(incomeRes.data || []); // Calculate display amounts
 			const totalAmount = reservationRes.data.total_amount || 0;
 			const paidAmount = reservationRes.data.paid_amount || 0;
 			const balanceAmount = reservationRes.data.balance_amount || 0;
@@ -297,22 +307,22 @@ export function PaymentDialog({
 
 			setFormData({
 				...formData,
-				currency: newCurrency as any,
+				currency: newCurrency,
 				amount: Math.round(convertedAmount * 100) / 100, // Round to 2 decimal places
 			});
 		} catch (error) {
-			console.error("Error converting currency:", error);
+			logger.error("Error converting currency", error);
 			// If conversion fails, just change currency without changing amount
 			setFormData({
 				...formData,
-				currency: newCurrency as any,
+				currency: newCurrency,
 			});
 		}
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		
+
 		const currentBooking = isExternalBooking ? externalBooking : reservation;
 		if (!currentBooking || !tenant?.id) return;
 
@@ -338,7 +348,7 @@ export function PaymentDialog({
 		}
 
 		// Add tolerance for rounding errors (0.10 variance allowed)
-		const tolerance = 0.10;
+		const tolerance = 0.1;
 		if (paymentAmountInReservationCurrency > remainingBalance + tolerance) {
 			toast({
 				title: "Payment Amount Exceeds Balance",
@@ -422,7 +432,7 @@ export function PaymentDialog({
 			amount: initialAmount,
 			account_id: "",
 			notes: "",
-			currency: initialCurrency as any,
+			currency: initialCurrency,
 			reference_number: "",
 			markAsComplete: false,
 		});

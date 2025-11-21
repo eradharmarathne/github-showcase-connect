@@ -18,7 +18,7 @@ interface UseCalendarDataReturn {
 	locations: Location[];
 	rooms: Room[];
 	reservations: Reservation[];
-	externalBookings: Reservation[];  // Now returns external bookings from unified table
+	externalBookings: Reservation[]; // Now returns external bookings from unified table
 	propertyMappings: PropertyMapping[];
 	loading: boolean;
 	refetch: () => Promise<void>;
@@ -28,7 +28,7 @@ export const useCalendarData = (): UseCalendarDataReturn => {
 	const [locations, setLocations] = useState<Location[]>([]);
 	const [rooms, setRooms] = useState<Room[]>([]);
 	const [reservations, setReservations] = useState<Reservation[]>([]);
-	const [externalBookings, setExternalBookings] = useState<Reservation[]>([]);  // Now uses Reservation type
+	const [externalBookings, setExternalBookings] = useState<Reservation[]>([]); // Now uses Reservation type
 	const [propertyMappings, setPropertyMappings] = useState<PropertyMapping[]>(
 		[],
 	);

@@ -168,11 +168,11 @@ export function TimelineView({
 					)
 					.order("check_in_date", { ascending: true });
 				if (error) throw error;
-				
+
 				// Transform to match expected format
-				return (data || []).map(booking => ({
+				return (data || []).map((booking) => ({
 					...booking,
-					source: booking.source_channel || 'unknown',
+					source: booking.source_channel || "unknown",
 					check_in: booking.check_in_timestamp || booking.check_in_date,
 					check_out: booking.check_out_timestamp || booking.check_out_date,
 				}));

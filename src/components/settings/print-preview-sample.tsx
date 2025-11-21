@@ -42,7 +42,11 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 	};
 
 	return (
-		<PrintTemplate qrCodeData={sampleReservation.reservation_number} documentType="Reservation" printSettingsOverride={printSettings}>
+		<PrintTemplate
+			qrCodeData={sampleReservation.reservation_number}
+			documentType="Reservation"
+			printSettingsOverride={printSettings}
+		>
 			<div className="space-y-6">
 				{/* Document Title */}
 				<div className="text-center border-b-2 border-black pb-4">
@@ -54,7 +58,9 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 					</div>
 					<div className="text-sm mt-2">
 						Confirmation Number:{" "}
-						<span className="font-bold">{sampleReservation.reservation_number}</span>
+						<span className="font-bold">
+							{sampleReservation.reservation_number}
+						</span>
 					</div>
 					<div className="text-xs mt-1">
 						Issued: {format(new Date(sampleReservation.created_at), "PPP")}
@@ -87,7 +93,8 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 							<tr className="border-b border-gray-200">
 								<td className="py-2 font-semibold">Number of Guests:</td>
 								<td className="py-2">
-									{sampleReservation.adults} Adult(s), {sampleReservation.children} Child(ren)
+									{sampleReservation.adults} Adult(s),{" "}
+									{sampleReservation.children} Child(ren)
 								</td>
 							</tr>
 						</tbody>
@@ -112,13 +119,19 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 							<tr className="border-b border-gray-200">
 								<td className="py-2 font-semibold">Check-In Date:</td>
 								<td className="py-2">
-									{format(new Date(sampleReservation.check_in_date), "EEEE, MMMM d, yyyy")}
+									{format(
+										new Date(sampleReservation.check_in_date),
+										"EEEE, MMMM d, yyyy",
+									)}
 								</td>
 							</tr>
 							<tr className="border-b border-gray-200">
 								<td className="py-2 font-semibold">Check-Out Date:</td>
 								<td className="py-2">
-									{format(new Date(sampleReservation.check_out_date), "EEEE, MMMM d, yyyy")}
+									{format(
+										new Date(sampleReservation.check_out_date),
+										"EEEE, MMMM d, yyyy",
+									)}
 								</td>
 							</tr>
 							<tr className="border-b border-gray-200">
@@ -127,14 +140,20 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 							</tr>
 							<tr className="border-b border-gray-200">
 								<td className="py-2 font-semibold">Reservation Status:</td>
-								<td className="py-2 uppercase font-semibold">{sampleReservation.status}</td>
+								<td className="py-2 uppercase font-semibold">
+									{sampleReservation.status}
+								</td>
 							</tr>
 						</tbody>
 					</table>
 					{sampleReservation.special_requests && (
 						<div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded">
-							<div className="text-xs font-semibold uppercase mb-1">Special Requests:</div>
-							<div className="text-sm">{sampleReservation.special_requests}</div>
+							<div className="text-xs font-semibold uppercase mb-1">
+								Special Requests:
+							</div>
+							<div className="text-sm">
+								{sampleReservation.special_requests}
+							</div>
 						</div>
 					)}
 				</div>
@@ -149,7 +168,8 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 							<tr className="border-b border-gray-200">
 								<td className="py-2 w-2/3">
 									Room Rate ({getCurrencySymbol(sampleReservation.currency)}
-									{sampleReservation.room_rate} × {sampleReservation.nights} night(s))
+									{sampleReservation.room_rate} × {sampleReservation.nights}{" "}
+									night(s))
 								</td>
 								<td className="py-2 text-right font-semibold">
 									{getCurrencySymbol(sampleReservation.currency)}
@@ -198,10 +218,12 @@ export function PrintPreviewSample({ printSettings }: PrintPreviewSampleProps) {
 						Thank you for choosing {sampleReservation.location.name}.
 					</p>
 					<p>
-						We look forward to welcoming you and providing you with an exceptional experience.
+						We look forward to welcoming you and providing you with an
+						exceptional experience.
 					</p>
 					<p className="mt-2">
-						For inquiries or modifications, please contact us with your confirmation number.
+						For inquiries or modifications, please contact us with your
+						confirmation number.
 					</p>
 				</div>
 			</div>

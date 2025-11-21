@@ -220,7 +220,7 @@ export default function EnhancedFinancialReports() {
 			for (const payment of paymentsResult.data || []) {
 				const convertedAmount = await convertCurrency(
 					parseFloat(payment.amount.toString()),
-					payment.currency as any,
+					payment.currency || "USD",
 					baseCurrency,
 					tenant.id,
 					selectedLocation!,
@@ -232,10 +232,11 @@ export default function EnhancedFinancialReports() {
 			// Process expenses
 			for (const expense of expenseResult.data || []) {
 				const accountCurrency =
-					(expense as any).accounts?.currency || expense.currency;
+					(expense as { accounts?: { currency: string | null } }).accounts
+						?.currency || expense.currency;
 				const convertedAmount = await convertCurrency(
 					parseFloat(expense.amount.toString()),
-					accountCurrency as any,
+					accountCurrency || "USD",
 					baseCurrency,
 					tenant.id,
 					selectedLocation!,
@@ -316,7 +317,7 @@ export default function EnhancedFinancialReports() {
 			for (const payment of paymentsResult.data || []) {
 				const convertedAmount = await convertCurrency(
 					parseFloat(payment.amount.toString()),
-					payment.currency as any,
+					payment.currency || "USD",
 					baseCurrency,
 					tenant.id,
 					selectedLocation!,
@@ -394,10 +395,11 @@ export default function EnhancedFinancialReports() {
 
 			for (const expense of data || []) {
 				const accountCurrency =
-					(expense as any).accounts?.currency || expense.currency;
+					(expense as { accounts?: { currency: string | null } }).accounts
+						?.currency || expense.currency;
 				const convertedAmount = await convertCurrency(
 					parseFloat(expense.amount.toString()),
-					accountCurrency as any,
+					accountCurrency || "USD",
 					baseCurrency,
 					tenant.id,
 					selectedLocation!,

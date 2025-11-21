@@ -178,7 +178,7 @@
     "paymentForm": "ගෙවීම් පෝරමය",
     "reports": "මූල්‍ය වාර්තා",
     "comprehensiveReports": "සවිස්තරාත්මක වාර්තා",
-    "accountReports": "ගිණුම් වාර්තා", 
+    "accountReports": "ගිණුම් වාර්තා",
     "commissionReports": "කොමිසම් වාර්තා",
     "balanceSheet": "ශේෂ පත්‍රය",
     "enhancedFinancialReports": "වැඩිදියුණු කළ මූල්‍ය වාර්තා",
@@ -670,12 +670,12 @@
     "cancel": "Cancel"
   },
   "profile": {
-  "myProfile": "මගේ පැතිකඩ",
-  "settings": "සැකසීම්",
-  "billing": "ගිණුම් ගැනීම සහ දායකත්වය",
-  "manageUsers": "පරිශීලක කළමනාකරණය",
-  "masterFiles": "ප්‍රධාන ගොනු",
-  "bookingChannels": "වෙන්කරණ නාලිකා"
+    "myProfile": "මගේ පැතිකඩ",
+    "settings": "සැකසීම්",
+    "billing": "ගිණුම් ගැනීම සහ දායකත්වය",
+    "manageUsers": "පරිශීලක කළමනාකරණය",
+    "masterFiles": "ප්‍රධාන ගොනු",
+    "bookingChannels": "වෙන්කරණ නාලිකා"
   },
   "fullscreen": {
     "enter": "Enter fullscreen",
@@ -1214,10 +1214,10 @@
     },
     "payment": {
       "title": "ගෙවීම් සැකසීම",
-      "description": "ගෙවීම් Creem.io හරහා ආරක්ෂිතව සකසනු ලැබේ. සියලුම ප්‍රධාන ක්‍රෙඩිට් කාර්ඩ් පිළිගැනේ. ඔබේ ගෙවීම් තොරතුරු කිසි විටෙකත් අපගේ සේවාදායකයන්හි ගබඩා නොකරයි.",
+      "description": "ගෙවීම් Polar.sh හරහා ආරක්ෂිතව සකසනු ලැබේ. සියලුම ප්‍රධාන ක්‍රෙඩිට් කාර්ඩ් පිළිගැනේ. ඔබේ ගෙවීම් තොරතුරු කිසි විටෙකත් අපගේ සේවාදායකයන්හි ගබඩා නොකරයි.",
       "demoMode": {
         "title": "නිරූපණ මාදිලිය:",
-        "description": "සැබෑ ගෙවීම් සැකසීම සක්‍රීය කිරීමට VITE_CREEM_API_KEY පරිසර විචල්‍යය සකසන්න."
+        "description": "සැබෑ ගෙවීම් සැකසීම සක්‍රීය කිරීමට VITE_POLAR_ORGANIZATION_ID පරිසර විචල්‍යය සකසන්න."
       }
     },
     "status": {

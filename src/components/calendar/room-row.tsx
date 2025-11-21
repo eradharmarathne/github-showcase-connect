@@ -109,20 +109,25 @@ export function RoomRow({
 						{calendarDays.map((day, dayIndex) => {
 							// Find ALL bookings that occupy this day
 							const allBookingsHere = [
-								...roomBookings.map(b => ({ ...b, isExternal: false })),
-								...roomExternalBookings.map(b => ({ ...b, isExternal: true }))
+								...roomBookings.map((b) => ({ ...b, isExternal: false })),
+								...roomExternalBookings.map((b) => ({
+									...b,
+									isExternal: true,
+								})),
 							].filter(
 								(booking) =>
 									dayIndex >= booking.span.startIndex &&
-									dayIndex < booking.span.startIndex + booking.span.spanDays
+									dayIndex < booking.span.startIndex + booking.span.spanDays,
 							);
 
 							// Determine what type of day this is for each booking
 							const getBookingDayType = (booking: any) => {
 								if (!booking) return null;
 								const isFirstDay = dayIndex === booking.span.startIndex;
-								const isLastDay = dayIndex === booking.span.startIndex + booking.span.spanDays - 1;
-								
+								const isLastDay =
+									dayIndex ===
+									booking.span.startIndex + booking.span.spanDays - 1;
+
 								if (isFirstDay && isLastDay) return "single"; // 1-day booking
 								if (isFirstDay) return "checkin"; // Check-in day
 								if (isLastDay) return "checkout"; // Check-out day
@@ -130,14 +135,26 @@ export function RoomRow({
 							};
 
 							// Separate bookings by their day type
-							const checkoutBooking = allBookingsHere.find(b => getBookingDayType(b) === "checkout");
-							const checkinBooking = allBookingsHere.find(b => getBookingDayType(b) === "checkin");
-							const middleBooking = allBookingsHere.find(b => getBookingDayType(b) === "middle");
-							const singleBooking = allBookingsHere.find(b => getBookingDayType(b) === "single");
+							const checkoutBooking = allBookingsHere.find(
+								(b) => getBookingDayType(b) === "checkout",
+							);
+							const checkinBooking = allBookingsHere.find(
+								(b) => getBookingDayType(b) === "checkin",
+							);
+							const middleBooking = allBookingsHere.find(
+								(b) => getBookingDayType(b) === "middle",
+							);
+							const singleBooking = allBookingsHere.find(
+								(b) => getBookingDayType(b) === "single",
+							);
 
 							// Priority: single > middle > checkout/checkin split
 							const hasMultipleBookings = allBookingsHere.length > 1;
-							const primaryBooking = singleBooking || middleBooking || checkoutBooking || checkinBooking;
+							const primaryBooking =
+								singleBooking ||
+								middleBooking ||
+								checkoutBooking ||
+								checkinBooking;
 
 							console.log("Rendering day:", format(day, "yyyy-MM-dd"), {
 								dayIndex,
@@ -156,22 +173,28 @@ export function RoomRow({
 												"flex-1 h-12 relative cursor-pointer transition-all overflow-hidden",
 												primaryBooking && "hover:brightness-110",
 												// Add subtle right border only when cell is empty (for day separation)
-												!primaryBooking && "border-r border-border/30"
+												!primaryBooking && "border-r border-border/30",
 											)}
 											style={{ minWidth: "32px" }}
-											onClick={() => primaryBooking && onBookingClick(primaryBooking)}
+											onClick={() =>
+												primaryBooking && onBookingClick(primaryBooking)
+											}
 										>
 											{/* Colored background based on booking status */}
-											
+
 											{/* Handle checkout booking (left half triangle) */}
 											{checkoutBooking && (
 												<div
 													className={cn(
 														"absolute inset-y-0 left-0 w-1/2",
-														checkoutBooking.isExternal ? "opacity-60" : "opacity-90",
-														getStatusColor(checkoutBooking.status)
+														checkoutBooking.isExternal
+															? "opacity-60"
+															: "opacity-90",
+														getStatusColor(checkoutBooking.status),
 													)}
-													style={{ clipPath: "polygon(100% 0, 0 0, 0 100%, 50% 100%)" }}
+													style={{
+														clipPath: "polygon(100% 0, 0 0, 0 100%, 50% 100%)",
+													}}
 												/>
 											)}
 
@@ -181,23 +204,30 @@ export function RoomRow({
 													<div
 														className={cn(
 															"absolute inset-y-0 right-0 w-1/2",
-															checkinBooking.isExternal ? "opacity-60" : "opacity-90",
-															getStatusColor(checkinBooking.status)
+															checkinBooking.isExternal
+																? "opacity-60"
+																: "opacity-90",
+															getStatusColor(checkinBooking.status),
 														)}
-														style={{ clipPath: "polygon(50% 0, 100% 0, 100% 100%, 0% 100%)" }}
+														style={{
+															clipPath:
+																"polygon(50% 0, 100% 0, 100% 100%, 0% 100%)",
+														}}
 													/>
 													{/* External booking badge */}
-													{checkinBooking.isExternal && "source" in checkinBooking && (
-														<div className="absolute top-0.5 left-1/2 ml-1 z-20">
-															<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
-																{checkinBooking.source === "booking_com" && "B"}
-																{checkinBooking.source === "airbnb" && "A"}
-																{checkinBooking.source === "expedia" && "E"}
-																{checkinBooking.source === "beds24" && "B24"}
-																{checkinBooking.source === "ical" && "iCal"}
+													{checkinBooking.isExternal &&
+														"source" in checkinBooking && (
+															<div className="absolute top-0.5 left-1/2 ml-1 z-20">
+																<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
+																	{checkinBooking.source === "booking_com" &&
+																		"B"}
+																	{checkinBooking.source === "airbnb" && "A"}
+																	{checkinBooking.source === "expedia" && "E"}
+																	{checkinBooking.source === "beds24" && "B24"}
+																	{checkinBooking.source === "ical" && "iCal"}
+																</div>
 															</div>
-														</div>
-													)}
+														)}
 												</>
 											)}
 
@@ -206,43 +236,55 @@ export function RoomRow({
 												<div
 													className={cn(
 														"absolute inset-0",
-														middleBooking.isExternal ? "opacity-60" : "opacity-90",
-														getStatusColor(middleBooking.status)
+														middleBooking.isExternal
+															? "opacity-60"
+															: "opacity-90",
+														getStatusColor(middleBooking.status),
 													)}
 												/>
 											)}
 
 											{/* Handle single day booking (diamond shape) */}
-											{singleBooking && !checkoutBooking && !checkinBooking && !middleBooking && (
-												<>
-													<div
-														className={cn(
-															"absolute inset-0",
-															singleBooking.isExternal ? "opacity-60" : "opacity-90",
-															getStatusColor(singleBooking.status)
-														)}
-														style={{ clipPath: "polygon(50% 0, 100% 50%, 50% 100%, 0 50%)" }}
-													/>
-													{/* Guest name for single day */}
-													<div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-														<span className="text-white text-[10px] sm:text-xs drop-shadow-md truncate">
-															{singleBooking.guest_name?.split(" ")[0]}
-														</span>
-													</div>
-													{/* External booking badge */}
-													{singleBooking.isExternal && "source" in singleBooking && (
-														<div className="absolute top-0.5 right-1 z-20">
-															<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
-																{singleBooking.source === "booking_com" && "B"}
-																{singleBooking.source === "airbnb" && "A"}
-																{singleBooking.source === "expedia" && "E"}
-																{singleBooking.source === "beds24" && "B24"}
-																{singleBooking.source === "ical" && "iCal"}
-															</div>
+											{singleBooking &&
+												!checkoutBooking &&
+												!checkinBooking &&
+												!middleBooking && (
+													<>
+														<div
+															className={cn(
+																"absolute inset-0",
+																singleBooking.isExternal
+																	? "opacity-60"
+																	: "opacity-90",
+																getStatusColor(singleBooking.status),
+															)}
+															style={{
+																clipPath:
+																	"polygon(50% 0, 100% 50%, 50% 100%, 0 50%)",
+															}}
+														/>
+														{/* Guest name for single day */}
+														<div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+															<span className="text-white text-[10px] sm:text-xs drop-shadow-md truncate">
+																{singleBooking.guest_name?.split(" ")[0]}
+															</span>
 														</div>
-													)}
-												</>
-											)}
+														{/* External booking badge */}
+														{singleBooking.isExternal &&
+															"source" in singleBooking && (
+																<div className="absolute top-0.5 right-1 z-20">
+																	<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
+																		{singleBooking.source === "booking_com" &&
+																			"B"}
+																		{singleBooking.source === "airbnb" && "A"}
+																		{singleBooking.source === "expedia" && "E"}
+																		{singleBooking.source === "beds24" && "B24"}
+																		{singleBooking.source === "ical" && "iCal"}
+																	</div>
+																</div>
+															)}
+													</>
+												)}
 
 											{/* Quick book button when cell is empty */}
 											{!primaryBooking && (
@@ -269,28 +311,32 @@ export function RoomRow({
 											</div>
 											<div className="space-y-1">
 												<div className="flex justify-between gap-4">
-													<span className="text-muted-foreground">Check-in:</span>
+													<span className="text-muted-foreground">
+														Check-in:
+													</span>
 													<span className="font-medium">
 														{format(
 															parseISO(
 																"check_in_date" in primaryBooking
 																	? primaryBooking.check_in_date
-																	: primaryBooking.check_in
+																	: primaryBooking.check_in,
 															),
-															"MMM dd, yyyy"
+															"MMM dd, yyyy",
 														)}
 													</span>
 												</div>
 												<div className="flex justify-between gap-4">
-													<span className="text-muted-foreground">Check-out:</span>
+													<span className="text-muted-foreground">
+														Check-out:
+													</span>
 													<span className="font-medium">
 														{format(
 															parseISO(
 																"check_out_date" in primaryBooking
 																	? primaryBooking.check_out_date
-																	: primaryBooking.check_out
+																	: primaryBooking.check_out,
 															),
-															"MMM dd, yyyy"
+															"MMM dd, yyyy",
 														)}
 													</span>
 												</div>
@@ -300,31 +346,41 @@ export function RoomRow({
 														{primaryBooking.status.replace("_", " ")}
 													</span>
 												</div>
-												{primaryBooking.isExternal && "source" in primaryBooking && (
-													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Source:</span>
-														<span className="font-medium capitalize">
-															{primaryBooking.source.replace("_", ".")}
-														</span>
-													</div>
-												)}
+												{primaryBooking.isExternal &&
+													"source" in primaryBooking && (
+														<div className="flex justify-between gap-4">
+															<span className="text-muted-foreground">
+																Source:
+															</span>
+															<span className="font-medium capitalize">
+																{primaryBooking.source.replace("_", ".")}
+															</span>
+														</div>
+													)}
 												<div className="flex justify-between gap-4">
 													<span className="text-muted-foreground">Guests:</span>
 													<span className="font-medium">
-														{primaryBooking.adults + (primaryBooking.children || 0)}
+														{primaryBooking.adults +
+															(primaryBooking.children || 0)}
 													</span>
 												</div>
 												{primaryBooking.total_amount > 0 && (
 													<div className="flex justify-between gap-4">
-														<span className="text-muted-foreground">Amount:</span>
+														<span className="text-muted-foreground">
+															Amount:
+														</span>
 														<span className="font-medium">
-															{getCurrencySymbol(primaryBooking.currency || "USD")}
+															{getCurrencySymbol(
+																primaryBooking.currency || "USD",
+															)}
 															{primaryBooking.total_amount.toLocaleString()}
 														</span>
 													</div>
 												)}
 												<div className="flex justify-between gap-4">
-													<span className="text-muted-foreground">Booking #:</span>
+													<span className="text-muted-foreground">
+														Booking #:
+													</span>
 													<span className="font-medium text-xs">
 														{"reservation_number" in primaryBooking
 															? primaryBooking.reservation_number

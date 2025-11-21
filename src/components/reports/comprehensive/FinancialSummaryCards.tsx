@@ -104,7 +104,7 @@ export function FinancialSummaryCards({
 				for (const expense of expensesResult.data || []) {
 					const convertedAmount = await convertCurrency(
 						parseFloat(expense.amount.toString()),
-						expense.currency as any,
+						expense.currency || "USD",
 						baseCurrency,
 						tenant.id,
 						selectedLocation!,
@@ -117,7 +117,7 @@ export function FinancialSummaryCards({
 				for (const payment of paymentsResult.data || []) {
 					const convertedAmount = await convertCurrency(
 						parseFloat(payment.amount.toString()),
-						payment.currency as any,
+						payment.currency || "USD",
 						baseCurrency,
 						tenant.id,
 						selectedLocation!,

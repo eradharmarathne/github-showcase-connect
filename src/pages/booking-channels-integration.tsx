@@ -3,7 +3,6 @@ import { RefreshCw, Wifi } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { logger } from "@/lib/logger";
 import {
 	BookingStatsCards,
 	BookingsTable,
@@ -41,6 +40,7 @@ import {
 	getSourceColor,
 	getStatusColor,
 } from "@/lib/booking-channels-utils";
+import { logger } from "@/lib/logger";
 import type {
 	ExternalBooking,
 	PropertyMapping,
@@ -92,20 +92,20 @@ export default function BookingChannelsIntegration() {
 			return;
 		}
 
-	setLoading(true);
-	try {
-		// Fetch bookings with location data - filtered by selected location (from unified reservations table)
-		const { data: bookingsData, error: bookingsError } = await supabase
-			.from("reservations")
-			.select(`
+		setLoading(true);
+		try {
+			// Fetch bookings with location data - filtered by selected location (from unified reservations table)
+			const { data: bookingsData, error: bookingsError } = await supabase
+				.from("reservations")
+				.select(`
           *,
           location:locations(name),
           room:rooms(id, room_number, room_type)
         `)
-			.eq("tenant_id", tenant.id)
-			.eq("location_id", selectedLocation)
-			.eq("is_external", true)
-			.order("check_in_date", { ascending: false });			// Fetch locations for the current tenant (for property mappings display)
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", selectedLocation)
+				.eq("is_external", true)
+				.order("check_in_date", { ascending: false }); // Fetch locations for the current tenant (for property mappings display)
 			const { data: locationsData, error: locationsError } = await supabase
 				.from("locations")
 				.select("*")
@@ -175,15 +175,16 @@ export default function BookingChannelsIntegration() {
 			const transformedBookings: ExternalBooking[] = (bookingsData || []).map(
 				(booking) => ({
 					id: booking.id,
-					external_id: booking.external_id || '',
-					property_id: booking.property_id || '',
-					source: booking.source_channel || 'unknown',
-					guest_name: booking.guest_name || '',
-					check_in: booking.check_in_timestamp || booking.check_in_date || '',
-					check_out: booking.check_out_timestamp || booking.check_out_date || '',
-					status: booking.status || '',
+					external_id: booking.external_id || "",
+					property_id: booking.property_id || "",
+					source: booking.source_channel || "unknown",
+					guest_name: booking.guest_name || "",
+					check_in: booking.check_in_timestamp || booking.check_in_date || "",
+					check_out:
+						booking.check_out_timestamp || booking.check_out_date || "",
+					status: booking.status || "",
 					total_amount: booking.total_amount || 0,
-					currency: booking.currency || 'USD',
+					currency: booking.currency || "USD",
 					adults: booking.adults || 0,
 					children: booking.children || 0,
 					room_name: booking.room_name,
@@ -191,9 +192,9 @@ export default function BookingChannelsIntegration() {
 					location_id: booking.location_id,
 					location: booking.location,
 					room: booking.room,
-					last_synced_at: booking.last_synced_at || booking.updated_at || '',
+					last_synced_at: booking.last_synced_at || booking.updated_at || "",
 					raw_data: booking.raw_data,
-				})
+				}),
 			);
 
 			setBookings(transformedBookings);
@@ -364,7 +365,7 @@ export default function BookingChannelsIntegration() {
 			logger.error("Token exchange error", error);
 
 			// Parse Beds24 API errors for better user feedback
-			let userMessage = error.message || "Unknown error";
+			let userMessage = (error as Error).message || "Unknown error";
 			if (userMessage.includes("Token not valid")) {
 				userMessage =
 					"Invalid or expired invite code. Please generate a new invite code in Beds24 and try again.";
@@ -675,7 +676,9 @@ export default function BookingChannelsIntegration() {
 		} catch (error: unknown) {
 			logger.error("Error syncing iCal", error);
 			const errorObj = error as { message?: string };
-			toast.error(`Failed to sync iCal: ${errorObj.message || "Unknown error"}`);
+			toast.error(
+				`Failed to sync iCal: ${errorObj.message || "Unknown error"}`,
+			);
 		} finally {
 			setSyncing(false);
 		}
@@ -702,7 +705,10 @@ export default function BookingChannelsIntegration() {
 		}
 	};
 
-	logger.debug("Bookings and location", { bookingsCount: bookings.length, selectedLocation });
+	logger.debug("Bookings and location", {
+		bookingsCount: bookings.length,
+		selectedLocation,
+	});
 
 	// No need to filter bookings - they're already filtered by selectedLocation in the query
 	const filteredBookings = bookings.map((booking) => {
@@ -752,10 +758,7 @@ export default function BookingChannelsIntegration() {
 			</div>
 
 			{/* Stats Cards */}
-			<BookingStatsCards
-				syncStats={syncStats}
-				lastSyncTime={lastSyncTime}
-			/>
+			<BookingStatsCards syncStats={syncStats} lastSyncTime={lastSyncTime} />
 
 			{/* Main Content */}
 			<Tabs defaultValue="bookings" className="space-y-4">
@@ -1032,30 +1035,30 @@ export default function BookingChannelsIntegration() {
 					<RoomMappingsTab locationId={selectedLocation || null} />
 				</TabsContent>
 
-			<TabsContent value="settings" className="space-y-6">
-				<SettingsTab
-					locations={locations}
-					selectedLocation={selectedLocation}
-					propertyMappings={propertyMappings}
-					propertyInputValues={propertyInputValues}
-					setPropertyInputValues={setPropertyInputValues}
-					addPropertyMapping={addPropertyMapping}
-					syncUrls={syncUrls}
-					icalInputValues={icalInputValues}
-					setIcalInputValues={setIcalInputValues}
-					rooms={rooms}
-					addIcalSyncUrl={addIcalSyncUrl}
-					deleteSyncUrl={deleteSyncUrl}
-					manualSyncIcal={manualSyncIcal}
-					syncing={syncing}
-					setupMode={setupMode}
-					setSetupMode={setSetupMode}
-					syncStats={syncStats}
-					exchangingToken={exchangingToken}
-					exchangeInviteCode={exchangeInviteCode}
-					getSourceColor={getSourceColor}
-				/>
-			</TabsContent>
+				<TabsContent value="settings" className="space-y-6">
+					<SettingsTab
+						locations={locations}
+						selectedLocation={selectedLocation}
+						propertyMappings={propertyMappings}
+						propertyInputValues={propertyInputValues}
+						setPropertyInputValues={setPropertyInputValues}
+						addPropertyMapping={addPropertyMapping}
+						syncUrls={syncUrls}
+						icalInputValues={icalInputValues}
+						setIcalInputValues={setIcalInputValues}
+						rooms={rooms}
+						addIcalSyncUrl={addIcalSyncUrl}
+						deleteSyncUrl={deleteSyncUrl}
+						manualSyncIcal={manualSyncIcal}
+						syncing={syncing}
+						setupMode={setupMode}
+						setSetupMode={setSetupMode}
+						syncStats={syncStats}
+						exchangingToken={exchangingToken}
+						exchangeInviteCode={exchangeInviteCode}
+						getSourceColor={getSourceColor}
+					/>
+				</TabsContent>
 			</Tabs>
 		</div>
 	);

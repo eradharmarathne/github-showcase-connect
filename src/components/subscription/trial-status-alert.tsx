@@ -41,9 +41,7 @@ export function TrialStatusAlert({
 	return (
 		<Alert className={alertClassName}>
 			<AlertTriangle className={`h-4 w-4 ${iconClassName}`} />
-			<AlertDescription className={textClassName}>
-				{message}
-			</AlertDescription>
+			<AlertDescription className={textClassName}>{message}</AlertDescription>
 		</Alert>
 	);
 }

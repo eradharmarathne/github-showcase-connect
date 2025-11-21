@@ -63,7 +63,7 @@ export default function PendingInvitation() {
 		});
 
 		setAccepting(invitation.id);
-		setError(null);
+		// setError(null); // Removed - error state not defined
 
 		try {
 			// Update the profile with tenant_id

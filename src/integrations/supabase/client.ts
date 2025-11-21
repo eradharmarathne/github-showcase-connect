@@ -5,44 +5,46 @@ import type { Database } from "./types";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 const SUPABASE_SERVICE_ROLE_KEY = import.meta.env
-	.VITE_SUPABASE_SERVICE_ROLE_KEY!;
+  .VITE_SUPABASE_SERVICE_ROLE_KEY!;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 // Use singleton pattern to prevent multiple client instances
-let supabaseInstance: ReturnType<typeof createClient<Database>> | null = null;
+type SupabaseClientType = ReturnType<typeof createClient<Database>>;
+let supabaseInstance: SupabaseClientType | null = null;
 
-function getSupabaseClient() {
-	if (!supabaseInstance) {
-		// In development, check if there's already a global instance to prevent HMR issues
-		if (import.meta.env.DEV && (window as any).__supabaseClient) {
-			supabaseInstance = (window as any).__supabaseClient;
-			return supabaseInstance;
-		}
+function getSupabaseClient(): SupabaseClientType {
+  if (!supabaseInstance) {
+    // In development, check if there's already a global instance to prevent HMR issues
+    if (import.meta.env.DEV && (window as any).__supabaseClient) {
+      supabaseInstance = (window as any).__supabaseClient;
+      return supabaseInstance;
+    }
 
-		supabaseInstance = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
-			auth: {
-				storage: localStorage,
-				persistSession: true,
-				autoRefreshToken: true,
-				storageKey: "cco-supabase-auth", // Unique storage key
-				detectSessionInUrl: true,
-				flowType: "pkce",
-			},
-			global: {
-				headers: {
-					"X-Client-Info": "checking-checkout-web",
-				},
-			},
-		});
+    supabaseInstance = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        storage: localStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+        storageKey: "cco-supabase-auth", // Unique storage key
+        detectSessionInUrl: true,
+        flowType: "pkce",
+      },
+      global: {
+        headers: {
+          "X-Client-Info": "checking-checkout-web",
+        },
+      },
+    });
 
-		// Store globally in development for HMR
-		if (import.meta.env.DEV) {
-			(window as any).__supabaseClient = supabaseInstance;
-		}
-	}
-	return supabaseInstance;
+    // Store globally in development for HMR
+    if (import.meta.env.DEV) {
+      (window as any).__supabaseClient = supabaseInstance;
+    }
+  }
+  // Safe to assert non-null because we always create the instance above
+  return supabaseInstance!;
 }
 
 // Single client instance for all operations
@@ -50,21 +52,21 @@ export const supabase = getSupabaseClient();
 
 // For admin operations that truly need service role access, create a temporary client
 export const createAdminClient = () => {
-	// Only create admin client when absolutely necessary and in secure environment
-	if (!SUPABASE_SERVICE_ROLE_KEY) {
-		console.warn("Service role key not available for admin operations");
-		return null;
-	}
+  // Only create admin client when absolutely necessary and in secure environment
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    console.warn("Service role key not available for admin operations");
+    return null;
+  }
 
-	return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-		auth: {
-			autoRefreshToken: false,
-			persistSession: false,
-		},
-		global: {
-			headers: {
-				"X-Client-Info": "checking-checkout-admin-temp",
-			},
-		},
-	});
+  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    global: {
+      headers: {
+        "X-Client-Info": "checking-checkout-admin-temp",
+      },
+    },
+  });
 };

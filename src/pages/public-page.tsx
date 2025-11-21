@@ -1,14 +1,39 @@
 import { addDays, format, isAfter, isBefore } from "date-fns";
-import { Calendar as CalendarIcon, Hotel, Loader2, Mail, MapPin, Phone, User, Users } from "lucide-react";
+import {
+	Calendar as CalendarIcon,
+	Hotel,
+	Loader2,
+	Mail,
+	MapPin,
+	Phone,
+	User,
+	Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,11 +126,13 @@ export default function PublicBookingPage() {
 					.single();
 
 				if (locationError) throw locationError;
-				
+
 				if (!locationData) {
-					throw new Error("Location not found or public booking is not enabled");
+					throw new Error(
+						"Location not found or public booking is not enabled",
+					);
 				}
-				
+
 				setLocation(locationData);
 
 				// Fetch tenant info
@@ -118,24 +145,29 @@ export default function PublicBookingPage() {
 				if (tenantError) throw tenantError;
 				setTenant(tenantData);
 
-			// Fetch available rooms for this location with full details
-			const { data: roomsData, error: roomsError } = await supabase
-				.from("rooms")
-				.select("id, room_number, room_type, base_price, currency, description")
-				.eq("tenant_id", locationData.tenant_id)
-				.eq("location_id", locationData.id)
-				.eq("is_active", true)
-				.order("room_type")
-				.order("room_number");
+				// Fetch available rooms for this location with full details
+				const { data: roomsData, error: roomsError } = await supabase
+					.from("rooms")
+					.select(
+						"id, room_number, room_type, base_price, currency, description",
+					)
+					.eq("tenant_id", locationData.tenant_id)
+					.eq("location_id", locationData.id)
+					.eq("is_active", true)
+					.order("room_type")
+					.order("room_number");
 
-			if (roomsError) throw roomsError;
+				if (roomsError) throw roomsError;
 
-			setRooms(roomsData || []);
+				setRooms(roomsData || []);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 				toast({
 					title: "Error",
-					description: error instanceof Error ? error.message : "Failed to load booking information. Please try again.",
+					description:
+						error instanceof Error
+							? error.message
+							: "Failed to load booking information. Please try again.",
 					variant: "destructive",
 				});
 			} finally {
@@ -162,7 +194,12 @@ export default function PublicBookingPage() {
 		}
 
 		// Validate required fields
-		if (!formData.guestName || !formData.guestEmail || !formData.checkInDate || !formData.checkOutDate) {
+		if (
+			!formData.guestName ||
+			!formData.guestEmail ||
+			!formData.checkInDate ||
+			!formData.checkOutDate
+		) {
 			toast({
 				title: "Missing Information",
 				description: "Please fill in all required fields.",
@@ -192,43 +229,46 @@ export default function PublicBookingPage() {
 			return;
 		}
 
-	setSubmitting(true);
+		setSubmitting(true);
 
-	try {
-		// Create a fresh fetch request without any auth headers
-		// to ensure this works for both logged-in and logged-out users
-		const response = await fetch(
-			`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-public-booking`,
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					"apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
+		try {
+			// Create a fresh fetch request without any auth headers
+			// to ensure this works for both logged-in and logged-out users
+			const response = await fetch(
+				`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-public-booking`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+					},
+					body: JSON.stringify({
+						locationSlug,
+						guestName: formData.guestName,
+						guestEmail: formData.guestEmail,
+						guestPhone: formData.guestPhone || undefined,
+						guestAddress: formData.guestAddress || undefined,
+						guestNationality: formData.guestNationality || undefined,
+						checkInDate: format(formData.checkInDate, "yyyy-MM-dd"),
+						checkOutDate: format(formData.checkOutDate, "yyyy-MM-dd"),
+						adults: formData.adults,
+						children: formData.children,
+						roomId: selectedRoomId,
+						specialRequests: formData.specialRequests || undefined,
+					}),
 				},
-				body: JSON.stringify({
-					locationSlug,
-					guestName: formData.guestName,
-					guestEmail: formData.guestEmail,
-					guestPhone: formData.guestPhone || undefined,
-					guestAddress: formData.guestAddress || undefined,
-					guestNationality: formData.guestNationality || undefined,
-					checkInDate: format(formData.checkInDate, "yyyy-MM-dd"),
-					checkOutDate: format(formData.checkOutDate, "yyyy-MM-dd"),
-					adults: formData.adults,
-					children: formData.children,
-					roomId: selectedRoomId,
-					specialRequests: formData.specialRequests || undefined,
-				}),
-			},
-		);
+			);
 
-		const result = await response.json();
+			const result = await response.json();
 
-		if (!response.ok) {
-			throw new Error(result.error || "Failed to submit booking request");
-		}			toast({
+			if (!response.ok) {
+				throw new Error(result.error || "Failed to submit booking request");
+			}
+			toast({
 				title: "Booking Request Submitted!",
-				description: result.message || "The hotel will contact you soon to confirm your booking.",
+				description:
+					result.message ||
+					"The hotel will contact you soon to confirm your booking.",
 			});
 
 			// Reset form
@@ -249,7 +289,10 @@ export default function PublicBookingPage() {
 			console.error("Error submitting booking:", error);
 			toast({
 				title: "Submission Failed",
-				description: error instanceof Error ? error.message : "An unexpected error occurred. Please try again.",
+				description:
+					error instanceof Error
+						? error.message
+						: "An unexpected error occurred. Please try again.",
 				variant: "destructive",
 			});
 		} finally {
@@ -259,7 +302,8 @@ export default function PublicBookingPage() {
 
 	const calculateNights = () => {
 		if (formData.checkInDate && formData.checkOutDate) {
-			const diff = formData.checkOutDate.getTime() - formData.checkInDate.getTime();
+			const diff =
+				formData.checkOutDate.getTime() - formData.checkInDate.getTime();
 			return Math.ceil(diff / (1000 * 60 * 60 * 24));
 		}
 		return 0;
@@ -283,7 +327,8 @@ export default function PublicBookingPage() {
 					<CardHeader>
 						<CardTitle>Hotel Not Found</CardTitle>
 						<CardDescription>
-							The booking page you're looking for doesn't exist or has been removed.
+							The booking page you're looking for doesn't exist or has been
+							removed.
 						</CardDescription>
 					</CardHeader>
 				</Card>
@@ -316,7 +361,8 @@ export default function PublicBookingPage() {
 					<CardHeader>
 						<CardTitle>Make a Booking Request</CardTitle>
 						<CardDescription>
-							Fill in your details below and we'll get back to you shortly to confirm your reservation.
+							Fill in your details below and we'll get back to you shortly to
+							confirm your reservation.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -327,14 +373,20 @@ export default function PublicBookingPage() {
 									<MapPin className="h-4 w-4 text-primary" />
 									<div>
 										<p className="font-medium">{location.name}</p>
-										{location.address && <p className="text-sm text-muted-foreground">{location.address}</p>}
+										{location.address && (
+											<p className="text-sm text-muted-foreground">
+												{location.address}
+											</p>
+										)}
 									</div>
 								</div>
 							)}
 
 							{location?.public_booking_message && (
 								<div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-									<p className="text-sm text-blue-900">{location.public_booking_message}</p>
+									<p className="text-sm text-blue-900">
+										{location.public_booking_message}
+									</p>
 								</div>
 							)}
 
@@ -354,7 +406,9 @@ export default function PublicBookingPage() {
 											id="guestName"
 											placeholder="John Doe"
 											value={formData.guestName}
-											onChange={(e) => setFormData({ ...formData, guestName: e.target.value })}
+											onChange={(e) =>
+												setFormData({ ...formData, guestName: e.target.value })
+											}
 											required
 										/>
 									</div>
@@ -371,7 +425,12 @@ export default function PublicBookingPage() {
 												placeholder="john@example.com"
 												className="pl-9"
 												value={formData.guestEmail}
-												onChange={(e) => setFormData({ ...formData, guestEmail: e.target.value })}
+												onChange={(e) =>
+													setFormData({
+														...formData,
+														guestEmail: e.target.value,
+													})
+												}
 												required
 											/>
 										</div>
@@ -387,7 +446,12 @@ export default function PublicBookingPage() {
 												placeholder="+1 234 567 8900"
 												className="pl-9"
 												value={formData.guestPhone}
-												onChange={(e) => setFormData({ ...formData, guestPhone: e.target.value })}
+												onChange={(e) =>
+													setFormData({
+														...formData,
+														guestPhone: e.target.value,
+													})
+												}
 											/>
 										</div>
 									</div>
@@ -398,7 +462,12 @@ export default function PublicBookingPage() {
 											id="guestNationality"
 											placeholder="USA"
 											value={formData.guestNationality}
-											onChange={(e) => setFormData({ ...formData, guestNationality: e.target.value })}
+											onChange={(e) =>
+												setFormData({
+													...formData,
+													guestNationality: e.target.value,
+												})
+											}
 										/>
 									</div>
 
@@ -408,7 +477,12 @@ export default function PublicBookingPage() {
 											id="guestAddress"
 											placeholder="123 Main St, City"
 											value={formData.guestAddress}
-											onChange={(e) => setFormData({ ...formData, guestAddress: e.target.value })}
+											onChange={(e) =>
+												setFormData({
+													...formData,
+													guestAddress: e.target.value,
+												})
+											}
 										/>
 									</div>
 								</div>
@@ -459,7 +533,10 @@ export default function PublicBookingPage() {
 															});
 														}
 													}}
-													disabled={(date) => isBefore(date, new Date()) && !isAfter(date, new Date())}
+													disabled={(date) =>
+														isBefore(date, new Date()) &&
+														!isAfter(date, new Date())
+													}
 													initialFocus
 												/>
 											</PopoverContent>
@@ -492,10 +569,14 @@ export default function PublicBookingPage() {
 												<Calendar
 													mode="single"
 													selected={formData.checkOutDate}
-													onSelect={(date) => setFormData({ ...formData, checkOutDate: date })}
+													onSelect={(date) =>
+														setFormData({ ...formData, checkOutDate: date })
+													}
 													disabled={(date) =>
-														isBefore(date, formData.checkInDate || new Date()) ||
-														date <= (formData.checkInDate || new Date())
+														isBefore(
+															date,
+															formData.checkInDate || new Date(),
+														) || date <= (formData.checkInDate || new Date())
 													}
 													initialFocus
 												/>
@@ -508,7 +589,9 @@ export default function PublicBookingPage() {
 										<Label htmlFor="adults">Adults</Label>
 										<Select
 											value={formData.adults.toString()}
-											onValueChange={(value) => setFormData({ ...formData, adults: parseInt(value) })}
+											onValueChange={(value) =>
+												setFormData({ ...formData, adults: parseInt(value) })
+											}
 										>
 											<SelectTrigger id="adults">
 												<SelectValue />
@@ -527,7 +610,9 @@ export default function PublicBookingPage() {
 										<Label htmlFor="children">Children</Label>
 										<Select
 											value={formData.children.toString()}
-											onValueChange={(value) => setFormData({ ...formData, children: parseInt(value) })}
+											onValueChange={(value) =>
+												setFormData({ ...formData, children: parseInt(value) })
+											}
 										>
 											<SelectTrigger id="children">
 												<SelectValue />
@@ -546,9 +631,12 @@ export default function PublicBookingPage() {
 								{/* Available Rooms */}
 								{rooms.length > 0 && (
 									<div>
-										<Label className="text-base font-semibold">Select a Room *</Label>
+										<Label className="text-base font-semibold">
+											Select a Room *
+										</Label>
 										<p className="text-sm text-muted-foreground mb-4">
-											Choose from our available rooms. All bookings require approval.
+											Choose from our available rooms. All bookings require
+											approval.
 										</p>
 										<div className="grid gap-3 sm:grid-cols-2">
 											{rooms.map((room) => (
@@ -560,26 +648,39 @@ export default function PublicBookingPage() {
 														"p-4 rounded-lg border-2 text-left transition-all hover:border-primary/50",
 														selectedRoomId === room.id
 															? "border-primary bg-primary/5"
-															: "border-border bg-card"
+															: "border-border bg-card",
 													)}
 												>
 													<div className="flex justify-between items-start mb-2">
 														<div>
-															<h4 className="font-semibold">{room.room_type}</h4>
-															<p className="text-sm text-muted-foreground">Room {room.room_number}</p>
+															<h4 className="font-semibold">
+																{room.room_type}
+															</h4>
+															<p className="text-sm text-muted-foreground">
+																Room {room.room_number}
+															</p>
 														</div>
 														<div className="text-right">
-															<p className="text-lg font-bold">{room.currency} {room.base_price}</p>
-															<p className="text-xs text-muted-foreground">per night</p>
+															<p className="text-lg font-bold">
+																{room.currency} {room.base_price}
+															</p>
+															<p className="text-xs text-muted-foreground">
+																per night
+															</p>
 														</div>
 													</div>
 													{room.description && (
-														<p className="text-sm text-muted-foreground mt-2">{room.description}</p>
+														<p className="text-sm text-muted-foreground mt-2">
+															{room.description}
+														</p>
 													)}
 													{nights > 0 && selectedRoomId === room.id && (
 														<div className="mt-3 pt-3 border-t">
 															<p className="text-sm font-medium">
-																Total for {nights} {nights === 1 ? "night" : "nights"}: {room.currency} {(room.base_price * nights).toFixed(2)}
+																Total for {nights}{" "}
+																{nights === 1 ? "night" : "nights"}:{" "}
+																{room.currency}{" "}
+																{(room.base_price * nights).toFixed(2)}
 															</p>
 														</div>
 													)}
@@ -594,10 +695,12 @@ export default function PublicBookingPage() {
 									<div className="p-4 bg-primary/5 rounded-lg">
 										<p className="text-sm font-medium flex items-center gap-2">
 											<Users className="h-4 w-4" />
-											{formData.adults} {formData.adults === 1 ? "Adult" : "Adults"}
+											{formData.adults}{" "}
+											{formData.adults === 1 ? "Adult" : "Adults"}
 											{formData.children > 0 && (
 												<>
-													, {formData.children} {formData.children === 1 ? "Child" : "Children"}
+													, {formData.children}{" "}
+													{formData.children === 1 ? "Child" : "Children"}
 												</>
 											)}{" "}
 											• {nights} {nights === 1 ? "Night" : "Nights"}
@@ -613,13 +716,23 @@ export default function PublicBookingPage() {
 										placeholder="Any special requirements or requests..."
 										rows={4}
 										value={formData.specialRequests}
-										onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
+										onChange={(e) =>
+											setFormData({
+												...formData,
+												specialRequests: e.target.value,
+											})
+										}
 									/>
 								</div>
 							</div>
 
 							{/* Submit Button */}
-							<Button type="submit" className="w-full" size="lg" disabled={submitting}>
+							<Button
+								type="submit"
+								className="w-full"
+								size="lg"
+								disabled={submitting}
+							>
 								{submitting ? (
 									<>
 										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -631,7 +744,8 @@ export default function PublicBookingPage() {
 							</Button>
 
 							<p className="text-sm text-center text-muted-foreground">
-								By submitting this form, you agree to be contacted by the hotel regarding your booking request.
+								By submitting this form, you agree to be contacted by the hotel
+								regarding your booking request.
 							</p>
 						</form>
 					</CardContent>

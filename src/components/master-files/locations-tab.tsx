@@ -192,33 +192,34 @@ export default function LocationsTab() {
 
 			const [
 				{ count: reservationsCount },
-			{ count: incomeCount },
-			{ count: expensesCount },
-			{ count: bookingsCount },
-			{ count: externalBookingsCount },
-		] = await Promise.all([
-			supabase
-				.from("reservations")
-				.select("*", { count: "exact", head: true })
-				.eq("location_id", id),
-			supabase
-				.from("income")
-				.select("*", { count: "exact", head: true })
-				.eq("location_id", id),
-			supabase
-				.from("expenses")
-				.select("*", { count: "exact", head: true })
-				.eq("location_id", id),
-			supabase
-				.from("bookings")
-				.select("*", { count: "exact", head: true })
-				.eq("location_id", id),
-			supabase
-				.from("reservations")
-				.select("*", { count: "exact", head: true })
-				.eq("location_id", id)
-				.eq("is_external", true),
-		]);			const totalDependents =
+				{ count: incomeCount },
+				{ count: expensesCount },
+				{ count: bookingsCount },
+				{ count: externalBookingsCount },
+			] = await Promise.all([
+				supabase
+					.from("reservations")
+					.select("*", { count: "exact", head: true })
+					.eq("location_id", id),
+				supabase
+					.from("income")
+					.select("*", { count: "exact", head: true })
+					.eq("location_id", id),
+				supabase
+					.from("expenses")
+					.select("*", { count: "exact", head: true })
+					.eq("location_id", id),
+				supabase
+					.from("bookings")
+					.select("*", { count: "exact", head: true })
+					.eq("location_id", id),
+				supabase
+					.from("reservations")
+					.select("*", { count: "exact", head: true })
+					.eq("location_id", id)
+					.eq("is_external", true),
+			]);
+			const totalDependents =
 				(reservationsCount || 0) +
 				(incomeCount || 0) +
 				(expensesCount || 0) +
@@ -296,24 +297,24 @@ export default function LocationsTab() {
 			await supabase
 				.from("booking_payments")
 				.delete()
-			.in(
-				"booking_id",
-				(
-					await supabase
-						.from("bookings")
-						.select("id")
-						.eq("tenant_id", tenant.id)
-						.eq("location_id", deleteAlert.locationId)
-				).data?.map((b) => b.id) || [],
-			);
+				.in(
+					"booking_id",
+					(
+						await supabase
+							.from("bookings")
+							.select("id")
+							.eq("tenant_id", tenant.id)
+							.eq("location_id", deleteAlert.locationId)
+					).data?.map((b) => b.id) || [],
+				);
 
-		// 2. Delete external bookings (from unified reservations table)
-		await supabase
-			.from("reservations")
-			.delete()
-			.eq("tenant_id", tenant.id)
-			.eq("location_id", deleteAlert.locationId)
-			.eq("is_external", true);			// 3. Delete income records
+			// 2. Delete external bookings (from unified reservations table)
+			await supabase
+				.from("reservations")
+				.delete()
+				.eq("tenant_id", tenant.id)
+				.eq("location_id", deleteAlert.locationId)
+				.eq("is_external", true); // 3. Delete income records
 			await supabase
 				.from("income")
 				.delete()

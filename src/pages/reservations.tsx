@@ -12,8 +12,8 @@ import { AddIncomeDialog } from "@/components/reservation";
 import { PaymentDialog } from "@/components/reservation/payment-dialog";
 import { PaymentsTable } from "@/components/reservation/payments-table";
 import { PublicBookingsManager } from "@/components/reservation/public-bookings-manager";
-import { ReservationsDesktopTable } from "@/components/reservation/reservations-desktop-table";
 import { useReservationPrint } from "@/components/reservation/reservation-print";
+import { ReservationsDesktopTable } from "@/components/reservation/reservations-desktop-table";
 import { ReservationsFilters } from "@/components/reservation/reservations-filters";
 import { ReservationsHeader } from "@/components/reservation/reservations-header";
 import { ReservationsMobileCards } from "@/components/reservation/reservations-mobile-cards";
@@ -226,15 +226,16 @@ export default function Reservations() {
 						/>
 					</TabsContent>
 
-				<TabsContent value="payments" className="space-y-4">
-					<PaymentsTable />
-				</TabsContent>
+					<TabsContent value="payments" className="space-y-4">
+						<PaymentsTable />
+					</TabsContent>
 
-				<TabsContent value="public-requests" className="space-y-4">
-					<PublicBookingsManager />
-				</TabsContent>
-			</div>
-		</Tabs>			{/* Dialogs */}
+					<TabsContent value="public-requests" className="space-y-4">
+						<PublicBookingsManager />
+					</TabsContent>
+				</div>
+			</Tabs>{" "}
+			{/* Dialogs */}
 			{showOTPVerification && otpData && (
 				<Dialog
 					open={showOTPVerification}
@@ -254,7 +255,6 @@ export default function Reservations() {
 					</DialogContent>
 				</Dialog>
 			)}
-
 			{/* Edit OTP Verification Dialog */}
 			{showEditOTPVerification && editOtpData && (
 				<Dialog
@@ -275,7 +275,6 @@ export default function Reservations() {
 					</DialogContent>
 				</Dialog>
 			)}
-
 			{editingReservation && (
 				<ReservationEditDialog
 					isOpen={isEditDialogOpen}
@@ -291,7 +290,6 @@ export default function Reservations() {
 					}}
 				/>
 			)}
-
 			<NewReservationDialog
 				isOpen={isNewReservationDialogOpen}
 				onClose={() => setIsNewReservationDialogOpen(false)}
@@ -300,7 +298,6 @@ export default function Reservations() {
 					setIsNewReservationDialogOpen(false);
 				}}
 			/>
-
 			<CompactReservationDialog
 				isOpen={isCompactReservationDialogOpen}
 				onClose={() => setIsCompactReservationDialogOpen(false)}
@@ -309,7 +306,6 @@ export default function Reservations() {
 					setIsCompactReservationDialogOpen(false);
 				}}
 			/>
-
 			<ViewReservationDialog
 				isOpen={isViewDialogOpen}
 				onClose={() => {
@@ -318,7 +314,6 @@ export default function Reservations() {
 				}}
 				reservationId={viewingReservationId || ""}
 			/>
-
 			<AddIncomeDialog
 				isOpen={isIncomeDialogOpen}
 				onClose={handleCloseIncomeDialog}
@@ -326,7 +321,6 @@ export default function Reservations() {
 				accounts={accounts}
 				onSuccess={handleIncomeSuccess}
 			/>
-
 			{paymentData && (
 				<PaymentDialog
 					isOpen={isPaymentDialogOpen}

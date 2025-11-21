@@ -178,7 +178,7 @@
     "paymentForm": "Payment Form",
     "reports": "Reports",
     "comprehensiveReports": "Comprehensive Reports",
-    "accountReports": "Account Reports", 
+    "accountReports": "Account Reports",
     "commissionReports": "Commission Reports",
     "balanceSheet": "Balance Sheet",
     "enhancedFinancialReports": "Enhanced Financial Reports",
@@ -1227,10 +1227,10 @@
     },
     "payment": {
       "title": "Payment Processing",
-      "description": "Payments are processed securely through Creem.io. All major credit cards are accepted. Your payment information is never stored on our servers.",
+      "description": "Payments are processed securely through Polar.sh. All major credit cards are accepted. Your payment information is never stored on our servers.",
       "demoMode": {
         "title": "Demo Mode:",
-        "description": "Set VITE_CREEM_API_KEY environment variable to enable real payment processing."
+        "description": "Set VITE_POLAR_ORGANIZATION_ID environment variable to enable real payment processing."
       }
     },
     "status": {

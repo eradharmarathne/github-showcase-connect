@@ -1,16 +1,30 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Copy, ExternalLink, Globe, Info, Loader2, X } from "lucide-react";
+import {
+	Check,
+	Copy,
+	ExternalLink,
+	Globe,
+	Info,
+	Loader2,
+	X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PublicBookingSettings {
@@ -27,12 +41,12 @@ export function PublicBookingSettings() {
 	const { tenant } = useAuth();
 	const { selectedLocation, locations } = useLocationContext();
 	const queryClient = useQueryClient();
-	
+
 	const [locationSlugInput, setLocationSlugInput] = useState("");
 	const [slugError, setSlugError] = useState("");
 	const [isCheckingSlug, setIsCheckingSlug] = useState(false);
 	const [copied, setCopied] = useState(false);
-	
+
 	const [settings, setSettings] = useState<PublicBookingSettings>({
 		public_booking_enabled: false,
 		public_booking_message: null,
@@ -47,7 +61,7 @@ export function PublicBookingSettings() {
 		queryKey: ["location-public-booking", selectedLocation],
 		queryFn: async () => {
 			if (!selectedLocation) return null;
-			
+
 			const { data, error } = await supabase
 				.from("locations")
 				.select(`
@@ -63,7 +77,7 @@ export function PublicBookingSettings() {
 				`)
 				.eq("id", selectedLocation)
 				.single();
-			
+
 			if (error) throw error;
 			return data;
 		},
@@ -87,7 +101,9 @@ export function PublicBookingSettings() {
 
 	// Update location settings mutation (includes slug)
 	const updateSettingsMutation = useMutation({
-		mutationFn: async (newSettings: Partial<PublicBookingSettings> & { slug?: string }) => {
+		mutationFn: async (
+			newSettings: Partial<PublicBookingSettings> & { slug?: string },
+		) => {
 			const { error } = await supabase
 				.from("locations")
 				.update(newSettings)
@@ -118,15 +134,20 @@ export function PublicBookingSettings() {
 		}
 	};
 
-	const handleSettingChange = (key: keyof PublicBookingSettings, value: any) => {
+	const handleSettingChange = (
+		key: keyof PublicBookingSettings,
+		value: any,
+	) => {
 		const newSettings = { ...settings, [key]: value };
 		setSettings(newSettings);
 		updateSettingsMutation.mutate({ [key]: value });
 	};
 
-	const currentLocation = locations.find(l => l.id === selectedLocation);
+	const currentLocation = locations.find((l) => l.id === selectedLocation);
 	const locationSlug = locationData?.slug || "";
-	const publicUrl = locationSlug ? `${window.location.origin}/r/${locationSlug}` : "";
+	const publicUrl = locationSlug
+		? `${window.location.origin}/r/${locationSlug}`
+		: "";
 
 	const copyToClipboard = () => {
 		navigator.clipboard.writeText(publicUrl);
@@ -170,7 +191,11 @@ export function PublicBookingSettings() {
 								Configure public booking page for {currentLocation?.name}
 							</CardDescription>
 						</div>
-						<Badge variant={settings.public_booking_enabled ? "default" : "secondary"}>
+						<Badge
+							variant={
+								settings.public_booking_enabled ? "default" : "secondary"
+							}
+						>
 							{settings.public_booking_enabled ? "Enabled" : "Disabled"}
 						</Badge>
 					</div>
@@ -183,12 +208,16 @@ export function PublicBookingSettings() {
 						</Label>
 						<div className="flex gap-2">
 							<div className="flex-1 flex items-center gap-2">
-								<span className="text-sm text-muted-foreground">checkingcheckout.com/r/</span>
+								<span className="text-sm text-muted-foreground">
+									checkingcheckout.com/r/
+								</span>
 								<Input
 									id="locationSlug"
 									value={locationSlugInput}
 									onChange={(e) => {
-										const value = e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+										const value = e.target.value
+											.toLowerCase()
+											.replace(/[^a-z0-9_-]/g, "");
 										setLocationSlugInput(value);
 										setSlugError("");
 									}}
@@ -205,7 +234,8 @@ export function PublicBookingSettings() {
 							</p>
 						)}
 						<p className="text-xs text-muted-foreground">
-							Unique URL path for this location. Use lowercase letters, numbers, hyphens, or underscores.
+							Unique URL path for this location. Use lowercase letters, numbers,
+							hyphens, or underscores.
 						</p>
 					</div>
 
@@ -219,7 +249,8 @@ export function PublicBookingSettings() {
 										Your Public Booking URL
 									</p>
 									<p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-										This is the unique URL for this location's public booking page.
+										This is the unique URL for this location's public booking
+										page.
 									</p>
 									<div className="flex items-center gap-2 mt-2">
 										<code className="flex-1 text-sm bg-white dark:bg-gray-800 px-3 py-2 rounded border">
@@ -261,7 +292,9 @@ export function PublicBookingSettings() {
 						</div>
 						<Switch
 							checked={settings.public_booking_enabled}
-							onCheckedChange={(checked) => handleSettingChange("public_booking_enabled", checked)}
+							onCheckedChange={(checked) =>
+								handleSettingChange("public_booking_enabled", checked)
+							}
 						/>
 					</div>
 
@@ -273,13 +306,24 @@ export function PublicBookingSettings() {
 								<Textarea
 									id="message"
 									value={settings.public_booking_message || ""}
-									onChange={(e) => setSettings({ ...settings, public_booking_message: e.target.value })}
-									onBlur={() => handleSettingChange("public_booking_message", settings.public_booking_message)}
+									onChange={(e) =>
+										setSettings({
+											...settings,
+											public_booking_message: e.target.value,
+										})
+									}
+									onBlur={() =>
+										handleSettingChange(
+											"public_booking_message",
+											settings.public_booking_message,
+										)
+									}
 									placeholder="Welcome to our hotel! Fill out the form below to request a booking..."
 									rows={3}
 								/>
 								<p className="text-xs text-muted-foreground">
-									This message will be displayed at the top of your public booking page
+									This message will be displayed at the top of your public
+									booking page
 								</p>
 							</div>
 
@@ -291,8 +335,18 @@ export function PublicBookingSettings() {
 										id="email"
 										type="email"
 										value={settings.public_booking_email || ""}
-										onChange={(e) => setSettings({ ...settings, public_booking_email: e.target.value })}
-										onBlur={() => handleSettingChange("public_booking_email", settings.public_booking_email)}
+										onChange={(e) =>
+											setSettings({
+												...settings,
+												public_booking_email: e.target.value,
+											})
+										}
+										onBlur={() =>
+											handleSettingChange(
+												"public_booking_email",
+												settings.public_booking_email,
+											)
+										}
 										placeholder="bookings@yourhotel.com"
 									/>
 								</div>
@@ -303,8 +357,18 @@ export function PublicBookingSettings() {
 										id="phone"
 										type="tel"
 										value={settings.public_booking_phone || ""}
-										onChange={(e) => setSettings({ ...settings, public_booking_phone: e.target.value })}
-										onBlur={() => handleSettingChange("public_booking_phone", settings.public_booking_phone)}
+										onChange={(e) =>
+											setSettings({
+												...settings,
+												public_booking_phone: e.target.value,
+											})
+										}
+										onBlur={() =>
+											handleSettingChange(
+												"public_booking_phone",
+												settings.public_booking_phone,
+											)
+										}
 										placeholder="+1 234 567 8900"
 									/>
 								</div>
@@ -321,7 +385,9 @@ export function PublicBookingSettings() {
 									</div>
 									<Switch
 										checked={settings.show_room_prices}
-										onCheckedChange={(checked) => handleSettingChange("show_room_prices", checked)}
+										onCheckedChange={(checked) =>
+											handleSettingChange("show_room_prices", checked)
+										}
 									/>
 								</div>
 
@@ -329,12 +395,15 @@ export function PublicBookingSettings() {
 									<div className="space-y-0.5">
 										<Label>Require Approval</Label>
 										<p className="text-sm text-muted-foreground">
-											Booking requests will be marked as pending for manual approval
+											Booking requests will be marked as pending for manual
+											approval
 										</p>
 									</div>
 									<Switch
 										checked={settings.require_booking_approval}
-										onCheckedChange={(checked) => handleSettingChange("require_booking_approval", checked)}
+										onCheckedChange={(checked) =>
+											handleSettingChange("require_booking_approval", checked)
+										}
 									/>
 								</div>
 							</div>

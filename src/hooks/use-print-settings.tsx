@@ -1,12 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
 import { useTenant } from "./use-tenant";
 import { useToast } from "./use-toast";
-import type { Tables } from "@/integrations/supabase/types";
 
 type PrintSettings = Tables<"print_settings">;
-type PrintSettingsInsert = Omit<PrintSettings, "id" | "created_at" | "updated_at">;
-type PrintSettingsUpdate = Partial<Omit<PrintSettings, "id" | "tenant_id" | "created_at" | "updated_at">>;
+type PrintSettingsInsert = Omit<
+	PrintSettings,
+	"id" | "created_at" | "updated_at"
+>;
+type PrintSettingsUpdate = Partial<
+	Omit<PrintSettings, "id" | "tenant_id" | "created_at" | "updated_at">
+>;
 
 export function usePrintSettings() {
 	const { tenant } = useTenant();
@@ -58,7 +63,9 @@ export function usePrintSettings() {
 			return data;
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["print-settings", tenant?.id] });
+			queryClient.invalidateQueries({
+				queryKey: ["print-settings", tenant?.id],
+			});
 			toast({
 				title: "Success",
 				description: "Print settings created successfully",
@@ -88,7 +95,9 @@ export function usePrintSettings() {
 			return data;
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["print-settings", tenant?.id] });
+			queryClient.invalidateQueries({
+				queryKey: ["print-settings", tenant?.id],
+			});
 			toast({
 				title: "Success",
 				description: "Print settings updated successfully",

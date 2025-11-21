@@ -389,7 +389,7 @@ export function AccountDetails({
 												<p className="text-lg sm:text-2xl font-bold">
 													{formatCurrency(
 														account.current_balance,
-														account.currency as any,
+														account.currency || "USD",
 													)}
 												</p>
 												<div className="flex pt-4 sm:pt-0 flex-col sm:flex-row gap-2 sm:gap-4 text-sm text-muted-foreground">
@@ -397,14 +397,14 @@ export function AccountDetails({
 														{t("reports.comprehensive.accounts.income")}:{" "}
 														{formatCurrency(
 															account.total_payments,
-															account.currency as any,
+															account.currency || "USD",
 														)}
 													</span>
 													<span className="text-red-600">
 														{t("reports.comprehensive.accounts.expenses")}:{" "}
 														{formatCurrency(
 															account.total_expenses,
-															account.currency as any,
+															account.currency || "USD",
 														)}
 													</span>
 												</div>
@@ -452,14 +452,14 @@ export function AccountDetails({
 																	: "-"}
 																{formatCurrency(
 																	txn.amount,
-																	txn.currency as any,
+																	txn.currency || "USD",
 																)}
 															</p>
 															<div className="text-sm text-muted-foreground">
 																{t("reports.comprehensive.accounts.balance")}:{" "}
 																{formatCurrency(
 																	txn.running_balance,
-																	txn.currency as any,
+																	txn.currency || "USD",
 																)}
 															</div>
 														</div>

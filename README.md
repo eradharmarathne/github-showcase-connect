@@ -31,7 +31,7 @@ A comprehensive multi-tenant hospitality management system built for hotels, gue
 
 ### 🏢 Multi-Tenancy
 - **Complete Tenant Isolation** - Secure data separation
-- **Subscription Management** - SaaS billing with Creem integration
+- **Subscription Management** - SaaS billing with Polar.sh integration
 - **Team Collaboration** - Invitation system with role-based permissions
 - **Trial Periods** - Free trials with automatic subscription management
 
@@ -165,8 +165,8 @@ RESEND_API_KEY=your_resend_api_key
 # SMS Service
 HUTCH_SMS_TOKEN=your_hutch_sms_token
 
-# Billing Integration
-CREEM_API_KEY=your_creem_api_key
+# Billing Integration (Polar.sh)
+VITE_POLAR_ORGANIZATION_ID=your_polar_organization_id
 ```
 
 ## 🔧 Available Scripts
@@ -208,7 +208,7 @@ supabase gen types typescript --local # Generate types
 - **Trial Periods** - Automatic trial management
 - **Plan Upgrades** - Seamless subscription upgrades
 - **Usage Tracking** - Monitor feature usage and limits
-- **Billing Integration** - Automated billing with Creem
+- **Billing Integration** - Automated billing with Polar.sh
 
 ## 🔐 Security Features
 

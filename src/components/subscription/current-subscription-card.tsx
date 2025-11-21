@@ -1,4 +1,10 @@
-import { AlertTriangle, Calendar, CheckCircle, Crown, XCircle } from "lucide-react";
+import {
+	AlertTriangle,
+	Calendar,
+	CheckCircle,
+	Crown,
+	XCircle,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +32,7 @@ const getStatusColor = (status: string): string => {
 	}
 };
 
-const getStatusIcon = (status: string): JSX.Element => {
+const getStatusIcon = (status: string) => {
 	switch (status) {
 		case "active":
 			return <CheckCircle className="size-4 text-green-600" />;

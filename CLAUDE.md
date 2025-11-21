@@ -177,7 +177,8 @@ Located in `supabase/functions/`:
 - `booking-reminders` - Automated guest communication
 - `sync-ical` / `scheduled-calendar-sync` - External calendar sync
 - `send-user-credentials` - User credential email
-- `handle-creem-webhook` - SaaS billing webhooks
+- `handle-polar-webhook` - Polar.sh billing webhooks
+- `create-polar-checkout` - Create Polar.sh checkout sessions
 - `clear-bookings` - Booking cleanup operations
 
 ## Critical Implementation Notes
@@ -211,10 +212,12 @@ if (!profile?.tenant_id || !tenant || !tenant.onboarding_completed) {
 
 ### Subscription Management
 
-- SaaS billing via Creem integration (`src/lib/creem.ts`)
+- SaaS billing via Polar.sh integration (`src/lib/polar.ts`)
 - Trial period tracking: `tenant.trial_ends_at`
 - Subscription status: `subscription.status` (`active` | `trialing`)
 - Access control: Check `hasActiveTrial` or `hasActiveSubscription` from `useAuth()`
+- Polar webhooks handled via `supabase/functions/handle-polar-webhook/`
+- Checkout sessions created via `supabase/functions/create-polar-checkout/`
 
 ### File Conventions
 

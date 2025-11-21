@@ -112,7 +112,7 @@ export function ViewReservationDialog({
 			// Check if it's an external booking
 			const isExternal = reservationRes.data.is_external === true;
 			setIsExternalBooking(isExternal);
-			
+
 			if (isExternal) {
 				setExternalBooking(reservationRes.data);
 			} else {
@@ -248,7 +248,7 @@ export function ViewReservationDialog({
 	}
 
 	const currentBooking = isExternalBooking ? externalBooking : reservation;
-	
+
 	if (!currentBooking) {
 		return (
 			<Dialog open={isOpen} onOpenChange={onClose}>
@@ -262,40 +262,54 @@ export function ViewReservationDialog({
 	}
 
 	// For external bookings, map field names
-	const bookingNumber = isExternalBooking 
-		? currentBooking.reservation_number || `${(currentBooking.source_channel || 'EXTERNAL').toUpperCase()}-${currentBooking.external_id}`
+	const bookingNumber = isExternalBooking
+		? currentBooking.reservation_number ||
+			`${(currentBooking.source_channel || "EXTERNAL").toUpperCase()}-${currentBooking.external_id}`
 		: currentBooking.reservation_number;
-	
+
 	const guestName = currentBooking.guest_name;
-	const guestEmail = isExternalBooking 
+	const guestEmail = isExternalBooking
 		? currentBooking.raw_data?.guest?.email || null
 		: currentBooking.guest_email;
 	const guestPhone = isExternalBooking
 		? currentBooking.raw_data?.guest?.phone || null
 		: currentBooking.guest_phone;
 	const guestAddress = isExternalBooking ? null : currentBooking.guest_address;
-	const guestNationality = isExternalBooking ? null : currentBooking.guest_nationality;
-	const guestPassportNumber = isExternalBooking ? null : currentBooking.guest_passport_number;
-	const guestIdNumber = isExternalBooking ? null : currentBooking.guest_id_number;
+	const guestNationality = isExternalBooking
+		? null
+		: currentBooking.guest_nationality;
+	const guestPassportNumber = isExternalBooking
+		? null
+		: currentBooking.guest_passport_number;
+	const guestIdNumber = isExternalBooking
+		? null
+		: currentBooking.guest_id_number;
 	const adults = currentBooking.adults || 0;
 	const children = currentBooking.children || 0;
 	// For external bookings, prefer timestamp fields, fall back to date fields
-	const checkInDate = isExternalBooking 
-		? (currentBooking.check_in_timestamp || currentBooking.check_in_date)
+	const checkInDate = isExternalBooking
+		? currentBooking.check_in_timestamp || currentBooking.check_in_date
 		: currentBooking.check_in_date;
-	const checkOutDate = isExternalBooking 
-		? (currentBooking.check_out_timestamp || currentBooking.check_out_date)
+	const checkOutDate = isExternalBooking
+		? currentBooking.check_out_timestamp || currentBooking.check_out_date
 		: currentBooking.check_out_date;
-	const nights = currentBooking.nights || Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24));
+	const nights =
+		currentBooking.nights ||
+		Math.ceil(
+			(new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) /
+				(1000 * 60 * 60 * 24),
+		);
 	const arrivalTime = isExternalBooking ? null : currentBooking.arrival_time;
-	const specialRequests = isExternalBooking 
+	const specialRequests = isExternalBooking
 		? currentBooking.raw_data?.notes || null
 		: currentBooking.special_requests;
-	const bookingSource = isExternalBooking ? currentBooking.source_channel : currentBooking.booking_source;
-	
+	const bookingSource = isExternalBooking
+		? currentBooking.source_channel
+		: currentBooking.booking_source;
+
 	// Room information
 	const roomInfo = currentBooking.rooms || null;
-	
+
 	// Financial fields - ensure all are proper numbers
 	const currency = currentBooking.currency || "LKR";
 	const roomRate = Number(currentBooking.room_rate) || 0;
@@ -308,11 +322,15 @@ export function ViewReservationDialog({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2 text-xl">
 						<Calendar className="size-5" />
-						{isExternalBooking ? "Booking Details" : t("reservations.dialog.viewTitle")}
+						{isExternalBooking
+							? "Booking Details"
+							: t("reservations.dialog.viewTitle")}
 					</DialogTitle>
 					<DialogDescription>
-						{isExternalBooking ? "Booking" : t("reservations.viewDialog.reservationNumber")} #
-						{bookingNumber}
+						{isExternalBooking
+							? "Booking"
+							: t("reservations.viewDialog.reservationNumber")}{" "}
+						#{bookingNumber}
 						{isExternalBooking && (
 							<span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
 								External Booking
@@ -336,7 +354,12 @@ export function ViewReservationDialog({
 							)}
 						</div>
 						<div className="text-sm text-muted-foreground">
-							{isExternalBooking ? "Last Synced" : "Created"}: {new Date(isExternalBooking ? currentBooking.last_synced_at : currentBooking.created_at).toLocaleDateString()}
+							{isExternalBooking ? "Last Synced" : "Created"}:{" "}
+							{new Date(
+								isExternalBooking
+									? currentBooking.last_synced_at
+									: currentBooking.created_at,
+							).toLocaleDateString()}
 						</div>
 					</div>
 
@@ -354,9 +377,7 @@ export function ViewReservationDialog({
 									<label className="text-xs font-medium text-muted-foreground">
 										Name
 									</label>
-									<p className="text-sm font-semibold">
-										{guestName}
-									</p>
+									<p className="text-sm font-semibold">{guestName}</p>
 								</div>
 								{guestEmail && (
 									<div>
@@ -395,9 +416,7 @@ export function ViewReservationDialog({
 										<label className="text-xs font-medium text-muted-foreground">
 											Passport Number
 										</label>
-										<p className="text-sm">
-											{guestPassportNumber}
-										</p>
+										<p className="text-sm">{guestPassportNumber}</p>
 									</div>
 								)}
 								{guestIdNumber && (
@@ -413,17 +432,13 @@ export function ViewReservationDialog({
 										<label className="text-xs font-medium text-muted-foreground">
 											Adults
 										</label>
-										<p className="text-sm font-semibold">
-											{adults}
-										</p>
+										<p className="text-sm font-semibold">{adults}</p>
 									</div>
 									<div>
 										<label className="text-xs font-medium text-muted-foreground">
 											Children
 										</label>
-										<p className="text-sm font-semibold">
-											{children}
-										</p>
+										<p className="text-sm font-semibold">{children}</p>
 									</div>
 								</div>
 							</CardContent>
@@ -528,22 +543,19 @@ export function ViewReservationDialog({
 												<label className="text-xs font-medium text-muted-foreground">
 													Description
 												</label>
+												<p className="text-sm">{roomInfo.description}</p>
+											</div>
+										)}
+										{roomInfo.amenities && roomInfo.amenities.length > 0 && (
+											<div>
+												<label className="text-xs font-medium text-muted-foreground">
+													Amenities
+												</label>
 												<p className="text-sm">
-													{roomInfo.description}
+													{roomInfo.amenities.join(", ")}
 												</p>
 											</div>
 										)}
-										{roomInfo.amenities &&
-											roomInfo.amenities.length > 0 && (
-												<div>
-													<label className="text-xs font-medium text-muted-foreground">
-														Amenities
-													</label>
-													<p className="text-sm">
-														{roomInfo.amenities.join(", ")}
-													</p>
-												</div>
-											)}
 									</>
 								) : (
 									<p className="text-sm text-muted-foreground">
@@ -567,8 +579,7 @@ export function ViewReservationDialog({
 										Room Rate (per night)
 									</label>
 									<p className="text-sm font-semibold">
-										{getCurrencySymbol(currency)}{" "}
-										{roomRate.toLocaleString()}
+										{getCurrencySymbol(currency)} {roomRate.toLocaleString()}
 									</p>
 								</div>
 								<div className="flex justify-between items-center">
@@ -583,8 +594,7 @@ export function ViewReservationDialog({
 										Total Amount
 									</label>
 									<p className="text-sm font-bold">
-										{getCurrencySymbol(currency)}{" "}
-										{totalAmount.toLocaleString()}
+										{getCurrencySymbol(currency)} {totalAmount.toLocaleString()}
 									</p>
 								</div>
 								<div className="flex justify-between items-center">

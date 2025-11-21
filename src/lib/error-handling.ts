@@ -128,7 +128,10 @@ export function isNotFoundError(error: unknown): boolean {
  * Standardized error handler for Supabase queries
  * Logs error and returns standardized error object
  */
-export function handleSupabaseError(error: unknown, context?: string): AppError {
+export function handleSupabaseError(
+	error: unknown,
+	context?: string,
+): AppError {
 	const message = getErrorMessage(error);
 	const code = getErrorCode(error);
 
@@ -174,4 +177,3 @@ export function getUserFriendlyError(error: unknown): string {
 
 	return getErrorMessage(error);
 }
-

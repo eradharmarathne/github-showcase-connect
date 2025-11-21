@@ -13,19 +13,18 @@ import { useAuth } from "@/context/auth-context";
 import { useSubscription } from "@/hooks/use-subscription";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+	cancelSubscription,
+	createCheckoutSession,
+	getPolarPriceId,
+} from "@/lib/polar";
 import type {
 	Invoice,
 	PaymentMethod,
 	Plan,
-	PlanWithCreemProduct,
+	PlanWithPolarProduct,
 	UsageData,
 } from "@/types/subscription";
-import {
-	cancelSubscription,
-	createCheckoutSession,
-	getProduct,
-} from "@/lib/creem";
-
 
 export default function BillingSubscription() {
 	const { t } = useTranslation("common");
@@ -39,7 +38,7 @@ export default function BillingSubscription() {
 	} = useSubscription();
 
 	const [loading, setLoading] = useState(true);
-	const [plans, setPlans] = useState<PlanWithCreemProduct[]>([]);
+	const [plans, setPlans] = useState<PlanWithPolarProduct[]>([]);
 	const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
 	const [cancelling, setCancelling] = useState(false);
 	const [trialDaysRemaining, setTrialDaysRemaining] = useState<number | null>(
@@ -59,7 +58,7 @@ export default function BillingSubscription() {
 
 		setLoadingInvoices(true);
 		try {
-			// Mock invoice data for now - replace with actual Creem API call
+			// Mock invoice data for now - replace with actual Polar API call
 			const currentPlan = plans.find(
 				(p) => p.id === currentSubscription?.plan_id,
 			);
@@ -89,7 +88,7 @@ export default function BillingSubscription() {
 
 		setLoadingPaymentMethods(true);
 		try {
-			// Mock payment methods - replace with actual Creem API call
+			// Mock payment methods - replace with actual Polar API call
 			const mockPaymentMethods: PaymentMethod[] = [
 				{
 					id: "pm_1",
@@ -154,19 +153,18 @@ export default function BillingSubscription() {
 
 					if (plansError) throw plansError;
 
-					// Fetch Creem product details for each plan (if needed)
+					// Fetch Polar product details for each plan (if needed)
 					const plansWithProducts = await Promise.all(
 						(plansData || []).map(async (plan) => {
 							try {
-								// If plan has a creem_product_id, fetch its details
-								// For now, we'll use mock data since the plans table doesn't have creem_product_id
-								return { ...plan, creemProduct: null };
+								// Plans now use polar_price_id for checkout
+								return { ...plan, polarProduct: null };
 							} catch (error) {
 								console.warn(
-									`Failed to fetch Creem product for plan ${plan.id}:`,
+									`Failed to fetch Polar product for plan ${plan.id}:`,
 									error,
 								);
-								return { ...plan, creemProduct: null };
+								return { ...plan, polarProduct: null };
 							}
 						}),
 					);
@@ -236,22 +234,27 @@ export default function BillingSubscription() {
 
 		setProcessingPlanId(plan.id);
 		try {
-			// Create checkout session with Creem
-			if (!plan.product_id) {
-				throw new Error("Plan does not have a Creem product ID configured");
+			// Create checkout session with Polar
+			if (!plan.polar_price_id) {
+				toast({
+					title: "Configuration Error",
+					description: `The ${plan.name} plan is not configured yet. Please contact support to set up this plan.`,
+					variant: "destructive",
+				});
+				throw new Error("Plan does not have a Polar price ID configured");
 			}
+
+			console.log(
+				`🔍 Creating checkout for plan: ${plan.name} with price_id: ${plan.polar_price_id}`,
+			);
 
 			const successUrl = `${window.location.origin}/billing/success?plan_id=${plan.id}&tenant_id=${tenant.id}&source=billing&redirect_to=billing`;
 
 			try {
 				const checkout = await createCheckoutSession({
-					product_id: plan.product_id,
+					product_price_id: plan.polar_price_id,
 					success_url: successUrl,
-					error_url: `${window.location.origin}/billing/error?source=billing`,
-					cancel_url: `${window.location.origin}/billing`,
-					customer: {
-						email: user.email,
-					},
+					customer_email: user.email,
 					metadata: {
 						tenant_id: tenant.id,
 						plan_id: plan.id,
@@ -260,24 +263,30 @@ export default function BillingSubscription() {
 					},
 				});
 
-				// Redirect to Creem checkout
+				// Redirect to Polar checkout
 				if (checkout?.checkoutUrl) {
 					window.location.href = checkout.checkoutUrl;
 				} else {
-					throw new Error("No checkout URL returned from Creem.io");
+					throw new Error("No checkout URL returned from Polar.sh");
 				}
-			} catch (creemError: any) {
-				// Enhanced error handling for Creem integration
-				console.warn("Creem checkout failed:", creemError);
+			} catch (polarError: any) {
+				// Enhanced error handling for Polar integration
+				console.warn("Polar checkout failed:", polarError);
 
-				if (creemError.message?.includes("API key")) {
+				if (
+					polarError.message?.includes("API key") ||
+					polarError.message?.includes("access token")
+				) {
 					toast({
 						title: "Configuration Error",
 						description:
 							"Payment system is not properly configured. Please contact support or try again later.",
 						variant: "destructive",
 					});
-				} else if (creemError.message?.includes("product_id")) {
+				} else if (
+					polarError.message?.includes("product_id") ||
+					polarError.message?.includes("price_id")
+				) {
 					toast({
 						title: "Plan Configuration Error",
 						description: `The ${plan.name} plan is not properly configured for payments. Please contact support.`,
@@ -286,7 +295,7 @@ export default function BillingSubscription() {
 				} else {
 					toast({
 						title: "Payment System Error",
-						description: `Failed to initialize checkout: ${creemError.message || "Unknown error"}. Please try again or contact support.`,
+						description: `Failed to initialize checkout: ${polarError.message || "Unknown error"}. Please try again or contact support.`,
 						variant: "destructive",
 					});
 				}
@@ -304,7 +313,7 @@ export default function BillingSubscription() {
 	};
 
 	const handleCancelSubscription = async () => {
-		if (!currentSubscription?.creem_subscription_id) {
+		if (!currentSubscription?.polar_subscription_id) {
 			toast({
 				title: "Error",
 				description: "No active subscription to cancel",
@@ -315,13 +324,13 @@ export default function BillingSubscription() {
 
 		setCancelling(true);
 		try {
-			// Cancel subscription in Creem
+			// Cancel subscription in Polar
 			try {
-				await cancelSubscription(currentSubscription.creem_subscription_id);
-			} catch (creemError) {
+				await cancelSubscription(currentSubscription.polar_subscription_id);
+			} catch (polarError) {
 				console.warn(
-					"Creem cancellation failed, proceeding with local cancellation:",
-					creemError,
+					"Polar cancellation failed, proceeding with local cancellation:",
+					polarError,
 				);
 			}
 
@@ -426,7 +435,7 @@ export default function BillingSubscription() {
 				processingPlanId={processingPlanId}
 			/>
 
-			{/* Creem.io Integration Info */}
+			{/* Polar.sh Integration Info */}
 			<PaymentProcessingInfo />
 		</div>
 	);

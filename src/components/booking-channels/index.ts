@@ -1,8 +1,8 @@
 export { AnalyticsTab } from "./analytics-tab";
 export { BookingChannelsStats } from "./booking-channels-stats";
 export { BookingDetailsDialog } from "./booking-details-dialog";
-export { BookingsTab } from "./bookings-tab";
 export { BookingStatsCards } from "./booking-stats-cards";
+export { BookingsTab } from "./bookings-tab";
 export { BookingsTable } from "./bookings-table";
 export { RoomMappingsTab } from "./room-mappings-tab";
 export { SettingsTab } from "./settings-tab";

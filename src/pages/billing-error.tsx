@@ -7,7 +7,7 @@ export default function BillingError() {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 
-	// Get URL parameters from Creem.io callback
+	// Get URL parameters from Polar.sh callback
 	const errorType = searchParams.get("error") || "unknown";
 	const errorDescription =
 		searchParams.get("error_description") ||

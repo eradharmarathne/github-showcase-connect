@@ -159,12 +159,15 @@ export function BookingsTable({
 											<div className="text-sm font-medium flex items-center gap-2">
 												{booking.room_id && booking.room ? (
 													<>
-														{booking.room.room_number} - {booking.room.room_type}
+														{booking.room.room_number} -{" "}
+														{booking.room.room_type}
 													</>
 												) : (
 													<>
 														{booking.room_name ||
-															t("bookingChannels.bookingsTable.unknownProperty")}
+															t(
+																"bookingChannels.bookingsTable.unknownProperty",
+															)}
 														{rooms.length > 0 && (
 															<Button
 																variant="outline"

@@ -218,14 +218,20 @@ function ReservationsDesktopTableComponent({
 		.filter((r) => r.status !== "checked_out" && r.status !== "cancelled")
 		.sort((a, b) => {
 			// Sort by check-in date (upcoming first)
-			return new Date(a.check_in_date).getTime() - new Date(b.check_in_date).getTime();
+			return (
+				new Date(a.check_in_date).getTime() -
+				new Date(b.check_in_date).getTime()
+			);
 		});
 
 	const completedReservations = filteredReservations
 		.filter((r) => r.status === "checked_out" || r.status === "cancelled")
 		.sort((a, b) => {
 			// Sort by check-out date (most recent first)
-			return new Date(b.check_out_date).getTime() - new Date(a.check_out_date).getTime();
+			return (
+				new Date(b.check_out_date).getTime() -
+				new Date(a.check_out_date).getTime()
+			);
 		});
 
 	const canShowPaymentButton = (reservation: ReservationFinancial): boolean => {
@@ -346,7 +352,7 @@ function ReservationsDesktopTableComponent({
 														)}
 													</Button>
 												</TableCell>
-												<TableCell 
+												<TableCell
 													className="py-3"
 													onClick={() => toggleRowExpansion(reservation.id)}
 												>
@@ -354,7 +360,9 @@ function ReservationsDesktopTableComponent({
 														<div className="flex-1">
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-900 text-sm">
-																	{reservation.guest_name} - {reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																	{reservation.guest_name} -{" "}
+																	{reservation.rooms?.room_number || "N/A"} -{" "}
+																	{reservation.rooms?.room_type || "N/A"}
 																</span>
 																<Badge
 																	variant="outline"
@@ -366,7 +374,8 @@ function ReservationsDesktopTableComponent({
 															<div className="text-xs text-slate-600">
 																{dateRange.startDate} - {dateRange.endDate}
 																<span className="text-slate-400 ml-1">
-																	({dateRange.nights} {dateRange.nights === 1 ? "night" : "nights"})
+																	({dateRange.nights}{" "}
+																	{dateRange.nights === 1 ? "night" : "nights"})
 																</span>
 															</div>
 														</div>
@@ -376,27 +385,37 @@ function ReservationsDesktopTableComponent({
 													<div className="font-medium text-slate-900 text-sm">
 														{getCurrencySymbol(selectedCurrency)}
 														{(
-															(convertedAmounts[reservation.id]?.roomAmount || 0) +
-															(convertedAmounts[reservation.id]?.expensesAmount || 0)
+															(convertedAmounts[reservation.id]?.roomAmount ||
+																0) +
+															(convertedAmounts[reservation.id]
+																?.expensesAmount || 0)
 														).toLocaleString()}
 													</div>
 												</TableCell>
 												<TableCell className="text-right py-3">
 													<div className="font-medium text-slate-900 text-sm">
 														{getCurrencySymbol(selectedCurrency)}
-														{(convertedAmounts[reservation.id]?.paidAmount || 0).toLocaleString()}
+														{(
+															convertedAmounts[reservation.id]?.paidAmount || 0
+														).toLocaleString()}
 													</div>
 												</TableCell>
 												<TableCell className="text-right py-3">
 													<div
 														className={`font-medium text-sm ${
-															(convertedAmounts[reservation.id]?.balanceAmount || 0) > 0
+															(
+																convertedAmounts[reservation.id]
+																	?.balanceAmount || 0
+															) > 0
 																? "text-rose-600"
 																: "text-emerald-600"
 														}`}
 													>
 														{getCurrencySymbol(selectedCurrency)}
-														{(convertedAmounts[reservation.id]?.balanceAmount || 0).toLocaleString()}
+														{(
+															convertedAmounts[reservation.id]?.balanceAmount ||
+															0
+														).toLocaleString()}
 													</div>
 												</TableCell>
 												<TableCell className="text-right py-3">
@@ -447,7 +466,8 @@ function ReservationsDesktopTableComponent({
 																e.stopPropagation();
 																onPrint({
 																	...reservation,
-																	convertedAmounts: convertedAmounts[reservation.id],
+																	convertedAmounts:
+																		convertedAmounts[reservation.id],
 																	selectedCurrency: selectedCurrency,
 																});
 															}}
@@ -470,7 +490,9 @@ function ReservationsDesktopTableComponent({
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">Name:</span>
+																		<span className="text-slate-600">
+																			Name:
+																		</span>
 																		<span className="font-medium text-slate-900">
 																			{reservation.guest_name}
 																		</span>
@@ -492,26 +514,40 @@ function ReservationsDesktopTableComponent({
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">Room Amount:</span>
+																		<span className="text-slate-600">
+																			Room Amount:
+																		</span>
 																		<span className="font-medium text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
-																			{(convertedAmounts[reservation.id]?.roomAmount || 0).toLocaleString()}
+																			{(
+																				convertedAmounts[reservation.id]
+																					?.roomAmount || 0
+																			).toLocaleString()}
 																		</span>
 																	</div>
 																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">Services:</span>
+																		<span className="text-slate-600">
+																			Services:
+																		</span>
 																		<span className="font-medium text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
-																			{(convertedAmounts[reservation.id]?.expensesAmount || 0).toLocaleString()}
+																			{(
+																				convertedAmounts[reservation.id]
+																					?.expensesAmount || 0
+																			).toLocaleString()}
 																		</span>
 																	</div>
 																	<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
-																		<span className="text-slate-700 font-medium">Total:</span>
+																		<span className="text-slate-700 font-medium">
+																			Total:
+																		</span>
 																		<span className="font-semibold text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
 																			{(
-																				(convertedAmounts[reservation.id]?.roomAmount || 0) +
-																				(convertedAmounts[reservation.id]?.expensesAmount || 0)
+																				(convertedAmounts[reservation.id]
+																					?.roomAmount || 0) +
+																				(convertedAmounts[reservation.id]
+																					?.expensesAmount || 0)
 																			).toLocaleString()}
 																		</span>
 																	</div>
@@ -527,7 +563,9 @@ function ReservationsDesktopTableComponent({
 																		variant="outline"
 																		size="sm"
 																		onClick={() => onAddIncome(reservation)}
-																		disabled={reservation.status === "checked_out"}
+																		disabled={
+																			reservation.status === "checked_out"
+																		}
 																		className="justify-start cursor-pointer text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
 																	>
 																		<DollarSign className="size-4 mr-2" />
@@ -571,7 +609,8 @@ function ReservationsDesktopTableComponent({
 					<CardHeader className="pb-3 bg-slate-50/50">
 						<CardTitle className="text-base font-medium flex items-center gap-2 text-slate-500">
 							<span className="h-2 w-2 rounded-full bg-slate-400"></span>
-							{t("reservations.sections.completed")} ({completedReservations.length})
+							{t("reservations.sections.completed")} (
+							{completedReservations.length})
 						</CardTitle>
 					</CardHeader>
 					<CardContent className="p-0">
@@ -621,7 +660,7 @@ function ReservationsDesktopTableComponent({
 														)}
 													</Button>
 												</TableCell>
-												<TableCell 
+												<TableCell
 													className="py-3"
 													onClick={() => toggleRowExpansion(reservation.id)}
 												>
@@ -629,7 +668,9 @@ function ReservationsDesktopTableComponent({
 														<div className="flex-1">
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-700 text-sm">
-																	{reservation.guest_name} - {reservation.rooms?.room_number || "N/A"} - {reservation.rooms?.room_type || "N/A"}
+																	{reservation.guest_name} -{" "}
+																	{reservation.rooms?.room_number || "N/A"} -{" "}
+																	{reservation.rooms?.room_type || "N/A"}
 																</span>
 																<Badge
 																	variant="outline"
@@ -641,7 +682,8 @@ function ReservationsDesktopTableComponent({
 															<div className="text-xs text-slate-500">
 																{dateRange.startDate} - {dateRange.endDate}
 																<span className="text-slate-400 ml-1">
-																	({dateRange.nights} {dateRange.nights === 1 ? "night" : "nights"})
+																	({dateRange.nights}{" "}
+																	{dateRange.nights === 1 ? "night" : "nights"})
 																</span>
 															</div>
 														</div>
@@ -651,27 +693,37 @@ function ReservationsDesktopTableComponent({
 													<div className="font-medium text-slate-700 text-sm">
 														{getCurrencySymbol(selectedCurrency)}
 														{(
-															(convertedAmounts[reservation.id]?.roomAmount || 0) +
-															(convertedAmounts[reservation.id]?.expensesAmount || 0)
+															(convertedAmounts[reservation.id]?.roomAmount ||
+																0) +
+															(convertedAmounts[reservation.id]
+																?.expensesAmount || 0)
 														).toLocaleString()}
 													</div>
 												</TableCell>
 												<TableCell className="text-right py-3">
 													<div className="font-medium text-slate-700 text-sm">
 														{getCurrencySymbol(selectedCurrency)}
-														{(convertedAmounts[reservation.id]?.paidAmount || 0).toLocaleString()}
+														{(
+															convertedAmounts[reservation.id]?.paidAmount || 0
+														).toLocaleString()}
 													</div>
 												</TableCell>
 												<TableCell className="text-right py-3">
 													<div
 														className={`font-medium text-sm ${
-															(convertedAmounts[reservation.id]?.balanceAmount || 0) > 0
+															(
+																convertedAmounts[reservation.id]
+																	?.balanceAmount || 0
+															) > 0
 																? "text-rose-600"
 																: "text-slate-600"
 														}`}
 													>
 														{getCurrencySymbol(selectedCurrency)}
-														{(convertedAmounts[reservation.id]?.balanceAmount || 0).toLocaleString()}
+														{(
+															convertedAmounts[reservation.id]?.balanceAmount ||
+															0
+														).toLocaleString()}
 													</div>
 												</TableCell>
 												<TableCell className="text-right py-3">
@@ -694,7 +746,8 @@ function ReservationsDesktopTableComponent({
 																e.stopPropagation();
 																onPrint({
 																	...reservation,
-																	convertedAmounts: convertedAmounts[reservation.id],
+																	convertedAmounts:
+																		convertedAmounts[reservation.id],
 																	selectedCurrency: selectedCurrency,
 																});
 															}}
@@ -717,7 +770,9 @@ function ReservationsDesktopTableComponent({
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">Name:</span>
+																		<span className="text-slate-600">
+																			Name:
+																		</span>
 																		<span className="font-medium text-slate-900">
 																			{reservation.guest_name}
 																		</span>
@@ -739,26 +794,40 @@ function ReservationsDesktopTableComponent({
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">Room Amount:</span>
+																		<span className="text-slate-600">
+																			Room Amount:
+																		</span>
 																		<span className="font-medium text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
-																			{(convertedAmounts[reservation.id]?.roomAmount || 0).toLocaleString()}
+																			{(
+																				convertedAmounts[reservation.id]
+																					?.roomAmount || 0
+																			).toLocaleString()}
 																		</span>
 																	</div>
 																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">Services:</span>
+																		<span className="text-slate-600">
+																			Services:
+																		</span>
 																		<span className="font-medium text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
-																			{(convertedAmounts[reservation.id]?.expensesAmount || 0).toLocaleString()}
+																			{(
+																				convertedAmounts[reservation.id]
+																					?.expensesAmount || 0
+																			).toLocaleString()}
 																		</span>
 																	</div>
 																	<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
-																		<span className="text-slate-700 font-medium">Total:</span>
+																		<span className="text-slate-700 font-medium">
+																			Total:
+																		</span>
 																		<span className="font-semibold text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
 																			{(
-																				(convertedAmounts[reservation.id]?.roomAmount || 0) +
-																				(convertedAmounts[reservation.id]?.expensesAmount || 0)
+																				(convertedAmounts[reservation.id]
+																					?.roomAmount || 0) +
+																				(convertedAmounts[reservation.id]
+																					?.expensesAmount || 0)
 																			).toLocaleString()}
 																		</span>
 																	</div>
@@ -787,13 +856,14 @@ function ReservationsDesktopTableComponent({
 			)}
 
 			{/* Empty State */}
-			{activeReservations.length === 0 && completedReservations.length === 0 && (
-				<Card>
-					<CardContent className="text-center py-8 text-gray-500">
-						{t("reservations.noReservationsFound")}
-					</CardContent>
-				</Card>
-			)}
+			{activeReservations.length === 0 &&
+				completedReservations.length === 0 && (
+					<Card>
+						<CardContent className="text-center py-8 text-gray-500">
+							{t("reservations.noReservationsFound")}
+						</CardContent>
+					</Card>
+				)}
 		</div>
 	);
 }

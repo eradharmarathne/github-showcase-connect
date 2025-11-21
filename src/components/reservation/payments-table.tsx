@@ -25,7 +25,9 @@ import { usePaymentsData } from "@/hooks/use-payments-data";
 export function PaymentsTable() {
 	const { t } = useTranslation();
 	const { payments, loading, refetch } = usePaymentsData();
-	const [viewingReservationId, setViewingReservationId] = useState<string | null>(null);
+	const [viewingReservationId, setViewingReservationId] = useState<
+		string | null
+	>(null);
 	const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
 	// Utility functions
@@ -165,12 +167,12 @@ export function PaymentsTable() {
 										<TableHead className="min-w-[120px]">
 											{t("common.stay", "Stay Period")}
 										</TableHead>
-									<TableHead className="min-w-[150px]">
-										{t("common.note", "Note")}
-									</TableHead>
-									<TableHead className="w-20">
-										{t("common.actions", "Actions")}
-									</TableHead>
+										<TableHead className="min-w-[150px]">
+											{t("common.note", "Note")}
+										</TableHead>
+										<TableHead className="w-20">
+											{t("common.actions", "Actions")}
+										</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -342,19 +344,19 @@ export function PaymentsTable() {
 									))}
 								</TableBody>
 							</Table>
-					</div>
-				)}
+						</div>
+					)}
+				</div>
 			</div>
-		</div>
 
-		<ViewReservationDialog
-			isOpen={isViewDialogOpen}
-			onClose={() => {
-				setIsViewDialogOpen(false);
-				setViewingReservationId(null);
-			}}
-			reservationId={viewingReservationId || ""}
-		/>
-	</div>
+			<ViewReservationDialog
+				isOpen={isViewDialogOpen}
+				onClose={() => {
+					setIsViewDialogOpen(false);
+					setViewingReservationId(null);
+				}}
+				reservationId={viewingReservationId || ""}
+			/>
+		</div>
 	);
 }

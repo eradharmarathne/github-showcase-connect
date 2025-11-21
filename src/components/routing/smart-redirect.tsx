@@ -60,17 +60,23 @@ export const SmartRedirect = () => {
 	// If user doesn't have a tenant_id in their profile, check for pending invitations
 	if (!profile?.tenant_id || !tenant) {
 		if (hasInvitations) {
-			logger.debug("No tenant_id but has invitations - redirecting to /pending-invitation");
+			logger.debug(
+				"No tenant_id but has invitations - redirecting to /pending-invitation",
+			);
 			return <Navigate to="/pending-invitation" replace />;
 		}
 
-		logger.debug("No tenant_id and no invitations - redirecting to /onboarding");
+		logger.debug(
+			"No tenant_id and no invitations - redirecting to /onboarding",
+		);
 		return <Navigate to="/onboarding" replace />;
 	}
 
 	// If tenant hasn't completed onboarding, redirect to onboarding
 	if (!tenant.onboarding_completed) {
-		logger.debug("Tenant onboarding not completed - redirecting to /onboarding");
+		logger.debug(
+			"Tenant onboarding not completed - redirecting to /onboarding",
+		);
 		return <Navigate to="/onboarding" replace />;
 	}
 
@@ -85,7 +91,9 @@ export const SmartRedirect = () => {
 		tenant.subscription_status &&
 		invalidSubscriptionStatuses.includes(tenant.subscription_status)
 	) {
-		logger.debug(`Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`);
+		logger.debug(
+			`Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`,
+		);
 		return <Navigate to="/onboarding" replace />;
 	}
 

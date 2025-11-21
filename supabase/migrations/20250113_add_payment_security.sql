@@ -73,24 +73,44 @@ COMMENT ON COLUMN payment_attempts.expires_at IS 'Payment attempt expires after 
 ALTER TABLE payment_attempts ENABLE ROW LEVEL SECURITY;
 
 -- 6. Create RLS policies
+DO $$
+BEGIN
+    -- Users can view their own payment attempts
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'payment_attempts'
+        AND policyname = 'Users can view own payment attempts'
+    ) THEN
+        CREATE POLICY "Users can view own payment attempts"
+            ON payment_attempts
+            FOR SELECT
+            USING (auth.uid() = user_id);
+    END IF;
 
--- Users can view their own payment attempts
-CREATE POLICY "Users can view own payment attempts"
-    ON payment_attempts
-    FOR SELECT
-    USING (auth.uid() = user_id);
+    -- Users can insert their own payment attempts
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'payment_attempts'
+        AND policyname = 'Users can create own payment attempts'
+    ) THEN
+        CREATE POLICY "Users can create own payment attempts"
+            ON payment_attempts
+            FOR INSERT
+            WITH CHECK (auth.uid() = user_id);
+    END IF;
 
--- Users can insert their own payment attempts
-CREATE POLICY "Users can create own payment attempts"
-    ON payment_attempts
-    FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
-
--- Service role can do everything (for webhooks)
-CREATE POLICY "Service role has full access to payment attempts"
-    ON payment_attempts
-    FOR ALL
-    USING (auth.jwt() ->> 'role' = 'service_role');
+    -- Service role can do everything (for webhooks)
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_policies
+        WHERE tablename = 'payment_attempts'
+        AND policyname = 'Service role has full access to payment attempts'
+    ) THEN
+        CREATE POLICY "Service role has full access to payment attempts"
+            ON payment_attempts
+            FOR ALL
+            USING (auth.jwt() ->> 'role' = 'service_role');
+    END IF;
+END$$;
 
 -- 7. Create function to automatically update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_payment_attempts_updated_at()

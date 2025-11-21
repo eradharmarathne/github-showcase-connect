@@ -13,7 +13,7 @@ import { useTenant } from "@/hooks/use-tenant";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import type { PaymentFormData, PaymentAccount } from "@/types/payment";
+import type { PaymentAccount, PaymentFormData } from "@/types/payment";
 import { convertCurrency } from "@/utils/currency";
 
 type Reservation = Tables<"reservations"> & {

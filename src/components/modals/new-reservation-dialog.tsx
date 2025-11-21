@@ -332,7 +332,7 @@ export function NewReservationDialog({
 					advance_amount: paymentData.advance_amount / roomSelections.length, // Split advance across rooms
 					paid_amount: 0, // Will be updated by trigger when payment is recorded
 					balance_amount: selection.total_amount, // Full amount unpaid initially
-					currency: selection.currency as any,
+					currency: selection.currency,
 					status: "tentative" as const,
 					arrival_time: selection.arrival_time || null,
 					special_requests: guestData.special_requests || null,

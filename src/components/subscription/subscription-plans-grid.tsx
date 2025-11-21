@@ -1,20 +1,14 @@
-import {
-	Bed,
-	Building2,
-	CheckCircle,
-	CreditCard,
-	Users,
-} from "lucide-react";
+import { Bed, Building2, CheckCircle, CreditCard, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { PlanWithCreemProduct } from "@/types/subscription";
+import type { PlanWithPolarProduct } from "@/types/subscription";
 
 interface SubscriptionPlansGridProps {
-	plans: PlanWithCreemProduct[];
+	plans: PlanWithPolarProduct[];
 	currentPlanId: string | null | undefined;
-	onSubscribe: (plan: PlanWithCreemProduct) => void;
+	onSubscribe: (plan: PlanWithPolarProduct) => void;
 	processingPlanId: string | null;
 }
 

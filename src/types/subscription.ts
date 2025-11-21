@@ -4,8 +4,14 @@ export type Plan = Tables<"plans">;
 export type Subscription = Tables<"subscriptions">;
 export type Tenant = Tables<"tenants">;
 
-export interface PlanWithCreemProduct extends Plan {
-	creemProduct?: any;
+export interface PolarProduct {
+	id: string;
+	name: string;
+	price_id: string;
+}
+
+export interface PlanWithPolarProduct extends Plan {
+	polarProduct?: PolarProduct | null;
 }
 
 export interface Invoice {

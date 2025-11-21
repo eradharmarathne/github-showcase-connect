@@ -83,11 +83,14 @@ const App = () => (
 									<Routes>
 										<Route path="/" element={<AuthRedirect />} />
 										<Route path="/auth" element={<Auth />} />
-					<Route path="/ui" element={<Design />} />
-					
-					{/* Public Booking Page - No Auth Required */}
-					<Route path="/r/:locationSlug" element={<PublicBookingPage />} />
-															<Route
+										<Route path="/ui" element={<Design />} />
+
+										{/* Public Booking Page - No Auth Required */}
+										<Route
+											path="/r/:locationSlug"
+											element={<PublicBookingPage />}
+										/>
+										<Route
 											path="/auth/forgot-password"
 											element={<ForgotPassword />}
 										/>

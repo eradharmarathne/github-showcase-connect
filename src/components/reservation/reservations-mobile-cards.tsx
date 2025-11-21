@@ -127,8 +127,9 @@ export function ReservationsMobileCards({
 
 	// Helper function to get room display text
 	const getRoomDisplay = (reservation: any): string => {
-		const roomNumber = reservation.rooms?.room_number || reservation.room_name || 'N/A';
-		const roomType = reservation.rooms?.room_type || '';
+		const roomNumber =
+			reservation.rooms?.room_number || reservation.room_name || "N/A";
+		const roomType = reservation.rooms?.room_type || "";
 		return roomType ? `${roomNumber} - ${roomType}` : roomNumber;
 	};
 
@@ -137,15 +138,15 @@ export function ReservationsMobileCards({
 		// Safely extract room and location data
 		const roomData = reservation.rooms || {};
 		const locationData = reservation.locations || {};
-		
+
 		return {
 			...reservation,
 			// Enhanced hotel/tenant information from context
-			tenant_name: tenant?.hotel_name || tenant?.name || '',
-			hotel_name: tenant?.hotel_name || tenant?.name || '',
-			hotel_address: tenant?.hotel_address || '',
-			hotel_phone: tenant?.hotel_phone || '',
-			hotel_email: tenant?.hotel_email || '',
+			tenant_name: tenant?.hotel_name || tenant?.name || "",
+			hotel_name: tenant?.hotel_name || tenant?.name || "",
+			hotel_address: tenant?.hotel_address || "",
+			hotel_phone: tenant?.hotel_phone || "",
+			hotel_email: tenant?.hotel_email || "",
 			hotel_website: tenant?.hotel_website || null,
 			logo_url: tenant?.logo_url || null,
 
@@ -156,7 +157,8 @@ export function ReservationsMobileCards({
 			location_email: locationData.email || null,
 
 			// Room details with fallbacks
-			room_number: roomData.room_number || reservation.room_name || "Unknown Room",
+			room_number:
+				roomData.room_number || reservation.room_name || "Unknown Room",
 			room_type: roomData.room_type || "Unknown Type",
 			bed_type: roomData.bed_type || null,
 			room_description: roomData.description || null,
@@ -213,14 +215,20 @@ export function ReservationsMobileCards({
 		.filter((r) => r.status !== "checked_out" && r.status !== "cancelled")
 		.sort((a, b) => {
 			// Sort by check-in date (upcoming first)
-			return new Date(a.check_in_date).getTime() - new Date(b.check_in_date).getTime();
+			return (
+				new Date(a.check_in_date).getTime() -
+				new Date(b.check_in_date).getTime()
+			);
 		});
 
 	const completedReservations = filteredReservations
 		.filter((r) => r.status === "checked_out" || r.status === "cancelled")
 		.sort((a, b) => {
 			// Sort by check-out date (most recent first)
-			return new Date(b.check_out_date).getTime() - new Date(a.check_out_date).getTime();
+			return (
+				new Date(b.check_out_date).getTime() -
+				new Date(a.check_out_date).getTime()
+			);
 		});
 
 	if (loading) {
@@ -240,8 +248,8 @@ export function ReservationsMobileCards({
 					</div>
 					<div className="grid gap-3">
 						{activeReservations.map((reservation) => (
-							<Card 
-								key={reservation.id} 
+							<Card
+								key={reservation.id}
 								className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow"
 							>
 								<CardContent className="p-4">
@@ -268,11 +276,18 @@ export function ReservationsMobileCards({
 										<div className="flex items-center gap-2 text-slate-600">
 											<Calendar className="h-3 w-3" />
 											<span>
-												{new Date(reservation.check_in_date).toLocaleDateString("en-US", {
-													month: "short",
-													day: "numeric",
-													year: "numeric",
-												})} - {new Date(reservation.check_out_date).toLocaleDateString("en-US", {
+												{new Date(reservation.check_in_date).toLocaleDateString(
+													"en-US",
+													{
+														month: "short",
+														day: "numeric",
+														year: "numeric",
+													},
+												)}{" "}
+												-{" "}
+												{new Date(
+													reservation.check_out_date,
+												).toLocaleDateString("en-US", {
 													month: "short",
 													day: "numeric",
 													year: "numeric",
@@ -281,24 +296,33 @@ export function ReservationsMobileCards({
 										</div>
 										<div className="flex items-center gap-2 text-slate-600">
 											<span className="text-slate-400">
-												({reservation.nights} {reservation.nights === 1 ? "night" : "nights"})
+												({reservation.nights}{" "}
+												{reservation.nights === 1 ? "night" : "nights"})
 											</span>
 										</div>
 									</div>
 
 									<div className="flex justify-between items-center pt-3 border-t border-slate-100 mb-3">
 										<div className="flex flex-col gap-1">
-											<span className="text-xs text-slate-600">Total Amount</span>
+											<span className="text-xs text-slate-600">
+												Total Amount
+											</span>
 											<span className="font-semibold text-sm text-slate-900">
 												{getCurrencySymbol(selectedCurrency)}{" "}
-												{(convertedAmounts[reservation.id] || 0).toLocaleString()}
+												{(
+													convertedAmounts[reservation.id] || 0
+												).toLocaleString()}
 											</span>
 										</div>
 										<div className="flex flex-col gap-1 items-end">
 											<span className="text-xs text-slate-600">Balance</span>
-											<span className={`font-semibold text-sm ${
-												reservation.balance_amount > 0 ? "text-rose-600" : "text-emerald-600"
-											}`}>
+											<span
+												className={`font-semibold text-sm ${
+													reservation.balance_amount > 0
+														? "text-rose-600"
+														: "text-emerald-600"
+												}`}
+											>
 												{getCurrencySymbol(selectedCurrency)}{" "}
 												{(reservation.balance_amount || 0).toLocaleString()}
 											</span>
@@ -335,13 +359,14 @@ export function ReservationsMobileCards({
 					<div className="flex items-center gap-2 px-1 pt-2">
 						<span className="h-2 w-2 rounded-full bg-slate-400"></span>
 						<h3 className="text-sm font-medium text-slate-500">
-							{t("reservations.sections.completed")} ({completedReservations.length})
+							{t("reservations.sections.completed")} (
+							{completedReservations.length})
 						</h3>
 					</div>
 					<div className="grid gap-3">
 						{completedReservations.map((reservation) => (
-							<Card 
-								key={reservation.id} 
+							<Card
+								key={reservation.id}
 								className="border-slate-200 shadow-sm opacity-70"
 							>
 								<CardContent className="p-4">
@@ -368,11 +393,18 @@ export function ReservationsMobileCards({
 										<div className="flex items-center gap-2 text-slate-600">
 											<Calendar className="h-3 w-3" />
 											<span>
-												{new Date(reservation.check_in_date).toLocaleDateString("en-US", {
-													month: "short",
-													day: "numeric",
-													year: "numeric",
-												})} - {new Date(reservation.check_out_date).toLocaleDateString("en-US", {
+												{new Date(reservation.check_in_date).toLocaleDateString(
+													"en-US",
+													{
+														month: "short",
+														day: "numeric",
+														year: "numeric",
+													},
+												)}{" "}
+												-{" "}
+												{new Date(
+													reservation.check_out_date,
+												).toLocaleDateString("en-US", {
 													month: "short",
 													day: "numeric",
 													year: "numeric",
@@ -381,17 +413,22 @@ export function ReservationsMobileCards({
 										</div>
 										<div className="flex items-center gap-2 text-slate-600">
 											<span className="text-slate-400">
-												({reservation.nights} {reservation.nights === 1 ? "night" : "nights"})
+												({reservation.nights}{" "}
+												{reservation.nights === 1 ? "night" : "nights"})
 											</span>
 										</div>
 									</div>
 
 									<div className="flex justify-between items-center pt-3 border-t border-slate-100 mb-3">
 										<div className="flex flex-col gap-1">
-											<span className="text-xs text-slate-600">Total Amount</span>
+											<span className="text-xs text-slate-600">
+												Total Amount
+											</span>
 											<span className="font-semibold text-sm text-slate-700">
 												{getCurrencySymbol(selectedCurrency)}{" "}
-												{(convertedAmounts[reservation.id] || 0).toLocaleString()}
+												{(
+													convertedAmounts[reservation.id] || 0
+												).toLocaleString()}
 											</span>
 										</div>
 										<div className="flex flex-col gap-1 items-end">
@@ -428,11 +465,12 @@ export function ReservationsMobileCards({
 			)}
 
 			{/* Empty state */}
-			{activeReservations.length === 0 && completedReservations.length === 0 && (
-				<div className="text-center py-8 text-slate-500">
-					{t("reservations.noReservationsFound")}
-				</div>
-			)}
+			{activeReservations.length === 0 &&
+				completedReservations.length === 0 && (
+					<div className="text-center py-8 text-slate-500">
+						{t("reservations.noReservationsFound")}
+					</div>
+				)}
 		</div>
 	);
 }

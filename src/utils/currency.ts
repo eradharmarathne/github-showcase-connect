@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger";
 
 // Updated type for dynamic currencies
 export type Currency = string; // Now supports any currency code
@@ -21,9 +22,15 @@ export type DatabaseCurrencyRate = Tables<"currency_rates">;
 // Type for currency rates object (currency_code -> usd_rate)
 export type CurrencyRates = Record<string, number>;
 
-// Cache for currency rates to avoid frequent DB calls
-let currencyRatesCache: CurrencyRates = {};
-let lastCacheUpdate = 0;
+// Cache entry structure
+interface CacheEntry {
+	rates: CurrencyRates;
+	timestamp: number;
+}
+
+// Tenant/location-specific cache for currency rates
+// Key format: `${tenantId}-${locationId}`
+const currencyRatesCache = new Map<string, CacheEntry>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 const getDefaultRates = (): CurrencyRates => {
@@ -47,13 +54,13 @@ export const getAvailableCurrencies = async (
 			.order("currency_code");
 
 		if (error) {
-			console.error("Error fetching currencies:", error);
+			logger.error("Error fetching currencies", error);
 			return ["USD"];
 		}
 
 		return data?.map((item) => item.currency_code) || ["USD"];
 	} catch (error) {
-		console.error("Error in getAvailableCurrencies:", error);
+		logger.error("Error in getAvailableCurrencies", error);
 		return ["USD"];
 	}
 };
@@ -66,12 +73,11 @@ export const getCurrencyRates = async (
 	const cacheKey = `${tenantId}-${locationId}`;
 	const now = Date.now();
 
-	// Check cache first (you may want to implement a more sophisticated cache structure)
-	if (
-		Object.keys(currencyRatesCache).length > 0 &&
-		now - lastCacheUpdate < CACHE_DURATION
-	) {
-		return currencyRatesCache;
+	// Check cache first - verify it exists, is for this tenant/location, and is not expired
+	const cachedEntry = currencyRatesCache.get(cacheKey);
+	if (cachedEntry && now - cachedEntry.timestamp < CACHE_DURATION) {
+		logger.debug("Returning cached currency rates", { cacheKey });
+		return cachedEntry.rates;
 	}
 
 	try {
@@ -84,28 +90,43 @@ export const getCurrencyRates = async (
 			.not("usd_rate", "is", null);
 
 		if (error) {
-			console.error("Error fetching currency rates:", error);
+			logger.error("Error fetching currency rates", error, {
+				tenantId,
+				locationId,
+			});
 			return getDefaultRates();
 		}
 
 		if (!data || data.length === 0) {
-			console.warn("No currency rates found in database for tenant/location");
+			logger.warn("No currency rates found in database for tenant/location", {
+				tenantId,
+				locationId,
+			});
 			return getDefaultRates();
 		}
 
 		// Convert database format to our rates object
 		const rates: CurrencyRates = {};
 		for (const rate of data) {
-			rates[rate.currency_code] = Number(rate.usd_rate);
+			if (rate.currency_code && rate.usd_rate !== null) {
+				rates[rate.currency_code] = Number(rate.usd_rate);
+			}
 		}
 
-		// Update cache
-		currencyRatesCache = rates;
-		lastCacheUpdate = now;
+		// Update cache for this specific tenant/location
+		currencyRatesCache.set(cacheKey, {
+			rates,
+			timestamp: now,
+		});
+
+		logger.debug("Cached currency rates", {
+			cacheKey,
+			currencyCount: Object.keys(rates).length,
+		});
 
 		return rates;
 	} catch (error) {
-		console.error("Error in getCurrencyRates:", error);
+		logger.error("Error in getCurrencyRates", error, { tenantId, locationId });
 		return getDefaultRates();
 	}
 };
@@ -117,6 +138,40 @@ export const convertCurrency = async (
 	tenantId: string,
 	locationId: string,
 ): Promise<number> => {
+	// Validate inputs
+	if (!tenantId || !locationId) {
+		logger.error("Missing tenant_id or location_id for currency conversion", {
+			fromCurrency,
+			toCurrency,
+			tenantId,
+			locationId,
+		});
+		throw new Error(
+			"Tenant ID and Location ID are required for currency conversion",
+		);
+	}
+
+	if (!fromCurrency || !toCurrency) {
+		logger.error("Missing currency codes for conversion", {
+			fromCurrency,
+			toCurrency,
+			tenantId,
+			locationId,
+		});
+		throw new Error("From currency and to currency are required");
+	}
+
+	if (typeof amount !== "number" || isNaN(amount) || !isFinite(amount)) {
+		logger.error("Invalid amount for currency conversion", {
+			amount,
+			fromCurrency,
+			toCurrency,
+			tenantId,
+			locationId,
+		});
+		throw new Error("Amount must be a valid number");
+	}
+
 	if (fromCurrency === toCurrency) {
 		return amount;
 	}
@@ -128,8 +183,11 @@ export const convertCurrency = async (
 		let usdAmount = amount;
 		if (fromCurrency !== "USD") {
 			const fromRate = rates[fromCurrency];
-			if (!fromRate) {
-				console.warn(`No rate found for ${fromCurrency}, using 1`);
+			if (!fromRate || fromRate <= 0) {
+				logger.warn(
+					`No valid rate found for ${fromCurrency}, returning original amount`,
+					{ fromCurrency, toCurrency, tenantId, locationId, rate: fromRate },
+				);
 				return amount;
 			}
 			usdAmount = amount / fromRate;
@@ -141,14 +199,38 @@ export const convertCurrency = async (
 		}
 
 		const toRate = rates[toCurrency];
-		if (!toRate) {
-			console.warn(`No rate found for ${toCurrency}, using USD amount`);
+		if (!toRate || toRate <= 0) {
+			logger.warn(
+				`No valid rate found for ${toCurrency}, returning USD amount`,
+				{ fromCurrency, toCurrency, tenantId, locationId, rate: toRate },
+			);
 			return usdAmount;
 		}
 
-		return usdAmount * toRate;
+		const convertedAmount = usdAmount * toRate;
+
+		// Validate result
+		if (!isFinite(convertedAmount)) {
+			logger.error("Currency conversion resulted in invalid number", {
+				fromCurrency,
+				toCurrency,
+				amount,
+				convertedAmount,
+				tenantId,
+				locationId,
+			});
+			return amount; // Return original amount on error
+		}
+
+		return convertedAmount;
 	} catch (error) {
-		console.error("Error converting currency:", error);
+		logger.error("Error converting currency", error, {
+			fromCurrency,
+			toCurrency,
+			tenantId,
+			locationId,
+		});
+		// Return original amount instead of throwing to prevent breaking the UI
 		return amount;
 	}
 };
@@ -188,17 +270,26 @@ export const addCustomCurrency = async (
 		);
 
 		if (error) {
-			console.error("Error adding custom currency:", error);
+			logger.error("Error adding custom currency", error, {
+				currencyCode,
+				tenantId,
+				locationId,
+			});
 			return { success: false, error: error.message };
 		}
 
-		// Clear cache to force refresh
-		currencyRatesCache = {};
-		lastCacheUpdate = 0;
+		// Clear cache for this specific tenant/location to force refresh
+		const cacheKey = `${tenantId}-${locationId}`;
+		currencyRatesCache.delete(cacheKey);
+		logger.debug("Cleared currency cache after adding currency", { cacheKey });
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error in addCustomCurrency:", error);
+		logger.error("Error in addCustomCurrency", error, {
+			currencyCode,
+			tenantId,
+			locationId,
+		});
 		return { success: false, error: "Failed to add currency" };
 	}
 };
@@ -231,17 +322,28 @@ export async function removeCustomCurrency(
 			.eq("is_custom", true);
 
 		if (error) {
-			console.error("Error removing currency:", error);
+			logger.error("Error removing currency", error, {
+				currencyCode,
+				tenantId,
+				locationId,
+			});
 			return { success: false, error: error.message };
 		}
 
-		// Clear cache to force refresh
-		currencyRatesCache = {};
-		lastCacheUpdate = 0;
+		// Clear cache for this specific tenant/location to force refresh
+		const cacheKey = `${tenantId}-${locationId}`;
+		currencyRatesCache.delete(cacheKey);
+		logger.debug("Cleared currency cache after removing currency", {
+			cacheKey,
+		});
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error in removeCustomCurrency:", error);
+		logger.error("Error in removeCustomCurrency", error, {
+			currencyCode,
+			tenantId,
+			locationId,
+		});
 		return { success: false, error: "Failed to remove currency" };
 	}
 }
@@ -331,17 +433,26 @@ export async function updateCurrencyRate(
 			.eq("location_id", locationId);
 
 		if (error) {
-			console.error("Error updating currency rate:", error);
+			logger.error("Error updating currency rate", error, {
+				currencyCode,
+				tenantId,
+				locationId,
+			});
 			return { success: false, error: error.message };
 		}
 
-		// Clear cache to force refresh
-		currencyRatesCache = {};
-		lastCacheUpdate = 0;
+		// Clear cache for this specific tenant/location to force refresh
+		const cacheKey = `${tenantId}-${locationId}`;
+		currencyRatesCache.delete(cacheKey);
+		logger.debug("Cleared currency cache after updating rate", { cacheKey });
 
 		return { success: true };
 	} catch (error) {
-		console.error("Error in updateCurrencyRate:", error);
+		logger.error("Error in updateCurrencyRate", error, {
+			currencyCode,
+			tenantId,
+			locationId,
+		});
 		return { success: false, error: "Failed to update currency rate" };
 	}
 }
@@ -361,13 +472,19 @@ export const getCurrencyDetails = async (
 			.order("currency_code");
 
 		if (error) {
-			console.error("Error fetching currency details:", error);
+			logger.error("Error fetching currency details", error, {
+				tenantId,
+				locationId,
+			});
 			return [];
 		}
 
 		return (data as DatabaseCurrencyRate[]) || [];
 	} catch (error) {
-		console.error("Error in getCurrencyDetails:", error);
+		logger.error("Error in getCurrencyDetails", error, {
+			tenantId,
+			locationId,
+		});
 		return [];
 	}
 };

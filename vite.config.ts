@@ -8,27 +8,17 @@ export default {
     host: "::",
     port: 8080,
     proxy: {
-      // Proxy Creem.io API requests to handle CORS
-      '/api/creem': {
-        target: 'https://api.creem.io',
-        changeOrigin: true,
-        rewrite: (path: string) => path.replace(/^\/api\/creem/, ''),
-        secure: true,
-        headers: {
-          'Origin': 'https://api.creem.io'
-        }
-      },
       // Proxy Resend API requests to handle CORS
-      '/api/resend': {
-        target: 'https://api.resend.com',
+      "/api/resend": {
+        target: "https://api.resend.com",
         changeOrigin: true,
-        rewrite: (path: string) => path.replace(/^\/api\/resend/, ''),
+        rewrite: (path: string) => path.replace(/^\/api\/resend/, ""),
         secure: true,
         headers: {
-          'Origin': 'https://api.resend.com'
-        }
-      }
-    }
+          Origin: "https://api.resend.com",
+        },
+      },
+    },
   },
   resolve: {
     alias: {

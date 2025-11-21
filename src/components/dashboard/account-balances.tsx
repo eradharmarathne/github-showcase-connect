@@ -1,13 +1,13 @@
 import { DollarSign } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { logger } from "@/lib/logger";
 import { AccountBalancesSkeleton } from "@/components/skeleton/account-balances-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { logger } from "@/lib/logger";
 import { getCurrencySymbol } from "@/utils/currency";
 
 type Account = Tables<"accounts">;

@@ -1,8 +1,8 @@
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 import { usePrintSettings } from "@/hooks/use-print-settings";
 import { useTenant } from "@/hooks/use-tenant";
 import { Tables } from "@/integrations/supabase/types";
-import QRCode from "qrcode";
-import { useEffect, useState } from "react";
 
 type PrintSettings = Tables<"print_settings">;
 
@@ -14,7 +14,12 @@ interface PrintTemplateProps {
 	printSettingsOverride?: any;
 }
 
-export function PrintTemplate({ children, qrCodeData, documentType = "Document", printSettingsOverride }: PrintTemplateProps) {
+export function PrintTemplate({
+	children,
+	qrCodeData,
+	documentType = "Document",
+	printSettingsOverride,
+}: PrintTemplateProps) {
 	const { printSettings } = usePrintSettings();
 	// allow preview to pass unsaved form state
 	const settings = printSettingsOverride ?? printSettings;
@@ -80,7 +85,10 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document",
 			</style>
 
 			{/* Header Section */}
-			<div className="mb-6 pb-4 border-b-2" style={{ borderColor: printSettings?.primary_color || "#000" }}>
+			<div
+				className="mb-6 pb-4 border-b-2"
+				style={{ borderColor: printSettings?.primary_color || "#000" }}
+			>
 				<div className="flex items-start justify-between">
 					{/* Logo */}
 					{settings?.show_logo && tenant?.logo_url && (
@@ -93,7 +101,11 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document",
 										: ""
 							}`}
 						>
-							<img src={tenant.logo_url} alt="Logo" className="h-16 w-auto object-contain" />
+							<img
+								src={tenant.logo_url}
+								alt="Logo"
+								className="h-16 w-auto object-contain"
+							/>
 						</div>
 					)}
 
@@ -120,7 +132,9 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document",
 						{tenant?.hotel_name && (
 							<h2 className="text-lg font-semibold">{tenant.hotel_name}</h2>
 						)}
-						{tenant?.hotel_address && <p className="text-sm">{tenant.hotel_address}</p>}
+						{tenant?.hotel_address && (
+							<p className="text-sm">{tenant.hotel_address}</p>
+						)}
 						<div className="flex justify-center gap-4 text-sm mt-1">
 							{tenant?.hotel_phone && <span>Tel: {tenant.hotel_phone}</span>}
 							{tenant?.hotel_email && <span>Email: {tenant.hotel_email}</span>}
@@ -136,30 +150,38 @@ export function PrintTemplate({ children, qrCodeData, documentType = "Document",
 			<div className="mb-6">{children}</div>
 
 			{/* Terms and Conditions */}
-			{printSettings?.show_terms_and_conditions && printSettings?.terms_and_conditions && (
-				<div className="mt-8 pt-4 border-t">
-					<h3 className="font-semibold mb-2">Terms & Conditions</h3>
-					<p className="text-xs whitespace-pre-wrap">{printSettings.terms_and_conditions}</p>
-				</div>
-			)}
+			{printSettings?.show_terms_and_conditions &&
+				printSettings?.terms_and_conditions && (
+					<div className="mt-8 pt-4 border-t">
+						<h3 className="font-semibold mb-2">Terms & Conditions</h3>
+						<p className="text-xs whitespace-pre-wrap">
+							{printSettings.terms_and_conditions}
+						</p>
+					</div>
+				)}
 
 			{/* Footer Section */}
 			<div className="mt-8 pt-4 border-t">
 				{printSettings?.footer_text && (
-					<p className="text-center text-sm mb-4">{printSettings.footer_text}</p>
+					<p className="text-center text-sm mb-4">
+						{printSettings.footer_text}
+					</p>
 				)}
 
 				{printSettings?.show_signature_line && (
 					<div className="mt-8 flex justify-end">
 						<div className="text-center">
 							<div className="border-t border-black w-48 mb-2"></div>
-							<p className="text-sm">{printSettings.signature_label || "Authorized Signature"}</p>
+							<p className="text-sm">
+								{printSettings.signature_label || "Authorized Signature"}
+							</p>
 						</div>
 					</div>
 				)}
 
 				<p className="text-center text-xs text-gray-500 mt-4">
-					Printed on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+					Printed on {new Date().toLocaleDateString()} at{" "}
+					{new Date().toLocaleTimeString()}
 				</p>
 			</div>
 		</div>

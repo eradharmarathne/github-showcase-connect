@@ -8,7 +8,6 @@ import {
 	Settings as SettingsIcon,
 	Trash2,
 } from "lucide-react";
-import type { PropertyMapping, SyncStats } from "@/types/booking-channels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +19,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { PropertyMapping, SyncStats } from "@/types/booking-channels";
 
 interface Location {
 	id: string;
@@ -229,9 +229,7 @@ export function SettingsTab({
 											</SelectTrigger>
 											<SelectContent>
 												<SelectItem value="ical">iCal</SelectItem>
-												<SelectItem value="booking_com">
-													Booking.com
-												</SelectItem>
+												<SelectItem value="booking_com">Booking.com</SelectItem>
 												<SelectItem value="airbnb">Airbnb</SelectItem>
 												<SelectItem value="expedia">Expedia</SelectItem>
 											</SelectContent>

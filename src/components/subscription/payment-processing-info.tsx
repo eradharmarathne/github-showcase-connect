@@ -13,16 +13,16 @@ export function PaymentProcessingInfo() {
 			</CardHeader>
 			<CardContent>
 				<p className="text-sm text-muted-foreground">
-					Payments are processed securely through Creem.io. All major credit
+					Payments are processed securely through Polar.sh. All major credit
 					cards are accepted. Your payment information is never stored on our
 					servers.
 				</p>
-				{!import.meta.env.VITE_CREEM_API_KEY && (
+				{!import.meta.env.VITE_POLAR_ORGANIZATION_ID && (
 					<Alert className="mt-4">
 						<AlertTriangle className="h-4 w-4" />
 						<AlertDescription>
-							<strong>Demo Mode:</strong> Set VITE_CREEM_API_KEY environment
-							variable to enable real payment processing.
+							<strong>Demo Mode:</strong> Set VITE_POLAR_ORGANIZATION_ID
+							environment variable to enable real payment processing.
 						</AlertDescription>
 					</Alert>
 				)}

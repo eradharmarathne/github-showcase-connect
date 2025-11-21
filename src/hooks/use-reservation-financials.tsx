@@ -55,25 +55,35 @@ export const useReservationFinancials = () => {
 			// Normalize all reservations (handle external booking specifics)
 			const allReservations = (reservations || []).map((reservation) => {
 				// For external bookings, use timestamps if available, otherwise use dates
-				const checkInDate = reservation.is_external && reservation.check_in_timestamp 
-					? reservation.check_in_timestamp 
-					: reservation.check_in_date;
-				const checkOutDate = reservation.is_external && reservation.check_out_timestamp 
-					? reservation.check_out_timestamp 
-					: reservation.check_out_date;
-				
+				const checkInDate =
+					reservation.is_external && reservation.check_in_timestamp
+						? reservation.check_in_timestamp
+						: reservation.check_in_date;
+				const checkOutDate =
+					reservation.is_external && reservation.check_out_timestamp
+						? reservation.check_out_timestamp
+						: reservation.check_out_date;
+
 				const nights = Math.ceil(
-					(new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24),
+					(new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) /
+						(1000 * 60 * 60 * 24),
 				);
 
 				return {
 					...reservation,
-					reservation_number: reservation.reservation_number || 
-						(reservation.is_external ? `${reservation.source_channel?.toUpperCase()}-${reservation.external_id}` : ''),
+					reservation_number:
+						reservation.reservation_number ||
+						(reservation.is_external
+							? `${reservation.source_channel?.toUpperCase()}-${reservation.external_id}`
+							: ""),
 					check_in_date: checkInDate,
 					check_out_date: checkOutDate,
 					nights,
-					room_rate: reservation.room_rate || (reservation.total_amount ? Number(reservation.total_amount) / nights : 0),
+					room_rate:
+						reservation.room_rate ||
+						(reservation.total_amount
+							? Number(reservation.total_amount) / nights
+							: 0),
 					total_amount: Number(reservation.total_amount) || 0,
 					paid_amount: Number(reservation.paid_amount) || 0,
 					balance_amount: Number(reservation.balance_amount) || 0,
