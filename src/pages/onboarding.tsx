@@ -412,16 +412,17 @@ export default function Onboarding() {
 
       if (tenantError) throw tenantError;
 
-      // Update user profile with tenant_id
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          tenant_id: tenant.id,
-          role: "admin",
-        })
-        .eq("id", user!.id);
+      // Update user profile with tenant_id using Edge Function (bypasses RLS)
+      const { data: profileData, error: profileError } =
+        await supabase.functions.invoke("update-profile-tenant", {
+          body: {
+            tenant_id: tenant.id,
+            role: "admin",
+          },
+        });
 
       if (profileError) throw profileError;
+      if (profileData?.error) throw new Error(profileData.error);
 
       // Create default location for the tenant
       const { data: location, error: locationError } = await supabase
