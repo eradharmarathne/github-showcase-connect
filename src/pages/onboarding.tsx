@@ -464,16 +464,8 @@ export default function Onboarding() {
         ]);
       if (permissionsError) throw permissionsError;
 
-      // Create pending subscription record
-      const { error: subscriptionError } = await supabase
-        .from("subscriptions")
-        .insert({
-          tenant_id: tenant.id,
-          plan_id: selectedPlanId || "professional",
-          status: "incomplete", // Will be updated by webhook
-        });
-
-      if (subscriptionError) throw subscriptionError;
+      // Note: Subscription will be created by Polar webhook after payment
+      // No need to create incomplete subscription here
 
       logger.info("Created pending tenant", { tenantId: tenant.id });
 

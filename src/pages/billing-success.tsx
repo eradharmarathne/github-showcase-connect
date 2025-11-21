@@ -26,8 +26,12 @@ export default function BillingSuccess() {
   // Get URL parameters from Polar.sh callback
   const checkoutId = searchParams.get("checkout_id");
   const orderId = searchParams.get("order_id");
+  const customerSessionToken = searchParams.get("customer_session_token");
   const redirectTo = searchParams.get("redirect_to"); // 'billing' for dashboard billing redirect
   const source = searchParams.get("source"); // 'onboarding' or 'billing'
+
+  // Use checkout_id or customer_session_token as identifier
+  const paymentIdentifier = checkoutId || customerSessionToken;
 
   // ✅ SECURE: Use polling to wait for webhook verification
   const {
@@ -37,7 +41,7 @@ export default function BillingSuccess() {
     isTimeout,
   } = usePaymentStatus({
     tenantId: tenant?.id || null,
-    enabled: !!checkoutId && !!tenant,
+    enabled: !!paymentIdentifier && !!tenant,
     timeoutMinutes: 10,
     pollIntervalSeconds: 3,
   });
@@ -110,8 +114,8 @@ export default function BillingSuccess() {
     );
   }
 
-  // Invalid payment link (no checkout_id)
-  if (!checkoutId) {
+  // Invalid payment link (no payment identifier)
+  if (!paymentIdentifier) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -274,7 +278,7 @@ export default function BillingSuccess() {
                 <strong>Order ID:</strong> {orderId}
               </p>
               <p>
-                <strong>Checkout ID:</strong> {checkoutId}
+                <strong>Payment ID:</strong> {paymentIdentifier}
               </p>
             </div>
           )}
