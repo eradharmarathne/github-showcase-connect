@@ -224,36 +224,6 @@ export function ProfileSettings() {
         </CardContent>
       </Card>
 
-      {/* Phone Verification Section */}
-      {profile?.phone && !profile?.is_phone_verified && (
-        <div className="mt-4">
-          <Card className="border-orange-200 bg-orange-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-orange-600" />
-                <div>
-                  <h3 className="font-medium text-orange-900">
-                    Phone Verification Required
-                  </h3>
-                  <p className="text-sm text-orange-700">
-                    Your phone number is not verified. Please verify to receive
-                    SMS notifications.
-                  </p>
-                </div>
-                <Button
-                  onClick={handlePhoneVerificationClick}
-                  variant="outline"
-                  size="sm"
-                  className="ml-auto border-orange-300 text-orange-700 hover:bg-orange-100"
-                >
-                  Verify Phone
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Phone Verification Dialog */}
       <Dialog
         open={showPhoneVerification}

@@ -201,7 +201,8 @@
     "subtitle": "ඔබේ දේපළ වෙන්කරණය සහ වෙන්කිරීම් කළමනාකරණය කරන්න",
     "tabs": {
       "reservations": "වෙන්කරණය",
-      "payments": "ගෙවීම්"
+      "payments": "ගෙවීම්",
+      "public-requests": "පොදු ඉල්ලීම්"
     },
     "sections": {
       "active": "ක්‍රියාකාරී වෙන්කරණයන්",
@@ -213,7 +214,9 @@
       "searchPlaceholder": "වෙන්කරණය සොයන්න...",
       "filterByStatus": "තත්ත්වය අනුව පෙරන්න",
       "allStatuses": "සියලුම තත්ත්වයන්",
-      "newReservation": "නව වෙන්කරණයක්"
+      "newReservation": "නව වෙන්කරණයක්",
+      "quickReservation": "ඉක්මන් වෙන්කරණය",
+      "fullReservationForm": "සම්පූර්ණ වෙන්කරණ පෝරමය"
     },
     "status": {
       "confirmed": "තහවුරු කළ",
@@ -243,6 +246,8 @@
         "date": "දිනය",
         "note": "සටහන"
       },
+      "adults": "වැඩිහිටියන් {{count}}",
+      "children": "දරුවන් {{count}}",
       "actions": {
         "view": "බලන්න",
         "edit": "සංස්කරණය",
@@ -267,7 +272,9 @@
       "nights_other": "රාත්‍රී {{count}}",
       "location": "ස්ථානය:",
       "total": "මුළු:",
-      "paid": "ගෙවූ:"
+      "paid": "ගෙවූ:",
+      "totalAmount": "මුළු මුදල",
+      "balance": "ශේෂය"
     },
     "dialog": {
       "viewTitle": "වෙන්කරණ විස්තර",
@@ -279,9 +286,36 @@
       "cancelButton": "අවලංගු",
       "saveButton": "වෙනස්කම් සුරකින්න",
       "createButton": "වෙන්කරණය නිර්මාණය",
+      "createButton_other": "වෙන් කිරීම් සාදන්න",
       "closeButton": "වසන්න",
-      "printButton": "මුද්‍රණය",
-      "editButton": "සංස්කරණය"
+      "editDescription": "වෙන්කරවා ගැනීමේ විස්තර වෙනස් කර ආගන්තුක තොරතුරු යාවත්කාලීන කරන්න",
+      "verifyAndEnableEditing": "සංස්කරණය සත්‍යාපනය කර සක්‍රීය කරන්න",
+      "saving": "සුරකිමින්...",
+      "creating": "නිර්මාණය කරමින්...",
+      "newDialog": {
+        "stepDescription": "පියවර {{currentStep}} of {{totalSteps}}: {{stepTitle}}",
+        "steps": {
+          "guest": "ආගන්තුක තොරතුරු",
+          "rooms": "කාමර තේරීම",
+          "pricing": "මිල නියම කිරීම",
+          "payment": "ගෙවීම",
+          "confirmation": "තහවුරු කිරීම"
+        },
+        "loadingRooms": "කාමර පූරණය කරමින්...",
+        "validation": {
+          "guestNameRequired": "ආගන්තුකයාගේ නම අවශ්‍යයි",
+          "atLeastOneRoom": "කරුණාකර අවම වශයෙන් එක් කාමරයක් තෝරන්න",
+          "allRoomsSelected": "කරුණාකර සියලුම කාමර තේරීම් සඳහා කාමරයක් තෝරන්න",
+          "allDatesSelected": "කරුණාකර සියලුම කාමර තේරීම් සඳහා පැමිණීමේ සහ පිටවීමේ දිනයන් තෝරන්න",
+          "roomUnavailable": {
+            "title": "කාමරය ലഭ്യമಿಲ್ಲ",
+            "description": "තෝරාගත් දිනයන් සඳහා තෝරාගත් කාමර එකක් හෝ කිහිපයක් ലഭ്യമಿಲ್ಲ. කරුණාකර ඔබගේ තේරීම සකසන්න."
+          }
+        },
+        "missingInfo": "අවශ්‍ය තොරතුරු חסר",
+        "createSuccess": "වෙන් කිරීම (වල්) {{reservationNumbers}} සාර්ථකව සාදන ලදී",
+        "createError": "වෙන් කිරීම සෑදීමට අසමත් විය"
+      }
     },
     "form": {
       "guestName": "අමුත්තාගේ නම",
@@ -303,7 +337,14 @@
       "commission": "කොමිස්",
       "roomRate": "කාමර ගාස්තු",
       "extraCharges": "අමතර ගාස්තු",
-      "discount": "වට්ටම්"
+      "discount": "වට්ටම්",
+      "bookingSource": "වෙන්කරවා ගැනීමේ මූලාශ්‍රය",
+      "arrivalTime": "පැමිණීමේ වේලාව",
+      "selectBookingSource": "වෙන්කරවා ගැනීමේ මූලාශ්‍රය තෝරන්න",
+      "selectRoom": "කාමරය තෝරන්න",
+      "noAgent": "නියෝජිතයෙක් නැත",
+      "noGuide": "මාර්ගෝපදේශකයෙක් නැත",
+      "specialRequestsPlaceholder": "ඕනෑම විශේෂ ඉල්ලීමක් හෝ සටහනක්..."
     },
     "viewDialog": {
       "guestInformation": "අමුත්තා තොරතුරු",
@@ -334,23 +375,34 @@
       "unknownLocation": "නොදන්නා ස්ථානය"
     },
     "paymentsTable": {
-      "title": "ගෙවීම් ඉතිහාසය",
-      "description": "වෙන්කරණ සඳහා සියලුම ගෙවීම් සහ ආදායම් වාර්තා",
+      "title": "ගෙවීම් සහ ආදායම්",
+      "payments": "ගෙවීම්",
+      "noPayments": "ගෙවීම් කිසිවක් හමු නොවීය",
+      "noPaymentsDescription": "වෙන් කිරීම් සඳහා ආදායම් වාර්තා කළ විට ගෙවීම් මෙහි දිස්වනු ඇත.",
       "headers": {
-        "reservationNumber": "වෙන්කරණ #",
-        "guest": "අමුත්තා",
-        "amount": "මුදල",
-        "method": "ගෙවීම් ක්‍රමය",
         "date": "දිනය",
-        "note": "සටහන",
-        "currency": "මුදල් වර්ගය"
+        "amount": "මුදල",
+        "type": "වර්ගය",
+        "method": "ක්‍රමය",
+        "account": "ගිණුම",
+        "reservationNumber": "වෙන්කරවා ගැනීම",
+        "guest": "ආගන්තුකයා",
+        "room": "කාමරය",
+        "stay": "නවාතැන් කාලය",
+        "note": "සටහන"
       },
-      "noPayments": "ගෙවීම් සොයාගත නොහැක",
-      "loadingPayments": "ගෙවීම් පූරණය වෙමින්...",
+      "advancePayment": "අත්තිකාරම් ගෙවීම",
+      "advance": "අත්තිකාරම්",
+      "paymentTypes": {
+        "room_charge": "කාමර ගාස්තු",
+        "additional_service": "අමතර සේවාව",
+        "commission": "කොමිස්",
+        "other": "වෙනත්"
+      },
       "paymentMethods": {
         "cash": "මුදල්",
         "card": "කාඩ්පත",
-        "bank_transfer": "බැංකු ස්ථාන මාරුව",
+        "bank_transfer": "බැංකු මාරු කිරීම",
         "mobile_payment": "ජංගම ගෙවීම",
         "other": "වෙනත්"
       }
@@ -453,7 +505,10 @@
       "checkOutSuccess": "අමුත්තා සාර්ථකව පිටත්ව ගියා",
       "cancelSuccess": "වෙන්කරණය සාර්ථකව අවලංගු කරන ලදි",
       "printSuccess": "වෙන්කරණය සාර්ථකව මුද්‍රණය කරන ලදි",
-      "sendConfirmationSuccess": "තහවුරුව සාර්ථකව යවන ලදි"
+      "sendConfirmationSuccess": "තහවුරුව සාර්ථකව යවන ලදි",
+      "printErrorNoData": "මුද්‍රණය කළ නොහැක: වෙන්කරණ දත්ත නොමැත",
+      "printErrorIncompleteData": "මුද්‍රණය කළ නොහැක: අසම්පූර්ණ වෙන්කරණ දත්ත",
+      "noReservationsGetStarted": "වෙන්කරණ කිසිවක් හමු නොවීය. ආරම්භ කිරීමට ඔබගේ පළමු වෙන්කරණය සාදන්න."
     }
   },
   "bookingChannels": {
@@ -641,6 +696,40 @@
       "guest": "අමුත්තා",
       "total": "මුළු එකතුව",
       "moreTransactions": "වැඩි ගනුදෙනු"
+    }
+  },
+  "otp": {
+    "title": "OTP සත්‍යාපනය අවශ්‍යයි",
+    "description": "මෙම වෙන් කිරීම සංස්කරණය කිරීමට ඔබගේ අනන්‍යතාවය සත්‍යාපනය කරන්න",
+    "info": {
+      "edit": "මෙම වෙන් කිරීම සංස්කරණය කිරීමට, අපට ඔබගේ අනන්‍යතාවය සත්‍යාපනය කිරීමට අවශ්‍ය වේ.",
+      "sentTo": "OTP කේතයක් යවනු ලබන්නේ:"
+    },
+    "sending": "යවමින්...",
+    "send": "OTP යවන්න",
+    "sentSuccess": "OTP සාර්ථකව යවන ලදි!",
+    "enter": "ඉලක්කම් 6 ක OTP ඇතුළත් කරන්න",
+    "resend": "OTP නැවත යවන්න",
+    "verifying": "සත්‍යාපනය කරමින්...",
+    "verify": "සත්‍යාපනය කරන්න",
+    "toast": {
+      "sent": {
+        "title": "OTP යවන ලදි",
+        "description": "{{phoneNumber}} වෙත සත්‍යාපන කේතය යවන ලදි"
+      },
+      "sendFailed": "OTP යැවීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+      "invalid": {
+        "title": "වලංගු නොවන OTP",
+        "description": "කරුණාකර ඉලක්කම් 6 කින් යුත් වලංගු OTP කේතයක් ඇතුළත් කරන්න"
+      },
+      "verified": {
+        "title": "සත්‍යාපනය කරන ලදී",
+        "description": "OTP සාර්ථකව සත්‍යාපනය කරන ලදී. ඔබට දැන් වෙන් කිරීම සංස්කරණය කළ හැකිය."
+      },
+      "verificationFailed": {
+        "title": "සත්‍යාපනය අසාර්ථක විය",
+        "description": "වලංගු නොවන OTP. කරුණාකර නැවත උත්සාහ කරන්න."
+      }
     }
   },
   "theme": {
@@ -1241,6 +1330,90 @@
     "messages": {
       "subscriptionRefreshed": "දායකත්ව තත්ත්වය නැවුම් කරන ලදි",
       "subscriptionCancelled": "දායකත්වය සාර්ථකව අවලංගු කරන ලදි"
+    }
+  },
+  "publicBookings": {
+    "title": "පොදු වෙන්කිරීමේ ඉල්ලීම්",
+    "description": "ඔබගේ පොදු වෙන්කිරීමේ පිටුව හරහා ඉදිරිපත් කරන ලද වෙන්කිරීමේ ඉල්ලීම් කළමනාකරණය කරන්න",
+    "loading": "වෙන් කිරීම් පූරණය වෙමින් පවතී...",
+    "noRequests": "තවමත් වෙන්කිරීමේ ඉල්ලීම් නොමැත.",
+    "shareLink": "ඔබගේ වෙන්කිරීමේ සබැඳිය බෙදා ගන්න:",
+    "table": {
+      "guestName": "ආගන්තුකයාගේ නම",
+      "contact": "සම්බන්ධතා",
+      "checkIn": "පැමිණීම",
+      "checkOut": "පිටවීම",
+      "guests": "අමුත්තන්",
+      "room": "කාමරය",
+      "status": "තත්ත්වය",
+      "submitted": "ඉදිරිපත් කරන ලදී",
+      "actions": "ක්‍රියා"
+    },
+    "guests": {
+      "adults": "වැඩිහිටියන් {{count}}",
+      "children": "දරුවන් {{count}}"
+    },
+    "nights": "රාත්‍රී {{count}}",
+    "notAssigned": "පවරා නැත",
+    "status": {
+      "pending": "පොරොත්තුවෙන්",
+      "confirmed": "තහවුරු කරන ලදී",
+      "rejected": "ප්‍රතික්ෂේප කරන ලදී",
+      "converted": "පරිවර්තනය කරන ලදී"
+    },
+    "toast": {
+      "statusUpdated": {
+        "title": "තත්ත්වය යාවත්කාලීන කරන ලදී",
+        "description": "වෙන්කිරීමේ ඉල්ලීම {{status}} සාර්ථකව.{{room}}",
+        "roomAssigned": "කාමරය {{room}} පවරන ලදී."
+      },
+      "statusUpdateFailed": "වෙන්කිරීමේ තත්ත්වය යාවත්කාලීන කිරීමට අසමත් විය.",
+      "roomNotAssigned": {
+        "title": "කාමරය පවරා නැත",
+        "description": "වෙන්කිරීමට පරිවර්තනය කිරීමට පෙර කරුණාකර කාමරයක් පවරන්න."
+      },
+      "reservationCreated": {
+        "title": "වෙන්කිරීම සාර්ථකයි!",
+        "description": "පොදු වෙන්කිරීම වෙන්කිරීමේ අංක #{{id}} වෙත පරිවර්තනය කර ඇත."
+      },
+      "conversionFailed": "වෙන්කිරීම වෙන්කිරීමට පරිවර්තනය කිරීමට අසමත් විය."
+    },
+    "dialog": {
+      "title": "වෙන්කිරීමේ ඉල්ලීම් විස්තර",
+      "description": "මෙම වෙන්කිරීමේ ඉල්ලීම සමාලෝචනය කර කළමනාකරණය කරන්න",
+      "guestInformation": "ආගන්තුක තොරතුරු",
+      "name": "නම",
+      "email": "විද්‍යුත් තැපෑල",
+      "phone": "දුරකථන",
+      "nationality": "ජාතිකත්වය",
+      "address": "ලිපිනය",
+      "bookingDetails": "වෙන්කිරීමේ විස්තර",
+      "checkIn": "පැමිණීම",
+      "checkOut": "පිටවීම",
+      "guests": "අමුත්තන්",
+      "adults": "වැඩිහිටි {{count}}",
+      "adults_other": "වැඩිහිටියන් {{count}}",
+      "children": "ළමා {{count}}",
+      "children_other": "ළමුන් {{count}}",
+      "nights": "රාත්‍රී",
+      "roomPreference": "කාමර මනාපය",
+      "specialRequests": "විශේෂ ඉල්ලීම්",
+      "status": "තත්ත්වය",
+      "assignedRoom": "පවරන ලද කාමරය",
+      "roomInfo": "කාමරය {{room_number}} - {{room_type}}",
+      "assignRoomOptional": "කාමරයක් පවරන්න (විකල්ප)",
+      "assignRoomDescription": "මෙම වෙන්කිරීම සඳහා පැවරීමට කාමරයක් තෝරන්න. ඔබට මෙය මඟ හැර පසුව පැවරිය හැක.",
+      "selectRoom": "කාමරය තෝරන්න",
+      "chooseRoomOptional": "කාමරයක් තෝරන්න (විකල්ප)",
+      "noRoomAssigned": "තවම කාමරයක් පවරා නැත",
+      "otherRoomTypes": "─── වෙනත් කාමර වර්ග ───",
+      "roomWillBeAssigned": "කාමරය {{room}} මෙම වෙන්කිරීමට පවරනු ලැබේ.",
+      "reject": "ප්‍රතික්ෂේප කරන්න",
+      "confirming": "තහවුරු කරමින්...",
+      "confirmBooking": "වෙන්කිරීම තහවුරු කරන්න",
+      "converting": "පරිවර්තනය කරමින්...",
+      "convertToReservation": "වෙන්කිරීමට පරිවර්තනය කරන්න",
+      "convertedToReservation": "✓ වෙන්කිරීමට පරිවර්තනය කරන ලදී"
     }
   }
 }

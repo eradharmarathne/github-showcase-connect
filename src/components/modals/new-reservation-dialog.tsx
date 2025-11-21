@@ -35,11 +35,11 @@ interface NewReservationDialogProps {
 }
 
 const STEPS = [
-	{ id: "guest", title: "Guest Information", icon: Calendar },
-	{ id: "rooms", title: "Room Selection", icon: Calendar },
-	{ id: "pricing", title: "Pricing", icon: Calendar },
-	{ id: "payment", title: "Payment", icon: Calendar },
-	{ id: "confirmation", title: "Confirmation", icon: Calendar },
+	{ id: "guest", title: "reservations.newDialog.steps.guest", icon: Calendar },
+	{ id: "rooms", title: "reservations.newDialog.steps.rooms", icon: Calendar },
+	{ id: "pricing", title: "reservations.newDialog.steps.pricing", icon: Calendar },
+	{ id: "payment", title: "reservations.newDialog.steps.payment", icon: Calendar },
+	{ id: "confirmation", title: "reservations.newDialog.steps.confirmation", icon: Calendar },
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
@@ -192,8 +192,8 @@ export function NewReservationDialog({
 			case "guest": {
 				if (!guestData.guest_name.trim()) {
 					toast({
-						title: "Validation Error",
-						description: "Guest name is required",
+						title: t("common.validationError"),
+						description: t("reservations.newDialog.validation.guestNameRequired"),
 						variant: "destructive",
 					});
 					return false;
@@ -204,8 +204,8 @@ export function NewReservationDialog({
 			case "rooms": {
 				if (roomSelections.length === 0) {
 					toast({
-						title: "Validation Error",
-						description: "Please select at least one room",
+						title: t("common.validationError"),
+						description: t("reservations.newDialog.validation.atLeastOneRoom"),
 						variant: "destructive",
 					});
 					return false;
@@ -216,8 +216,8 @@ export function NewReservationDialog({
 				);
 				if (invalidSelections.length > 0) {
 					toast({
-						title: "Validation Error",
-						description: "Please select a room for all room selections",
+						title: t("common.validationError"),
+						description: t("reservations.newDialog.validation.allRoomsSelected"),
 						variant: "destructive",
 					});
 					return false;
@@ -228,9 +228,8 @@ export function NewReservationDialog({
 				);
 				if (missingDatesSelections.length > 0) {
 					toast({
-						title: "Validation Error",
-						description:
-							"Please select check-in and check-out dates for all room selections",
+						title: t("common.validationError"),
+						description: t("reservations.newDialog.validation.allDatesSelected"),
 						variant: "destructive",
 					});
 					return false;
@@ -243,9 +242,8 @@ export function NewReservationDialog({
 				});
 				if (unavailableSelections.length > 0) {
 					toast({
-						title: "Room Unavailable",
-						description:
-							"One or more selected rooms are not available for the chosen dates. Please adjust your selection.",
+						title: t("reservations.newDialog.validation.roomUnavailable.title"),
+						description: t("reservations.newDialog.validation.roomUnavailable.description"),
 						variant: "destructive",
 					});
 					return false;
@@ -284,8 +282,8 @@ export function NewReservationDialog({
 
 		if (!tenant?.id || !profile?.id || !selectedLocation) {
 			toast({
-				title: "Error",
-				description: "Missing required information",
+				title: t("common.error"),
+				description: t("reservations.newDialog.missingInfo"),
 				variant: "destructive",
 			});
 			return;
@@ -392,8 +390,8 @@ export function NewReservationDialog({
 				.map((r) => r.reservation_number)
 				.join(", ");
 			toast({
-				title: "Success",
-				description: `Reservation(s) ${reservationNumbersDisplay} created successfully`,
+				title: t("common.success"),
+				description: t("reservations.newDialog.createSuccess", { reservationNumbers: reservationNumbersDisplay }),
 			});
 
 			// Reset form and close dialog
@@ -403,8 +401,8 @@ export function NewReservationDialog({
 		} catch (error) {
 			console.error("Error creating reservation:", error);
 			toast({
-				title: "Error",
-				description: "Failed to create reservation",
+				title: t("common.error"),
+				description: t("reservations.newDialog.createError"),
 				variant: "destructive",
 			});
 		} finally {
@@ -496,11 +494,10 @@ export function NewReservationDialog({
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						<Calendar className="h-5 w-5" />
-						Create New Reservation
+						{t("reservations.dialog.newTitle")}
 					</DialogTitle>
 					<DialogDescription>
-						Step {currentStepIndex + 1} of {STEPS.length}:{" "}
-						{STEPS[currentStepIndex].title}
+						{t("reservations.newDialog.stepDescription", { currentStep: currentStepIndex + 1, totalSteps: STEPS.length, stepTitle: t(STEPS[currentStepIndex].title) })}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -524,7 +521,7 @@ export function NewReservationDialog({
 										: "text-gray-500"
 								}`}
 							>
-								{step.title}
+								{t(step.title)}
 							</span>
 							{index < STEPS.length - 1 && (
 								<div
@@ -542,13 +539,13 @@ export function NewReservationDialog({
 					<Suspense
 						fallback={
 							<div className="flex items-center justify-center p-8">
-								Loading...
+								{t("common.loading")}
 							</div>
 						}
 					>
 						{loading ? (
 							<div className="flex items-center justify-center p-8">
-								Loading rooms...
+								{t("reservations.newDialog.loadingRooms")}
 							</div>
 						) : (
 							renderCurrentStep()
@@ -562,7 +559,7 @@ export function NewReservationDialog({
 						{!isFirstStep && (
 							<Button type="button" variant="outline" onClick={handlePrevious}>
 								<ChevronLeft className="h-4 w-4 mr-2" />
-								Previous
+								{t("common.previous")}
 							</Button>
 						)}
 					</div>
@@ -570,19 +567,19 @@ export function NewReservationDialog({
 					<div className="flex gap-2">
 						<Button type="button" variant="outline" onClick={onClose}>
 							<X className="h-4 w-4 mr-2" />
-							Cancel
+							{t("common.cancel")}
 						</Button>
 
 						{isLastStep ? (
 							<Button onClick={handleSubmit} disabled={submitting}>
 								<Save className="h-4 w-4 mr-2" />
 								{submitting
-									? "Creating..."
-									: `Create Reservation${roomSelections.length > 1 ? "s" : ""}`}
+									? t("reservations.dialog.creating")
+									: t("reservations.dialog.createButton", { count: roomSelections.length })}
 							</Button>
 						) : (
 							<Button onClick={handleNext}>
-								Next
+								{t("common.next")}
 								<ChevronRight className="h-4 w-4 ml-2" />
 							</Button>
 						)}

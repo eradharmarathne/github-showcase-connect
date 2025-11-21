@@ -28,7 +28,9 @@ export function ReservationsHeader({
 				<TabsTrigger value="payments">
 					{t("reservations.tabs.payments")}
 				</TabsTrigger>
-				<TabsTrigger value="public-requests">Public Requests</TabsTrigger>
+				<TabsTrigger value="public-requests">
+					{t("reservations.tabs.public-requests")}
+				</TabsTrigger>
 			</TabsList>
 		</div>
 	);

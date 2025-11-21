@@ -109,11 +109,11 @@ export function PaymentsTable() {
 						<div className="flex items-center space-x-3">
 							<CreditCard className="h-6 w-6 text-primary" />
 							<h3 className="text-lg font-semibold text-gray-900">
-								{t("reservations.paymentsTable.title", "Payments & Income")}
+								{t("reservations.paymentsTable.title")}
 							</h3>
 						</div>
 						<Badge variant="secondary" className="ml-2">
-							{payments.length} {t("common.payments", "payments")}
+							{payments.length} {t("reservations.paymentsTable.payments", { count: payments.length })}
 						</Badge>
 					</div>
 
@@ -123,16 +123,10 @@ export function PaymentsTable() {
 								<CreditCard className="h-12 w-12" />
 							</div>
 							<h3 className="mt-2 text-sm font-medium text-gray-900">
-								{t(
-									"reservations.paymentsTable.noPayments",
-									"No payments found",
-								)}
+								{t("reservations.paymentsTable.noPayments")}
 							</h3>
 							<p className="mt-1 text-sm text-gray-500">
-								{t(
-									"reservations.paymentsTable.noPaymentsDescription",
-									"Payments will appear here when income is recorded for reservations.",
-								)}
+								{t("reservations.paymentsTable.noPaymentsDescription")}
 							</p>
 						</div>
 					) : (
@@ -141,37 +135,37 @@ export function PaymentsTable() {
 								<TableHeader>
 									<TableRow>
 										<TableHead className="min-w-[100px]">
-											{t("common.date", "Date")}
+											{t("reservations.paymentsTable.headers.date")}
 										</TableHead>
 										<TableHead className="min-w-[120px]">
-											{t("common.amount", "Amount")}
+											{t("reservations.paymentsTable.headers.amount")}
 										</TableHead>
 										<TableHead className="min-w-[100px]">
-											{t("common.type", "Type")}
+											{t("reservations.paymentsTable.headers.type")}
 										</TableHead>
 										<TableHead className="min-w-[100px]">
-											{t("common.method", "Method")}
+											{t("reservations.paymentsTable.headers.method")}
 										</TableHead>
 										<TableHead className="min-w-[120px]">
-											{t("common.account", "Account")}
+											{t("reservations.paymentsTable.headers.account")}
 										</TableHead>
 										<TableHead className="min-w-[140px]">
-											{t("common.reservation", "Reservation")}
+											{t("reservations.paymentsTable.headers.reservationNumber")}
 										</TableHead>
 										<TableHead className="min-w-[150px]">
-											{t("common.guest", "Guest")}
+											{t("reservations.paymentsTable.headers.guest")}
 										</TableHead>
 										<TableHead className="min-w-[100px]">
-											{t("common.room", "Room")}
+											{t("reservations.paymentsTable.headers.room")}
 										</TableHead>
 										<TableHead className="min-w-[120px]">
-											{t("common.stay", "Stay Period")}
+											{t("reservations.paymentsTable.headers.stay")}
 										</TableHead>
 										<TableHead className="min-w-[150px]">
-											{t("common.note", "Note")}
+											{t("reservations.paymentsTable.headers.note")}
 										</TableHead>
 										<TableHead className="w-20">
-											{t("common.actions", "Actions")}
+											{t("reservations.table.headers.actions")}
 										</TableHead>
 									</TableRow>
 								</TableHeader>
@@ -192,7 +186,7 @@ export function PaymentsTable() {
 												</div>
 												{payment.is_advance && (
 													<div className="text-xs text-yellow-600 mt-1">
-														Advance Payment
+														{t("reservations.paymentsTable.advancePayment")}
 													</div>
 												)}
 											</TableCell>
@@ -205,8 +199,8 @@ export function PaymentsTable() {
 													)}`}
 												>
 													{payment.is_advance
-														? "Advance"
-														: payment.type.replace("_", " ")}
+														? t("reservations.paymentsTable.advance")
+														: t(`reservations.paymentsTable.paymentTypes.${payment.type}`)}
 												</Badge>
 											</TableCell>
 											<TableCell>
@@ -216,14 +210,14 @@ export function PaymentsTable() {
 														payment.payment_method,
 													)}`}
 												>
-													{payment.payment_method.replace("_", " ")}
+													{t(`reservations.paymentsTable.paymentMethods.${payment.payment_method}`)}
 												</Badge>
 											</TableCell>
 											<TableCell>
 												<div className="flex items-center space-x-1">
 													<Building2 className="h-3 w-3 text-gray-400" />
 													<span className="text-sm">
-														{payment.account_name || "-"}
+														{payment.account_name || t("reservations.table.noData")}
 													</span>
 												</div>
 											</TableCell>
@@ -235,7 +229,7 @@ export function PaymentsTable() {
 														</div>
 														{payment.reservation_status && (
 															<Badge variant="outline" className="text-xs">
-																{payment.reservation_status}
+																{t(`reservations.status.${payment.reservation_status.toLowerCase()}`)}
 															</Badge>
 														)}
 													</div>
@@ -261,15 +255,15 @@ export function PaymentsTable() {
 														)}
 														{payment.adults !== null && (
 															<div className="text-xs text-gray-500">
-																{payment.adults} adult(s)
+																{t("reservations.table.adults", { count: payment.adults })}
 																{payment.children
-																	? `, ${payment.children} child(ren)`
+																	? `, ${t("reservations.table.children", { count: payment.children })}`
 																	: ""}
 															</div>
 														)}
 													</div>
 												) : (
-													"-"
+													t("reservations.table.noData")
 												)}
 											</TableCell>
 											<TableCell>
@@ -288,7 +282,7 @@ export function PaymentsTable() {
 														)}
 													</div>
 												) : (
-													"-"
+													t("reservations.table.noData")
 												)}
 											</TableCell>
 											<TableCell>
@@ -302,12 +296,12 @@ export function PaymentsTable() {
 														</div>
 														{payment.nights && (
 															<div className="text-xs text-gray-500">
-																{payment.nights} night(s)
+																{t("reservations.table.nights", { count: payment.nights })}
 															</div>
 														)}
 													</div>
 												) : (
-													"-"
+													t("reservations.table.noData")
 												)}
 											</TableCell>
 											<TableCell>
@@ -319,7 +313,7 @@ export function PaymentsTable() {
 														{payment.note}
 													</div>
 												) : (
-													"-"
+													t("reservations.table.noData")
 												)}
 											</TableCell>
 											<TableCell>
@@ -332,8 +326,7 @@ export function PaymentsTable() {
 														}
 														className="h-8 w-8 p-0"
 														title={t(
-															"common.viewReservation",
-															"View reservation",
+															"reservations.table.actions.view"
 														)}
 													>
 														<Eye className="h-4 w-4" />

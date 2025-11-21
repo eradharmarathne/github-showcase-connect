@@ -110,12 +110,12 @@ export function ReservationsFilters({
 					{onNewCompactReservation && (
 						<DropdownMenuItem onClick={onNewCompactReservation}>
 							<Calendar className="size-4 mr-2" />
-							Quick Reservation
+							{t("reservations.filters.quickReservation")}
 						</DropdownMenuItem>
 					)}
 					<DropdownMenuItem onClick={onNewReservation}>
 						<Calendar className="size-4 mr-2" />
-						Full Reservation Form
+						{t("reservations.filters.fullReservationForm")}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

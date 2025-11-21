@@ -201,7 +201,8 @@
     "subtitle": "Manage your property reservations and bookings",
     "tabs": {
       "reservations": "Reservations",
-      "payments": "Payments"
+      "payments": "Payments",
+      "public-requests": "Public Requests"
     },
     "sections": {
       "active": "Active Reservations",
@@ -213,7 +214,9 @@
       "searchPlaceholder": "Search reservations...",
       "filterByStatus": "Filter by status",
       "allStatuses": "All Statuses",
-      "newReservation": "New Reservation"
+      "newReservation": "New Reservation",
+      "quickReservation": "Quick Reservation",
+      "fullReservationForm": "Full Reservation Form"
     },
     "status": {
       "confirmed": "Confirmed",
@@ -243,6 +246,8 @@
         "date": "Date",
         "note": "Note"
       },
+      "adults": "{{count}} adult(s)",
+      "children": "{{count}} child(ren)",
       "actions": {
         "view": "View",
         "edit": "Edit",
@@ -267,7 +272,9 @@
       "nights_other": "{{count}} nights",
       "location": "Location:",
       "total": "Total:",
-      "paid": "Paid:"
+      "paid": "Paid:",
+      "totalAmount": "Total Amount",
+      "balance": "Balance"
     },
     "dialog": {
       "viewTitle": "Reservation Details",
@@ -279,9 +286,36 @@
       "cancelButton": "Cancel",
       "saveButton": "Save Changes",
       "createButton": "Create Reservation",
+      "createButton_other": "Create Reservations",
       "closeButton": "Close",
-      "printButton": "Print",
-      "editButton": "Edit"
+      "editDescription": "Modify reservation details and update guest information",
+      "verifyAndEnableEditing": "Verify & Enable Editing",
+      "saving": "Saving...",
+      "creating": "Creating...",
+      "newDialog": {
+        "stepDescription": "Step {{currentStep}} of {{totalSteps}}: {{stepTitle}}",
+        "steps": {
+          "guest": "Guest Information",
+          "rooms": "Room Selection",
+          "pricing": "Pricing",
+          "payment": "Payment",
+          "confirmation": "Confirmation"
+        },
+        "loadingRooms": "Loading rooms...",
+        "validation": {
+          "guestNameRequired": "Guest name is required",
+          "atLeastOneRoom": "Please select at least one room",
+          "allRoomsSelected": "Please select a room for all room selections",
+          "allDatesSelected": "Please select check-in and check-out dates for all room selections",
+          "roomUnavailable": {
+            "title": "Room Unavailable",
+            "description": "One or more selected rooms are not available for the chosen dates. Please adjust your selection."
+          }
+        },
+        "missingInfo": "Missing required information",
+        "createSuccess": "Reservation(s) {{reservationNumbers}} created successfully",
+        "createError": "Failed to create reservation"
+      }
     },
     "form": {
       "guestName": "Guest Name",
@@ -303,7 +337,14 @@
       "commission": "Commission",
       "roomRate": "Room Rate",
       "extraCharges": "Extra Charges",
-      "discount": "Discount"
+      "discount": "Discount",
+      "bookingSource": "Booking Source",
+      "arrivalTime": "Arrival Time",
+      "selectBookingSource": "Select booking source",
+      "selectRoom": "Select room",
+      "noAgent": "No Agent",
+      "noGuide": "No Guide",
+      "specialRequestsPlaceholder": "Any special requests or notes..."
     },
     "viewDialog": {
       "guestInformation": "Guest Information",
@@ -334,19 +375,30 @@
       "unknownLocation": "Unknown Location"
     },
     "paymentsTable": {
-      "title": "Payment History",
-      "description": "All payments and income records for reservations",
-      "headers": {
-        "reservationNumber": "Reservation #",
-        "guest": "Guest",
-        "amount": "Amount",
-        "method": "Payment Method",
-        "date": "Date",
-        "note": "Note",
-        "currency": "Currency"
-      },
+      "title": "Payments & Income",
+      "payments": "payments",
       "noPayments": "No payments found",
-      "loadingPayments": "Loading payments...",
+      "noPaymentsDescription": "Payments will appear here when income is recorded for reservations.",
+      "headers": {
+        "date": "Date",
+        "amount": "Amount",
+        "type": "Type",
+        "method": "Method",
+        "account": "Account",
+        "reservationNumber": "Reservation",
+        "guest": "Guest",
+        "room": "Room",
+        "stay": "Stay Period",
+        "note": "Note"
+      },
+      "advancePayment": "Advance Payment",
+      "advance": "Advance",
+      "paymentTypes": {
+        "room_charge": "Room Charge",
+        "additional_service": "Additional Service",
+        "commission": "Commission",
+        "other": "Other"
+      },
       "paymentMethods": {
         "cash": "Cash",
         "card": "Card",
@@ -453,7 +505,10 @@
       "checkOutSuccess": "Guest checked out successfully",
       "cancelSuccess": "Reservation cancelled successfully",
       "printSuccess": "Reservation printed successfully",
-      "sendConfirmationSuccess": "Confirmation sent successfully"
+      "sendConfirmationSuccess": "Confirmation sent successfully",
+      "printErrorNoData": "Cannot print: No reservation data available",
+      "printErrorIncompleteData": "Cannot print: Incomplete reservation data",
+      "noReservationsGetStarted": "No reservations found. Create your first reservation to get started."
     }
   },
   "bookingChannels": {
@@ -649,6 +704,40 @@
       "guest": "Guest",
       "total": "Total",
       "moreTransactions": "more transactions"
+    }
+  },
+  "otp": {
+    "title": "OTP Verification Required",
+    "description": "Verify your identity to edit this reservation",
+    "info": {
+      "edit": "To edit this reservation, we need to verify your identity.",
+      "sentTo": "An OTP will be sent to:"
+    },
+    "sending": "Sending...",
+    "send": "Send OTP",
+    "sentSuccess": "OTP sent successfully!",
+    "enter": "Enter 6-digit OTP",
+    "resend": "Resend OTP",
+    "verifying": "Verifying...",
+    "verify": "Verify",
+    "toast": {
+      "sent": {
+        "title": "OTP Sent",
+        "description": "Verification code sent to {{phoneNumber}}"
+      },
+      "sendFailed": "Failed to send OTP. Please try again.",
+      "invalid": {
+        "title": "Invalid OTP",
+        "description": "Please enter a valid 6-digit OTP"
+      },
+      "verified": {
+        "title": "Verified",
+        "description": "OTP verified successfully. You can now edit the reservation."
+      },
+      "verificationFailed": {
+        "title": "Verification Failed",
+        "description": "Invalid OTP. Please try again."
+      }
     }
   },
   "theme": {
@@ -1254,6 +1343,90 @@
     "messages": {
       "subscriptionRefreshed": "Subscription status refreshed",
       "subscriptionCancelled": "Subscription cancelled successfully"
+    }
+  },
+  "publicBookings": {
+    "title": "Public Booking Requests",
+    "description": "Manage booking requests submitted through your public booking page",
+    "loading": "Loading bookings...",
+    "noRequests": "No booking requests yet.",
+    "shareLink": "Share your booking link:",
+    "table": {
+      "guestName": "Guest Name",
+      "contact": "Contact",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "guests": "Guests",
+      "room": "Room",
+      "status": "Status",
+      "submitted": "Submitted",
+      "actions": "Actions"
+    },
+    "guests": {
+      "adults": "{{count}}A",
+      "children": "{{count}}C"
+    },
+    "nights": "{{count}} nights",
+    "notAssigned": "Not assigned",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "converted": "Converted"
+    },
+    "toast": {
+      "statusUpdated": {
+        "title": "Status Updated",
+        "description": "Booking request {{status}} successfully.{{room}}",
+        "roomAssigned": "Room {{room}} assigned."
+      },
+      "statusUpdateFailed": "Failed to update booking status.",
+      "roomNotAssigned": {
+        "title": "Room Not Assigned",
+        "description": "Please assign a room before converting to reservation."
+      },
+      "reservationCreated": {
+        "title": "Reservation Created!",
+        "description": "Public booking has been converted to reservation #{{id}}."
+      },
+      "conversionFailed": "Failed to convert booking to reservation."
+    },
+    "dialog": {
+      "title": "Booking Request Details",
+      "description": "Review and manage this booking request",
+      "guestInformation": "Guest Information",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "nationality": "Nationality",
+      "address": "Address",
+      "bookingDetails": "Booking Details",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "guests": "Guests",
+      "adults": "{{count}} Adult",
+      "adults_other": "{{count}} Adults",
+      "children": "{{count}} Child",
+      "children_other": "{{count}} Children",
+      "nights": "Nights",
+      "roomPreference": "Room Preference",
+      "specialRequests": "Special Requests",
+      "status": "Status",
+      "assignedRoom": "Assigned Room",
+      "roomInfo": "Room {{room_number}} - {{room_type}}",
+      "assignRoomOptional": "Assign Room (Optional)",
+      "assignRoomDescription": "Select a room to assign for this booking. You can skip this and assign later.",
+      "selectRoom": "Select Room",
+      "chooseRoomOptional": "Choose a room (optional)",
+      "noRoomAssigned": "No room assigned yet",
+      "otherRoomTypes": "─── Other Room Types ───",
+      "roomWillBeAssigned": "Room {{room}} will be assigned to this booking.",
+      "reject": "Reject",
+      "confirming": "Confirming...",
+      "confirmBooking": "Confirm Booking",
+      "converting": "Converting...",
+      "convertToReservation": "Convert to Reservation",
+      "convertedToReservation": "✓ Converted to Reservation"
     }
   }
 }

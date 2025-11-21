@@ -172,7 +172,7 @@ export function ReservationsMobileCards({
 			console.error("[Print] No reservation data provided");
 			toast({
 				title: t("common.error"),
-				description: "Cannot print: No reservation data available",
+				description: t("reservations.messages.printErrorNoData"),
 				variant: "destructive",
 			});
 			return;
@@ -185,7 +185,7 @@ export function ReservationsMobileCards({
 			});
 			toast({
 				title: t("common.error"),
-				description: "Cannot print: Incomplete reservation data",
+				description: t("reservations.messages.printErrorIncompleteData"),
 				variant: "destructive",
 			});
 			return;
@@ -296,8 +296,7 @@ export function ReservationsMobileCards({
 										</div>
 										<div className="flex items-center gap-2 text-slate-600">
 											<span className="text-slate-400">
-												({reservation.nights}{" "}
-												{reservation.nights === 1 ? "night" : "nights"})
+												({t("reservations.mobileCard.nights", { count: reservation.nights })})
 											</span>
 										</div>
 									</div>
@@ -305,7 +304,7 @@ export function ReservationsMobileCards({
 									<div className="flex justify-between items-center pt-3 border-t border-slate-100 mb-3">
 										<div className="flex flex-col gap-1">
 											<span className="text-xs text-slate-600">
-												Total Amount
+												{t("reservations.mobileCard.totalAmount")}
 											</span>
 											<span className="font-semibold text-sm text-slate-900">
 												{getCurrencySymbol(selectedCurrency)}{" "}
@@ -315,7 +314,7 @@ export function ReservationsMobileCards({
 											</span>
 										</div>
 										<div className="flex flex-col gap-1 items-end">
-											<span className="text-xs text-slate-600">Balance</span>
+											<span className="text-xs text-slate-600">{t("reservations.mobileCard.balance")}</span>
 											<span
 												className={`font-semibold text-sm ${
 													reservation.balance_amount > 0
@@ -413,8 +412,7 @@ export function ReservationsMobileCards({
 										</div>
 										<div className="flex items-center gap-2 text-slate-600">
 											<span className="text-slate-400">
-												({reservation.nights}{" "}
-												{reservation.nights === 1 ? "night" : "nights"})
+												({t("reservations.mobileCard.nights", { count: reservation.nights })})
 											</span>
 										</div>
 									</div>
@@ -422,7 +420,7 @@ export function ReservationsMobileCards({
 									<div className="flex justify-between items-center pt-3 border-t border-slate-100 mb-3">
 										<div className="flex flex-col gap-1">
 											<span className="text-xs text-slate-600">
-												Total Amount
+												{t("reservations.mobileCard.totalAmount")}
 											</span>
 											<span className="font-semibold text-sm text-slate-700">
 												{getCurrencySymbol(selectedCurrency)}{" "}
@@ -432,7 +430,7 @@ export function ReservationsMobileCards({
 											</span>
 										</div>
 										<div className="flex flex-col gap-1 items-end">
-											<span className="text-xs text-slate-600">Balance</span>
+											<span className="text-xs text-slate-600">{t("reservations.mobileCard.balance")}</span>
 											<span className="font-semibold text-sm text-slate-600">
 												{getCurrencySymbol(selectedCurrency)}{" "}
 												{(reservation.balance_amount || 0).toLocaleString()}

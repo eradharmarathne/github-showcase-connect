@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -78,6 +79,7 @@ export function ReservationEditDialog({
 	onClose,
 	onUpdate,
 }: ReservationEditDialogProps) {
+	const { t } = useTranslation();
 	const { toast } = useToast();
 	const [isOTPVerified, setIsOTPVerified] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -348,17 +350,17 @@ export function ReservationEditDialog({
 			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						Edit Reservation - {reservation.reservation_number}
+						{t("reservations.dialog.editTitle")} - {reservation.reservation_number}
 					</DialogTitle>
 					<DialogDescription>
-						Modify reservation details and update guest information
+						{t("reservations.dialog.editDescription")}
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-6">
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<Label>Guest Name</Label>
+							<Label>{t("reservations.form.guestName")}</Label>
 							<Input
 								value={formData.guest_name || ""}
 								onChange={(e) =>
@@ -367,7 +369,7 @@ export function ReservationEditDialog({
 							/>
 						</div>
 						<div>
-							<Label>Guest Email</Label>
+							<Label>{t("reservations.form.guestEmail")}</Label>
 							<Input
 								type="email"
 								value={formData.guest_email || ""}
@@ -380,7 +382,7 @@ export function ReservationEditDialog({
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<Label>Guest Phone</Label>
+							<Label>{t("reservations.form.guestPhone")}</Label>
 							<PhoneInput
 								defaultCountry="LK"
 								international
@@ -391,7 +393,7 @@ export function ReservationEditDialog({
 							/>
 						</div>
 						<div>
-							<Label>Guest Nationality</Label>
+							<Label>{t("reservations.form.guestNationality")}</Label>
 							<Input
 								value={formData.guest_nationality || ""}
 								onChange={(e) =>
@@ -405,7 +407,7 @@ export function ReservationEditDialog({
 					</div>
 
 					<div>
-						<Label>Guest Address</Label>
+						<Label>{t("reservations.form.guestAddress")}</Label>
 						<Textarea
 							value={formData.guest_address || ""}
 							onChange={(e) =>
@@ -415,7 +417,7 @@ export function ReservationEditDialog({
 					</div>
 
 					<div>
-						<Label>Booking Source</Label>
+						<Label>{t("reservations.form.bookingSource")}</Label>
 						<Select
 							value={formData.booking_source || ""}
 							onValueChange={(value) =>
@@ -423,7 +425,7 @@ export function ReservationEditDialog({
 							}
 						>
 							<SelectTrigger>
-								<SelectValue placeholder="Select booking source" />
+								<SelectValue placeholder={t("reservations.form.selectBookingSource")} />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="direct">Direct</SelectItem>
@@ -444,7 +446,7 @@ export function ReservationEditDialog({
 
 					<div className="grid grid-cols-3 gap-4">
 						<div>
-							<Label>Adults</Label>
+							<Label>{t("reservations.form.adults")}</Label>
 							<Input
 								type="number"
 								min="1"
@@ -455,7 +457,7 @@ export function ReservationEditDialog({
 							/>
 						</div>
 						<div>
-							<Label>Children</Label>
+							<Label>{t("reservations.form.children")}</Label>
 							<Input
 								type="number"
 								min="0"
@@ -469,7 +471,7 @@ export function ReservationEditDialog({
 							/>
 						</div>
 						<div>
-							<Label>Arrival Time</Label>
+							<Label>{t("reservations.form.arrivalTime")}</Label>
 							<Input
 								type="time"
 								value={formData.arrival_time || ""}
@@ -482,7 +484,7 @@ export function ReservationEditDialog({
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<Label htmlFor="check_in_date">Check-in Date</Label>
+							<Label htmlFor="check_in_date">{t("reservations.form.checkInDate")}</Label>
 							<DatePicker
 								value={formData.check_in_date || ""}
 								onChange={(value) => {
@@ -525,7 +527,7 @@ export function ReservationEditDialog({
 							/>
 						</div>
 						<div>
-							<Label htmlFor="check_out_date">Check-out Date</Label>
+							<Label htmlFor="check_out_date">{t("reservations.form.checkOutDate")}</Label>
 							<DatePicker
 								value={formData.check_out_date || ""}
 								onChange={(value) => {
@@ -571,7 +573,7 @@ export function ReservationEditDialog({
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<Label>Room</Label>
+							<Label>{t("reservations.form.room")}</Label>
 							<Select
 								value={formData.room_id || ""}
 								onValueChange={(value) => {
@@ -610,7 +612,7 @@ export function ReservationEditDialog({
 								}}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select room" />
+									<SelectValue placeholder={t("reservations.form.selectRoom")} />
 								</SelectTrigger>
 								<SelectContent>
 									{rooms.map((room) => (
@@ -622,7 +624,7 @@ export function ReservationEditDialog({
 							</Select>
 						</div>
 						<div>
-							<Label>Room Rate</Label>
+							<Label>{t("reservations.form.roomRate")}</Label>
 							<Input
 								type="number"
 								step="0.01"
@@ -641,7 +643,7 @@ export function ReservationEditDialog({
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<Label>Agent</Label>
+							<Label>{t("reservations.form.agent")}</Label>
 							<Select
 								value={formData.agent_id || "none"}
 								onValueChange={(value) => {
@@ -657,7 +659,7 @@ export function ReservationEditDialog({
 									<SelectValue placeholder="Select agent (optional)" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="none">No Agent</SelectItem>
+									<SelectItem value="none">{t("reservations.form.noAgent")}</SelectItem>
 									{agents.map((agent) => (
 										<SelectItem key={agent.id} value={agent.id}>
 											{agent.name} ({agent.commission_rate}%)
@@ -667,7 +669,7 @@ export function ReservationEditDialog({
 							</Select>
 						</div>
 						<div>
-							<Label>Guide</Label>
+							<Label>{t("reservations.form.guide")}</Label>
 							<Select
 								value={formData.guide_id || "none"}
 								onValueChange={(value) => {
@@ -683,7 +685,7 @@ export function ReservationEditDialog({
 									<SelectValue placeholder="Select guide (optional)" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="none">No Guide</SelectItem>
+									<SelectItem value="none">{t("reservations.form.noGuide")}</SelectItem>
 									{guides.map((guide) => (
 										<SelectItem key={guide.id} value={guide.id}>
 											{guide.name} ({guide.commission_rate}%)
@@ -695,32 +697,32 @@ export function ReservationEditDialog({
 					</div>
 
 					<div>
-						<Label>Special Requests</Label>
+						<Label>{t("reservations.form.specialRequests")}</Label>
 						<Textarea
 							value={formData.special_requests || ""}
 							onChange={(e) =>
 								setFormData({ ...formData, special_requests: e.target.value })
 							}
-							placeholder="Any special requests or notes..."
+							placeholder={t("reservations.form.specialRequestsPlaceholder")}
 						/>
 					</div>
 
 					<div className="bg-muted p-4 rounded-lg">
 						<div className="grid grid-cols-3 gap-4 text-xs sm:text-sm">
 							<div>
-								<span className="font-medium">Total Amount:</span>
+								<span className="font-medium">{t("reservations.viewDialog.totalAmount")}:</span>
 								<div className="text-lg">
 									{formData.currency} {formData.total_amount}
 								</div>
 							</div>
 							<div>
-								<span className="font-medium">Paid Amount:</span>
+								<span className="font-medium">{t("reservations.viewDialog.paidAmount")}:</span>
 								<div className="text-lg">
 									{formData.currency} {formData.paid_amount || 0}
 								</div>
 							</div>
 							<div>
-								<span className="font-medium">Balance:</span>
+								<span className="font-medium">{t("reservations.viewDialog.balanceAmount")}:</span>
 								<div className="text-lg">
 									{formData.currency}{" "}
 									{(formData.total_amount || 0) - (formData.paid_amount || 0)}
@@ -731,7 +733,7 @@ export function ReservationEditDialog({
 
 					<div className="flex justify-between pt-4">
 						<Button variant="outline" onClick={handleClose}>
-							Cancel
+							{t("common.cancel")}
 						</Button>
 
 						<div className="flex gap-2">
@@ -741,12 +743,12 @@ export function ReservationEditDialog({
 									phoneNumber={location?.phone || profile?.phone || ""}
 									locationId={reservation?.location_id}
 									triggerComponent={
-										<Button variant="default">Verify & Enable Editing</Button>
+										<Button variant="default">{t("reservations.dialog.verifyAndEnableEditing")}</Button>
 									}
 								/>
 							) : (
 								<Button onClick={handleSubmit} disabled={isSubmitting}>
-									{isSubmitting ? "Saving..." : "Save Changes"}
+									{isSubmitting ? t("reservations.dialog.saving") : t("reservations.dialog.saveButton")}
 								</Button>
 							)}
 						</div>
