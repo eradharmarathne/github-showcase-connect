@@ -1,12 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Webhook } from "https://esm.sh/svix@1.15.0";
+import { Webhooks } from "jsr:@polar-sh/deno";
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, webhook-id, webhook-timestamp, webhook-signature",
+    "authorization, x-client-info, apikey, content-type, x-polar-signature",
 };
 
 // Polar webhook event types
@@ -71,45 +71,46 @@ serve(async (req) => {
       );
     }
 
-    // Get payload and headers for webhook verification
-    const payload = await req.text();
-    const webhookId = req.headers.get("webhook-id");
-    const webhookTimestamp = req.headers.get("webhook-timestamp");
-    const webhookSignature = req.headers.get("webhook-signature");
+    // Process webhook using Polar's Webhooks handler with onPayload callback
+    let event;
+    let processed = false;
 
-    console.log("📨 Received Polar webhook:", {
-      webhookId,
-      webhookTimestamp,
-      hasSignature: !!webhookSignature,
-      payloadLength: payload.length,
+    const webhookHandler = Webhooks({
+      webhookSecret: POLAR_WEBHOOK_SECRET,
+      onPayload: async (payload) => {
+        console.log("✅ Webhook signature verified successfully");
+        console.log("📋 Processing webhook event:", payload.type);
+        event = payload;
+        processed = true;
+        // Return void - we'll handle the response after processing
+      },
     });
 
-    // Verify webhook signature using Standard Webhooks (Polar uses same format as Svix)
-    const wh = new Webhook(POLAR_WEBHOOK_SECRET);
-    let event;
-
+    // Execute the webhook handler
     try {
-      event = wh.verify(payload, {
-        "webhook-id": webhookId || "",
-        "webhook-timestamp": webhookTimestamp || "",
-        "webhook-signature": webhookSignature || "",
+      await webhookHandler(req);
+
+      // If webhook wasn't processed, return error
+      if (!processed || !event) {
+        console.error("❌ Webhook payload not received");
+        return new Response(
+          JSON.stringify({ error: "Webhook processing failed" }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+          },
+        );
+      }
+    } catch (error) {
+      console.error("❌ Webhook verification failed:", error);
+      return new Response(JSON.stringify({ error: "Invalid signature" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
       });
-      console.log("✅ Webhook signature verified successfully");
-    } catch (err) {
-      console.error("❌ Webhook signature verification failed:", err.message);
-      return new Response(
-        JSON.stringify({ error: "Invalid webhook signature" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        },
-      );
     }
 
-    console.log("📋 Processing webhook event:", event.type);
-
     // Check for duplicate webhook (idempotency)
-    const eventId = webhookId || event.id || crypto.randomUUID();
+    const eventId = event.id || crypto.randomUUID();
     const { data: existingEvent } = await supabase
       .from("polar_webhook_events")
       .select("id, processed_at, retry_count")

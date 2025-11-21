@@ -51,6 +51,10 @@ serve(async (req) => {
       );
     }
 
+    // Extract product_id from product_price_id (format: product_id or price_id)
+    // In Polar, the products array expects product IDs, not price IDs
+    const product_id = product_price_id;
+
     // Get Polar API access token from environment variables
     const POLAR_ACCESS_TOKEN = Deno.env.get("POLAR_ACCESS_TOKEN");
     if (!POLAR_ACCESS_TOKEN) {
@@ -80,16 +84,15 @@ serve(async (req) => {
     }
 
     // Prepare request body for Polar API
-    // Note: Polar API expects 'product_price_id' for the custom checkout endpoint
+    // Note: Polar API /v1/checkouts/ expects 'products' array with product IDs
     const polarRequestBody: {
-      product_price_id: string;
-      payment_processor?: string;
+      products: string[];
       success_url?: string;
       customer_email?: string;
       customer_name?: string;
       metadata?: Record<string, string | number | boolean>;
     } = {
-      product_price_id,
+      products: [product_id],
     };
 
     // Add success URL if provided
@@ -111,26 +114,23 @@ serve(async (req) => {
     }
 
     console.log("📤 Creating Polar checkout session:", {
-      url: "https://sandbox-api.polar.sh/v1/checkouts/custom/",
-      product_price_id,
+      url: "https://sandbox-api.polar.sh/v1/checkouts/",
+      product_id,
       has_metadata: !!metadata,
       has_customer: !!(customer_email || customer_name),
     });
 
     // Make request to Polar API
-    // Using /custom/ endpoint which accepts product_price_id directly
-    const response = await fetch(
-      "https://sandbox-api.polar.sh/v1/checkouts/custom/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify(polarRequestBody),
+    // Using /v1/checkouts/ endpoint which accepts products array
+    const response = await fetch("https://sandbox-api.polar.sh/v1/checkouts/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${POLAR_ACCESS_TOKEN}`,
+        Accept: "application/json",
       },
-    );
+      body: JSON.stringify(polarRequestBody),
+    });
 
     const responseData = await response.json();
 

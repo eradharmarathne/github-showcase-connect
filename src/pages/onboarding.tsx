@@ -20,7 +20,7 @@ import { usePaymentStatus } from "@/hooks/use-payment-status";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { logger } from "@/lib/logger";
-import { createCheckoutSession, getPolarPriceId } from "@/lib/polar";
+import { createCheckoutSession } from "@/lib/polar";
 
 export default function Onboarding() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -260,16 +260,16 @@ export default function Onboarding() {
         throw new Error("Selected plan not found");
       }
 
-      // Get Polar price ID for the selected plan
-      const polarPriceId = await getPolarPriceId(selectedPlanId);
-      if (!polarPriceId) {
-        throw new Error("Plan does not have a Polar price ID configured");
+      if (!selectedPlan.polar_price_id) {
+        throw new Error(
+          "Selected plan does not have a Polar product ID configured",
+        );
       }
 
       // Create checkout session with Polar
       const checkoutSession = await createCheckoutSession({
-        product_price_id: polarPriceId,
-        success_url: `${window.location.origin}/onboarding?payment_status=checking&tenant_id=${tenantId}`,
+        product_price_id: selectedPlan.polar_price_id,
+        success_url: `${window.location.origin}/billing/success?plan_id=${selectedPlanId}&tenant_id=${tenantId}&source=onboarding&redirect_to=onboarding`,
         customer_email: user?.email,
         customer_name: formData.contactName || user?.user_metadata?.name,
         metadata: {
