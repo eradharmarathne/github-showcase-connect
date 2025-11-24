@@ -1,5 +1,6 @@
 import { Calendar, ChevronLeft, ChevronRight, Save, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { type RoomSelection } from "@/components/reservation/multi-room-selector";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +51,7 @@ export function NewReservationDialog({
 	onReservationCreated,
 }: NewReservationDialogProps) {
 	const { toast } = useToast();
+	const { t } = useTranslation();
 	const { profile } = useProfile();
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
