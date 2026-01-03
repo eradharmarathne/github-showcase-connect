@@ -32,7 +32,7 @@ export function ReservationDateSelector({
 	onDatesChange,
 	className,
 	disabled = false,
-	minDate = new Date(),
+	minDate,
 	maxDate,
 	showNights = true,
 	roomId,
