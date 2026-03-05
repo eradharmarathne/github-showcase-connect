@@ -1,4 +1,4 @@
-import { addDays, differenceInDays, format, parseISO } from "date-fns";
+import { differenceInDays, format, parseISO } from "date-fns";
 import { Calendar, CalendarDays, Save, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -262,12 +262,6 @@ export function CompactReservationDialog({
 	};
 
 	const isCalendarDateDisabled = (date: Date) => {
-		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-
-		// Disable past dates
-		if (date < today) return true;
-
 		// If selecting check-out, must be after check-in
 		if (isSelectingCheckOut && checkInDate) {
 			if (date <= checkInDate) return true;
@@ -669,8 +663,7 @@ export function CompactReservationDialog({
 														onChange={(e) =>
 															handleFieldChange("check_in_date", e.target.value)
 														}
-														min={format(new Date(), "yyyy-MM-dd")}
-													/>
+															/>
 												</div>
 
 												<div>
@@ -684,10 +677,7 @@ export function CompactReservationDialog({
 																e.target.value,
 															)
 														}
-														min={
-															formData.check_in_date ||
-															format(addDays(new Date(), 1), "yyyy-MM-dd")
-														}
+														min={formData.check_in_date || undefined}
 													/>
 												</div>
 

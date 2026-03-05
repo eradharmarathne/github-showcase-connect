@@ -21,7 +21,7 @@ export function DateRangePicker({
 	checkOutDate = "",
 	onDateChange,
 	className,
-	minDate = new Date(),
+	minDate = undefined,
 	maxDate,
 }: DateRangePickerProps) {
 	const [selectedCheckIn, setSelectedCheckIn] = useState<Date | undefined>(
