@@ -741,7 +741,7 @@ export function CompactReservationDialog({
 															}
 														>
 															<SelectTrigger>
-																<SelectValue />
+																<SelectValue placeholder={t("reservations.form.selectBookingSource")} />
 															</SelectTrigger>
 															<SelectContent>
 																<SelectItem value="direct">Direct</SelectItem>
@@ -768,15 +768,16 @@ export function CompactReservationDialog({
 														<div>
 															<Label>{t("reservations.form.guide")}</Label>
 															<Select
-																value={formData.guide_id}
+																value={formData.guide_id || "none"}
 																onValueChange={(value) =>
-																	handleFieldChange("guide_id", value)
+																	handleFieldChange("guide_id", value === "none" ? "" : value)
 																}
 															>
 																<SelectTrigger>
 																	<SelectValue placeholder={t("reservations.form.selectGuide")} />
 																</SelectTrigger>
 																<SelectContent>
+																	<SelectItem value="none">{t("reservations.form.noGuide")}</SelectItem>
 																	{guides.map((guide) => (
 																		<SelectItem key={guide.id} value={guide.id}>
 																			{guide.name}
@@ -792,15 +793,16 @@ export function CompactReservationDialog({
 														<div>
 															<Label>{t("reservations.form.agent")}</Label>
 															<Select
-																value={formData.agent_id}
+																value={formData.agent_id || "none"}
 																onValueChange={(value) =>
-																	handleFieldChange("agent_id", value)
+																	handleFieldChange("agent_id", value === "none" ? "" : value)
 																}
 															>
 																<SelectTrigger>
 																	<SelectValue placeholder={t("reservations.form.selectAgent")} />
 																</SelectTrigger>
 																<SelectContent>
+																	<SelectItem value="none">{t("reservations.form.noAgent")}</SelectItem>
 																	{agents.map((agent) => (
 																		<SelectItem key={agent.id} value={agent.id}>
 																			{agent.name}

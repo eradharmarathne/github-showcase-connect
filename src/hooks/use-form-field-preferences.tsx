@@ -50,7 +50,7 @@ export function useFormFieldPreferences() {
 					show_paid_amount: true,
 					show_guide: true,
 					show_agent: true,
-					show_booking_source: false,
+					show_booking_source: true,
 					show_id_photos: false,
 					show_guest_signature: false,
 				};
