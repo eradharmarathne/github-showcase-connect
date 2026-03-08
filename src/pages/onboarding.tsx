@@ -2,16 +2,16 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import {
-  CompanyInfoStep,
-  CompletionStep,
-  FeaturesStep,
-  type OnboardingFormData,
-  OnboardingNavigation,
-  OnboardingProgress,
-  type Plan,
-  PlanSelectionStep,
-  PropertyDetailsStep,
-  STEPS,
+	CompanyInfoStep,
+	CompletionStep,
+	FeaturesStep,
+	type OnboardingFormData,
+	OnboardingNavigation,
+	OnboardingProgress,
+	type Plan,
+	PlanSelectionStep,
+	PropertyDetailsStep,
+	STEPS,
 } from "@/components/onboarding";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,627 +23,627 @@ import { logger } from "@/lib/logger";
 import { createCheckoutSession } from "@/lib/polar";
 
 export default function Onboarding() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [processingPayment, setProcessingPayment] = useState(false);
-  const [hasExistingTenant, setHasExistingTenant] = useState(false);
-  const [pendingTenantId, setPendingTenantId] = useState<string | null>(null);
-  const [awaitingPayment, setAwaitingPayment] = useState(false);
-  const [formData, setFormData] = useState<OnboardingFormData>({
-    // Company Info
-    companyName: "",
-    contactName: "",
-    email: "",
-    phone: "",
-    address: "",
-    country: "",
-
-    // Property Details
-    propertyType: "",
-    propertyCount: "",
-    totalRooms: "",
-    description: "",
-
-    // Features
-    selectedFeatures: ["bookings", "payments"], // Essential features pre-selected
-
-    // User preferences
-    currency: "USD",
-    timezone: "",
-  });
-
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user, profile, tenant } = useAuth();
-  const [searchParams] = useSearchParams();
-  const {
-    status: paymentStatus,
-    isVerified,
-    isFailed,
-  } = usePaymentStatus({
-    tenantId: pendingTenantId,
-    enabled: awaitingPayment,
-  });
-
-  useEffect(() => {
-    if (!user) {
-      navigate("/");
-      return;
-    }
-
-    // Check if user already has a tenant (returning user with no locations)
-    if (profile?.tenant_id && tenant) {
-      setHasExistingTenant(true);
-    }
-
-    // Handle return from payment via URL parameters
-    const paymentStatusParam = searchParams.get("payment_status");
-    const tenantIdParam = searchParams.get("tenant_id");
-
-    if (paymentStatusParam === "checking" && tenantIdParam) {
-      logger.debug("Returning from payment, starting verification...");
-      setPendingTenantId(tenantIdParam);
-      setAwaitingPayment(true);
-      setCurrentStep(4); // Ensure we're on the payment step
-    }
-
-    // Pre-fill user email if available
-    if (user.email && !formData.email) {
-      setFormData((prev) => ({
-        ...prev,
-        email: user.email!,
-        contactName: user.user_metadata?.name || "",
-      }));
-    }
-
-    // Fetch available plans
-    const fetchPlans = async () => {
-      try {
-        const { data: plansData, error } = await supabase
-          .from("plans")
-          .select("*")
-          .eq("is_active", true)
-          .order("price_cents");
-
-        if (error) throw error;
-        setPlans(plansData || []);
-      } catch (error) {
-        logger.error("Error fetching plans", error);
-        toast({
-          title: "Error",
-          description: "Failed to load subscription plans",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchPlans();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, navigate, toast, profile?.tenant_id, tenant]);
-
-  useEffect(() => {
-    if (hasExistingTenant) {
-      navigate("/dashboard");
-    }
-  }, [hasExistingTenant, navigate]);
-
-  // Handle payment verification
-  useEffect(() => {
-    if (isVerified && pendingTenantId) {
-      logger.info("Payment verified, advancing to completion...");
-      toast({
-        title: "Payment Verified! 🎉",
-        description: "Your payment has been confirmed. Almost done!",
-      });
-
-      // Advance to completion step (step 5)
-      setCurrentStep(5);
-      setAwaitingPayment(false);
-    } else if (isFailed && pendingTenantId) {
-      logger.error("Payment verification failed or timed out");
-      toast({
-        title: "Payment Verification Failed",
-        description:
-          "We couldn't verify your payment. Please try again or contact support.",
-        variant: "destructive",
-      });
-      setAwaitingPayment(false);
-      setPendingTenantId(null);
-    }
-  }, [isVerified, isFailed, pendingTenantId, toast]);
-
-  // Early return for users with existing tenant - don't render onboarding UI
-  if (hasExistingTenant) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const handleNext = () => {
-    // Validate the current step before advancing
-    if (!validateStep()) {
-      toast({
-        title: "Incomplete Information",
-        description: "Please complete all required fields before continuing.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Special handling for payment step (step 4)
-    if (currentStep === 4) {
-      // Step 4 requires payment verification - show appropriate message
-      if (!isVerified || !pendingTenantId) {
-        toast({
-          title: "Payment Required",
-          description:
-            "Please click 'Subscribe & Start Trial' and complete payment to continue.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    // Prevent going back from completion step (step 5)
-    if (currentStep === 5) {
-      toast({
-        title: "Cannot Go Back",
-        description:
-          "Payment has been completed. Please finish the onboarding.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Prevent going back if payment is being processed or verified
-    if (currentStep === 4 && (awaitingPayment || isVerified)) {
-      toast({
-        title: "Cannot Go Back",
-        description:
-          "Payment is being processed. Please wait for verification.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handlePayNow = async () => {
-    // Prevent double-submission
-    if (processingPayment || awaitingPayment) {
-      toast({
-        title: "Payment Already in Progress",
-        description: "Please wait for the current payment to complete.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!selectedPlanId) {
-      toast({
-        title: "No Plan Selected",
-        description: "Please select a subscription plan first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setProcessingPayment(true);
-
-      // ✅ SECURE: Create tenant with "pending_payment" status BEFORE payment
-      const tenantId = await createPendingPaymentTenant();
-      if (!tenantId) {
-        throw new Error("Failed to create tenant");
-      }
-
-      setPendingTenantId(tenantId);
-
-      const selectedPlan = plans.find((p) => p.id === selectedPlanId);
-      if (!selectedPlan) {
-        throw new Error("Selected plan not found");
-      }
-
-      if (!selectedPlan.polar_price_id) {
-        throw new Error(
-          "Selected plan does not have a Polar product ID configured",
-        );
-      }
-
-      // Create checkout session with Polar
-      const checkoutSession = await createCheckoutSession({
-        product_price_id: selectedPlan.polar_price_id,
-        success_url: `${window.location.origin}/billing/success?plan_id=${selectedPlanId}&tenant_id=${tenantId}&source=onboarding&redirect_to=onboarding`,
-        customer_email: user?.email,
-        customer_name: formData.contactName || user?.user_metadata?.name,
-        metadata: {
-          tenant_id: tenantId,
-          user_id: user!.id,
-          plan_id: selectedPlanId,
-          source: "onboarding",
-          timestamp: new Date().toISOString(),
-        },
-      });
-
-      // ✅ SECURE: Open Polar in NEW TAB (user stays on onboarding)
-      if (checkoutSession.checkoutUrl) {
-        window.open(checkoutSession.checkoutUrl, "_blank");
-
-        // Start awaiting payment verification
-        setAwaitingPayment(true);
-
-        toast({
-          title: "Payment Window Opened",
-          description:
-            "Complete your payment in the new tab. We'll verify it automatically.",
-        });
-      } else {
-        throw new Error("No checkout URL received from Polar");
-      }
-    } catch (error: unknown) {
-      logger.error("Error creating checkout session", error);
-
-      // Clean up pending tenant if payment initiation failed
-      if (pendingTenantId) {
-        supabase
-          .from("tenants")
-          .delete()
-          .eq("id", pendingTenantId)
-          .then(() => {
-            logger.debug("Cleaned up failed tenant");
-          });
-        setPendingTenantId(null);
-      }
-
-      const errorObj = error as { message?: string };
-      toast({
-        title: "Payment Error",
-        description:
-          errorObj.message || "Failed to initiate payment. Please try again.",
-        variant: "destructive",
-      });
-      setAwaitingPayment(false);
-    } finally {
-      setProcessingPayment(false);
-    }
-  };
-
-  const createPendingPaymentTenant = async (): Promise<string> => {
-    try {
-      setLoading(true);
-
-      // Validate required form data
-      if (
-        !formData.companyName ||
-        !formData.contactName ||
-        !formData.email ||
-        !formData.propertyType
-      ) {
-        throw new Error(
-          "Missing required information. Please complete all previous steps.",
-        );
-      }
-
-      // Generate collision-resistant slug with client-side logic
-      const generateUniqueSlug = async (name: string): Promise<string> => {
-        const baseSlug =
-          name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, "")
-            .replace(/\s+/g, "-")
-            .replace(/-+/g, "-")
-            .trim() || "tenant";
-
-        // Check if base slug exists
-        const { data: existing } = await supabase
-          .from("tenants")
-          .select("slug")
-          .eq("slug", baseSlug)
-          .limit(1);
-
-        if (!existing || existing.length === 0) {
-          return baseSlug;
-        }
-
-        // Find the next available slug with counter
-        let counter = 2;
-        let candidateSlug = `${baseSlug}-${counter}`;
-
-        // Prevent infinite loops
-        const maxAttempts = 100;
-        let attempts = 0;
-
-        while (attempts < maxAttempts) {
-          const { data: existingCandidate } = await supabase
-            .from("tenants")
-            .select("slug")
-            .eq("slug", candidateSlug)
-            .limit(1);
-
-          if (!existingCandidate || existingCandidate.length === 0) {
-            return candidateSlug;
-          }
-
-          counter++;
-          attempts++;
-          candidateSlug = `${baseSlug}-${counter}`;
-        }
-
-        // Fallback to UUID if we can't find a unique slug
-        return `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
-      };
-
-      const slug = await generateUniqueSlug(formData.companyName);
-
-      // ✅ SECURE: Create tenant with "pending_payment" status
-      const { data: tenant, error: tenantError } = await supabase
-        .from("tenants")
-        .insert({
-          name: formData.companyName,
-          slug: slug,
-          username: slug, // Use slug as username
-          hotel_name: formData.companyName,
-          hotel_email: formData.email,
-          hotel_phone: formData.phone,
-          hotel_address: formData.address,
-          hotel_timezone: formData.timezone || "UTC",
-          owner_profile_id: user!.id,
-          onboarding_completed: false, // Not completed until payment verified
-          subscription_status: "pending_payment", // ✅ Waiting for payment
-        })
-        .select()
-        .single();
-
-      if (tenantError) throw tenantError;
-
-      // Update user profile with tenant_id using Edge Function (bypasses RLS)
-      const { data: profileData, error: profileError } =
-        await supabase.functions.invoke("update-profile-tenant", {
-          body: {
-            tenant_id: tenant.id,
-            role: "admin",
-          },
-        });
-
-      if (profileError) throw profileError;
-      if (profileData?.error) throw new Error(profileData.error);
-
-      // Create default location for the tenant
-      const { data: location, error: locationError } = await supabase
-        .from("locations")
-        .insert({
-          name: formData.companyName,
-          tenant_id: tenant.id,
-          is_active: true,
-          property_type: formData.propertyType,
-        })
-        .select()
-        .single();
-
-      if (locationError) throw locationError;
-
-      // Create user permissions for the new location
-      const { error: permissionsError } = await supabase
-        .from("user_permissions")
-        .insert([
-          {
-            user_id: user.id,
-            tenant_id: tenant.id,
-            location_id: location.id,
-            tenant_role: "tenant_admin",
-            is_tenant_admin: true,
-            access_dashboard: true,
-            access_income: true,
-            access_expenses: true,
-            access_reports: true,
-            access_calendar: true,
-            access_bookings: true,
-            access_rooms: true,
-            access_master_files: true,
-            access_accounts: true,
-            access_users: true,
-            access_settings: true,
-            access_booking_channels: true,
-          },
-        ]);
-      if (permissionsError) throw permissionsError;
-
-      // Note: Subscription will be created by Polar webhook after payment
-      // No need to create incomplete subscription here
-
-      logger.info("Created pending tenant", { tenantId: tenant.id });
-
-      return tenant.id;
-    } catch (error: unknown) {
-      logger.error("Pending tenant creation error", error);
-      const errorObj = error as { message?: string };
-      toast({
-        title: "Setup Error",
-        description:
-          errorObj.message || "Failed to create tenant. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleComplete = async () => {
-    try {
-      setLoading(true);
-
-      // Verify we have a tenant ID (should be set from payment flow)
-      if (!pendingTenantId) {
-        throw new Error("No tenant found. Please complete payment first.");
-      }
-
-      // Mark tenant as onboarding complete
-      const { error: updateError } = await supabase
-        .from("tenants")
-        .update({ onboarding_completed: true })
-        .eq("id", pendingTenantId);
-
-      if (updateError) throw updateError;
-
-      logger.info("Onboarding completed successfully");
-
-      toast({
-        title: "Welcome aboard! 🎉",
-        description:
-          "Your account has been set up successfully. Let's get started!",
-      });
-
-      // Small delay to show the toast, then redirect
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 1500);
-    } catch (error: unknown) {
-      logger.error("Final completion error", error);
-      const errorObj = error as { message?: string };
-      toast({
-        title: "Setup Error",
-        description:
-          errorObj.message || "Failed to complete setup. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const validateStep = (): boolean => {
-    switch (currentStep) {
-      case 1:
-        return !!(
-          formData.companyName &&
-          formData.contactName &&
-          formData.email
-        );
-      case 2:
-        return !!(formData.propertyType && formData.propertyCount);
-      case 3:
-        return formData.selectedFeatures.length > 0;
-      case 4:
-        // CRITICAL: Step 4 (payment) should NOT allow "Next" - payment verification auto-advances
-        // User must click "Subscribe & Start Trial" and complete payment
-        // Only allow proceeding if payment is verified
-        return isVerified && pendingTenantId !== null;
-      default:
-        return true;
-    }
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <CompanyInfoStep formData={formData} setFormData={setFormData} />
-        );
-
-      case 2:
-        return (
-          <PropertyDetailsStep formData={formData} setFormData={setFormData} />
-        );
-
-      case 3:
-        return <FeaturesStep formData={formData} setFormData={setFormData} />;
-
-      case 4:
-        return (
-          <PlanSelectionStep
-            formData={formData}
-            setFormData={setFormData}
-            plans={plans}
-            selectedPlanId={selectedPlanId}
-            setSelectedPlanId={setSelectedPlanId}
-            processingPayment={processingPayment}
-            onPayNow={handlePayNow}
-          />
-        );
-
-      case 5:
-        return <CompletionStep loading={loading} onComplete={handleComplete} />;
-
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
-      <div className="max-w-4xl py-4 sm:py-16 w-full mx-auto">
-        {/* Progress Header */}
-        <OnboardingProgress
-          currentStep={currentStep}
-          totalSteps={STEPS.length}
-        />
-
-        {/* Payment Verification Status */}
-        {awaitingPayment && (
-          <Alert className="mb-4">
-            {paymentStatus === "pending" && (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <AlertTitle>Waiting for Payment Verification...</AlertTitle>
-                <AlertDescription>
-                  Please complete your payment in the new tab. We're monitoring
-                  for confirmation and will update automatically.
-                </AlertDescription>
-              </>
-            )}
-            {paymentStatus === "verified" && (
-              <>
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertTitle>Payment Verified!</AlertTitle>
-                <AlertDescription>
-                  Your payment has been confirmed. Setting up your account...
-                </AlertDescription>
-              </>
-            )}
-            {(paymentStatus === "failed" || paymentStatus === "timeout") && (
-              <>
-                <XCircle className="h-4 w-4 text-red-600" />
-                <AlertTitle>Payment Verification Failed</AlertTitle>
-                <AlertDescription>
-                  We couldn't verify your payment. Please try again or contact
-                  support.
-                </AlertDescription>
-              </>
-            )}
-          </Alert>
-        )}
-
-        {/* Main Content */}
-        <Card className="bg-card border">
-          <CardContent className="px-8 py-8">{renderStepContent()}</CardContent>
-        </Card>
-
-        {/* Navigation */}
-        <OnboardingNavigation
-          currentStep={currentStep}
-          totalSteps={STEPS.length}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-          canProceed={validateStep()}
-        />
-      </div>
-    </div>
-  );
+	const [currentStep, setCurrentStep] = useState(1);
+	const [loading, setLoading] = useState(false);
+	const [plans, setPlans] = useState<Plan[]>([]);
+	const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+	const [processingPayment, setProcessingPayment] = useState(false);
+	const [hasExistingTenant, setHasExistingTenant] = useState(false);
+	const [pendingTenantId, setPendingTenantId] = useState<string | null>(null);
+	const [awaitingPayment, setAwaitingPayment] = useState(false);
+	const [formData, setFormData] = useState<OnboardingFormData>({
+		// Company Info
+		companyName: "",
+		contactName: "",
+		email: "",
+		phone: "",
+		address: "",
+		country: "",
+
+		// Property Details
+		propertyType: "",
+		propertyCount: "",
+		totalRooms: "",
+		description: "",
+
+		// Features
+		selectedFeatures: ["bookings", "payments"], // Essential features pre-selected
+
+		// User preferences
+		currency: "USD",
+		timezone: "",
+	});
+
+	const navigate = useNavigate();
+	const { toast } = useToast();
+	const { user, profile, tenant } = useAuth();
+	const [searchParams] = useSearchParams();
+	const {
+		status: paymentStatus,
+		isVerified,
+		isFailed,
+	} = usePaymentStatus({
+		tenantId: pendingTenantId,
+		enabled: awaitingPayment,
+	});
+
+	useEffect(() => {
+		if (!user) {
+			navigate("/");
+			return;
+		}
+
+		// Check if user already has a tenant (returning user with no locations)
+		if (profile?.tenant_id && tenant) {
+			setHasExistingTenant(true);
+		}
+
+		// Handle return from payment via URL parameters
+		const paymentStatusParam = searchParams.get("payment_status");
+		const tenantIdParam = searchParams.get("tenant_id");
+
+		if (paymentStatusParam === "checking" && tenantIdParam) {
+			logger.debug("Returning from payment, starting verification...");
+			setPendingTenantId(tenantIdParam);
+			setAwaitingPayment(true);
+			setCurrentStep(4); // Ensure we're on the payment step
+		}
+
+		// Pre-fill user email if available
+		if (user.email && !formData.email) {
+			setFormData((prev) => ({
+				...prev,
+				email: user.email!,
+				contactName: user.user_metadata?.name || "",
+			}));
+		}
+
+		// Fetch available plans
+		const fetchPlans = async () => {
+			try {
+				const { data: plansData, error } = await supabase
+					.from("plans")
+					.select("*")
+					.eq("is_active", true)
+					.order("price_cents");
+
+				if (error) throw error;
+				setPlans(plansData || []);
+			} catch (error) {
+				logger.error("Error fetching plans", error);
+				toast({
+					title: "Error",
+					description: "Failed to load subscription plans",
+					variant: "destructive",
+				});
+			}
+		};
+
+		fetchPlans();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user, navigate, toast, profile?.tenant_id, tenant]);
+
+	useEffect(() => {
+		if (hasExistingTenant) {
+			navigate("/dashboard");
+		}
+	}, [hasExistingTenant, navigate]);
+
+	// Handle payment verification
+	useEffect(() => {
+		if (isVerified && pendingTenantId) {
+			logger.info("Payment verified, advancing to completion...");
+			toast({
+				title: "Payment Verified! 🎉",
+				description: "Your payment has been confirmed. Almost done!",
+			});
+
+			// Advance to completion step (step 5)
+			setCurrentStep(5);
+			setAwaitingPayment(false);
+		} else if (isFailed && pendingTenantId) {
+			logger.error("Payment verification failed or timed out");
+			toast({
+				title: "Payment Verification Failed",
+				description:
+					"We couldn't verify your payment. Please try again or contact support.",
+				variant: "destructive",
+			});
+			setAwaitingPayment(false);
+			setPendingTenantId(null);
+		}
+	}, [isVerified, isFailed, pendingTenantId, toast]);
+
+	// Early return for users with existing tenant - don't render onboarding UI
+	if (hasExistingTenant) {
+		return (
+			<div className="min-h-screen bg-background flex items-center justify-center">
+				<div className="text-center">
+					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+					<p className="text-muted-foreground">Redirecting to dashboard...</p>
+				</div>
+			</div>
+		);
+	}
+
+	const handleNext = () => {
+		// Validate the current step before advancing
+		if (!validateStep()) {
+			toast({
+				title: "Incomplete Information",
+				description: "Please complete all required fields before continuing.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		// Special handling for payment step (step 4)
+		if (currentStep === 4) {
+			// Step 4 requires payment verification - show appropriate message
+			if (!isVerified || !pendingTenantId) {
+				toast({
+					title: "Payment Required",
+					description:
+						"Please click 'Subscribe & Start Trial' and complete payment to continue.",
+					variant: "destructive",
+				});
+				return;
+			}
+		}
+
+		if (currentStep < STEPS.length) {
+			setCurrentStep(currentStep + 1);
+		}
+	};
+
+	const handlePrevious = () => {
+		// Prevent going back from completion step (step 5)
+		if (currentStep === 5) {
+			toast({
+				title: "Cannot Go Back",
+				description:
+					"Payment has been completed. Please finish the onboarding.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		// Prevent going back if payment is being processed or verified
+		if (currentStep === 4 && (awaitingPayment || isVerified)) {
+			toast({
+				title: "Cannot Go Back",
+				description:
+					"Payment is being processed. Please wait for verification.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		if (currentStep > 1) {
+			setCurrentStep(currentStep - 1);
+		}
+	};
+
+	const handlePayNow = async () => {
+		// Prevent double-submission
+		if (processingPayment || awaitingPayment) {
+			toast({
+				title: "Payment Already in Progress",
+				description: "Please wait for the current payment to complete.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		if (!selectedPlanId) {
+			toast({
+				title: "No Plan Selected",
+				description: "Please select a subscription plan first.",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		try {
+			setProcessingPayment(true);
+
+			// ✅ SECURE: Create tenant with "pending_payment" status BEFORE payment
+			const tenantId = await createPendingPaymentTenant();
+			if (!tenantId) {
+				throw new Error("Failed to create tenant");
+			}
+
+			setPendingTenantId(tenantId);
+
+			const selectedPlan = plans.find((p) => p.id === selectedPlanId);
+			if (!selectedPlan) {
+				throw new Error("Selected plan not found");
+			}
+
+			if (!selectedPlan.polar_price_id) {
+				throw new Error(
+					"Selected plan does not have a Polar product ID configured",
+				);
+			}
+
+			// Create checkout session with Polar
+			const checkoutSession = await createCheckoutSession({
+				product_price_id: selectedPlan.polar_price_id,
+				success_url: `${window.location.origin}/billing/success?plan_id=${selectedPlanId}&tenant_id=${tenantId}&source=onboarding&redirect_to=onboarding`,
+				customer_email: user?.email,
+				customer_name: formData.contactName || user?.user_metadata?.name,
+				metadata: {
+					tenant_id: tenantId,
+					user_id: user!.id,
+					plan_id: selectedPlanId,
+					source: "onboarding",
+					timestamp: new Date().toISOString(),
+				},
+			});
+
+			// ✅ SECURE: Open Polar in NEW TAB (user stays on onboarding)
+			if (checkoutSession.checkoutUrl) {
+				window.open(checkoutSession.checkoutUrl, "_blank");
+
+				// Start awaiting payment verification
+				setAwaitingPayment(true);
+
+				toast({
+					title: "Payment Window Opened",
+					description:
+						"Complete your payment in the new tab. We'll verify it automatically.",
+				});
+			} else {
+				throw new Error("No checkout URL received from Polar");
+			}
+		} catch (error: unknown) {
+			logger.error("Error creating checkout session", error);
+
+			// Clean up pending tenant if payment initiation failed
+			if (pendingTenantId) {
+				supabase
+					.from("tenants")
+					.delete()
+					.eq("id", pendingTenantId)
+					.then(() => {
+						logger.debug("Cleaned up failed tenant");
+					});
+				setPendingTenantId(null);
+			}
+
+			const errorObj = error as { message?: string };
+			toast({
+				title: "Payment Error",
+				description:
+					errorObj.message || "Failed to initiate payment. Please try again.",
+				variant: "destructive",
+			});
+			setAwaitingPayment(false);
+		} finally {
+			setProcessingPayment(false);
+		}
+	};
+
+	const createPendingPaymentTenant = async (): Promise<string> => {
+		try {
+			setLoading(true);
+
+			// Validate required form data
+			if (
+				!formData.companyName ||
+				!formData.contactName ||
+				!formData.email ||
+				!formData.propertyType
+			) {
+				throw new Error(
+					"Missing required information. Please complete all previous steps.",
+				);
+			}
+
+			// Generate collision-resistant slug with client-side logic
+			const generateUniqueSlug = async (name: string): Promise<string> => {
+				const baseSlug =
+					name
+						.toLowerCase()
+						.replace(/[^a-z0-9\s-]/g, "")
+						.replace(/\s+/g, "-")
+						.replace(/-+/g, "-")
+						.trim() || "tenant";
+
+				// Check if base slug exists
+				const { data: existing } = await supabase
+					.from("tenants")
+					.select("slug")
+					.eq("slug", baseSlug)
+					.limit(1);
+
+				if (!existing || existing.length === 0) {
+					return baseSlug;
+				}
+
+				// Find the next available slug with counter
+				let counter = 2;
+				let candidateSlug = `${baseSlug}-${counter}`;
+
+				// Prevent infinite loops
+				const maxAttempts = 100;
+				let attempts = 0;
+
+				while (attempts < maxAttempts) {
+					const { data: existingCandidate } = await supabase
+						.from("tenants")
+						.select("slug")
+						.eq("slug", candidateSlug)
+						.limit(1);
+
+					if (!existingCandidate || existingCandidate.length === 0) {
+						return candidateSlug;
+					}
+
+					counter++;
+					attempts++;
+					candidateSlug = `${baseSlug}-${counter}`;
+				}
+
+				// Fallback to UUID if we can't find a unique slug
+				return `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
+			};
+
+			const slug = await generateUniqueSlug(formData.companyName);
+
+			// ✅ SECURE: Create tenant with "pending_payment" status
+			const { data: tenant, error: tenantError } = await supabase
+				.from("tenants")
+				.insert({
+					name: formData.companyName,
+					slug: slug,
+					username: slug, // Use slug as username
+					hotel_name: formData.companyName,
+					hotel_email: formData.email,
+					hotel_phone: formData.phone,
+					hotel_address: formData.address,
+					hotel_timezone: formData.timezone || "UTC",
+					owner_profile_id: user!.id,
+					onboarding_completed: false, // Not completed until payment verified
+					subscription_status: "pending_payment", // ✅ Waiting for payment
+				})
+				.select()
+				.single();
+
+			if (tenantError) throw tenantError;
+
+			// Update user profile with tenant_id using Edge Function (bypasses RLS)
+			const { data: profileData, error: profileError } =
+				await supabase.functions.invoke("update-profile-tenant", {
+					body: {
+						tenant_id: tenant.id,
+						role: "admin",
+					},
+				});
+
+			if (profileError) throw profileError;
+			if (profileData?.error) throw new Error(profileData.error);
+
+			// Create default location for the tenant
+			const { data: location, error: locationError } = await supabase
+				.from("locations")
+				.insert({
+					name: formData.companyName,
+					tenant_id: tenant.id,
+					is_active: true,
+					property_type: formData.propertyType,
+				})
+				.select()
+				.single();
+
+			if (locationError) throw locationError;
+
+			// Create user permissions for the new location
+			const { error: permissionsError } = await supabase
+				.from("user_permissions")
+				.insert([
+					{
+						user_id: user.id,
+						tenant_id: tenant.id,
+						location_id: location.id,
+						tenant_role: "tenant_admin",
+						is_tenant_admin: true,
+						access_dashboard: true,
+						access_income: true,
+						access_expenses: true,
+						access_reports: true,
+						access_calendar: true,
+						access_bookings: true,
+						access_rooms: true,
+						access_master_files: true,
+						access_accounts: true,
+						access_users: true,
+						access_settings: true,
+						access_booking_channels: true,
+					},
+				]);
+			if (permissionsError) throw permissionsError;
+
+			// Note: Subscription will be created by Polar webhook after payment
+			// No need to create incomplete subscription here
+
+			logger.info("Created pending tenant", { tenantId: tenant.id });
+
+			return tenant.id;
+		} catch (error: unknown) {
+			logger.error("Pending tenant creation error", error);
+			const errorObj = error as { message?: string };
+			toast({
+				title: "Setup Error",
+				description:
+					errorObj.message || "Failed to create tenant. Please try again.",
+				variant: "destructive",
+			});
+			throw error;
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleComplete = async () => {
+		try {
+			setLoading(true);
+
+			// Verify we have a tenant ID (should be set from payment flow)
+			if (!pendingTenantId) {
+				throw new Error("No tenant found. Please complete payment first.");
+			}
+
+			// Mark tenant as onboarding complete
+			const { error: updateError } = await supabase
+				.from("tenants")
+				.update({ onboarding_completed: true })
+				.eq("id", pendingTenantId);
+
+			if (updateError) throw updateError;
+
+			logger.info("Onboarding completed successfully");
+
+			toast({
+				title: "Welcome aboard! 🎉",
+				description:
+					"Your account has been set up successfully. Let's get started!",
+			});
+
+			// Small delay to show the toast, then redirect
+			setTimeout(() => {
+				navigate("/dashboard", { replace: true });
+			}, 1500);
+		} catch (error: unknown) {
+			logger.error("Final completion error", error);
+			const errorObj = error as { message?: string };
+			toast({
+				title: "Setup Error",
+				description:
+					errorObj.message || "Failed to complete setup. Please try again.",
+				variant: "destructive",
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const validateStep = (): boolean => {
+		switch (currentStep) {
+			case 1:
+				return !!(
+					formData.companyName &&
+					formData.contactName &&
+					formData.email
+				);
+			case 2:
+				return !!(formData.propertyType && formData.propertyCount);
+			case 3:
+				return formData.selectedFeatures.length > 0;
+			case 4:
+				// CRITICAL: Step 4 (payment) should NOT allow "Next" - payment verification auto-advances
+				// User must click "Subscribe & Start Trial" and complete payment
+				// Only allow proceeding if payment is verified
+				return isVerified && pendingTenantId !== null;
+			default:
+				return true;
+		}
+	};
+
+	const renderStepContent = () => {
+		switch (currentStep) {
+			case 1:
+				return (
+					<CompanyInfoStep formData={formData} setFormData={setFormData} />
+				);
+
+			case 2:
+				return (
+					<PropertyDetailsStep formData={formData} setFormData={setFormData} />
+				);
+
+			case 3:
+				return <FeaturesStep formData={formData} setFormData={setFormData} />;
+
+			case 4:
+				return (
+					<PlanSelectionStep
+						formData={formData}
+						setFormData={setFormData}
+						plans={plans}
+						selectedPlanId={selectedPlanId}
+						setSelectedPlanId={setSelectedPlanId}
+						processingPayment={processingPayment}
+						onPayNow={handlePayNow}
+					/>
+				);
+
+			case 5:
+				return <CompletionStep loading={loading} onComplete={handleComplete} />;
+
+			default:
+				return null;
+		}
+	};
+
+	return (
+		<div className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
+			<div className="max-w-4xl py-4 sm:py-16 w-full mx-auto">
+				{/* Progress Header */}
+				<OnboardingProgress
+					currentStep={currentStep}
+					totalSteps={STEPS.length}
+				/>
+
+				{/* Payment Verification Status */}
+				{awaitingPayment && (
+					<Alert className="mb-4">
+						{paymentStatus === "pending" && (
+							<>
+								<Loader2 className="h-4 w-4 animate-spin" />
+								<AlertTitle>Waiting for Payment Verification...</AlertTitle>
+								<AlertDescription>
+									Please complete your payment in the new tab. We're monitoring
+									for confirmation and will update automatically.
+								</AlertDescription>
+							</>
+						)}
+						{paymentStatus === "verified" && (
+							<>
+								<CheckCircle className="h-4 w-4 text-green-600" />
+								<AlertTitle>Payment Verified!</AlertTitle>
+								<AlertDescription>
+									Your payment has been confirmed. Setting up your account...
+								</AlertDescription>
+							</>
+						)}
+						{(paymentStatus === "failed" || paymentStatus === "timeout") && (
+							<>
+								<XCircle className="h-4 w-4 text-red-600" />
+								<AlertTitle>Payment Verification Failed</AlertTitle>
+								<AlertDescription>
+									We couldn't verify your payment. Please try again or contact
+									support.
+								</AlertDescription>
+							</>
+						)}
+					</Alert>
+				)}
+
+				{/* Main Content */}
+				<Card className="bg-card border">
+					<CardContent className="px-8 py-8">{renderStepContent()}</CardContent>
+				</Card>
+
+				{/* Navigation */}
+				<OnboardingNavigation
+					currentStep={currentStep}
+					totalSteps={STEPS.length}
+					onNext={handleNext}
+					onPrevious={handlePrevious}
+					canProceed={validateStep()}
+				/>
+			</div>
+		</div>
+	);
 }

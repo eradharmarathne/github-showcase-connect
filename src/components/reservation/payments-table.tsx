@@ -113,7 +113,10 @@ export function PaymentsTable() {
 							</h3>
 						</div>
 						<Badge variant="secondary" className="ml-2">
-							{payments.length} {t("reservations.paymentsTable.payments", { count: payments.length })}
+							{payments.length}{" "}
+							{t("reservations.paymentsTable.payments", {
+								count: payments.length,
+							})}
 						</Badge>
 					</div>
 
@@ -150,7 +153,9 @@ export function PaymentsTable() {
 											{t("reservations.paymentsTable.headers.account")}
 										</TableHead>
 										<TableHead className="min-w-[140px]">
-											{t("reservations.paymentsTable.headers.reservationNumber")}
+											{t(
+												"reservations.paymentsTable.headers.reservationNumber",
+											)}
 										</TableHead>
 										<TableHead className="min-w-[150px]">
 											{t("reservations.paymentsTable.headers.guest")}
@@ -200,7 +205,9 @@ export function PaymentsTable() {
 												>
 													{payment.is_advance
 														? t("reservations.paymentsTable.advance")
-														: t(`reservations.paymentsTable.paymentTypes.${payment.type}`)}
+														: t(
+																`reservations.paymentsTable.paymentTypes.${payment.type}`,
+															)}
 												</Badge>
 											</TableCell>
 											<TableCell>
@@ -210,14 +217,17 @@ export function PaymentsTable() {
 														payment.payment_method,
 													)}`}
 												>
-													{t(`reservations.paymentsTable.paymentMethods.${payment.payment_method}`)}
+													{t(
+														`reservations.paymentsTable.paymentMethods.${payment.payment_method}`,
+													)}
 												</Badge>
 											</TableCell>
 											<TableCell>
 												<div className="flex items-center space-x-1">
 													<Building2 className="h-3 w-3 text-gray-400" />
 													<span className="text-sm">
-														{payment.account_name || t("reservations.table.noData")}
+														{payment.account_name ||
+															t("reservations.table.noData")}
 													</span>
 												</div>
 											</TableCell>
@@ -229,7 +239,9 @@ export function PaymentsTable() {
 														</div>
 														{payment.reservation_status && (
 															<Badge variant="outline" className="text-xs">
-																{t(`reservations.status.${payment.reservation_status.toLowerCase()}`)}
+																{t(
+																	`reservations.status.${payment.reservation_status.toLowerCase()}`,
+																)}
 															</Badge>
 														)}
 													</div>
@@ -255,7 +267,9 @@ export function PaymentsTable() {
 														)}
 														{payment.adults !== null && (
 															<div className="text-xs text-gray-500">
-																{t("reservations.table.adults", { count: payment.adults })}
+																{t("reservations.table.adults", {
+																	count: payment.adults,
+																})}
 																{payment.children
 																	? `, ${t("reservations.table.children", { count: payment.children })}`
 																	: ""}
@@ -296,7 +310,9 @@ export function PaymentsTable() {
 														</div>
 														{payment.nights && (
 															<div className="text-xs text-gray-500">
-																{t("reservations.table.nights", { count: payment.nights })}
+																{t("reservations.table.nights", {
+																	count: payment.nights,
+																})}
 															</div>
 														)}
 													</div>
@@ -325,9 +341,7 @@ export function PaymentsTable() {
 															handleViewReservation(payment.booking_id)
 														}
 														className="h-8 w-8 p-0"
-														title={t(
-															"reservations.table.actions.view"
-														)}
+														title={t("reservations.table.actions.view")}
 													>
 														<Eye className="h-4 w-4" />
 													</Button>

@@ -38,9 +38,21 @@ interface NewReservationDialogProps {
 const STEPS = [
 	{ id: "guest", title: "reservations.newDialog.steps.guest", icon: Calendar },
 	{ id: "rooms", title: "reservations.newDialog.steps.rooms", icon: Calendar },
-	{ id: "pricing", title: "reservations.newDialog.steps.pricing", icon: Calendar },
-	{ id: "payment", title: "reservations.newDialog.steps.payment", icon: Calendar },
-	{ id: "confirmation", title: "reservations.newDialog.steps.confirmation", icon: Calendar },
+	{
+		id: "pricing",
+		title: "reservations.newDialog.steps.pricing",
+		icon: Calendar,
+	},
+	{
+		id: "payment",
+		title: "reservations.newDialog.steps.payment",
+		icon: Calendar,
+	},
+	{
+		id: "confirmation",
+		title: "reservations.newDialog.steps.confirmation",
+		icon: Calendar,
+	},
 ] as const;
 
 type StepId = (typeof STEPS)[number]["id"];
@@ -195,7 +207,9 @@ export function NewReservationDialog({
 				if (!guestData.guest_name.trim()) {
 					toast({
 						title: t("common.validationError"),
-						description: t("reservations.newDialog.validation.guestNameRequired"),
+						description: t(
+							"reservations.newDialog.validation.guestNameRequired",
+						),
 						variant: "destructive",
 					});
 					return false;
@@ -219,7 +233,9 @@ export function NewReservationDialog({
 				if (invalidSelections.length > 0) {
 					toast({
 						title: t("common.validationError"),
-						description: t("reservations.newDialog.validation.allRoomsSelected"),
+						description: t(
+							"reservations.newDialog.validation.allRoomsSelected",
+						),
 						variant: "destructive",
 					});
 					return false;
@@ -231,7 +247,9 @@ export function NewReservationDialog({
 				if (missingDatesSelections.length > 0) {
 					toast({
 						title: t("common.validationError"),
-						description: t("reservations.newDialog.validation.allDatesSelected"),
+						description: t(
+							"reservations.newDialog.validation.allDatesSelected",
+						),
 						variant: "destructive",
 					});
 					return false;
@@ -245,7 +263,9 @@ export function NewReservationDialog({
 				if (unavailableSelections.length > 0) {
 					toast({
 						title: t("reservations.newDialog.validation.roomUnavailable.title"),
-						description: t("reservations.newDialog.validation.roomUnavailable.description"),
+						description: t(
+							"reservations.newDialog.validation.roomUnavailable.description",
+						),
 						variant: "destructive",
 					});
 					return false;
@@ -393,7 +413,9 @@ export function NewReservationDialog({
 				.join(", ");
 			toast({
 				title: t("common.success"),
-				description: t("reservations.newDialog.createSuccess", { reservationNumbers: reservationNumbersDisplay }),
+				description: t("reservations.newDialog.createSuccess", {
+					reservationNumbers: reservationNumbersDisplay,
+				}),
 			});
 
 			// Reset form and close dialog
@@ -499,7 +521,11 @@ export function NewReservationDialog({
 						{t("reservations.dialog.newTitle")}
 					</DialogTitle>
 					<DialogDescription>
-						{t("reservations.newDialog.stepDescription", { currentStep: currentStepIndex + 1, totalSteps: STEPS.length, stepTitle: t(STEPS[currentStepIndex].title) })}
+						{t("reservations.newDialog.stepDescription", {
+							currentStep: currentStepIndex + 1,
+							totalSteps: STEPS.length,
+							stepTitle: t(STEPS[currentStepIndex].title),
+						})}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -577,7 +603,9 @@ export function NewReservationDialog({
 								<Save className="h-4 w-4 mr-2" />
 								{submitting
 									? t("reservations.dialog.creating")
-									: t("reservations.dialog.createButton", { count: roomSelections.length })}
+									: t("reservations.dialog.createButton", {
+											count: roomSelections.length,
+										})}
 							</Button>
 						) : (
 							<Button onClick={handleNext}>

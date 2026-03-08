@@ -35,6 +35,7 @@ export default function Accounts() {
 		id: string;
 		name: string;
 	} | null>(null);
+	const accountsQueryKey = ["accounts", tenant?.id];
 
 	// Fetch accounts and map current_balance to currentBalance for component compatibility
 	const {
@@ -42,7 +43,7 @@ export default function Accounts() {
 		isLoading,
 		error,
 	} = useQuery({
-		queryKey: ["accounts", tenant?.id],
+		queryKey: accountsQueryKey,
 		queryFn: async (): Promise<AccountWithBalance[]> => {
 			if (!tenant?.id) return [];
 
@@ -82,7 +83,7 @@ export default function Accounts() {
 	});
 
 	const handleAccountSaved = () => {
-		queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
+		queryClient.invalidateQueries({ queryKey: accountsQueryKey });
 		setShowAddDialog(false);
 		setEditingAccount(null);
 		toast({
@@ -185,8 +186,7 @@ export default function Accounts() {
 				throw deleteError;
 			}
 
-			queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
-			queryClient.invalidateQueries({ queryKey: ["accounts"] });
+			queryClient.invalidateQueries({ queryKey: accountsQueryKey });
 			toast({
 				title: t("common.success"),
 				description: `Account "${deletingAccount.name}" has been successfully deleted.`,
@@ -205,7 +205,7 @@ export default function Accounts() {
 	};
 
 	const handleTransferCompleted = () => {
-		queryClient.invalidateQueries({ queryKey: ["accounts-with-balances"] });
+		queryClient.invalidateQueries({ queryKey: accountsQueryKey });
 		setShowTransferDialog(false);
 		toast({
 			title: t("common.success"),

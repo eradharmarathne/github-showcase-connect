@@ -350,7 +350,8 @@ export function ReservationEditDialog({
 			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
-						{t("reservations.dialog.editTitle")} - {reservation.reservation_number}
+						{t("reservations.dialog.editTitle")} -{" "}
+						{reservation.reservation_number}
 					</DialogTitle>
 					<DialogDescription>
 						{t("reservations.dialog.editDescription")}
@@ -425,7 +426,9 @@ export function ReservationEditDialog({
 							}
 						>
 							<SelectTrigger>
-								<SelectValue placeholder={t("reservations.form.selectBookingSource")} />
+								<SelectValue
+									placeholder={t("reservations.form.selectBookingSource")}
+								/>
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="direct">Direct</SelectItem>
@@ -484,7 +487,9 @@ export function ReservationEditDialog({
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<Label htmlFor="check_in_date">{t("reservations.form.checkInDate")}</Label>
+							<Label htmlFor="check_in_date">
+								{t("reservations.form.checkInDate")}
+							</Label>
 							<DatePicker
 								value={formData.check_in_date || ""}
 								onChange={(value) => {
@@ -527,7 +532,9 @@ export function ReservationEditDialog({
 							/>
 						</div>
 						<div>
-							<Label htmlFor="check_out_date">{t("reservations.form.checkOutDate")}</Label>
+							<Label htmlFor="check_out_date">
+								{t("reservations.form.checkOutDate")}
+							</Label>
 							<DatePicker
 								value={formData.check_out_date || ""}
 								onChange={(value) => {
@@ -612,7 +619,9 @@ export function ReservationEditDialog({
 								}}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder={t("reservations.form.selectRoom")} />
+									<SelectValue
+										placeholder={t("reservations.form.selectRoom")}
+									/>
 								</SelectTrigger>
 								<SelectContent>
 									{rooms.map((room) => (
@@ -659,7 +668,9 @@ export function ReservationEditDialog({
 									<SelectValue placeholder="Select agent (optional)" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="none">{t("reservations.form.noAgent")}</SelectItem>
+									<SelectItem value="none">
+										{t("reservations.form.noAgent")}
+									</SelectItem>
 									{agents.map((agent) => (
 										<SelectItem key={agent.id} value={agent.id}>
 											{agent.name} ({agent.commission_rate}%)
@@ -685,7 +696,9 @@ export function ReservationEditDialog({
 									<SelectValue placeholder="Select guide (optional)" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="none">{t("reservations.form.noGuide")}</SelectItem>
+									<SelectItem value="none">
+										{t("reservations.form.noGuide")}
+									</SelectItem>
 									{guides.map((guide) => (
 										<SelectItem key={guide.id} value={guide.id}>
 											{guide.name} ({guide.commission_rate}%)
@@ -710,19 +723,25 @@ export function ReservationEditDialog({
 					<div className="bg-muted p-4 rounded-lg">
 						<div className="grid grid-cols-3 gap-4 text-xs sm:text-sm">
 							<div>
-								<span className="font-medium">{t("reservations.viewDialog.totalAmount")}:</span>
+								<span className="font-medium">
+									{t("reservations.viewDialog.totalAmount")}:
+								</span>
 								<div className="text-lg">
 									{formData.currency} {formData.total_amount}
 								</div>
 							</div>
 							<div>
-								<span className="font-medium">{t("reservations.viewDialog.paidAmount")}:</span>
+								<span className="font-medium">
+									{t("reservations.viewDialog.paidAmount")}:
+								</span>
 								<div className="text-lg">
 									{formData.currency} {formData.paid_amount || 0}
 								</div>
 							</div>
 							<div>
-								<span className="font-medium">{t("reservations.viewDialog.balanceAmount")}:</span>
+								<span className="font-medium">
+									{t("reservations.viewDialog.balanceAmount")}:
+								</span>
 								<div className="text-lg">
 									{formData.currency}{" "}
 									{(formData.total_amount || 0) - (formData.paid_amount || 0)}
@@ -743,12 +762,16 @@ export function ReservationEditDialog({
 									phoneNumber={location?.phone || profile?.phone || ""}
 									locationId={reservation?.location_id}
 									triggerComponent={
-										<Button variant="default">{t("reservations.dialog.verifyAndEnableEditing")}</Button>
+										<Button variant="default">
+											{t("reservations.dialog.verifyAndEnableEditing")}
+										</Button>
 									}
 								/>
 							) : (
 								<Button onClick={handleSubmit} disabled={isSubmitting}>
-									{isSubmitting ? t("reservations.dialog.saving") : t("reservations.dialog.saveButton")}
+									{isSubmitting
+										? t("reservations.dialog.saving")
+										: t("reservations.dialog.saveButton")}
 								</Button>
 							)}
 						</div>

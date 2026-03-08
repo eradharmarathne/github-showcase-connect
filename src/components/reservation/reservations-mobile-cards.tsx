@@ -296,7 +296,11 @@ export function ReservationsMobileCards({
 										</div>
 										<div className="flex items-center gap-2 text-slate-600">
 											<span className="text-slate-400">
-												({t("reservations.mobileCard.nights", { count: reservation.nights })})
+												(
+												{t("reservations.mobileCard.nights", {
+													count: reservation.nights,
+												})}
+												)
 											</span>
 										</div>
 									</div>
@@ -314,7 +318,9 @@ export function ReservationsMobileCards({
 											</span>
 										</div>
 										<div className="flex flex-col gap-1 items-end">
-											<span className="text-xs text-slate-600">{t("reservations.mobileCard.balance")}</span>
+											<span className="text-xs text-slate-600">
+												{t("reservations.mobileCard.balance")}
+											</span>
 											<span
 												className={`font-semibold text-sm ${
 													reservation.balance_amount > 0
@@ -412,7 +418,11 @@ export function ReservationsMobileCards({
 										</div>
 										<div className="flex items-center gap-2 text-slate-600">
 											<span className="text-slate-400">
-												({t("reservations.mobileCard.nights", { count: reservation.nights })})
+												(
+												{t("reservations.mobileCard.nights", {
+													count: reservation.nights,
+												})}
+												)
 											</span>
 										</div>
 									</div>
@@ -430,7 +440,9 @@ export function ReservationsMobileCards({
 											</span>
 										</div>
 										<div className="flex flex-col gap-1 items-end">
-											<span className="text-xs text-slate-600">{t("reservations.mobileCard.balance")}</span>
+											<span className="text-xs text-slate-600">
+												{t("reservations.mobileCard.balance")}
+											</span>
 											<span className="font-semibold text-sm text-slate-600">
 												{getCurrencySymbol(selectedCurrency)}{" "}
 												{(reservation.balance_amount || 0).toLocaleString()}

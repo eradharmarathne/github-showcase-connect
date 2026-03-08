@@ -88,6 +88,8 @@ export function Layout() {
 						return t("pageTitle.masterFiles");
 				}
 			}
+			case "/rooms":
+				return t("pageTitle.masterFilesRooms");
 			case "/room-management":
 				return t("pageTitle.roomManagement");
 			case "/booking-channels":

@@ -105,12 +105,19 @@ export default function AccountsReports() {
 		}
 	};
 
+	const getNextDate = (date: string) => {
+		const nextDate = new Date(`${date}T00:00:00.000Z`);
+		nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+		return nextDate.toISOString().split("T")[0];
+	};
+
 	const fetchAccountBalances = async () => {
 		try {
 			const balances: AccountBalance[] = [];
-			const usdToLkrRate = parseFloat(
-				localStorage.getItem("usdToLkrRate") || "300",
-			);
+			const createdAtFrom = dateFrom ? `${dateFrom}T00:00:00.000Z` : null;
+			const createdAtToExclusive = dateTo
+				? `${getNextDate(dateTo)}T00:00:00.000Z`
+				: null;
 
 			for (const account of accounts) {
 				// Fetch income for this account
@@ -139,16 +146,25 @@ export default function AccountsReports() {
 
 				// Apply date filters if specified
 				if (dateFrom) {
-					incomeQuery = incomeQuery.gte("date", dateFrom);
+					incomeQuery = incomeQuery.gte("created_at", createdAtFrom!);
 					expenseQuery = expenseQuery.gte("date", dateFrom);
-					transfersFromQuery = transfersFromQuery.gte("created_at", dateFrom);
-					transfersToQuery = transfersToQuery.gte("created_at", dateFrom);
+					transfersFromQuery = transfersFromQuery.gte(
+						"created_at",
+						createdAtFrom!,
+					);
+					transfersToQuery = transfersToQuery.gte("created_at", createdAtFrom!);
 				}
 				if (dateTo) {
-					incomeQuery = incomeQuery.lte("date", dateTo);
+					incomeQuery = incomeQuery.lt("created_at", createdAtToExclusive!);
 					expenseQuery = expenseQuery.lte("date", dateTo);
-					transfersFromQuery = transfersFromQuery.lte("created_at", dateTo);
-					transfersToQuery = transfersToQuery.lte("created_at", dateTo);
+					transfersFromQuery = transfersFromQuery.lt(
+						"created_at",
+						createdAtToExclusive!,
+					);
+					transfersToQuery = transfersToQuery.lt(
+						"created_at",
+						createdAtToExclusive!,
+					);
 				}
 
 				const [

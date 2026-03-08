@@ -25,7 +25,7 @@ interface AuthContextType {
 	tenantLoading: boolean;
 	signOut: () => Promise<void>;
 	refreshProfile: () => Promise<void>;
-	refreshTenant: () => Promise<void>;
+	refreshTenant: (tenantIdOverride?: string) => Promise<void>;
 	hasActiveTrial: boolean;
 	hasActiveSubscription: boolean;
 	isOwner: boolean;
@@ -152,28 +152,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 		}
 	};
 
-	const refreshTenant = async () => {
-		if (profile?.tenant_id) {
-			await fetchTenant(profile.tenant_id);
-			await fetchSubscription(profile.tenant_id);
+	const refreshTenant = async (tenantIdOverride?: string) => {
+		const tenantIdToFetch = tenantIdOverride || profileRef.current?.tenant_id;
+
+		if (!tenantIdToFetch) {
+			tenantIdRef.current = null;
+			setTenant(null);
+			setSubscription(null);
+			return;
 		}
+
+		tenantIdRef.current = tenantIdToFetch;
+		await fetchTenant(tenantIdToFetch);
+		await fetchSubscription(tenantIdToFetch);
 	};
 
-	// Keep refs in sync with state to prevent stale closures
+	// Keep profile ref in sync to prevent stale closure reads.
 	useEffect(() => {
 		profileRef.current = profile;
-		if (profile?.tenant_id !== tenantIdRef.current) {
-			tenantIdRef.current = profile?.tenant_id || null;
-		}
-	}, [profile, tenant]);
+	}, [profile]);
 
-	// Separate effect to fetch tenant data when tenant_id changes
+	// Fetch tenant/subscription whenever profile tenant_id changes.
 	useEffect(() => {
 		const fetchTenantData = async () => {
-			if (profile?.tenant_id && profile.tenant_id !== tenantIdRef.current) {
-				tenantIdRef.current = profile.tenant_id;
-				await fetchTenant(profile.tenant_id);
-				await fetchSubscription(profile.tenant_id);
+			const nextTenantId = profile?.tenant_id || null;
+
+			if (!nextTenantId) {
+				tenantIdRef.current = null;
+				setTenant(null);
+				setSubscription(null);
+				return;
+			}
+
+			if (nextTenantId !== tenantIdRef.current) {
+				tenantIdRef.current = nextTenantId;
+				await fetchTenant(nextTenantId);
+				await fetchSubscription(nextTenantId);
 			}
 		};
 

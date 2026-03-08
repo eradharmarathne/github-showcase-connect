@@ -90,12 +90,19 @@ export const useReservationFinancials = () => {
 				};
 			});
 
+			if (allReservations.length === 0) {
+				return [];
+			}
+
 			// Get income records for expense calculations
 			const { data: incomeRecords, error: incomeError } = await supabase
 				.from("income")
 				.select("*")
 				.eq("tenant_id", tenant.id)
-				.in("booking_id", allReservations?.map((r) => r.id) || []);
+				.in(
+					"booking_id",
+					allReservations.map((reservation) => reservation.id),
+				);
 
 			if (incomeError) throw incomeError;
 

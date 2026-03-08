@@ -361,8 +361,11 @@ function ReservationsDesktopTableComponent({
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-900 text-sm">
 																	{reservation.guest_name} -{" "}
-																	{reservation.rooms?.room_number || t("reservations.table.noData")} -{" "}
-																	{reservation.rooms?.room_type || t("reservations.table.noData")}
+																	{reservation.rooms?.room_number ||
+																		t("reservations.table.noData")}{" "}
+																	-{" "}
+																	{reservation.rooms?.room_type ||
+																		t("reservations.table.noData")}
 																</span>
 																<Badge
 																	variant="outline"
@@ -374,7 +377,11 @@ function ReservationsDesktopTableComponent({
 															<div className="text-xs text-slate-600">
 																{dateRange.startDate} - {dateRange.endDate}
 																<span className="text-slate-400 ml-1">
-																	({t("reservations.table.nights", { count: dateRange.nights })})
+																	(
+																	{t("reservations.table.nights", {
+																		count: dateRange.nights,
+																	})}
+																	)
 																</span>
 															</div>
 														</div>
@@ -485,7 +492,9 @@ function ReservationsDesktopTableComponent({
 														<div className="grid grid-cols-3 gap-6 pl-8">
 															<div className="space-y-3">
 																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t("reservations.viewDialog.guestInformation")}
+																	{t(
+																		"reservations.viewDialog.guestInformation",
+																	)}
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
@@ -498,7 +507,10 @@ function ReservationsDesktopTableComponent({
 																	</div>
 																	<div className="flex justify-between text-sm">
 																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.reservationNumber")}:
+																			{t(
+																				"reservations.viewDialog.reservationNumber",
+																			)}
+																			:
 																		</span>
 																		<span className="font-medium text-slate-900">
 																			{reservation.reservation_number}
@@ -509,12 +521,15 @@ function ReservationsDesktopTableComponent({
 
 															<div className="space-y-3">
 																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t("reservations.viewDialog.financialDetails")}
+																	{t(
+																		"reservations.viewDialog.financialDetails",
+																	)}
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
 																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.roomCharges")}:
+																			{t("reservations.viewDialog.roomCharges")}
+																			:
 																		</span>
 																		<span className="font-medium text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
@@ -555,7 +570,9 @@ function ReservationsDesktopTableComponent({
 
 															<div className="space-y-3">
 																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t("reservations.reservationActions.quickActions")}
+																	{t(
+																		"reservations.reservationActions.quickActions",
+																	)}
 																</h4>
 																<div className="flex flex-row gap-2">
 																	<Button
@@ -668,8 +685,11 @@ function ReservationsDesktopTableComponent({
 															<div className="flex items-center gap-2 mb-1">
 																<span className="font-medium text-slate-700 text-sm">
 																	{reservation.guest_name} -{" "}
-																	{reservation.rooms?.room_number || t("reservations.table.noData")} -{" "}
-																	{reservation.rooms?.room_type || t("reservations.table.noData")}
+																	{reservation.rooms?.room_number ||
+																		t("reservations.table.noData")}{" "}
+																	-{" "}
+																	{reservation.rooms?.room_type ||
+																		t("reservations.table.noData")}
 																</span>
 																<Badge
 																	variant="outline"
@@ -681,7 +701,11 @@ function ReservationsDesktopTableComponent({
 															<div className="text-xs text-slate-500">
 																{dateRange.startDate} - {dateRange.endDate}
 																<span className="text-slate-400 ml-1">
-																	({t("reservations.table.nights", { count: dateRange.nights })})
+																	(
+																	{t("reservations.table.nights", {
+																		count: dateRange.nights,
+																	})}
+																	)
 																</span>
 															</div>
 														</div>
@@ -764,7 +788,9 @@ function ReservationsDesktopTableComponent({
 														<div className="grid grid-cols-3 gap-6 pl-8">
 															<div className="space-y-3">
 																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t("reservations.viewDialog.guestInformation")}
+																	{t(
+																		"reservations.viewDialog.guestInformation",
+																	)}
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
@@ -777,7 +803,10 @@ function ReservationsDesktopTableComponent({
 																	</div>
 																	<div className="flex justify-between text-sm">
 																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.reservationNumber")}:
+																			{t(
+																				"reservations.viewDialog.reservationNumber",
+																			)}
+																			:
 																		</span>
 																		<span className="font-medium text-slate-900">
 																			{reservation.reservation_number}
@@ -788,12 +817,15 @@ function ReservationsDesktopTableComponent({
 
 															<div className="space-y-3">
 																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t("reservations.viewDialog.financialDetails")}
+																	{t(
+																		"reservations.viewDialog.financialDetails",
+																	)}
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
 																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.roomCharges")}:
+																			{t("reservations.viewDialog.roomCharges")}
+																			:
 																		</span>
 																		<span className="font-medium text-slate-900">
 																			{getCurrencySymbol(selectedCurrency)}
@@ -837,7 +869,9 @@ function ReservationsDesktopTableComponent({
 																	{t("reservations.table.headers.status")}
 																</h4>
 																<div className="text-sm text-slate-600">
-																	{t("reservations.messages.reservationCompleted")}
+																	{t(
+																		"reservations.messages.reservationCompleted",
+																	)}
 																</div>
 															</div>
 														</div>

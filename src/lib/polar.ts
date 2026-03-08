@@ -145,7 +145,7 @@ export const cancelSubscription = async (
 			.from("subscriptions")
 			.update({
 				status: "cancelled",
-				canceled_at: new Date().toISOString(),
+				cancelled_at: new Date().toISOString(),
 				updated_at: new Date().toISOString(),
 			})
 			.eq("polar_subscription_id", subscriptionId)

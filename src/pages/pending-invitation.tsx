@@ -141,7 +141,7 @@ export default function PendingInvitation() {
 			);
 			// Refresh profile and tenant data
 			await refreshProfile();
-			await refreshTenant();
+			await refreshTenant(invitation.tenant_id);
 
 			console.log("🎉 [PENDING-INVITATION] Invitation accepted successfully!");
 			toast.success(`Successfully joined ${invitation.tenant_name}!`);

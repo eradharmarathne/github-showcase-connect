@@ -40,6 +40,7 @@ import PublicBookingPage from "./pages/public-page";
 import Reports from "./pages/reports";
 import Reservations from "./pages/reservations";
 import ResetPassword from "./pages/reset-password";
+import Rooms from "./pages/rooms";
 import Settings from "./pages/settings";
 import Users from "./pages/users";
 
@@ -193,6 +194,23 @@ const App = () => (
 												element={
 													<PermissionRoute permission={["access_master_files"]}>
 														<MasterFiles />
+													</PermissionRoute>
+												}
+											/>
+										</Route>
+										<Route
+											path="/rooms"
+											element={
+												<ProtectedRoute>
+													<Layout />
+												</ProtectedRoute>
+											}
+										>
+											<Route
+												index
+												element={
+													<PermissionRoute permission={["access_rooms"]}>
+														<Rooms />
 													</PermissionRoute>
 												}
 											/>

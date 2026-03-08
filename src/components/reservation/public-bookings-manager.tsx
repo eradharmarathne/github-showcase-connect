@@ -168,8 +168,13 @@ export function PublicBookingsManager() {
 			toast({
 				title: t("publicBookings.toast.statusUpdated.title"),
 				description: t("publicBookings.toast.statusUpdated.description", {
-					status: status === "confirmed" ? t("publicBookings.status.confirmed") : t("publicBookings.status.rejected"),
-					room: roomInfo ? ` ${t("publicBookings.toast.statusUpdated.roomAssigned", { room: roomInfo.room_number })}` : ""
+					status:
+						status === "confirmed"
+							? t("publicBookings.status.confirmed")
+							: t("publicBookings.status.rejected"),
+					room: roomInfo
+						? ` ${t("publicBookings.toast.statusUpdated.roomAssigned", { room: roomInfo.room_number })}`
+						: "",
 				}),
 			});
 
@@ -247,7 +252,9 @@ export function PublicBookingsManager() {
 
 			toast({
 				title: t("publicBookings.toast.reservationCreated.title"),
-				description: t("publicBookings.toast.reservationCreated.description", { id: reservation.id?.substring(0, 8) }),
+				description: t("publicBookings.toast.reservationCreated.description", {
+					id: reservation.id?.substring(0, 8),
+				}),
 			});
 
 			refetch();
@@ -306,19 +313,21 @@ export function PublicBookingsManager() {
 		<Card>
 			<CardHeader>
 				<CardTitle>{t("publicBookings.title")}</CardTitle>
-				<CardDescription>
-					{t("publicBookings.description")}
-				</CardDescription>
+				<CardDescription>{t("publicBookings.description")}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				{isLoading ? (
 					<div className="text-center py-8">
 						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-						<p className="text-muted-foreground mt-2">{t("publicBookings.loading")}</p>
+						<p className="text-muted-foreground mt-2">
+							{t("publicBookings.loading")}
+						</p>
 					</div>
 				) : bookings.length === 0 ? (
 					<div className="text-center py-8">
-						<p className="text-muted-foreground">{t("publicBookings.noRequests")}</p>
+						<p className="text-muted-foreground">
+							{t("publicBookings.noRequests")}
+						</p>
 						<p className="text-sm text-muted-foreground mt-2">
 							{t("publicBookings.shareLink")}{" "}
 							<code className="bg-muted px-2 py-1 rounded">
@@ -365,7 +374,9 @@ export function PublicBookingsManager() {
 											{format(new Date(booking.check_out_date), "MMM dd, yyyy")}
 										</TableCell>
 										<TableCell>
-											{t("publicBookings.guests.adults", { count: booking.adults })}
+											{t("publicBookings.guests.adults", {
+												count: booking.adults,
+											})}
 											{booking.children > 0 &&
 												`, ${t("publicBookings.guests.children", { count: booking.children })}`}
 											<div className="text-xs text-muted-foreground">
@@ -431,19 +442,27 @@ export function PublicBookingsManager() {
 						<div className="space-y-4">
 							{/* Guest Information */}
 							<div>
-								<h3 className="font-semibold mb-2">{t("publicBookings.dialog.guestInformation")}</h3>
+								<h3 className="font-semibold mb-2">
+									{t("publicBookings.dialog.guestInformation")}
+								</h3>
 								<div className="grid grid-cols-2 gap-4 text-sm">
 									<div>
-										<p className="text-muted-foreground">{t("publicBookings.dialog.name")}</p>
+										<p className="text-muted-foreground">
+											{t("publicBookings.dialog.name")}
+										</p>
 										<p className="font-medium">{selectedBooking.guest_name}</p>
 									</div>
 									<div>
-										<p className="text-muted-foreground">{t("publicBookings.dialog.email")}</p>
+										<p className="text-muted-foreground">
+											{t("publicBookings.dialog.email")}
+										</p>
 										<p className="font-medium">{selectedBooking.guest_email}</p>
 									</div>
 									{selectedBooking.guest_phone && (
 										<div>
-											<p className="text-muted-foreground">{t("publicBookings.dialog.phone")}</p>
+											<p className="text-muted-foreground">
+												{t("publicBookings.dialog.phone")}
+											</p>
 											<p className="font-medium">
 												{selectedBooking.guest_phone}
 											</p>
@@ -451,7 +470,9 @@ export function PublicBookingsManager() {
 									)}
 									{selectedBooking.guest_nationality && (
 										<div>
-											<p className="text-muted-foreground">{t("publicBookings.dialog.nationality")}</p>
+											<p className="text-muted-foreground">
+												{t("publicBookings.dialog.nationality")}
+											</p>
 											<p className="font-medium">
 												{selectedBooking.guest_nationality}
 											</p>
@@ -459,7 +480,9 @@ export function PublicBookingsManager() {
 									)}
 									{selectedBooking.guest_address && (
 										<div className="col-span-2">
-											<p className="text-muted-foreground">{t("publicBookings.dialog.address")}</p>
+											<p className="text-muted-foreground">
+												{t("publicBookings.dialog.address")}
+											</p>
 											<p className="font-medium">
 												{selectedBooking.guest_address}
 											</p>
@@ -470,10 +493,14 @@ export function PublicBookingsManager() {
 
 							{/* Booking Details */}
 							<div>
-								<h3 className="font-semibold mb-2">{t("publicBookings.dialog.bookingDetails")}</h3>
+								<h3 className="font-semibold mb-2">
+									{t("publicBookings.dialog.bookingDetails")}
+								</h3>
 								<div className="grid grid-cols-2 gap-4 text-sm">
 									<div>
-										<p className="text-muted-foreground">{t("publicBookings.dialog.checkIn")}</p>
+										<p className="text-muted-foreground">
+											{t("publicBookings.dialog.checkIn")}
+										</p>
 										<p className="font-medium">
 											{format(
 												new Date(selectedBooking.check_in_date),
@@ -482,7 +509,9 @@ export function PublicBookingsManager() {
 										</p>
 									</div>
 									<div>
-										<p className="text-muted-foreground">{t("publicBookings.dialog.checkOut")}</p>
+										<p className="text-muted-foreground">
+											{t("publicBookings.dialog.checkOut")}
+										</p>
 										<p className="font-medium">
 											{format(
 												new Date(selectedBooking.check_out_date),
@@ -491,27 +520,35 @@ export function PublicBookingsManager() {
 										</p>
 									</div>
 									<div>
-										<p className="text-muted-foreground">{t("publicBookings.dialog.guests")}</p>
+										<p className="text-muted-foreground">
+											{t("publicBookings.dialog.guests")}
+										</p>
 										<p className="font-medium">
-											{t("publicBookings.dialog.adults", { count: selectedBooking.adults })}
+											{t("publicBookings.dialog.adults", {
+												count: selectedBooking.adults,
+											})}
 											{selectedBooking.children > 0 &&
 												`, ${t("publicBookings.dialog.children", { count: selectedBooking.children })}`}
 										</p>
 									</div>
 									<div>
-										<p className="text-muted-foreground">{t("publicBookings.dialog.nights")}</p>
+										<p className="text-muted-foreground">
+											{t("publicBookings.dialog.nights")}
+										</p>
 										<p className="font-medium">
 											{t("publicBookings.nights", {
 												count: calculateNights(
 													selectedBooking.check_in_date,
 													selectedBooking.check_out_date,
-												)
+												),
 											})}
 										</p>
 									</div>
 									{selectedBooking.room_type_preference && (
 										<div className="col-span-2">
-											<p className="text-muted-foreground">{t("publicBookings.dialog.roomPreference")}</p>
+											<p className="text-muted-foreground">
+												{t("publicBookings.dialog.roomPreference")}
+											</p>
 											<p className="font-medium">
 												{selectedBooking.room_type_preference}
 											</p>
@@ -523,7 +560,9 @@ export function PublicBookingsManager() {
 							{/* Special Requests */}
 							{selectedBooking.special_requests && (
 								<div>
-									<h3 className="font-semibold mb-2">{t("publicBookings.dialog.specialRequests")}</h3>
+									<h3 className="font-semibold mb-2">
+										{t("publicBookings.dialog.specialRequests")}
+									</h3>
 									<p className="text-sm bg-muted p-3 rounded-md">
 										{selectedBooking.special_requests}
 									</p>
@@ -532,7 +571,9 @@ export function PublicBookingsManager() {
 
 							{/* Status */}
 							<div>
-								<h3 className="font-semibold mb-2">{t("publicBookings.dialog.status")}</h3>
+								<h3 className="font-semibold mb-2">
+									{t("publicBookings.dialog.status")}
+								</h3>
 								{getStatusBadge(selectedBooking.status)}
 							</div>
 
@@ -540,12 +581,16 @@ export function PublicBookingsManager() {
 							{selectedBooking.status !== "pending" &&
 								(selectedBooking as any).assigned_room && (
 									<div>
-										<h3 className="font-semibold mb-2">{t("publicBookings.dialog.assignedRoom")}</h3>
+										<h3 className="font-semibold mb-2">
+											{t("publicBookings.dialog.assignedRoom")}
+										</h3>
 										<div className="flex items-center gap-2">
 											<Badge variant="outline" className="bg-blue-50">
-												{t("publicBookings.dialog.roomInfo", { 
-													room_number: (selectedBooking as any).assigned_room.room_number,
-													room_type: (selectedBooking as any).assigned_room.room_type
+												{t("publicBookings.dialog.roomInfo", {
+													room_number: (selectedBooking as any).assigned_room
+														.room_number,
+													room_type: (selectedBooking as any).assigned_room
+														.room_type,
 												})}
 											</Badge>
 										</div>
@@ -555,18 +600,26 @@ export function PublicBookingsManager() {
 							{/* Room Assignment - Only show for pending bookings */}
 							{selectedBooking.status === "pending" && (
 								<div>
-									<h3 className="font-semibold mb-2">{t("publicBookings.dialog.assignRoomOptional")}</h3>
+									<h3 className="font-semibold mb-2">
+										{t("publicBookings.dialog.assignRoomOptional")}
+									</h3>
 									<p className="text-sm text-muted-foreground mb-3">
 										{t("publicBookings.dialog.assignRoomDescription")}
 									</p>
 									<div className="space-y-2">
-										<Label htmlFor="room-select">{t("publicBookings.dialog.selectRoom")}</Label>
+										<Label htmlFor="room-select">
+											{t("publicBookings.dialog.selectRoom")}
+										</Label>
 										<Select
 											value={selectedRoomId}
 											onValueChange={setSelectedRoomId}
 										>
 											<SelectTrigger id="room-select">
-												<SelectValue placeholder={t("publicBookings.dialog.chooseRoomOptional")} />
+												<SelectValue
+													placeholder={t(
+														"publicBookings.dialog.chooseRoomOptional",
+													)}
+												/>
 											</SelectTrigger>
 											<SelectContent>
 												<SelectItem value="none">
@@ -611,7 +664,10 @@ export function PublicBookingsManager() {
 										</Select>
 										{selectedRoomId && selectedRoomId !== "none" && (
 											<p className="text-sm text-muted-foreground">
-												{t("publicBookings.dialog.roomWillBeAssigned", { room: rooms.find((r) => r.id === selectedRoomId)?.room_number })}
+												{t("publicBookings.dialog.roomWillBeAssigned", {
+													room: rooms.find((r) => r.id === selectedRoomId)
+														?.room_number,
+												})}
 											</p>
 										)}
 									</div>
@@ -641,7 +697,9 @@ export function PublicBookingsManager() {
 									disabled={isConfirming}
 								>
 									<CheckCircle className="h-4 w-4 mr-2" />
-									{isConfirming ? t("publicBookings.dialog.confirming") : t("publicBookings.dialog.confirmBooking")}
+									{isConfirming
+										? t("publicBookings.dialog.confirming")
+										: t("publicBookings.dialog.confirmBooking")}
 								</Button>
 							</>
 						)}
@@ -651,7 +709,9 @@ export function PublicBookingsManager() {
 								disabled={isConfirming || !selectedBooking.assigned_room_id}
 							>
 								<CheckCircle className="h-4 w-4 mr-2" />
-								{isConfirming ? t("publicBookings.dialog.converting") : t("publicBookings.dialog.convertToReservation")}
+								{isConfirming
+									? t("publicBookings.dialog.converting")
+									: t("publicBookings.dialog.convertToReservation")}
 							</Button>
 						)}
 						{selectedBooking?.status === "converted" && (

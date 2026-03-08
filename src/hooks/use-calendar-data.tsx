@@ -110,10 +110,17 @@ export const useCalendarData = (): UseCalendarDataReturn => {
 			if (locationsData.error) throw locationsData.error;
 
 			// Fetch property mappings from database - simplified query
-			const { data: mappingsData, error: mappingsError } = await supabase
+			let mappingsQuery = supabase
 				.from("channel_property_mappings")
 				.select("*")
+				.eq("tenant_id", tenant.id)
 				.eq("is_active", true);
+
+			if (selectedLocation) {
+				mappingsQuery = mappingsQuery.eq("location_id", selectedLocation);
+			}
+
+			const { data: mappingsData, error: mappingsError } = await mappingsQuery;
 
 			if (mappingsError) throw mappingsError;
 

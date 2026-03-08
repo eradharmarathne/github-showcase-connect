@@ -98,6 +98,8 @@ export default function RoomsTab() {
 	const { toast } = useToast();
 	const { tenant } = useAuth();
 	const { hasPermission } = usePermissions();
+	const canManageRooms =
+		hasPermission("access_rooms") || hasPermission("access_master_files");
 
 	const fetchRooms = useCallback(async () => {
 		if (!tenant?.id) {
@@ -159,7 +161,7 @@ export default function RoomsTab() {
 		e.preventDefault();
 
 		// Check permission before allowing edit/create
-		if (!hasPermission("access_master_files")) {
+		if (!canManageRooms) {
 			toast({
 				title: "Error",
 				description: "You don't have permission to manage rooms",
@@ -253,7 +255,7 @@ export default function RoomsTab() {
 
 	const handleDelete = async (id: string) => {
 		// Check permission before allowing delete
-		if (!hasPermission("access_master_files")) {
+		if (!canManageRooms) {
 			toast({
 				title: "Error",
 				description: "You don't have permission to delete rooms",
