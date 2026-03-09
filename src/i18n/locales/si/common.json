@@ -259,22 +259,23 @@
       },
       "noReservations": "වෙන්කරණයන් සොයාගත නොහැක",
       "loadingReservations": "වෙන්කරණයන් පූරණය වෙමින්...",
-      "noData": "දත්ත නොමැත"
+      "noData": "දත්ත නොමැත",
+      "nights": "රාත්‍රී {{count}}",
+      "nights_other": "රාත්‍රී {{count}}"
     },
     "mobileCard": {
       "guest": "අමුත්තා:",
       "dates": "දිනයන්:",
       "room": "කාමරය:",
       "amount": "මුදල:",
-      "balance": "ශේෂය:",
+      "balance": "ශේෂය",
       "status": "තත්ත්වය:",
       "nights": "රාත්‍රී {{count}}",
       "nights_other": "රාත්‍රී {{count}}",
       "location": "ස්ථානය:",
       "total": "මුළු:",
       "paid": "ගෙවූ:",
-      "totalAmount": "මුළු මුදල",
-      "balance": "ශේෂය"
+      "totalAmount": "මුළු මුදල"
     },
     "dialog": {
       "viewTitle": "වෙන්කරණ විස්තර",
@@ -344,7 +345,22 @@
       "selectRoom": "කාමරය තෝරන්න",
       "noAgent": "නියෝජිතයෙක් නැත",
       "noGuide": "මාර්ගෝපදේශකයෙක් නැත",
-      "specialRequestsPlaceholder": "ඕනෑම විශේෂ ඉල්ලීමක් හෝ සටහනක්..."
+      "specialRequestsPlaceholder": "ඕනෑම විශේෂ ඉල්ලීමක් හෝ සටහනක්...",
+      "guestNamePlaceholder": "අමුත්තාගේ නම ඇතුළත් කරන්න",
+      "guestEmailPlaceholder": "අමුත්තාගේ ඊමේල් ඇතුළත් කරන්න",
+      "guestPhonePlaceholder": "අමුත්තාගේ දුරකථන අංකය ඇතුළත් කරන්න",
+      "guestNationality": "අමුත්තාගේ ජාතිකත්වය",
+      "guestNationalityPlaceholder": "ජාතිකත්වය ඇතුළත් කරන්න",
+      "guestPassportNumber": "අමුත්තාගේ ගමන් බලපත්‍ර අංකය",
+      "guestPassportNumberPlaceholder": "ගමන් බලපත්‍ර අංකය ඇතුළත් කරන්න",
+      "guestIdNumber": "අමුත්තාගේ හැඳුනුම්පත් අංකය",
+      "guestIdNumberPlaceholder": "හැඳුනුම්පත් අංකය ඇතුළත් කරන්න",
+      "guestAddress": "අමුත්තාගේ ලිපිනය",
+      "guestAddressPlaceholder": "අමුත්තාගේ ලිපිනය ඇතුළත් කරන්න",
+      "selectGuide": "මාර්ගෝපදේශක තෝරන්න",
+      "selectAgent": "නියෝජිතයා තෝරන්න",
+      "specialRequests": "විශේෂ ඉල්ලීම්",
+      "advanceAmount": "අත්තිකාරම් මුදල"
     },
     "viewDialog": {
       "guestInformation": "අමුත්තා තොරතුරු",
@@ -372,7 +388,8 @@
       "noExpenses": "වියදම් වාර්තා වී නැත",
       "unknownGuest": "නොදන්නා අමුත්තා",
       "unknownRoom": "නොදන්නා කාමරය",
-      "unknownLocation": "නොදන්නා ස්ථානය"
+      "unknownLocation": "නොදන්නා ස්ථානය",
+      "bookingDetails": "වෙන්කරණ විස්තර"
     },
     "paymentsTable": {
       "title": "ගෙවීම් සහ ආදායම්",
@@ -508,7 +525,53 @@
       "sendConfirmationSuccess": "තහවුරුව සාර්ථකව යවන ලදි",
       "printErrorNoData": "මුද්‍රණය කළ නොහැක: වෙන්කරණ දත්ත නොමැත",
       "printErrorIncompleteData": "මුද්‍රණය කළ නොහැක: අසම්පූර්ණ වෙන්කරණ දත්ත",
-      "noReservationsGetStarted": "වෙන්කරණ කිසිවක් හමු නොවීය. ආරම්භ කිරීමට ඔබගේ පළමු වෙන්කරණය සාදන්න."
+      "noReservationsGetStarted": "වෙන්කරණ කිසිවක් හමු නොවීය. ආරම්භ කිරීමට ඔබගේ පළමු වෙන්කරණය සාදන්න.",
+      "reservationCompleted": "වෙන්කරණය සාර්ථකව සම්පූර්ණ කරන ලදී"
+    },
+    "newDialog": {
+      "stepDescription": "පියවර {{currentStep}} of {{totalSteps}}: {{stepTitle}}",
+      "steps": {
+        "guest": "ආගන්තුක තොරතුරු",
+        "rooms": "කාමර තේරීම",
+        "pricing": "මිල නියම කිරීම",
+        "payment": "ගෙවීම",
+        "confirmation": "තහවුරු කිරීම"
+      },
+      "loadingRooms": "කාමර පූරණය කරමින්...",
+      "validation": {
+        "guestNameRequired": "ආගන්තුකයාගේ නම අවශ්‍යයි",
+        "atLeastOneRoom": "කරුණාකර අවම වශයෙන් එක් කාමරයක් තෝරන්න",
+        "allRoomsSelected": "කරුණාකර සියලුම කාමර තේරීම් සඳහා කාමරයක් තෝරන්න",
+        "allDatesSelected": "කරුණාකර සියලුම කාමර තේරීම් සඳහා පැමිණීමේ සහ පිටවීමේ දිනයන් තෝරන්න",
+        "roomUnavailable": {
+          "title": "කාමරය ലഭ്യമಿಲ್ಲ",
+          "description": "තෝරාගත් දිනයන් සඳහා තෝරාගත් කාමර එකක් හෝ කිහිපයක් ലഭ്യമಿಲ್ಲ. කරුණාකර ඔබගේ තේරීම සකසන්න."
+        }
+      },
+      "missingInfo": "අවශ්‍ය තොරතුරු חסר",
+      "createSuccess": "වෙන් කිරීම (වල්) {{reservationNumbers}} සාර්ථකව සාදන ලදී",
+      "createError": "වෙන් කිරීම සෑදීමට අසමත් විය"
+    },
+    "compactDialog": {
+      "permissionDenied": "වෙන්කරණ සෑදීමට ඔබට අවසර නැත.",
+      "description": "කාමර ලಭ್ಯතාවය සහ මිලගණන් සමඟ ඉක්මනින් වෙන්කරණයක් සාදන්න.",
+      "pricingDetails": "මිල විස්තර",
+      "nights": "රාත්‍රී",
+      "ratePerNight": "එක් රාත්‍රියකට ගාස්තුව",
+      "selectCheckIn": "පැමිණීමේ දිනය තෝරන්න",
+      "selectCheckOut": "පිටත්වීමේ දිනය තෝරන්න",
+      "checkIn": "පැමිණීම",
+      "checkOut": "පිටත්වීම",
+      "selectedDates": "තෝරාගත් දින",
+      "changeDates": "දින වෙනස් කරන්න",
+      "footerSummary": "රාත්‍රී {{nights}} • {{currency}} {{total}} මුළු",
+      "legend": {
+        "title": "දිනදර්ශන සංකේත",
+        "available": "ලබා ගත හැක",
+        "unavailable": "ලබා ගත නොහැක",
+        "checkIn": "පැමිණීම",
+        "checkOut": "පිටත්වීම"
+      }
     }
   },
   "bookingChannels": {
@@ -529,7 +592,10 @@
       "revenue": "ආදායම",
       "totalBookingValue": "මුළු වෙන්කරණ වටිනාකම",
       "activeSources": "ක්‍රියාකාරී මූලාශ්‍ර",
-      "bookingChannels": "වෙන්කරණ නාලිකා"
+      "bookingChannels": "වෙන්කරණ නාලිකා",
+      "fromAllSources": "සියලු මූලාශ්‍ර වලින්",
+      "lastSyncTime": "අවසන් සමමුහූර්ත වේලාව",
+      "totalValue": "මුළු වටිනාකම"
     },
     "tabs": {
       "bookings": "වෙන්කරණ",
@@ -562,7 +628,12 @@
       "adultsChildren": "{{adults}}වැ + {{children}}ළ",
       "payout": "ගෙවීම: {{amount}} LKR",
       "noBookings": "තෝරන ලද ස්ථානය සඳහා වෙන්කරණ හමු නොවීය.",
-      "viewDetails": "විස්තර බලන්න"
+      "viewDetails": "විස්තර බලන්න",
+      "mapRoom": "කාමරය සිතියම්ගත කරන්න",
+      "selectRoom": "කාමරය තෝරන්න...",
+      "cancel": "අවලංගු කරන්න",
+      "roomMappedSuccess": "කාමර සිතියම්ගත කිරීම සාර්ථකව යාවත්කාලීන කරන ලදී",
+      "roomMappingError": "කාමර සිතියම්ගත කිරීම යාවත්කාලීන කිරීමට අසමත් විය"
     },
     "bookingDialog": {
       "title": "වෙන්කරණ විස්තර",
@@ -583,7 +654,10 @@
       "bookingDetails": "වෙන්කරණ විස්තර",
       "externalId": "බාහිර ID:",
       "propertyId": "දේපළ ID:",
-      "lastSynced": "අවසන් සමමුහූර්තය:"
+      "lastSynced": "අවසන් සමමුහූර්තය:",
+      "propertyRoom": "දේපළ / කාමරය",
+      "unknownProperty": "නොදන්නා දේපළ",
+      "notMappedToRoom": "කාමරයකට සිතියම්ගත කර නැත"
     },
     "analytics": {
       "title": "වෙන්කරණ විශ්ලේෂණ",
@@ -671,6 +745,13 @@
     "deselect": "තේරීම ඉවත් කරන්න",
     "buttons": {
       "refresh": "නැවුම් කරන්න"
+    },
+    "error": "දෝෂයක්",
+    "accessDenied": "ප්‍රවේශය ප්‍රතික්ෂේප විය",
+    "validationError": "වලංගුකරණ දෝෂය",
+    "directIncome": "සෘජු ආදායම",
+    "transaction": {
+      "moreTransactions": "වැඩි ගනුදෙනු"
     }
   },
   "auth": {
@@ -1020,6 +1101,12 @@
       "income": "ආදායම",
       "expense": "වියදම",
       "noTransactions": "මෑත ගනුදෙනු හමු නොවීය"
+    },
+    "deleteDialog": {
+      "title": "ගිණුම මකන්න",
+      "description": "ඔබට \"{{accountName}}\" ගිණුම මකා දැමීමට අවශ්‍යද?",
+      "warning": "මෙම ක්‍රියාව ආපසු හැරවිය නොහැක.",
+      "confirm": "ගිණුම මකන්න"
     }
   },
   "reports": {

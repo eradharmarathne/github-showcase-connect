@@ -259,22 +259,23 @@
       },
       "noReservations": "No reservations found",
       "loadingReservations": "Loading reservations...",
-      "noData": "No data available"
+      "noData": "No data available",
+      "nights": "{{count}} night",
+      "nights_other": "{{count}} nights"
     },
     "mobileCard": {
       "guest": "Guest:",
       "dates": "Dates:",
       "room": "Room:",
       "amount": "Amount:",
-      "balance": "Balance:",
+      "balance": "Balance",
       "status": "Status:",
       "nights": "{{count}} night",
       "nights_other": "{{count}} nights",
       "location": "Location:",
       "total": "Total:",
       "paid": "Paid:",
-      "totalAmount": "Total Amount",
-      "balance": "Balance"
+      "totalAmount": "Total Amount"
     },
     "dialog": {
       "viewTitle": "Reservation Details",
@@ -344,7 +345,22 @@
       "selectRoom": "Select room",
       "noAgent": "No Agent",
       "noGuide": "No Guide",
-      "specialRequestsPlaceholder": "Any special requests or notes..."
+      "specialRequestsPlaceholder": "Any special requests or notes...",
+      "guestNamePlaceholder": "Enter guest name",
+      "guestEmailPlaceholder": "Enter guest email",
+      "guestPhonePlaceholder": "Enter guest phone number",
+      "guestNationality": "Guest Nationality",
+      "guestNationalityPlaceholder": "Enter guest nationality",
+      "guestPassportNumber": "Guest Passport Number",
+      "guestPassportNumberPlaceholder": "Enter passport number",
+      "guestIdNumber": "Guest ID Number",
+      "guestIdNumberPlaceholder": "Enter ID number",
+      "guestAddress": "Guest Address",
+      "guestAddressPlaceholder": "Enter guest address",
+      "selectGuide": "Select guide",
+      "selectAgent": "Select agent",
+      "specialRequests": "Special Requests",
+      "advanceAmount": "Advance Amount"
     },
     "viewDialog": {
       "guestInformation": "Guest Information",
@@ -372,7 +388,8 @@
       "noExpenses": "No expenses recorded",
       "unknownGuest": "Unknown Guest",
       "unknownRoom": "Unknown Room",
-      "unknownLocation": "Unknown Location"
+      "unknownLocation": "Unknown Location",
+      "bookingDetails": "Booking Details"
     },
     "paymentsTable": {
       "title": "Payments & Income",
@@ -508,7 +525,53 @@
       "sendConfirmationSuccess": "Confirmation sent successfully",
       "printErrorNoData": "Cannot print: No reservation data available",
       "printErrorIncompleteData": "Cannot print: Incomplete reservation data",
-      "noReservationsGetStarted": "No reservations found. Create your first reservation to get started."
+      "noReservationsGetStarted": "No reservations found. Create your first reservation to get started.",
+      "reservationCompleted": "Reservation completed successfully"
+    },
+    "newDialog": {
+      "stepDescription": "Step {{currentStep}} of {{totalSteps}}: {{stepTitle}}",
+      "steps": {
+        "guest": "Guest Information",
+        "rooms": "Room Selection",
+        "pricing": "Pricing",
+        "payment": "Payment",
+        "confirmation": "Confirmation"
+      },
+      "loadingRooms": "Loading rooms...",
+      "validation": {
+        "guestNameRequired": "Guest name is required",
+        "atLeastOneRoom": "Please select at least one room",
+        "allRoomsSelected": "Please select a room for all room selections",
+        "allDatesSelected": "Please select check-in and check-out dates for all room selections",
+        "roomUnavailable": {
+          "title": "Room Unavailable",
+          "description": "One or more selected rooms are not available for the chosen dates. Please adjust your selection."
+        }
+      },
+      "missingInfo": "Missing required information",
+      "createSuccess": "Reservation(s) {{reservationNumbers}} created successfully",
+      "createError": "Failed to create reservation"
+    },
+    "compactDialog": {
+      "permissionDenied": "You do not have permission to create reservations.",
+      "description": "Create a reservation quickly with room availability and pricing.",
+      "pricingDetails": "Pricing Details",
+      "nights": "Nights",
+      "ratePerNight": "Rate per night",
+      "selectCheckIn": "Select check-in date",
+      "selectCheckOut": "Select check-out date",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "selectedDates": "Selected Dates",
+      "changeDates": "Change dates",
+      "footerSummary": "{{nights}} nights • {{currency}} {{total}} total",
+      "legend": {
+        "title": "Calendar Legend",
+        "available": "Available",
+        "unavailable": "Unavailable",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out"
+      }
     }
   },
   "bookingChannels": {
@@ -529,7 +592,10 @@
       "revenue": "Revenue",
       "totalBookingValue": "Total booking value",
       "activeSources": "Active Sources",
-      "bookingChannels": "Booking channels"
+      "bookingChannels": "Booking channels",
+      "fromAllSources": "From all sources",
+      "lastSyncTime": "Last synchronization time",
+      "totalValue": "Total Value"
     },
     "tabs": {
       "bookings": "Bookings",
@@ -679,6 +745,13 @@
     "deselect": "Deselect",
     "buttons": {
       "refresh": "Refresh"
+    },
+    "error": "Error",
+    "accessDenied": "Access Denied",
+    "validationError": "Validation Error",
+    "directIncome": "Direct Income",
+    "transaction": {
+      "moreTransactions": "more transactions"
     }
   },
   "auth": {
@@ -1255,7 +1328,8 @@
         "commission": "Commission",
         "status": "Status",
         "paid": "Paid",
-        "pending": "Pending"
+        "pending": "Pending",
+        "checkOut": "Check-out"
       },
       "errors": {
         "fetchCommissions": "Failed to fetch commission data"
