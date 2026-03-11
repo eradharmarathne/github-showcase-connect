@@ -7,9 +7,9 @@ export type Currency = string; // Now supports any currency code
 
 export interface CurrencyRate {
 	id: string;
-	currency_code: string | null;
-	usd_rate: number | null;
-	is_custom: boolean | null;
+	currency_code: string;
+	usd_rate: number;
+	is_custom: boolean;
 	tenant_id: string;
 	location_id: string;
 	updated_at: string;
@@ -32,11 +32,90 @@ interface CacheEntry {
 // Key format: `${tenantId}-${locationId}`
 const currencyRatesCache = new Map<string, CacheEntry>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const DEFAULT_CURRENCY_CODE = "USD";
 
 const getDefaultRates = (): CurrencyRates => {
 	return {
-		USD: 1,
+		[DEFAULT_CURRENCY_CODE]: 1,
 	};
+};
+
+const normalizeCurrencyCode = (
+	currencyCode: string | null | undefined,
+): string | null => {
+	if (!currencyCode) {
+		return null;
+	}
+
+	const normalizedCode = currencyCode.trim().toUpperCase();
+	if (!/^[A-Z]{3,5}$/.test(normalizedCode)) {
+		return null;
+	}
+
+	return normalizedCode;
+};
+
+const createFallbackCurrencyRate = (
+	tenantId: string,
+	locationId: string,
+	currencyCode: string = DEFAULT_CURRENCY_CODE,
+): CurrencyRate => {
+	const timestamp = new Date().toISOString();
+
+	return {
+		id: `fallback-${tenantId}-${locationId}-${currencyCode}`,
+		currency_code: currencyCode,
+		usd_rate: currencyCode === DEFAULT_CURRENCY_CODE ? 1 : 0,
+		is_custom: false,
+		tenant_id: tenantId,
+		location_id: locationId,
+		updated_at: timestamp,
+		created_at: timestamp,
+	};
+};
+
+const normalizeCurrencyDetails = (
+	data: DatabaseCurrencyRate[] | null,
+	tenantId: string,
+	locationId: string,
+): CurrencyRate[] => {
+	const normalizedByCode = new Map<string, CurrencyRate>();
+
+	for (const item of data || []) {
+		const currencyCode = normalizeCurrencyCode(item.currency_code);
+		if (!currencyCode) {
+			continue;
+		}
+
+		const normalizedUsdRate =
+			typeof item.usd_rate === "number" && item.usd_rate > 0
+				? Number(item.usd_rate)
+				: currencyCode === DEFAULT_CURRENCY_CODE
+					? 1
+					: 0;
+
+		normalizedByCode.set(currencyCode, {
+			id: item.id,
+			currency_code: currencyCode,
+			usd_rate: normalizedUsdRate,
+			is_custom: item.is_custom ?? false,
+			tenant_id: item.tenant_id,
+			location_id: item.location_id,
+			updated_at: item.updated_at,
+			created_at: item.created_at,
+		});
+	}
+
+	if (!normalizedByCode.has(DEFAULT_CURRENCY_CODE)) {
+		normalizedByCode.set(
+			DEFAULT_CURRENCY_CODE,
+			createFallbackCurrencyRate(tenantId, locationId),
+		);
+	}
+
+	return Array.from(normalizedByCode.values()).sort((a, b) =>
+		a.currency_code.localeCompare(b.currency_code),
+	);
 };
 
 // Get all available currencies from database for a specific tenant and location
@@ -55,13 +134,25 @@ export const getAvailableCurrencies = async (
 
 		if (error) {
 			logger.error("Error fetching currencies", error);
-			return ["USD"];
+			return [DEFAULT_CURRENCY_CODE];
 		}
 
-		return data?.map((item) => item.currency_code) || ["USD"];
+		const currencies = new Set<string>();
+		for (const item of data || []) {
+			const currencyCode = normalizeCurrencyCode(item.currency_code);
+			if (currencyCode) {
+				currencies.add(currencyCode);
+			}
+		}
+
+		if (!currencies.has(DEFAULT_CURRENCY_CODE)) {
+			currencies.add(DEFAULT_CURRENCY_CODE);
+		}
+
+		return Array.from(currencies).sort((a, b) => a.localeCompare(b));
 	} catch (error) {
 		logger.error("Error in getAvailableCurrencies", error);
-		return ["USD"];
+		return [DEFAULT_CURRENCY_CODE];
 	}
 };
 
@@ -108,9 +199,22 @@ export const getCurrencyRates = async (
 		// Convert database format to our rates object
 		const rates: CurrencyRates = {};
 		for (const rate of data) {
-			if (rate.currency_code && rate.usd_rate !== null) {
-				rates[rate.currency_code] = Number(rate.usd_rate);
+			const currencyCode = normalizeCurrencyCode(rate.currency_code);
+			if (
+				currencyCode &&
+				typeof rate.usd_rate === "number" &&
+				rate.usd_rate > 0
+			) {
+				rates[currencyCode] = Number(rate.usd_rate);
 			}
+		}
+
+		if (!rates[DEFAULT_CURRENCY_CODE]) {
+			rates[DEFAULT_CURRENCY_CODE] = 1;
+		}
+
+		if (Object.keys(rates).length === 0) {
+			return getDefaultRates();
 		}
 
 		// Update cache for this specific tenant/location
@@ -138,6 +242,9 @@ export const convertCurrency = async (
 	tenantId: string,
 	locationId: string,
 ): Promise<number> => {
+	const normalizedFromCurrency = normalizeCurrencyCode(fromCurrency);
+	const normalizedToCurrency = normalizeCurrencyCode(toCurrency);
+
 	// Validate inputs
 	if (!tenantId || !locationId) {
 		logger.error("Missing tenant_id or location_id for currency conversion", {
@@ -151,7 +258,7 @@ export const convertCurrency = async (
 		);
 	}
 
-	if (!fromCurrency || !toCurrency) {
+	if (!normalizedFromCurrency || !normalizedToCurrency) {
 		logger.error("Missing currency codes for conversion", {
 			fromCurrency,
 			toCurrency,
@@ -172,7 +279,7 @@ export const convertCurrency = async (
 		throw new Error("Amount must be a valid number");
 	}
 
-	if (fromCurrency === toCurrency) {
+	if (normalizedFromCurrency === normalizedToCurrency) {
 		return amount;
 	}
 
@@ -181,12 +288,18 @@ export const convertCurrency = async (
 
 		// Convert from source currency to USD first
 		let usdAmount = amount;
-		if (fromCurrency !== "USD") {
-			const fromRate = rates[fromCurrency];
+		if (normalizedFromCurrency !== DEFAULT_CURRENCY_CODE) {
+			const fromRate = rates[normalizedFromCurrency];
 			if (!fromRate || fromRate <= 0) {
 				logger.warn(
-					`No valid rate found for ${fromCurrency}, returning original amount`,
-					{ fromCurrency, toCurrency, tenantId, locationId, rate: fromRate },
+					`No valid rate found for ${normalizedFromCurrency}, returning original amount`,
+					{
+						fromCurrency: normalizedFromCurrency,
+						toCurrency: normalizedToCurrency,
+						tenantId,
+						locationId,
+						rate: fromRate,
+					},
 				);
 				return amount;
 			}
@@ -194,15 +307,21 @@ export const convertCurrency = async (
 		}
 
 		// Convert from USD to target currency
-		if (toCurrency === "USD") {
+		if (normalizedToCurrency === DEFAULT_CURRENCY_CODE) {
 			return usdAmount;
 		}
 
-		const toRate = rates[toCurrency];
+		const toRate = rates[normalizedToCurrency];
 		if (!toRate || toRate <= 0) {
 			logger.warn(
-				`No valid rate found for ${toCurrency}, returning USD amount`,
-				{ fromCurrency, toCurrency, tenantId, locationId, rate: toRate },
+				`No valid rate found for ${normalizedToCurrency}, returning USD amount`,
+				{
+					fromCurrency: normalizedFromCurrency,
+					toCurrency: normalizedToCurrency,
+					tenantId,
+					locationId,
+					rate: toRate,
+				},
 			);
 			return usdAmount;
 		}
@@ -212,8 +331,8 @@ export const convertCurrency = async (
 		// Validate result
 		if (!isFinite(convertedAmount)) {
 			logger.error("Currency conversion resulted in invalid number", {
-				fromCurrency,
-				toCurrency,
+				fromCurrency: normalizedFromCurrency,
+				toCurrency: normalizedToCurrency,
 				amount,
 				convertedAmount,
 				tenantId,
@@ -243,8 +362,10 @@ export const addCustomCurrency = async (
 	locationId: string,
 ): Promise<{ success: boolean; error?: string }> => {
 	try {
+		const normalizedCurrencyCode = normalizeCurrencyCode(currencyCode);
+
 		// Validate currency code (3-5 uppercase letters)
-		if (!/^[A-Z]{3,5}$/.test(currencyCode)) {
+		if (!normalizedCurrencyCode) {
 			return {
 				success: false,
 				error: "Currency code must be 3-5 uppercase letters",
@@ -258,7 +379,7 @@ export const addCustomCurrency = async (
 
 		const { error } = await supabase.from("currency_rates").upsert(
 			{
-				currency_code: currencyCode,
+				currency_code: normalizedCurrencyCode,
 				usd_rate: usdRate,
 				is_custom: true,
 				tenant_id: tenantId,
@@ -271,7 +392,7 @@ export const addCustomCurrency = async (
 
 		if (error) {
 			logger.error("Error adding custom currency", error, {
-				currencyCode,
+				currencyCode: normalizedCurrencyCode,
 				tenantId,
 				locationId,
 			});
@@ -309,21 +430,26 @@ export async function removeCustomCurrency(
 	locationId: string,
 ): Promise<{ success: boolean; error?: string }> {
 	try {
-		if (currencyCode === "USD") {
+		const normalizedCurrencyCode = normalizeCurrencyCode(currencyCode);
+		if (!normalizedCurrencyCode) {
+			return { success: false, error: "Invalid currency code" };
+		}
+
+		if (normalizedCurrencyCode === DEFAULT_CURRENCY_CODE) {
 			return { success: false, error: "Cannot remove USD base currency" };
 		}
 
 		const { error } = await supabase
 			.from("currency_rates")
 			.delete()
-			.eq("currency_code", currencyCode)
+			.eq("currency_code", normalizedCurrencyCode)
 			.eq("tenant_id", tenantId)
 			.eq("location_id", locationId)
 			.eq("is_custom", true);
 
 		if (error) {
 			logger.error("Error removing currency", error, {
-				currencyCode,
+				currencyCode: normalizedCurrencyCode,
 				tenantId,
 				locationId,
 			});
@@ -414,7 +540,12 @@ export async function updateCurrencyRate(
 	locationId: string,
 ): Promise<{ success: boolean; error?: string }> {
 	try {
-		if (currencyCode === "USD") {
+		const normalizedCurrencyCode = normalizeCurrencyCode(currencyCode);
+		if (!normalizedCurrencyCode) {
+			return { success: false, error: "Invalid currency code" };
+		}
+
+		if (normalizedCurrencyCode === DEFAULT_CURRENCY_CODE) {
 			return { success: false, error: "Cannot modify USD base currency rate" };
 		}
 
@@ -428,13 +559,13 @@ export async function updateCurrencyRate(
 				usd_rate: usdRate,
 				updated_at: new Date().toISOString(),
 			})
-			.eq("currency_code", currencyCode)
+			.eq("currency_code", normalizedCurrencyCode)
 			.eq("tenant_id", tenantId)
 			.eq("location_id", locationId);
 
 		if (error) {
 			logger.error("Error updating currency rate", error, {
-				currencyCode,
+				currencyCode: normalizedCurrencyCode,
 				tenantId,
 				locationId,
 			});
@@ -476,15 +607,19 @@ export const getCurrencyDetails = async (
 				tenantId,
 				locationId,
 			});
-			return [];
+			return [createFallbackCurrencyRate(tenantId, locationId)];
 		}
 
-		return (data as DatabaseCurrencyRate[]) || [];
+		return normalizeCurrencyDetails(
+			(data as DatabaseCurrencyRate[]) || [],
+			tenantId,
+			locationId,
+		);
 	} catch (error) {
 		logger.error("Error in getCurrencyDetails", error, {
 			tenantId,
 			locationId,
 		});
-		return [];
+		return [createFallbackCurrencyRate(tenantId, locationId)];
 	}
 };

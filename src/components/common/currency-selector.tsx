@@ -1,7 +1,6 @@
-import { DollarSign, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -34,11 +33,20 @@ export const CurrencySelector = ({
 	const [loading, setLoading] = useState(true);
 	const { tenant } = useTenant();
 	const { selectedLocation } = useLocationContext();
+	const normalizedCurrency = currency.trim().toUpperCase();
+	const effectiveCurrency = normalizedCurrency || "USD";
 
 	useEffect(() => {
+		let isCancelled = false;
+
 		const loadCurrencies = async () => {
+			setLoading(true);
+
 			if (!tenant?.id || !selectedLocation) {
-				setLoading(false);
+				if (!isCancelled) {
+					setCurrencies([]);
+					setLoading(false);
+				}
 				return;
 			}
 
@@ -47,22 +55,74 @@ export const CurrencySelector = ({
 					tenant.id,
 					selectedLocation,
 				);
-				setCurrencies(currencyDetails);
+				if (!isCancelled) {
+					setCurrencies(currencyDetails);
+				}
 			} catch (error) {
 				console.error("Error loading currencies:", error);
+				if (!isCancelled) {
+					setCurrencies([]);
+				}
 			} finally {
-				setLoading(false);
+				if (!isCancelled) {
+					setLoading(false);
+				}
 			}
 		};
 
 		loadCurrencies();
+
+		return () => {
+			isCancelled = true;
+		};
 	}, [tenant?.id, selectedLocation]);
 
-	const selectedCurrency = currencies.find((c) => c.currency_code === currency);
+	const availableCurrencies = useMemo(() => {
+		const currencyMap = new Map<string, CurrencyRate>();
+		const now = new Date().toISOString();
+
+		for (const entry of currencies) {
+			currencyMap.set(entry.currency_code, entry);
+		}
+
+		if (normalizedCurrency && !currencyMap.has(normalizedCurrency)) {
+			currencyMap.set(normalizedCurrency, {
+				id: `selected-${normalizedCurrency}`,
+				currency_code: normalizedCurrency,
+				usd_rate: normalizedCurrency === "USD" ? 1 : 0,
+				is_custom: false,
+				tenant_id: tenant?.id || "",
+				location_id: selectedLocation || "",
+				updated_at: now,
+				created_at: now,
+			});
+		}
+
+		if (!currencyMap.has("USD")) {
+			currencyMap.set("USD", {
+				id: "fallback-usd",
+				currency_code: "USD",
+				usd_rate: 1,
+				is_custom: false,
+				tenant_id: tenant?.id || "",
+				location_id: selectedLocation || "",
+				updated_at: now,
+				created_at: now,
+			});
+		}
+
+		return Array.from(currencyMap.values()).sort((a, b) =>
+			a.currency_code.localeCompare(b.currency_code),
+		);
+	}, [currencies, normalizedCurrency, tenant?.id, selectedLocation]);
+
+	const selectedCurrency = availableCurrencies.find(
+		(c) => c.currency_code === effectiveCurrency,
+	);
 
 	const handleGoogleSearchClick = () => {
-		if (currency && currency !== "USD") {
-			const searchUrl = getCurrencyConversionSearchUrl(currency);
+		if (normalizedCurrency && normalizedCurrency !== "USD") {
+			const searchUrl = getCurrencyConversionSearchUrl(normalizedCurrency);
 			window.open(searchUrl, "_blank");
 		}
 	};
@@ -70,11 +130,11 @@ export const CurrencySelector = ({
 	return (
 		<div className="flex gap-2">
 			<Select
-				value={currency}
+				value={effectiveCurrency}
 				onValueChange={onCurrencyChange}
-				disabled={loading}
+				disabled={loading && availableCurrencies.length === 0}
 			>
-				<SelectTrigger className="flex-1">
+				<SelectTrigger className="flex-1" aria-label={label}>
 					<SelectValue>
 						{selectedCurrency ? (
 							<div className="flex items-center gap-2">
@@ -96,13 +156,15 @@ export const CurrencySelector = ({
 							</div>
 						) : (
 							<span className="text-muted-foreground">
-								{loading ? "Loading..." : "Select currency"}
+								{loading
+									? "Loading..."
+									: effectiveCurrency || "Select currency"}
 							</span>
 						)}
 					</SelectValue>
 				</SelectTrigger>
 				<SelectContent className="z-50 bg-background border">
-					{currencies.map((curr) => (
+					{availableCurrencies.map((curr) => (
 						<SelectItem key={curr.currency_code} value={curr.currency_code}>
 							<div className="flex items-center gap-2">
 								<span className="font-medium min-w-[48px]">
@@ -126,18 +188,20 @@ export const CurrencySelector = ({
 				</SelectContent>
 			</Select>
 
-			{showGoogleSearchLink && currency && currency !== "USD" && (
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={handleGoogleSearchClick}
-					className="px-3"
-					title={`Search USD to ${currency} conversion rate`}
-				>
-					<ExternalLink className="size-4" />
-				</Button>
-			)}
+			{showGoogleSearchLink &&
+				normalizedCurrency &&
+				normalizedCurrency !== "USD" && (
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={handleGoogleSearchClick}
+						className="px-3"
+						title={`Search USD to ${normalizedCurrency} conversion rate`}
+					>
+						<ExternalLink className="size-4" />
+					</Button>
+				)}
 		</div>
 	);
 };

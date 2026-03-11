@@ -28,6 +28,7 @@ import { CurrencyRate } from "./types";
 
 export function CurrencyManagement() {
 	const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
+	const [isLoadingRates, setIsLoadingRates] = useState(true);
 	const [newCurrencyCode, setNewCurrencyCode] = useState("");
 	const [newCurrencyRate, setNewCurrencyRate] = useState<number>(1);
 	const [isAddingCurrency, setIsAddingCurrency] = useState(false);
@@ -39,16 +40,26 @@ export function CurrencyManagement() {
 
 	const fetchCurrencyRates = useCallback(async () => {
 		if (!tenant?.id || !selectedLocation) {
+			setCurrencyRates([]);
+			setIsLoadingRates(false);
 			return;
 		}
 
+		setIsLoadingRates(true);
 		try {
 			const rates = await getCurrencyDetails(tenant.id, selectedLocation);
 			setCurrencyRates(rates);
 		} catch (error) {
 			console.error("Error fetching currency rates:", error);
+			toast({
+				title: "Error",
+				description: "Failed to load currencies",
+				variant: "destructive",
+			});
+		} finally {
+			setIsLoadingRates(false);
 		}
-	}, [tenant?.id, selectedLocation]);
+	}, [tenant?.id, selectedLocation, toast]);
 
 	useEffect(() => {
 		fetchCurrencyRates();
@@ -299,7 +310,11 @@ export function CurrencyManagement() {
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-4">
-									{currencyRates.length === 0 ? (
+									{isLoadingRates ? (
+										<p className="text-muted-foreground text-center py-8">
+											Loading currencies...
+										</p>
+									) : currencyRates.length === 0 ? (
 										<p className="text-muted-foreground text-center py-8">
 											No currencies found. Add a custom currency to get started.
 										</p>
