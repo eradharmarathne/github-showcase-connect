@@ -271,22 +271,36 @@ export default function Auth() {
 				className="hidden sm:flex lg:h-screen flex-1 sm:overflow-hidden"
 				aria-label="Product showcase"
 			>
-				<div className="flex size-full items-center justify-center bg-linear-to-br from-red-700 to-red-950 p-4 sm:p-8 lg:p-16 dark:from-red-800 dark:to-red-950">
-					<div>
-						<h2 className="max-w-lg capitalize text-lg md:text-xl lg:text-2xl font-semibold leading-9 text-white dark:text-white">
+				<div className="flex size-full items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4 sm:p-8 lg:p-16 relative overflow-hidden">
+					{/* Decorative yellow accent glow */}
+					<div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-yellow-500/10 blur-3xl" />
+					<div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-yellow-400/8 blur-2xl" />
+
+					<div className="relative z-10 text-center">
+						{/* CC Monogram */}
+						<div className="mx-auto mb-8 w-20 h-20 rounded-full bg-yellow-500 flex items-center justify-center shadow-xl shadow-yellow-500/25">
+							<span className="text-3xl font-bold text-black tracking-tight">CC</span>
+						</div>
+
+						{/* Shiny brand name */}
+						<h1 className="text-4xl lg:text-5xl font-bold tracking-wide animate-shimmer animate-glow-pulse mb-4">
+							CheckingCheckout
+						</h1>
+
+						<h2 className="max-w-lg mx-auto text-lg md:text-xl font-medium leading-8 text-gray-300">
 							Welcome to Checking &amp; Checkout
 						</h2>
-						<p className="mt-4 text-white dark:text-white">
+						<p className="mt-3 text-gray-400 max-w-md mx-auto">
 							The all-in-one hotel management solution for small to medium
 							businesses.
 						</p>
-						<div className="mt-14 rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20">
+						<div className="mt-12 rounded-xl bg-white/5 p-1.5 ring-1 ring-yellow-500/20">
 							<img
 								alt="Dashboard screenshot showing data visualization and analytics interface"
 								src="/images/dashboard.png"
 								width={2432}
 								height={1442}
-								className="rounded-md shadow-2xl shadow-black/50 ring-1 ring-gray-900/5"
+								className="rounded-md shadow-2xl shadow-black/50 ring-1 ring-gray-800/30"
 							/>
 						</div>
 					</div>
@@ -365,7 +379,7 @@ export default function Auth() {
 
 					<Button
 						type="submit"
-						className="w-full cursor-pointer bg-red-700 hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700"
+						className="w-full cursor-pointer bg-yellow-500 hover:bg-yellow-600 text-black font-semibold dark:bg-yellow-500 dark:hover:bg-yellow-600 dark:text-black"
 						disabled={submitting}
 					>
 							{submitting ? (
@@ -431,7 +445,7 @@ export default function Auth() {
 							size="sm"
 							onClick={fillDemoCredentials}
 							disabled={submitting}
-							className="w-full cursor-pointer border-red-400 text-red-800 hover:bg-red-50 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-900/50"
+							className="w-full cursor-pointer border-yellow-500 text-yellow-700 hover:bg-yellow-50 dark:border-yellow-500 dark:text-yellow-400 dark:hover:bg-yellow-900/30"
 						>
 							Try Demo Account
 						</Button>

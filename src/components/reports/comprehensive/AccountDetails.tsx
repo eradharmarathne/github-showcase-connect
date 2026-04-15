@@ -126,17 +126,17 @@ export function AccountDetails({
 				}
 
 				// Execute all queries
-				const [
-					expenseResult,
-					paymentsResult,
-					transfersFromResult,
-					transfersToResult,
-				] = await Promise.all([
-					expenseQuery.order("date", { ascending: true }),
-					paymentsQuery.order("created_at", { ascending: true }),
-					transfersFromQuery.order("created_at", { ascending: true }),
-					transfersToQuery.order("created_at", { ascending: true }),
-				]);
+			const [
+				expenseResult,
+				paymentsResult,
+				transfersFromResult,
+				transfersToResult,
+			] = await Promise.all([
+				expenseQuery.order("date", { ascending: true }).limit(500),
+				paymentsQuery.order("created_at", { ascending: true }).limit(500),
+				transfersFromQuery.order("created_at", { ascending: true }).limit(500),
+				transfersToQuery.order("created_at", { ascending: true }).limit(500),
+			]);
 
 				// Process transactions and calculate balances
 				const transactions: TransactionDetail[] = [];

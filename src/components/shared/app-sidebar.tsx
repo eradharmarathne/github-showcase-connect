@@ -140,7 +140,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
 		<Sidebar
 			collapsible="icon"
 			{...props}
-			className="z-20 bg-background text-foreground"
+			className="z-20 bg-sidebar text-sidebar-foreground"
 			data-testid="app-sidebar"
 		>
 			<SidebarHeader>

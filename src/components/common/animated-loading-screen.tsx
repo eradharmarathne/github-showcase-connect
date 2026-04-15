@@ -15,90 +15,87 @@ export function AnimatedLoadingScreen({
 	const { t } = useTranslation();
 	const [dots, setDots] = useState("");
 
-	// Animate dots
 	useEffect(() => {
 		const interval = setInterval(() => {
-			setDots((prev) => {
-				if (prev === "...") return "";
-				return prev + ".";
-			});
+			setDots((prev) => (prev === "..." ? "" : prev + "."));
 		}, 500);
-
 		return () => clearInterval(interval);
 	}, []);
 
 	return (
 		<div
-			className={`fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center ${className}`}
+			className={`fixed inset-0 z-50 flex items-center justify-center bg-black ${className}`}
 		>
-			<div className="flex flex-col items-center space-y-6 max-w-md mx-auto px-6">
+			<div className="flex flex-col items-center space-y-8">
 				{showLogo && (
-					<div className="relative">
-						{/* Animated logo/icon */}
-						<div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
-							<div className="w-10 h-10 rounded-full bg-primary animate-spin">
-								<div className="w-full h-full rounded-full border-4 border-primary-foreground border-t-transparent animate-spin" />
-							</div>
+					<div className="relative flex items-center justify-center w-32 h-32">
+						{/* Concentric pulse rings */}
+						<div className="absolute inset-0 rounded-full border-2 border-yellow-500/30 animate-pulse-ring" />
+						<div
+							className="absolute inset-0 rounded-full border-2 border-yellow-400/20 animate-pulse-ring"
+							style={{ animationDelay: "0.5s" }}
+						/>
+						<div
+							className="absolute inset-0 rounded-full border border-yellow-300/10 animate-pulse-ring"
+							style={{ animationDelay: "1s" }}
+						/>
+
+						{/* Spinning ring */}
+						<div className="absolute inset-2 rounded-full animate-spin-slow">
+							<svg className="w-full h-full" viewBox="0 0 100 100">
+								<circle
+									cx="50"
+									cy="50"
+									r="46"
+									fill="none"
+									stroke="rgba(234,179,8,0.15)"
+									strokeWidth="2"
+								/>
+								<circle
+									cx="50"
+									cy="50"
+									r="46"
+									fill="none"
+									stroke="#eab308"
+									strokeWidth="2.5"
+									strokeLinecap="round"
+									strokeDasharray="70 220"
+								/>
+							</svg>
 						</div>
 
-						{/* Ripple effect */}
-						<div className="absolute inset-0 rounded-full bg-primary/10 animate-ping" />
-						<div className="absolute inset-2 rounded-full bg-primary/20 animate-ping animation-delay-200" />
+						{/* CC Monogram */}
+						<div className="relative z-10 flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500 shadow-lg shadow-yellow-500/30">
+							<span className="text-2xl font-bold text-black tracking-tight">
+								CC
+							</span>
+						</div>
 					</div>
 				)}
 
+				{/* Shiny brand name */}
+				<h1 className="text-3xl font-bold tracking-wide animate-shimmer animate-glow-pulse">
+					CheckingCheckout
+				</h1>
+
 				{/* Loading text */}
-				<div className="text-center space-y-2">
-					<h2 className="text-lg font-semibold text-foreground">
+				<div className="text-center space-y-1">
+					<p className="text-sm text-gray-400">
 						{message || t("common.loading")}
-						<span className="inline-block w-8 text-left">{dots}</span>
-					</h2>
-					<p className="text-sm text-muted-foreground">
-						{t("common.pleaseWait")}
+						<span className="inline-block w-6 text-left">{dots}</span>
 					</p>
 				</div>
 
-				{/* Progress bars */}
-				<div className="w-full max-w-xs space-y-2">
-					<div className="h-1 bg-muted rounded-full overflow-hidden">
-						<div className="h-full bg-primary rounded-full animate-slide-right" />
-					</div>
-					<div className="h-1 bg-muted rounded-full overflow-hidden">
-						<div
-							className="h-full bg-primary/60 rounded-full animate-slide-right"
-							style={{ animationDelay: "0.5s" }}
-						/>
-					</div>
-					<div className="h-1 bg-muted rounded-full overflow-hidden">
-						<div
-							className="h-full bg-primary/30 rounded-full animate-slide-right"
-							style={{ animationDelay: "1s" }}
-						/>
-					</div>
-				</div>
-
-				{/* Floating dots */}
-				<div className="relative w-22 h-6">
-					<div className="absolute left-0 w-2 h-2 bg-primary rounded-full animate-bounce" />
+				{/* Bouncing dots */}
+				<div className="flex space-x-2">
+					<div className="w-2 h-2 rounded-full bg-yellow-500 animate-bounce-dot" />
 					<div
-						className="absolute left-4 w-2 h-2 bg-primary/80 rounded-full animate-bounce"
-						style={{ animationDelay: "0.1s" }}
-					/>
-					<div
-						className="absolute left-8 w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+						className="w-2 h-2 rounded-full bg-yellow-400 animate-bounce-dot"
 						style={{ animationDelay: "0.2s" }}
 					/>
 					<div
-						className="absolute right-8 w-2 h-2 bg-primary/60 rounded-full animate-bounce"
-						style={{ animationDelay: "0.3s" }}
-					/>
-					<div
-						className="absolute right-4 w-2 h-2 bg-primary/80 rounded-full animate-bounce"
+						className="w-2 h-2 rounded-full bg-yellow-300 animate-bounce-dot"
 						style={{ animationDelay: "0.4s" }}
-					/>
-					<div
-						className="absolute right-0 w-2 h-2 bg-primary rounded-full animate-bounce"
-						style={{ animationDelay: "0.5s" }}
 					/>
 				</div>
 			</div>

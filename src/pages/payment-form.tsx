@@ -253,15 +253,7 @@ export default function PaymentForm() {
 
 		setSubmitting(true);
 		try {
-			// Generate payment number
-			const currentYear = new Date().getFullYear();
-			const { data: existingPayments } = await supabase
-				.from("payments")
-				.select("id")
-				.gte("created_at", `${currentYear}-01-01`)
-				.lt("created_at", `${currentYear + 1}-01-01`);
-
-			const paymentNumber = `PAY${currentYear}${String((existingPayments?.length || 0) + 1).padStart(4, "0")}`;
+			const paymentNumber = `PAY-${Date.now()}`;
 
 			const paymentData = {
 				reservation_id: reservationId,

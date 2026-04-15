@@ -246,7 +246,7 @@ export const ReservationPrintView: React.FC<ReservationPrintViewProps> = ({
 
 			{/* Terms and Conditions */}
 			<div className="mb-8">
-				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-red-500">
+				<h2 className="text-lg md:text-xl lg:text-2xl font-bold mb-4 bg-gray-100 p-3 border-l-4 border-yellow-500">
 					Terms and Conditions
 				</h2>
 				<div className="text-sm space-y-2">
