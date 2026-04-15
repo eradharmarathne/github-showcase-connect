@@ -334,6 +334,7 @@ This project is proprietary software. All rights reserved.
 
 ---
 
+
 **Built with ❤️ for the hospitality industry**
 
 *Empowering accommodation providers with modern technology for seamless operations and exceptional guest experiences.*
