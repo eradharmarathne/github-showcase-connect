@@ -25,6 +25,7 @@ type Reservation = {
 	adults: number;
 	children: number | null;
 	reservation_number: string;
+	booking_source: string | null;
 };
 
 interface BookingSpan {
@@ -109,7 +110,11 @@ export function RoomRow({
 						{calendarDays.map((day, dayIndex) => {
 							// Find ALL bookings that occupy this day
 							const allBookingsHere = [
-								...roomBookings.map((b) => ({ ...b, isExternal: false })),
+								...roomBookings.map((b) => {
+									const src = (b.booking_source || "direct").toLowerCase();
+									const hasOtaSource = !["direct", "manual", ""].includes(src);
+									return { ...b, isExternal: false, ...(hasOtaSource ? { source: src } : {}) };
+								}),
 								...roomExternalBookings.map((b) => ({
 									...b,
 									isExternal: true,
@@ -155,15 +160,6 @@ export function RoomRow({
 								middleBooking ||
 								checkoutBooking ||
 								checkinBooking;
-
-							console.log("Rendering day:", format(day, "yyyy-MM-dd"), {
-								dayIndex,
-								allBookingsCount: allBookingsHere.length,
-								hasCheckout: !!checkoutBooking,
-								hasCheckin: !!checkinBooking,
-								hasMiddle: !!middleBooking,
-								hasSingle: !!singleBooking,
-							});
 
 							return (
 								<Tooltip key={dayIndex}>
@@ -214,9 +210,9 @@ export function RoomRow({
 																"polygon(50% 0, 100% 0, 100% 100%, 0% 100%)",
 														}}
 													/>
-													{/* External booking badge */}
-													{checkinBooking.isExternal &&
-														"source" in checkinBooking && (
+													{/* Booking source badge */}
+													{"source" in checkinBooking &&
+														checkinBooking.source && (
 															<div className="absolute top-0.5 left-1/2 ml-1 z-20">
 																<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
 																	{checkinBooking.source === "booking_com" &&
@@ -225,6 +221,8 @@ export function RoomRow({
 																	{checkinBooking.source === "expedia" && "E"}
 																	{checkinBooking.source === "beds24" && "B24"}
 																	{checkinBooking.source === "ical" && "iCal"}
+																	{!["booking_com", "airbnb", "expedia", "beds24", "ical"].includes(checkinBooking.source) &&
+																		checkinBooking.source.slice(0, 3).toUpperCase()}
 																</div>
 															</div>
 														)}
@@ -269,9 +267,9 @@ export function RoomRow({
 																{singleBooking.guest_name?.split(" ")[0]}
 															</span>
 														</div>
-														{/* External booking badge */}
-														{singleBooking.isExternal &&
-															"source" in singleBooking && (
+														{/* Booking source badge */}
+														{"source" in singleBooking &&
+															singleBooking.source && (
 																<div className="absolute top-0.5 right-1 z-20">
 																	<div className="bg-white/90 text-[8px] px-1 py-0.5 rounded font-bold text-blue-600">
 																		{singleBooking.source === "booking_com" &&
@@ -280,6 +278,8 @@ export function RoomRow({
 																		{singleBooking.source === "expedia" && "E"}
 																		{singleBooking.source === "beds24" && "B24"}
 																		{singleBooking.source === "ical" && "iCal"}
+																		{!["booking_com", "airbnb", "expedia", "beds24", "ical"].includes(singleBooking.source) &&
+																			singleBooking.source.slice(0, 3).toUpperCase()}
 																	</div>
 																</div>
 															)}
@@ -346,8 +346,8 @@ export function RoomRow({
 														{primaryBooking.status.replace("_", " ")}
 													</span>
 												</div>
-												{primaryBooking.isExternal &&
-													"source" in primaryBooking && (
+												{"source" in primaryBooking &&
+													primaryBooking.source && (
 														<div className="flex justify-between gap-4">
 															<span className="text-muted-foreground">
 																Source:

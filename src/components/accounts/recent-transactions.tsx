@@ -1,10 +1,16 @@
-import { ArrowRightLeft } from "lucide-react";
+import {
+	ArrowDownLeft,
+	ArrowRightLeft,
+	ArrowUpRight,
+	Receipt,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocationContext } from "@/context/location-context";
 import { useTenant } from "@/hooks/use-tenant";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { getCurrencySymbol } from "@/utils/currency";
 
 type Account = Tables<"accounts">;
 type AccountWithBalance = Account & { currentBalance: number };
@@ -20,73 +26,191 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 	const [transactions, setTransactions] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 
+	const accountIds = accounts.map((a) => a.id);
+
 	const fetchTransactions = useCallback(async () => {
-		// Don't fetch if no tenant or selected location
-		if (!tenant?.id || !selectedLocation) {
+		if (!tenant?.id || !selectedLocation || accountIds.length === 0) {
 			setTransactions([]);
 			setLoading(false);
 			return;
 		}
 
 		try {
-			// Only fetch account transfers (account-to-account transactions)
-			// Filter by tenant_id directly on account_transfers table
-			const transfersResponse = await supabase
-				.from("account_transfers")
-				.select(
-					"*, from_account:accounts!from_account_id(name, currency, tenant_id, location_access), to_account:accounts!to_account_id(name, currency, tenant_id, location_access)",
-				)
-				.eq("tenant_id", tenant.id)
-				.order("created_at", { ascending: false })
-				.limit(20);
+			const [
+				transfersResponse,
+				paymentsResponse,
+				incomeResponse,
+				expensesResponse,
+			] = await Promise.all([
+				supabase
+					.from("account_transfers")
+					.select(
+						"*, from_account:accounts!from_account_id(name, currency, location_access), to_account:accounts!to_account_id(name, currency, location_access)",
+					)
+					.eq("tenant_id", tenant.id)
+					.order("created_at", { ascending: false })
+					.limit(20),
+				supabase
+					.from("payments")
+					.select(
+						"id, amount, currency, created_at, payment_type, notes, account_id, reservations!inner(guest_name, reservation_number, tenant_id, location_id)",
+					)
+					.eq("reservations.tenant_id", tenant.id)
+					.eq("reservations.location_id", selectedLocation)
+					.in("account_id", accountIds)
+					.order("created_at", { ascending: false })
+					.limit(20),
+				supabase
+					.from("income")
+					.select("id, amount, currency, date, type, note, account_id")
+					.eq("tenant_id", tenant.id)
+					.eq("location_id", selectedLocation)
+					.in("account_id", accountIds)
+					.neq("type", "booking")
+					.order("date", { ascending: false })
+					.limit(20),
+				supabase
+					.from("expenses")
+					.select(
+						"id, amount, currency, date, main_type, sub_type, note, account_id",
+					)
+					.eq("tenant_id", tenant.id)
+					.eq("location_id", selectedLocation)
+					.in("account_id", accountIds)
+					.order("date", { ascending: false })
+					.limit(20),
+			]);
 
-			if (transfersResponse.error) {
-				console.error("Error fetching transfers:", transfersResponse.error);
-				setTransactions([]);
-				return;
-			}
+			const allTransactions: any[] = [];
+			const accountMap = new Map(accounts.map((a) => [a.id, a]));
 
-			// Filter account transfers to only include those where at least one account
-			// has access to the selected location
+			// Format transfers
 			const filteredTransfers = (transfersResponse.data || []).filter(
 				(transfer) => {
-					const fromAccountAccess =
+					const fromAccess =
 						transfer.from_account?.location_access || [];
-					const toAccountAccess = transfer.to_account?.location_access || [];
+					const toAccess = transfer.to_account?.location_access || [];
 					return (
-						fromAccountAccess.includes(selectedLocation) ||
-						toAccountAccess.includes(selectedLocation)
+						fromAccess.includes(selectedLocation) ||
+						toAccess.includes(selectedLocation)
 					);
 				},
 			);
+			for (const transfer of filteredTransfers) {
+				allTransactions.push({
+					id: transfer.id,
+					type: "transfer",
+					display_amount: transfer.amount,
+					currency: transfer.from_account?.currency || "LKR",
+					created_at: transfer.created_at,
+					description: `${t("accounts.transactions.transfer")} from ${transfer.from_account?.name || "Unknown"} to ${transfer.to_account?.name || "Unknown"}`,
+					note: transfer.note,
+					conversion_rate: transfer.conversion_rate,
+				});
+			}
 
-			// Format account transfer transactions
-			const formattedTransactions = filteredTransfers.map((transfer) => ({
-				...transfer,
-				type: "transfer",
-				display_amount: transfer.amount,
-				currency: transfer.from_account?.currency || "LKR",
-				description: `${t("accounts.transactions.transfer")} from ${transfer.from_account?.name || "Unknown"} to ${transfer.to_account?.name || "Unknown"}`,
-			}));
+			// Format payments
+			for (const payment of paymentsResponse.data || []) {
+				const acc = accountMap.get(payment.account_id);
+				const res = payment.reservations as any;
+				allTransactions.push({
+					id: payment.id,
+					type: "payment",
+					display_amount: payment.amount,
+					currency: payment.currency || acc?.currency || "LKR",
+					created_at: payment.created_at,
+					description: `${res?.guest_name || "Guest"} (${res?.reservation_number || "N/A"})`,
+					note: payment.notes,
+					account_name: acc?.name,
+				});
+			}
 
-			setTransactions(formattedTransactions);
+			// Format non-booking income
+			for (const inc of incomeResponse.data || []) {
+				const acc = accountMap.get(inc.account_id!);
+				allTransactions.push({
+					id: inc.id,
+					type: "income",
+					display_amount: inc.amount,
+					currency: inc.currency || acc?.currency || "LKR",
+					created_at: inc.date,
+					description: `${inc.type} income`,
+					note: inc.note,
+					account_name: acc?.name,
+				});
+			}
+
+			// Format expenses
+			for (const exp of expensesResponse.data || []) {
+				const acc = accountMap.get(exp.account_id);
+				allTransactions.push({
+					id: exp.id,
+					type: "expense",
+					display_amount: exp.amount,
+					currency: exp.currency || acc?.currency || "LKR",
+					created_at: exp.date,
+					description: `${exp.main_type} - ${exp.sub_type}`,
+					note: exp.note,
+					account_name: acc?.name,
+				});
+			}
+
+			allTransactions.sort(
+				(a, b) =>
+					new Date(b.created_at).getTime() -
+					new Date(a.created_at).getTime(),
+			);
+
+			setTransactions(allTransactions.slice(0, 30));
 		} catch (error) {
 			console.error("Error fetching transactions:", error);
 		} finally {
 			setLoading(false);
 		}
-	}, [t, tenant?.id, selectedLocation]);
+	}, [t, tenant?.id, selectedLocation, accountIds.join(",")]);
 
 	useEffect(() => {
 		fetchTransactions();
 	}, [fetchTransactions]);
 
 	const getTransactionIcon = (type: string) => {
-		return <ArrowRightLeft className="size-4 text-blue-500" />;
+		switch (type) {
+			case "payment":
+			case "income":
+				return <ArrowUpRight className="size-4 text-green-500" />;
+			case "expense":
+				return <ArrowDownLeft className="size-4 text-red-500" />;
+			case "transfer":
+				return <ArrowRightLeft className="size-4 text-blue-500" />;
+			default:
+				return <Receipt className="size-4 text-gray-500" />;
+		}
 	};
 
 	const getTransactionColor = (type: string) => {
-		return "text-blue-600";
+		switch (type) {
+			case "payment":
+			case "income":
+				return "text-green-600";
+			case "expense":
+				return "text-red-600";
+			case "transfer":
+				return "text-blue-600";
+			default:
+				return "text-foreground";
+		}
+	};
+
+	const getAmountPrefix = (type: string) => {
+		switch (type) {
+			case "payment":
+			case "income":
+				return "+";
+			case "expense":
+				return "-";
+			default:
+				return "";
+		}
 	};
 
 	if (loading) {
@@ -132,7 +256,21 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 								<div>
 									<div className="font-medium">{transaction.description}</div>
 									<div className="text-sm text-muted-foreground capitalize">
-										{t(`accounts.transactions.${transaction.type}`)}
+										{transaction.type === "payment"
+											? t("accounts.transactions.payment", {
+													defaultValue: "Payment",
+												})
+											: transaction.type === "income"
+												? t("accounts.transactions.income", {
+														defaultValue: "Income",
+													})
+												: transaction.type === "expense"
+													? t("accounts.transactions.expense", {
+															defaultValue: "Expense",
+														})
+													: t("accounts.transactions.transfer")}
+										{transaction.account_name &&
+											` · ${transaction.account_name}`}
 									</div>
 								</div>
 							</div>
@@ -140,14 +278,16 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 								<div
 									className={`font-medium ${getTransactionColor(transaction.type)}`}
 								>
-									{transaction.currency === "LKR" ? "Rs." : "$"}
-									{transaction.display_amount.toLocaleString()}
+									{getAmountPrefix(transaction.type)}
+									{getCurrencySymbol(transaction.currency)}
+									{Number(transaction.display_amount).toLocaleString()}
 								</div>
-								{transaction.conversion_rate !== 1 && (
-									<div className="text-sm text-muted-foreground">
-										Rate: {transaction.conversion_rate}
-									</div>
-								)}
+								{transaction.conversion_rate &&
+									transaction.conversion_rate !== 1 && (
+										<div className="text-sm text-muted-foreground">
+											Rate: {transaction.conversion_rate}
+										</div>
+									)}
 							</div>
 						</div>
 						<div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -158,9 +298,9 @@ export function RecentTransactions({ accounts }: RecentTransactionsProps) {
 									minute: "2-digit",
 								})}
 							</span>
-							{(transaction.note || transaction.description_text) && (
+							{transaction.note && (
 								<span className="truncate ml-4 max-w-48">
-									{transaction.note || transaction.description_text}
+									{transaction.note}
 								</span>
 							)}
 						</div>

@@ -28,6 +28,7 @@ interface IDPhotoUploadProps {
 	title?: string;
 	maxPhotos?: number;
 	className?: string;
+	uploadPathPrefix?: string;
 }
 
 const ID_TYPES = [
@@ -43,6 +44,7 @@ export const IDPhotoUpload = ({
 	title = "ID Documents",
 	maxPhotos = 3,
 	className,
+	uploadPathPrefix,
 }: IDPhotoUploadProps) => {
 	const { toast } = useToast();
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -91,10 +93,11 @@ export const IDPhotoUpload = ({
 				setUploadProgress((prev) => ({ ...prev, [fileId]: 0 }));
 
 				try {
-					// Create file path
 					const fileExt = file.name.split(".").pop();
 					const fileName = `id-${selectedIDType}-${Math.random()}.${fileExt}`;
-					const filePath = `reservation-documents/id-photos/${fileName}`;
+					const filePath = uploadPathPrefix
+						? `${uploadPathPrefix}/${fileName}`
+						: `reservation-documents/id-photos/${fileName}`;
 
 					// Upload file with simulated progress
 					const progressInterval = setInterval(() => {

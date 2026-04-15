@@ -1564,6 +1564,69 @@ export type Database = {
 					},
 				];
 			};
+			location_notification_contacts: {
+				Row: {
+					category: string;
+					created_at: string | null;
+					id: string;
+					is_active: boolean | null;
+					location_id: string;
+					name: string;
+					notify_on_check_in: boolean | null;
+					notify_on_check_out: boolean | null;
+					notify_on_payment: boolean | null;
+					notify_on_reservation: boolean | null;
+					phone: string;
+					tenant_id: string;
+					updated_at: string | null;
+				};
+				Insert: {
+					category?: string;
+					created_at?: string | null;
+					id?: string;
+					is_active?: boolean | null;
+					location_id: string;
+					name: string;
+					notify_on_check_in?: boolean | null;
+					notify_on_check_out?: boolean | null;
+					notify_on_payment?: boolean | null;
+					notify_on_reservation?: boolean | null;
+					phone: string;
+					tenant_id: string;
+					updated_at?: string | null;
+				};
+				Update: {
+					category?: string;
+					created_at?: string | null;
+					id?: string;
+					is_active?: boolean | null;
+					location_id?: string;
+					name?: string;
+					notify_on_check_in?: boolean | null;
+					notify_on_check_out?: boolean | null;
+					notify_on_payment?: boolean | null;
+					notify_on_reservation?: boolean | null;
+					phone?: string;
+					tenant_id?: string;
+					updated_at?: string | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "location_notification_contacts_location_id_fkey";
+						columns: ["location_id"];
+						isOneToOne: false;
+						referencedRelation: "locations";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "location_notification_contacts_tenant_id_fkey";
+						columns: ["tenant_id"];
+						isOneToOne: false;
+						referencedRelation: "tenants";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			locations: {
 				Row: {
 					address: string | null;
@@ -2268,10 +2331,13 @@ export type Database = {
 					guest_address: string | null;
 					guest_email: string | null;
 					guest_id_number: string | null;
+					guest_id_photos: Json | null;
 					guest_name: string;
 					guest_nationality: string | null;
 					guest_passport_number: string | null;
 					guest_phone: string | null;
+					guest_privacy_accepted_at: string | null;
+					guest_share_token: string | null;
 					guide_commission: number | null;
 					guide_id: string | null;
 					id: string;
@@ -2325,10 +2391,13 @@ export type Database = {
 					guest_address?: string | null;
 					guest_email?: string | null;
 					guest_id_number?: string | null;
+					guest_id_photos?: Json | null;
 					guest_name: string;
 					guest_nationality?: string | null;
 					guest_passport_number?: string | null;
 					guest_phone?: string | null;
+					guest_privacy_accepted_at?: string | null;
+					guest_share_token?: string | null;
 					guide_commission?: number | null;
 					guide_id?: string | null;
 					id?: string;
@@ -2382,10 +2451,13 @@ export type Database = {
 					guest_address?: string | null;
 					guest_email?: string | null;
 					guest_id_number?: string | null;
+					guest_id_photos?: Json | null;
 					guest_name?: string;
 					guest_nationality?: string | null;
 					guest_passport_number?: string | null;
 					guest_phone?: string | null;
+					guest_privacy_accepted_at?: string | null;
+					guest_share_token?: string | null;
 					guide_commission?: number | null;
 					guide_id?: string | null;
 					id?: string;
@@ -3062,6 +3134,10 @@ export type Database = {
 						Returns: boolean;
 				  }
 				| { Args: { p_token: string }; Returns: Json };
+			admin_reset_user_password: {
+				Args: { new_password: string; target_user_id: string };
+				Returns: Json;
+			};
 			check_account_transactions: {
 				Args: { account_id: string; tenant_id: string };
 				Returns: Json;
@@ -3119,12 +3195,12 @@ export type Database = {
 			};
 			generate_payment_number: { Args: never; Returns: string };
 			generate_reservation_number:
+				| { Args: never; Returns: string }
+				| { Args: { p_tenant_id: string }; Returns: string }
 				| {
 						Args: { p_location_id: string; p_tenant_id: string };
 						Returns: string;
-				  }
-				| { Args: never; Returns: string }
-				| { Args: { p_tenant_id: string }; Returns: string };
+				  };
 			generate_tenant_slug: { Args: { hotel_name: string }; Returns: string };
 			generate_unique_tenant_slug: {
 				Args: { p_name: string };

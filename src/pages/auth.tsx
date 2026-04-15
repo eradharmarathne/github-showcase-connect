@@ -271,7 +271,7 @@ export default function Auth() {
 				className="hidden sm:flex lg:h-screen flex-1 sm:overflow-hidden"
 				aria-label="Product showcase"
 			>
-				<div className="flex size-full items-center justify-center bg-linear-to-br from-blue-400 to-blue-600 p-4 sm:p-8 lg:p-16 dark:from-blue-600 dark:to-blue-500">
+				<div className="flex size-full items-center justify-center bg-linear-to-br from-red-700 to-red-950 p-4 sm:p-8 lg:p-16 dark:from-red-800 dark:to-red-950">
 					<div>
 						<h2 className="max-w-lg capitalize text-lg md:text-xl lg:text-2xl font-semibold leading-9 text-white dark:text-white">
 							Welcome to Checking &amp; Checkout
@@ -363,11 +363,11 @@ export default function Auth() {
 							</div>
 						</div>
 
-						<Button
-							type="submit"
-							className="w-full  cursor-pointer"
-							disabled={submitting}
-						>
+					<Button
+						type="submit"
+						className="w-full cursor-pointer bg-red-700 hover:bg-red-800 dark:bg-red-600 dark:hover:bg-red-700"
+						disabled={submitting}
+					>
 							{submitting ? (
 								<div className="flex items-center justify-center">
 									<div className="animate-spin rounded-full size-4 border-2 border-transparent border-t-current"></div>
@@ -431,7 +431,7 @@ export default function Auth() {
 							size="sm"
 							onClick={fillDemoCredentials}
 							disabled={submitting}
-							className="w-full  cursor-pointer border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/50"
+							className="w-full cursor-pointer border-red-400 text-red-800 hover:bg-red-50 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-900/50"
 						>
 							Try Demo Account
 						</Button>

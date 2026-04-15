@@ -45,6 +45,8 @@ export function InviteMemberDialog({
 		defaultInvitePermissions,
 	);
 	const [inviteLoading, setInviteLoading] = useState(false);
+	const [useCustomPassword, setUseCustomPassword] = useState(false);
+	const [customPassword, setCustomPassword] = useState("");
 
 	const handleInviteMember = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -92,6 +94,9 @@ export function InviteMemberDialog({
 					access_settings: invitePermissions.access_settings,
 					access_booking_channels: invitePermissions.access_booking_channels,
 				},
+				...(useCustomPassword && customPassword.trim()
+					? { password: customPassword.trim() }
+					: {}),
 			});
 
 			if (!result.success) {
@@ -111,6 +116,8 @@ export function InviteMemberDialog({
 			setInviteEmail("");
 			setInviteLocationId("");
 			setInvitePermissions(defaultInvitePermissions);
+			setUseCustomPassword(false);
+			setCustomPassword("");
 			onOpenChange(false);
 			onInviteSuccess();
 		} catch (error: any) {
@@ -182,6 +189,41 @@ export function InviteMemberDialog({
 								))}
 							</SelectContent>
 						</Select>
+					</div>
+
+					{/* Custom Password Section */}
+					<div className="space-y-2">
+						<div className="flex items-center space-x-2">
+							<Checkbox
+								id="useCustomPassword"
+								checked={useCustomPassword}
+								onCheckedChange={(checked) => {
+									setUseCustomPassword(!!checked);
+									if (!checked) setCustomPassword("");
+								}}
+							/>
+							<Label
+								htmlFor="useCustomPassword"
+								className="text-sm font-normal"
+							>
+								Set custom password
+							</Label>
+						</div>
+						{useCustomPassword && (
+							<Input
+								id="customPassword"
+								type="text"
+								placeholder="Enter password for user"
+								value={customPassword}
+								onChange={(e) => setCustomPassword(e.target.value)}
+								minLength={6}
+							/>
+						)}
+						<p className="text-xs text-muted-foreground">
+							{useCustomPassword
+								? "This password will be sent to the user via email"
+								: "A secure random password will be auto-generated and emailed"}
+						</p>
 					</div>
 
 					{/* Permissions Section */}

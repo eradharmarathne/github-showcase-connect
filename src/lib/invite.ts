@@ -22,6 +22,7 @@ export interface AddUserToLocationParams {
 	locationId: string;
 	addedBy: string;
 	permissions: LocationPermissions;
+	password?: string;
 }
 
 export interface AddUserToLocationResult {
@@ -154,7 +155,7 @@ export const addUserToLocation = async (
 			} else {
 				// User doesn't exist at all - create new user account
 
-				password = generateSecurePassword();
+				password = params.password || generateSecurePassword();
 
 				// Create auth user using admin client (auth operations require admin)
 				const { data: authData, error: authCreateError } =

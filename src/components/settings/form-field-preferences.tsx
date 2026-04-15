@@ -1,13 +1,89 @@
-import { Edit } from "lucide-react";
+import { Bell, Edit, ExternalLink } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { useFormFieldPreferences } from "@/hooks/use-form-field-preferences";
+import { useTenant } from "@/hooks/use-tenant";
+import { supabase } from "@/integrations/supabase/client";
+
+interface LocationContactSummary {
+	location_id: string;
+	location_name: string;
+	active_contacts: number;
+	reservation_contacts: number;
+}
+
+function useSmsNotificationSummary(tenantId: string | undefined) {
+	const [summaries, setSummaries] = useState<LocationContactSummary[]>([]);
+	const [loading, setLoading] = useState(true);
+
+	const fetch = useCallback(async () => {
+		if (!tenantId) return;
+		try {
+			const { data: locations } = await supabase
+				.from("locations")
+				.select("id, name")
+				.eq("tenant_id", tenantId)
+				.eq("is_active", true)
+				.order("name");
+
+			if (!locations?.length) {
+				setSummaries([]);
+				return;
+			}
+
+			const { data: contacts } = await (supabase as any)
+				.from("location_notification_contacts")
+				.select("location_id, is_active, notify_on_reservation")
+				.eq("tenant_id", tenantId);
+
+			const contactList = (contacts ?? []) as Array<{
+				location_id: string;
+				is_active: boolean;
+				notify_on_reservation: boolean;
+			}>;
+
+			setSummaries(
+				locations.map((loc) => {
+					const locContacts = contactList.filter(
+						(c) => c.location_id === loc.id,
+					);
+					return {
+						location_id: loc.id,
+						location_name: loc.name,
+						active_contacts: locContacts.filter((c) => c.is_active).length,
+						reservation_contacts: locContacts.filter(
+							(c) => c.is_active && c.notify_on_reservation,
+						).length,
+					};
+				}),
+			);
+		} catch (error) {
+			console.error("Error fetching SMS notification summary:", error);
+		} finally {
+			setLoading(false);
+		}
+	}, [tenantId]);
+
+	useEffect(() => {
+		fetch();
+	}, [fetch]);
+
+	return { summaries, loading };
+}
 
 export function FormFieldPreferences() {
+	const { tenant } = useTenant();
 	const {
 		preferences: formPreferences,
 		updatePreferences: updateFormPreferences,
 		loading: formPreferencesLoading,
 	} = useFormFieldPreferences();
+	const { summaries, loading: summaryLoading } = useSmsNotificationSummary(
+		tenant?.id,
+	);
+
+	const smsEnabled = (formPreferences as any)?.sms_on_new_reservation ?? true;
 
 	return (
 		<Card>
@@ -341,6 +417,85 @@ export function FormFieldPreferences() {
 								Check-in/Check-out dates, and Room Rate are always visible and
 								cannot be hidden.
 							</p>
+						</div>
+
+						{/* SMS Notification Settings */}
+						<div className="mt-8 border-t pt-6">
+							<h3 className="font-medium text-base flex items-center gap-2 mb-4">
+								<Bell className="h-5 w-5" />
+								SMS Notification Settings
+							</h3>
+
+							<div className="space-y-4">
+								<div className="flex items-center justify-between p-4 border rounded-lg">
+									<div>
+										<p className="font-medium text-sm">
+											Send SMS on New Reservation
+										</p>
+										<p className="text-xs text-muted-foreground mt-1">
+											When enabled, SMS notifications are sent to configured
+											contacts when a new reservation is created.
+										</p>
+									</div>
+									<Switch
+										checked={smsEnabled}
+										onCheckedChange={(checked) =>
+											updateFormPreferences({
+												sms_on_new_reservation: checked,
+											} as any)
+										}
+									/>
+								</div>
+
+								{summaryLoading ? (
+									<div className="text-sm text-muted-foreground">
+										Loading contact summary...
+									</div>
+								) : summaries.length > 0 ? (
+									<div className="space-y-2">
+										<p className="text-sm font-medium">
+											Notification Contacts per Location
+										</p>
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+											{summaries.map((s) => (
+												<div
+													key={s.location_id}
+													className="flex items-center justify-between p-3 border rounded-lg text-sm"
+												>
+													<span className="font-medium">
+														{s.location_name}
+													</span>
+													<span className="text-muted-foreground">
+														{s.reservation_contacts > 0 ? (
+															<span className="text-green-600">
+																{s.reservation_contacts} contact
+																{s.reservation_contacts !== 1 ? "s" : ""} for
+																reservations
+															</span>
+														) : (
+															<span className="text-amber-600">
+																No reservation contacts
+															</span>
+														)}
+													</span>
+												</div>
+											))}
+										</div>
+										<p className="text-xs text-muted-foreground flex items-center gap-1 mt-2">
+											<ExternalLink className="h-3 w-3" />
+											Manage contacts in Location Management settings above.
+										</p>
+									</div>
+								) : (
+									<div className="p-3 bg-amber-50 rounded-lg">
+										<p className="text-sm text-amber-800">
+											No locations configured. Add locations and notification
+											contacts in Location Management to enable SMS
+											notifications.
+										</p>
+									</div>
+								)}
+							</div>
 						</div>
 					</div>
 				)}

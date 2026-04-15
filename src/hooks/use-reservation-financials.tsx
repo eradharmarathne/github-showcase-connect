@@ -9,13 +9,21 @@ export interface ReservationFinancial {
 	id: string;
 	reservation_number: string;
 	guest_name: string;
+	guest_email?: string | null;
+	guest_phone?: string | null;
+	guest_nationality?: string | null;
+	guest_passport_number?: string | null;
+	guest_id_number?: string | null;
+	guest_address?: string | null;
+	guest_id_photos?: any;
+	booking_source?: string | null;
+	special_requests?: string | null;
 	status: string;
 	currency: string;
 	room_amount_usd: number;
 	expenses_usd: number;
 	user_paid_amount_usd: number;
 	needs_to_pay_usd: number;
-	// Additional fields for compatibility
 	rooms?: { room_number: string; room_type: string } | null;
 	locations?: { name: string } | null;
 	check_in_date: string;
@@ -25,6 +33,8 @@ export interface ReservationFinancial {
 	total_amount: number;
 	paid_amount: number | null;
 	balance_amount: number | null;
+	adults?: number;
+	children?: number;
 }
 
 export const useReservationFinancials = () => {
@@ -148,26 +158,37 @@ export const useReservationFinancials = () => {
 					);
 					const needsToPayUsd = roomAmountUsd + expensesUsd - paidAmountUsd;
 
-					return {
-						id: reservation.id,
-						reservation_number: reservation.reservation_number,
-						guest_name: reservation.guest_name,
-						status: reservation.status,
-						currency: reservation.currency,
-						room_amount_usd: Math.round(roomAmountUsd * 100) / 100,
-						expenses_usd: Math.round(expensesUsd * 100) / 100,
-						user_paid_amount_usd: Math.round(paidAmountUsd * 100) / 100,
-						needs_to_pay_usd: Math.round(needsToPayUsd * 100) / 100,
-						rooms: reservation.rooms,
-						locations: reservation.locations,
-						check_in_date: reservation.check_in_date,
-						check_out_date: reservation.check_out_date,
-						nights: reservation.nights,
-						room_rate: reservation.room_rate,
-						total_amount: reservation.total_amount,
-						paid_amount: reservation.paid_amount,
-						balance_amount: reservation.balance_amount,
-					};
+				return {
+					id: reservation.id,
+					reservation_number: reservation.reservation_number,
+					guest_name: reservation.guest_name,
+					guest_email: reservation.guest_email,
+					guest_phone: reservation.guest_phone,
+					guest_nationality: reservation.guest_nationality,
+					guest_passport_number: reservation.guest_passport_number,
+					guest_id_number: reservation.guest_id_number,
+					guest_address: reservation.guest_address,
+					guest_id_photos: reservation.guest_id_photos,
+					booking_source: reservation.booking_source || reservation.source_channel || "direct",
+					special_requests: reservation.special_requests,
+					status: reservation.status,
+					currency: reservation.currency,
+					room_amount_usd: Math.round(roomAmountUsd * 100) / 100,
+					expenses_usd: Math.round(expensesUsd * 100) / 100,
+					user_paid_amount_usd: Math.round(paidAmountUsd * 100) / 100,
+					needs_to_pay_usd: Math.round(needsToPayUsd * 100) / 100,
+					rooms: reservation.rooms,
+					locations: reservation.locations,
+					check_in_date: reservation.check_in_date,
+					check_out_date: reservation.check_out_date,
+					nights: reservation.nights,
+					room_rate: reservation.room_rate,
+					total_amount: reservation.total_amount,
+					paid_amount: reservation.paid_amount,
+					balance_amount: reservation.balance_amount,
+					adults: reservation.adults || 0,
+					children: reservation.children || 0,
+				};
 				}) || [],
 			);
 

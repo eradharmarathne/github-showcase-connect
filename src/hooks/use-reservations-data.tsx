@@ -14,7 +14,9 @@ export type ReservationWithJoins = {
 	guest_phone?: string | null;
 	guest_address?: string | null;
 	guest_id_number?: string | null;
+	guest_passport_number?: string | null;
 	guest_nationality?: string | null;
+	guest_id_photos?: any;
 	adults: number;
 	children: number;
 	check_in_date: string;
@@ -166,7 +168,9 @@ export function useReservationsData() {
 						: booking.guest_phone,
 					guest_address: booking.guest_address,
 					guest_id_number: booking.guest_id_number,
+					guest_passport_number: booking.guest_passport_number,
 					guest_nationality: booking.guest_nationality,
+					guest_id_photos: booking.guest_id_photos,
 					adults: booking.adults || 0,
 					children: booking.children || 0,
 					check_in_date: checkInDate,

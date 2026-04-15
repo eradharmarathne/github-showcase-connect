@@ -31,6 +31,7 @@ type Reservation = {
 	adults: number;
 	children: number | null;
 	reservation_number: string;
+	booking_source: string | null;
 };
 
 export type ExternalBooking = {
@@ -124,7 +125,7 @@ export function TimelineView({
 			const { data, error } = await supabase
 				.from("reservations")
 				.select(
-					"id, room_id, guest_name, check_in_date, check_out_date, status, total_amount, currency, adults, children, reservation_number",
+					"id, room_id, guest_name, check_in_date, check_out_date, status, total_amount, currency, adults, children, reservation_number, booking_source, is_external",
 				)
 				.eq("tenant_id", tenant.id)
 				.eq("location_id", selectedLocation)
@@ -134,7 +135,7 @@ export function TimelineView({
 				.order("check_in_date", { ascending: true });
 
 			if (error) throw error;
-			return data || [];
+			return (data || []).filter((r) => !r.is_external);
 		},
 		enabled: !!selectedLocation && !!tenant?.id,
 		staleTime: 30000, // Cache for 30 seconds
@@ -259,9 +260,23 @@ export function TimelineView({
 
 	// Apply filters to reservations
 	const filteredReservations = reservations.filter((reservation) => {
-		// Source filter - hide direct bookings if disabled
-		if (sourceFilters && !sourceFilters.direct) {
-			return false;
+		if (sourceFilters) {
+			const src = (reservation.booking_source || "direct").toLowerCase();
+			if (
+				(src === "direct" || src === "manual" || src === "") &&
+				!sourceFilters.direct
+			)
+				return false;
+			if (src === "booking_com" && !sourceFilters.booking_com) return false;
+			if (src === "airbnb" && !sourceFilters.airbnb) return false;
+			if (src === "expedia" && !sourceFilters.expedia) return false;
+			if (src === "beds24" && !sourceFilters.beds24) return false;
+			if (src === "ical" && !sourceFilters.ical) return false;
+			if (
+				!["direct", "manual", "", "booking_com", "airbnb", "expedia", "beds24", "ical"].includes(src) &&
+				!sourceFilters.other
+			)
+				return false;
 		}
 
 		// Search filter

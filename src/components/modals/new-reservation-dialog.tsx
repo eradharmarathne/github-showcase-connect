@@ -408,6 +408,40 @@ export function NewReservationDialog({
 				}
 			}
 
+			// Send SMS notification to location contacts (fire and forget)
+			if (createdReservations) {
+				for (const reservation of createdReservations) {
+					const room = rooms.find((r) => r.id === reservation.room_id);
+					supabase.functions
+						.invoke("send-sms-notification", {
+							body: {
+								type: "reservation",
+								locationId: selectedLocation,
+								guestName: reservation.guest_name,
+								reservationNumber: reservation.reservation_number,
+								roomNumber: room?.room_number || "N/A",
+								checkIn: reservation.check_in_date,
+								checkOut: reservation.check_out_date,
+								amount: reservation.total_amount,
+								currency: reservation.currency,
+								status: "NEW",
+							},
+						})
+						.then((result) => {
+							if (result.error) {
+								console.error(
+									`SMS notification failed for ${reservation.reservation_number}:`,
+									result.error,
+								);
+							} else {
+								console.log(
+									`SMS notification sent for ${reservation.reservation_number}`,
+								);
+							}
+						});
+				}
+			}
+
 			const reservationNumbersDisplay = reservations
 				.map((r) => r.reservation_number)
 				.join(", ");

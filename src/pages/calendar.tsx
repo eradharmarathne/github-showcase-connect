@@ -1,13 +1,16 @@
 import { addMonths, format, startOfMonth, subMonths } from "date-fns";
 import {
 	Calendar as CalendarIcon,
+	CalendarDays,
 	ChevronLeft,
 	ChevronRight,
 	Filter,
+	LayoutList,
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
+import { CalendarGridView } from "@/components/calendar/calendar-grid-view";
 import { TimelineView } from "@/components/calendar/timeline-view";
 import { NewReservationDialog } from "@/components/modals";
 import { PermissionRoute } from "@/components/routing/permission-route";
@@ -36,6 +39,7 @@ export default function Calendar() {
 	const [showBeds24, setShowBeds24] = useState(true);
 	const [showIcal, setShowIcal] = useState(true);
 	const [showOther, setShowOther] = useState(true);
+	const [viewMode, setViewMode] = useState<"timeline" | "grid">("timeline");
 	const [isNewReservationDialogOpen, setIsNewReservationDialogOpen] =
 		useState(false);
 
@@ -103,6 +107,34 @@ export default function Calendar() {
 							{format(startOfMonth(currentDate), "MMMM yyyy")}
 						</h2>
 
+						{/* View Mode Toggle */}
+						<div className="flex items-center rounded-lg border bg-slate-100 p-0.5">
+							<button
+								type="button"
+								onClick={() => setViewMode("timeline")}
+								className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+									viewMode === "timeline"
+										? "bg-white text-slate-900 shadow-sm"
+										: "text-slate-500 hover:text-slate-700"
+								}`}
+							>
+								<LayoutList className="size-3.5" />
+								<span className="hidden sm:inline">Timeline</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => setViewMode("grid")}
+								className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+									viewMode === "grid"
+										? "bg-white text-slate-900 shadow-sm"
+										: "text-slate-500 hover:text-slate-700"
+								}`}
+							>
+								<CalendarDays className="size-3.5" />
+								<span className="hidden sm:inline">Grid</span>
+							</button>
+						</div>
+
 						{/* Booking Source Filter */}
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
@@ -168,26 +200,48 @@ export default function Calendar() {
 					</Button>
 				</div>
 
-				{/* Channel Manager Timeline View */}
-				<TimelineView
-					currentDate={currentDate}
-					searchTerm=""
-					statusFilter="all"
-					roomFilter="all"
-					sourceFilters={{
-						direct: showDirectBookings,
-						booking_com: showBookingCom,
-						airbnb: showAirbnb,
-						expedia: showExpedia,
-						beds24: showBeds24,
-						ical: showIcal,
-						other: showOther,
-					}}
-					onBookingClick={handleBookingClick}
-					onQuickBook={handleQuickBook}
-					getStatusColor={getStatusColor}
-					getCurrencySymbol={getCurrencySymbol}
-				/>
+				{/* Calendar View */}
+				{viewMode === "timeline" ? (
+					<TimelineView
+						currentDate={currentDate}
+						searchTerm=""
+						statusFilter="all"
+						roomFilter="all"
+						sourceFilters={{
+							direct: showDirectBookings,
+							booking_com: showBookingCom,
+							airbnb: showAirbnb,
+							expedia: showExpedia,
+							beds24: showBeds24,
+							ical: showIcal,
+							other: showOther,
+						}}
+						onBookingClick={handleBookingClick}
+						onQuickBook={handleQuickBook}
+						getStatusColor={getStatusColor}
+						getCurrencySymbol={getCurrencySymbol}
+					/>
+				) : (
+					<CalendarGridView
+						currentDate={currentDate}
+						searchTerm=""
+						statusFilter="all"
+						roomFilter="all"
+						sourceFilters={{
+							direct: showDirectBookings,
+							booking_com: showBookingCom,
+							airbnb: showAirbnb,
+							expedia: showExpedia,
+							beds24: showBeds24,
+							ical: showIcal,
+							other: showOther,
+						}}
+						onBookingClick={handleBookingClick}
+						onQuickBook={handleQuickBook}
+						getStatusColor={getStatusColor}
+						getCurrencySymbol={getCurrencySymbol}
+					/>
+				)}
 			</div>
 
 			{/* New Reservation Dialog */}

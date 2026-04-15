@@ -2,6 +2,7 @@ import {
 	CheckCircle,
 	CreditCard,
 	DollarSign,
+	Download,
 	Edit,
 	Eye,
 	MoreHorizontal,
@@ -69,9 +70,10 @@ interface ReservationActionsProps {
 	onPayment?: () => void;
 	onAddIncome?: () => void;
 	onPrint?: () => void;
+	onDownloadPdf?: () => void;
 	canShowPayment: boolean;
 	isMobile?: boolean;
-	showPaymentAndIncome?: boolean; // New prop to control visibility
+	showPaymentAndIncome?: boolean;
 }
 
 export function ReservationActions({
@@ -81,69 +83,75 @@ export function ReservationActions({
 	onPayment,
 	onAddIncome,
 	onPrint,
+	onDownloadPdf,
 	canShowPayment,
 	isMobile = false,
 	showPaymentAndIncome = true,
 }: ReservationActionsProps) {
-	// Disable income and payment actions when reservation is checked out (complete)
-	const isReservationComplete =
-		reservation.status === "checked_out" || reservation.status === "confirmed";
+	const isReservationComplete = reservation.status === "checked_out";
 
 	if (isMobile) {
 		return (
-			<div className="flex gap-2 mt-4">
-				<Button variant="outline" size="sm" className="flex-1" onClick={onView}>
-					<Eye className="size-4 mr-1" />
-					View
-				</Button>
-				{onPrint && (
-					<Button variant="outline" size="sm" onClick={onPrint}>
-						<Printer className="size-4" />
-					</Button>
-				)}
+			<div className="space-y-2 mt-4">
+				{/* Payment row - full width prominent button */}
 				{showPaymentAndIncome &&
 					(isReservationComplete ? (
-						<Button
-							variant="outline"
-							size="sm"
-							className="text-green-600 cursor-not-allowed"
-							disabled
-						>
-							<CheckCircle className="size-4 mr-1" />
-							<span className="hidden sm:block">Reservation Completed</span>
-						</Button>
+						<div className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-green-50 border border-green-200 text-green-600">
+							<CheckCircle className="size-4" />
+							<span className="text-sm font-medium">Reservation Completed</span>
+						</div>
 					) : (
-						<>
+						<div className="flex gap-2">
+							{canShowPayment && onPayment && (
+								<Button
+									variant="default"
+									size="default"
+									onClick={onPayment}
+									className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-10"
+								>
+									<CreditCard className="size-4 mr-2" />
+									Pay Now
+								</Button>
+							)}
 							{onAddIncome && (
 								<Button
 									variant="outline"
-									size="sm"
+									size="default"
 									onClick={onAddIncome}
-									className="text-blue-600 hover:text-blue-700"
+									className="flex-1 border-blue-300 text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-medium h-10"
 								>
-									<DollarSign className="size-4" />
+									<DollarSign className="size-4 mr-2" />
+									Add Income
 								</Button>
 							)}
-							{canShowPayment && onPayment && (
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={onPayment}
-									className="text-green-600 hover:text-green-700"
-								>
-									<CreditCard className="size-4" />
-								</Button>
-							)}
-						</>
-					))}{" "}
-				<OTPVerification
-					onVerified={onEdit}
-					triggerComponent={
-						<Button variant="outline" size="sm">
-							<Edit className="size-4" />
+						</div>
+					))}
+
+				{/* Action buttons row */}
+				<div className="flex gap-2">
+					<Button variant="outline" size="sm" className="flex-1" onClick={onView}>
+						<Eye className="size-4 mr-1" />
+						View
+					</Button>
+					{onPrint && (
+						<Button variant="outline" size="sm" onClick={onPrint}>
+							<Printer className="size-4" />
 						</Button>
-					}
-				/>
+					)}
+					{onDownloadPdf && (
+						<Button variant="outline" size="sm" onClick={onDownloadPdf} className="text-blue-600 hover:text-blue-700">
+							<Download className="size-4" />
+						</Button>
+					)}
+					<OTPVerification
+						onVerified={onEdit}
+						triggerComponent={
+							<Button variant="outline" size="sm">
+								<Edit className="size-4" />
+							</Button>
+						}
+					/>
+				</div>
 			</div>
 		);
 	}
@@ -155,7 +163,7 @@ export function ReservationActions({
 					<MoreHorizontal className="size-4" />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-48">
+			<DropdownMenuContent align="end" className="w-52">
 				<DropdownMenuItem onClick={onView}>
 					<Eye className="size-4 mr-2" />
 					View Details
@@ -166,9 +174,33 @@ export function ReservationActions({
 						Print Reservation
 					</DropdownMenuItem>
 				)}
+				{onDownloadPdf && (
+					<DropdownMenuItem onClick={onDownloadPdf}>
+						<Download className="size-4 mr-2" />
+						Download PDF
+					</DropdownMenuItem>
+				)}
+
 				{showPaymentAndIncome && (
 					<>
 						<DropdownMenuSeparator />
+						{canShowPayment && (
+							<DropdownMenuItem
+								onClick={isReservationComplete ? undefined : onPayment}
+								className={
+									isReservationComplete
+										? "text-gray-400 cursor-not-allowed"
+										: "text-emerald-600 font-semibold"
+								}
+								disabled={isReservationComplete}
+							>
+								<CreditCard className="size-4 mr-2" />
+								Pay Now
+								{isReservationComplete && (
+									<span className="text-xs ml-2">(Complete)</span>
+								)}
+							</DropdownMenuItem>
+						)}
 						<DropdownMenuItem
 							onClick={isReservationComplete ? undefined : onAddIncome}
 							className={
@@ -184,23 +216,6 @@ export function ReservationActions({
 								<span className="text-xs ml-2">(Complete)</span>
 							)}
 						</DropdownMenuItem>
-						{canShowPayment && (
-							<DropdownMenuItem
-								onClick={isReservationComplete ? undefined : onPayment}
-								className={
-									isReservationComplete
-										? "text-gray-400 cursor-not-allowed"
-										: "text-green-600"
-								}
-								disabled={isReservationComplete}
-							>
-								<CreditCard className="size-4 mr-2" />
-								Pay Now
-								{isReservationComplete && (
-									<span className="text-xs ml-2">(Complete)</span>
-								)}
-							</DropdownMenuItem>
-						)}
 					</>
 				)}
 				<DropdownMenuSeparator />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Eye, EyeOff, KeyRound, Loader2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { usePermissions } from "@/hooks/use-permissions";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,10 +38,15 @@ export function EditUserDialog({
 }: EditUserDialogProps) {
 	const { hasPermission } = usePermissions();
 	const [editingUser, setEditingUser] = useState<User | null>(user);
+	const [newPassword, setNewPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
+	const [passwordLoading, setPasswordLoading] = useState(false);
+	const [sendCredentials, setSendCredentials] = useState(true);
 
-	// Update editing user when user prop changes
 	useEffect(() => {
 		setEditingUser(user ? { ...user } : null);
+		setNewPassword("");
+		setShowPassword(false);
 	}, [user]);
 
 	const updateEditUserPermission = (
@@ -59,6 +66,70 @@ export function EditUserDialog({
 				},
 			},
 		});
+	};
+
+	const handleResetPassword = async () => {
+		if (!editingUser || !newPassword.trim()) return;
+
+		if (newPassword.trim().length < 6) {
+			toast({
+				title: "Password Too Short",
+				description: "Password must be at least 6 characters",
+				variant: "destructive",
+			});
+			return;
+		}
+
+		setPasswordLoading(true);
+		try {
+			const { data, error } = await supabase.rpc(
+				"admin_reset_user_password",
+				{
+					target_user_id: editingUser.id,
+					new_password: newPassword.trim(),
+				},
+			);
+
+			if (error) throw error;
+			if (data && !data.success) {
+				throw new Error(data.error || "Failed to reset password");
+			}
+
+			if (sendCredentials) {
+				try {
+					await supabase.functions.invoke("send-user-credentials", {
+						body: {
+							to: editingUser.email,
+							email: editingUser.email,
+							password: newPassword.trim(),
+							loginUrl: `${window.location.origin}/auth`,
+							organizationName: "CheckingCheckout",
+							emailType: "new_user_credentials",
+						},
+					});
+				} catch (emailErr) {
+					console.error("Failed to send credentials email:", emailErr);
+				}
+			}
+
+			toast({
+				title: "Password Updated",
+				description: sendCredentials
+					? `New password set and emailed to ${editingUser.email}`
+					: `Password updated for ${editingUser.email}`,
+			});
+			setNewPassword("");
+			setShowPassword(false);
+		} catch (error: any) {
+			console.error("Error resetting password:", error);
+			toast({
+				title: "Error",
+				description: error.message || "Failed to reset password",
+				variant: "destructive",
+			});
+		} finally {
+			setPasswordLoading(false);
+		}
 	};
 
 	const handleSaveEditUser = async () => {
@@ -211,6 +282,70 @@ export function EditUserDialog({
 								</Card>
 							))}
 						</div>
+
+						<Separator />
+
+						<div className="space-y-3">
+							<Label className="text-base font-semibold flex items-center gap-2">
+								<KeyRound className="h-4 w-4" />
+								Reset Password
+							</Label>
+							<div className="flex gap-2">
+								<div className="relative flex-1">
+									<Input
+										type={showPassword ? "text" : "password"}
+										placeholder="Enter new password"
+										value={newPassword}
+										onChange={(e) => setNewPassword(e.target.value)}
+										className="pr-10"
+									/>
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon"
+										className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+										onClick={() => setShowPassword(!showPassword)}
+									>
+										{showPassword ? (
+											<EyeOff className="h-4 w-4 text-muted-foreground" />
+										) : (
+											<Eye className="h-4 w-4 text-muted-foreground" />
+										)}
+									</Button>
+								</div>
+								<Button
+									type="button"
+									variant="secondary"
+									disabled={!newPassword.trim() || passwordLoading}
+									onClick={handleResetPassword}
+								>
+									{passwordLoading ? (
+										<Loader2 className="h-4 w-4 animate-spin mr-2" />
+									) : (
+										<KeyRound className="h-4 w-4 mr-2" />
+									)}
+									Update
+								</Button>
+							</div>
+							<div className="flex items-center space-x-2">
+								<Checkbox
+									id="send-credentials"
+									checked={sendCredentials}
+									onCheckedChange={(checked) =>
+										setSendCredentials(checked as boolean)
+									}
+								/>
+								<Label
+									htmlFor="send-credentials"
+									className="text-sm font-normal flex items-center gap-1.5"
+								>
+									<Send className="h-3 w-3" />
+									Email new credentials to user
+								</Label>
+							</div>
+						</div>
+
+						<Separator />
 
 						<div className="flex gap-2">
 							<Button

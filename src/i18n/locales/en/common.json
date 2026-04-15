@@ -14,7 +14,13 @@
       "monthlyExpenses": "Monthly Expenses",
       "weeklyProfit": "Weekly Profit",
       "monthlyProfit": "Monthly Profit",
-      "margin": "margin"
+      "margin": "margin",
+      "reservationIncome": "Reservation Income",
+      "otherIncome": "Other Income",
+      "totalIncome": "Total Income",
+      "monthlyReservationIncome": "Monthly Reservation Income",
+      "monthlyOtherIncome": "Monthly Other Income",
+      "monthlyTotalIncome": "Monthly Total Income"
     },
     "chart": {
       "incomeVsExpenses": "Income vs Expenses",
@@ -412,6 +418,11 @@
       "advance": "Advance",
       "paymentTypes": {
         "room_charge": "Room Charge",
+        "room_payment": "Room Payment",
+        "advance_payment": "Advance Payment",
+        "partial_payment": "Partial Payment",
+        "full_payment": "Full Payment",
+        "Payment Type": "Payment",
         "additional_service": "Additional Service",
         "commission": "Commission",
         "other": "Other"
@@ -421,6 +432,7 @@
         "card": "Card",
         "bank_transfer": "Bank Transfer",
         "mobile_payment": "Mobile Payment",
+        "cheque": "Cheque",
         "other": "Other"
       }
     },

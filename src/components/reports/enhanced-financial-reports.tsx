@@ -170,7 +170,7 @@ export default function EnhancedFinancialReports() {
 
 		try {
 			// Build queries with filters
-			let incomeQuery = supabase.from("income").select("amount, currency");
+			let incomeQuery = supabase.from("income").select("amount, currency, type");
 			let expenseQuery = supabase
 				.from("expenses")
 				.select("amount, currency, accounts(currency)");
@@ -221,6 +221,20 @@ export default function EnhancedFinancialReports() {
 				const convertedAmount = await convertCurrency(
 					parseFloat(payment.amount.toString()),
 					payment.currency || "USD",
+					baseCurrency,
+					tenant.id,
+					selectedLocation!,
+				);
+				totalIncome += convertedAmount;
+				totalTransactions++;
+			}
+
+			// Process other income (non-booking) from income table
+			for (const income of incomeResult.data || []) {
+				if ((income as any).type === "booking") continue;
+				const convertedAmount = await convertCurrency(
+					parseFloat(income.amount.toString()),
+					income.currency || "USD",
 					baseCurrency,
 					tenant.id,
 					selectedLocation!,
@@ -342,6 +356,43 @@ export default function EnhancedFinancialReports() {
 					amount: convertedAmount,
 					description: `${payment.payment_type} - ${(payment as any).reservations?.guest_name} (${(payment as any).reservations?.reservation_number})${payment.notes ? ` - ${payment.notes}` : ""}`,
 					account: (payment as any).accounts?.name || "Unknown",
+					currency: baseCurrency,
+				});
+			}
+
+			// Process other income (non-booking) from income table
+			for (const income of incomeResult.data || []) {
+				if ((income as any).type === "booking") continue;
+				const convertedAmount = await convertCurrency(
+					parseFloat(income.amount.toString()),
+					income.currency || "USD",
+					baseCurrency,
+					tenant.id,
+					selectedLocation!,
+				);
+				totalIncomeForPercentage += convertedAmount;
+
+				const type =
+					(income as any).type === "service"
+						? "Service Income"
+						: "Other Income";
+				if (!incomeMap.has(type)) {
+					incomeMap.set(type, {
+						type,
+						amount: 0,
+						percentage: 0,
+						transactions: [],
+					});
+				}
+
+				const category = incomeMap.get(type)!;
+				category.amount += convertedAmount;
+				category.transactions.push({
+					id: income.id,
+					date: income.date,
+					amount: convertedAmount,
+					description: income.note || `${(income as any).type} income`,
+					account: (income as any).accounts?.name || "Unknown",
 					currency: baseCurrency,
 				});
 			}

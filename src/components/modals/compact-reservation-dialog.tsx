@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NationalityCombobox } from "@/components/ui/nationality-combobox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -413,6 +414,33 @@ export function CompactReservationDialog({
 					});
 			}
 
+			// Send SMS notification to location contacts (fire and forget)
+			if (createdReservation) {
+				const room = rooms.find((r) => r.id === createdReservation.room_id);
+				supabase.functions
+					.invoke("send-sms-notification", {
+						body: {
+							type: "reservation",
+							locationId: selectedLocation,
+							guestName: createdReservation.guest_name,
+							reservationNumber: createdReservation.reservation_number,
+							roomNumber: room?.room_number || "N/A",
+							checkIn: createdReservation.check_in_date,
+							checkOut: createdReservation.check_out_date,
+							amount: createdReservation.total_amount,
+							currency: createdReservation.currency,
+							status: "NEW",
+						},
+					})
+					.then((result) => {
+						if (result.error) {
+							console.error("SMS notification failed:", result.error);
+						} else {
+							console.log("SMS notification sent for new reservation");
+						}
+					});
+			}
+
 			toast({
 				title: "Success",
 				description: `Reservation ${reservationNumber} created successfully`,
@@ -567,12 +595,12 @@ export function CompactReservationDialog({
 														<Label>
 															{t("reservations.form.guestNationality")}
 														</Label>
-														<Input
+														<NationalityCombobox
 															value={formData.guest_nationality}
-															onChange={(e) =>
+															onValueChange={(val) =>
 																handleFieldChange(
 																	"guest_nationality",
-																	e.target.value,
+																	val,
 																)
 															}
 															placeholder={t(

@@ -52,7 +52,7 @@ function formatPhoneNumber(phoneNumber: string): string {
 	return formatted;
 }
 
-// Function to get location admin phone numbers
+// Function to get location admin phone numbers (legacy fallback)
 async function getLocationAdminPhones(locationId: string): Promise<string[]> {
 	try {
 		const { data: adminUsers, error } = await supabase
@@ -69,7 +69,6 @@ async function getLocationAdminPhones(locationId: string): Promise<string[]> {
 			return [];
 		}
 
-		// Extract phone numbers, format them, and filter out null/empty values
 		const phoneNumbers = adminUsers
 			.map((user: any) => user.profiles?.phone)
 			.filter((phone: string | null) => phone && phone.trim().length > 0)
@@ -82,6 +81,63 @@ async function getLocationAdminPhones(locationId: string): Promise<string[]> {
 		console.error("Exception getting location admin phones:", error);
 		return [];
 	}
+}
+
+type NotificationEventType = "reservation" | "check_in" | "check_out" | "payment";
+
+async function getNotificationContacts(
+	locationId: string,
+	eventType: NotificationEventType,
+): Promise<string[]> {
+	const columnMap: Record<NotificationEventType, string> = {
+		reservation: "notify_on_reservation",
+		check_in: "notify_on_check_in",
+		check_out: "notify_on_check_out",
+		payment: "notify_on_payment",
+	};
+
+	const notifyColumn = columnMap[eventType];
+
+	try {
+		const { data, error } = await supabase
+			.from("location_notification_contacts")
+			.select("phone")
+			.eq("location_id", locationId)
+			.eq("is_active", true)
+			.eq(notifyColumn, true);
+
+		if (error) {
+			console.error("Error fetching notification contacts:", error);
+			return [];
+		}
+
+		const phoneNumbers = (data ?? [])
+			.map((row: any) => row.phone)
+			.filter((phone: string | null) => phone && phone.trim().length > 0)
+			.map((phone: string) => formatPhoneNumber(phone))
+			.filter((phone: string) => phone.length > 0);
+
+		console.log(
+			`Found ${phoneNumbers.length} notification contacts for location ${locationId} (event: ${eventType})`,
+		);
+		return phoneNumbers;
+	} catch (error) {
+		console.error("Exception getting notification contacts:", error);
+		return [];
+	}
+}
+
+async function getRecipientsForEvent(
+	locationId: string,
+	eventType: NotificationEventType,
+): Promise<string[]> {
+	const contactPhones = await getNotificationContacts(locationId, eventType);
+	if (contactPhones.length > 0) {
+		return contactPhones;
+	}
+	// Fall back to admin phones if no dedicated contacts are configured
+	console.log(`No notification contacts found for ${eventType}, falling back to admin phones`);
+	return getLocationAdminPhones(locationId);
 }
 
 async function getAccessToken(): Promise<string> {
@@ -174,7 +230,7 @@ async function sendSMS(
 
 	const smsData = {
 		campaignName: "Financial Alert",
-		mask: "RathnaSuper",
+		mask: "RetailMastr",
 		numbers: formattedPhoneNumber,
 		content: message,
 	};
@@ -302,58 +358,65 @@ const handler = async (req: Request): Promise<Response> => {
 		let message: string;
 		let phoneNumbers: string[] = [];
 
-		// Determine recipient phone numbers based on priority:
-		// 1. Direct phoneNumber (for OTP)
-		// 2. locationPhone (primary location contact)  
-		// 3. Location admin phones via locationId
-		// 4. Fallback default
+		const isNotificationEvent =
+			smsRequest.type === "reservation" || smsRequest.type === "payment";
 
-		// If phoneNumber is provided directly (e.g., for OTP), use it
-		if (smsRequest.phoneNumber) {
+		if (isNotificationEvent && smsRequest.locationId) {
+			// For reservation/payment events, query the notification contacts table first
+			const eventType: NotificationEventType =
+				smsRequest.type === "payment" ? "payment" : "reservation";
+			phoneNumbers = await getRecipientsForEvent(
+				smsRequest.locationId,
+				eventType,
+			);
+
+			// Also include locationPhone if provided
+			if (smsRequest.locationPhone) {
+				const formatted = formatPhoneNumber(smsRequest.locationPhone);
+				if (formatted && !phoneNumbers.includes(formatted)) {
+					phoneNumbers.push(formatted);
+				}
+			}
+
+			if (phoneNumbers.length === 0) {
+				console.log("No recipients found for notification event. Using fallback.");
+				phoneNumbers = ["94719528589"];
+			}
+		} else if (smsRequest.phoneNumber) {
 			const formattedPhoneNumber = formatPhoneNumber(smsRequest.phoneNumber);
 			if (formattedPhoneNumber) {
 				phoneNumbers = [formattedPhoneNumber];
 			}
-			
-			// For OTP verification, also notify location admins if locationId is provided
+
 			if (smsRequest.type === "otp_verification" && smsRequest.locationId) {
 				const adminPhones = await getLocationAdminPhones(smsRequest.locationId);
-				// Add admin phones but avoid duplicates
 				adminPhones.forEach(phone => {
 					if (!phoneNumbers.includes(phone)) {
 						phoneNumbers.push(phone);
 					}
 				});
 			}
-		}
-		// If locationPhone is provided, use it as primary recipient 
-		else if (smsRequest.locationPhone) {
+		} else if (smsRequest.locationPhone) {
 			const formattedLocationPhone = formatPhoneNumber(smsRequest.locationPhone);
 			if (formattedLocationPhone) {
 				phoneNumbers = [formattedLocationPhone];
 			}
-			
-			// Also add location admin phones as secondary recipients if locationId provided
+
 			if (smsRequest.locationId) {
 				const adminPhones = await getLocationAdminPhones(smsRequest.locationId);
-				// Add admin phones but avoid duplicates
 				adminPhones.forEach(phone => {
 					if (!phoneNumbers.includes(phone)) {
 						phoneNumbers.push(phone);
 					}
 				});
 			}
-		}
-		// If locationId is provided but no locationPhone, get location admin phone numbers
-		else if (smsRequest.locationId) {
+		} else if (smsRequest.locationId) {
 			phoneNumbers = await getLocationAdminPhones(smsRequest.locationId);
 			if (phoneNumbers.length === 0) {
 				console.log(`No admin phone numbers found for location ${smsRequest.locationId}. Using fallback.`);
 				phoneNumbers = ["94719528589"];
 			}
-		}
-		// Fallback to default phone number if no location or phone provided
-		else {
+		} else {
 			phoneNumbers = ["94719528589"];
 		}
 

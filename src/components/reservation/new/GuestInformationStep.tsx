@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NationalityCombobox } from "@/components/ui/nationality-combobox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
 	Select,
@@ -82,13 +83,12 @@ export function GuestInformationStep({
 				{fieldPreferences?.show_guest_nationality !== false && (
 					<div className="space-y-2">
 						<Label htmlFor="guest_nationality">Nationality</Label>
-						<Input
-							id="guest_nationality"
+						<NationalityCombobox
 							value={guestData.guest_nationality}
-							onChange={(e) =>
-								onGuestDataChange("guest_nationality", e.target.value)
+							onValueChange={(val) =>
+								onGuestDataChange("guest_nationality", val)
 							}
-							placeholder="Enter nationality"
+							placeholder="Select nationality"
 						/>
 					</div>
 				)}

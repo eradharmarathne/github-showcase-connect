@@ -18,6 +18,7 @@ import { SmartRedirect } from "./components/routing/smart-redirect";
 import AuthProvider from "./context/auth-context";
 import { LocationProvider } from "./context/location-context";
 import AccessDenied from "./pages/access-denied";
+import AuthCallback from "./pages/auth-callback";
 import Accounts from "./pages/accounts";
 import Auth from "./pages/auth";
 import BillingError from "./pages/billing-error";
@@ -36,6 +37,7 @@ import NotFound from "./pages/not-found";
 import Onboarding from "./pages/onboarding";
 import PaymentForm from "./pages/payment-form";
 import PendingInvitation from "./pages/pending-invitation";
+import GuestPage from "./pages/guest-page";
 import PublicBookingPage from "./pages/public-page";
 import Reports from "./pages/reports";
 import Reservations from "./pages/reservations";
@@ -84,13 +86,18 @@ const App = () => (
 									<Routes>
 										<Route path="/" element={<AuthRedirect />} />
 										<Route path="/auth" element={<Auth />} />
+										<Route path="/auth-callback" element={<AuthCallback />} />
 										<Route path="/ui" element={<Design />} />
 
-										{/* Public Booking Page - No Auth Required */}
-										<Route
-											path="/r/:locationSlug"
-											element={<PublicBookingPage />}
-										/>
+									{/* Public Pages - No Auth Required */}
+									<Route
+										path="/r/:locationSlug"
+										element={<PublicBookingPage />}
+									/>
+									<Route
+										path="/guest/:token"
+										element={<GuestPage />}
+									/>
 										<Route
 											path="/auth/forgot-password"
 											element={<ForgotPassword />}

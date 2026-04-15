@@ -1,15 +1,14 @@
 import {
-	Calendar,
 	ChevronDown,
 	ChevronRight,
 	CreditCard,
 	DollarSign,
+	Download,
 	Edit,
 	Eye,
-	MapPin,
 	Printer,
 } from "lucide-react";
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ReservationsListSkeleton } from "@/components/skeleton/reservations-list-skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -23,14 +22,11 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useLocationContext } from "@/context/location-context";
 import {
 	type ReservationFinancial,
 	useReservationFinancials,
 } from "@/hooks/use-reservation-financials";
-import { useTenant } from "@/hooks/use-tenant";
-import type { Database } from "@/integrations/supabase/types";
-import { convertCurrency, getCurrencySymbol } from "@/utils/currency";
+import { getCurrencySymbol } from "@/utils/currency";
 
 type Currency = string;
 
@@ -94,6 +90,7 @@ interface ReservationsDesktopTableProps {
 	onPayment: (reservationId: string, amount: number, currency: string) => void;
 	onAddIncome: (reservation: any) => void;
 	onPrint: (reservation: any) => void;
+	onDownloadPdf?: (reservation: any) => void;
 }
 
 function ReservationsDesktopTableComponent({
@@ -105,95 +102,13 @@ function ReservationsDesktopTableComponent({
 	onPayment,
 	onAddIncome,
 	onPrint,
+	onDownloadPdf,
 }: ReservationsDesktopTableProps) {
 	const { t } = useTranslation();
 	const { data: reservations, isLoading, error } = useReservationFinancials();
-	const { tenant } = useTenant();
-	const { selectedLocation } = useLocationContext();
 
 	// State for expanded rows
 	const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-
-	// State for converted amounts
-	const [convertedAmounts, setConvertedAmounts] = useState<
-		Record<
-			string,
-			{
-				roomAmount: number;
-				expensesAmount: number;
-				paidAmount: number;
-				balanceAmount: number;
-			}
-		>
-	>({});
-
-	// Convert currency amounts when selectedCurrency changes
-	useEffect(() => {
-		const convertAmounts = async () => {
-			if (!reservations) return;
-
-			const newConvertedAmounts: typeof convertedAmounts = {};
-
-			for (const reservation of reservations) {
-				try {
-					const [roomAmount, expensesAmount, paidAmount, balanceAmount] =
-						await Promise.all([
-							convertCurrency(
-								reservation.room_amount_usd,
-								"USD",
-								selectedCurrency,
-								tenant?.id!,
-								selectedLocation!,
-							),
-							convertCurrency(
-								reservation.expenses_usd,
-								"USD",
-								selectedCurrency,
-								tenant?.id!,
-								selectedLocation!,
-							),
-							convertCurrency(
-								reservation.user_paid_amount_usd,
-								"USD",
-								selectedCurrency,
-								tenant?.id!,
-								selectedLocation!,
-							),
-							convertCurrency(
-								reservation.needs_to_pay_usd,
-								"USD",
-								selectedCurrency,
-								tenant?.id!,
-								selectedLocation!,
-							),
-						]);
-
-					newConvertedAmounts[reservation.id] = {
-						roomAmount,
-						expensesAmount,
-						paidAmount,
-						balanceAmount,
-					};
-				} catch (error) {
-					console.error(
-						`Failed to convert currency for reservation ${reservation.id}:`,
-						error,
-					);
-					// Fallback to USD amounts
-					newConvertedAmounts[reservation.id] = {
-						roomAmount: reservation.room_amount_usd,
-						expensesAmount: reservation.expenses_usd,
-						paidAmount: reservation.user_paid_amount_usd,
-						balanceAmount: reservation.needs_to_pay_usd,
-					};
-				}
-			}
-
-			setConvertedAmounts(newConvertedAmounts);
-		};
-
-		convertAmounts();
-	}, [reservations, selectedCurrency, tenant?.id, selectedLocation]);
 
 	// Filter and organize reservations
 	const filteredReservations =
@@ -387,114 +302,118 @@ function ReservationsDesktopTableComponent({
 														</div>
 													</div>
 												</TableCell>
-												<TableCell className="text-right py-3">
-													<div className="font-medium text-slate-900 text-sm">
-														{getCurrencySymbol(selectedCurrency)}
-														{(
-															(convertedAmounts[reservation.id]?.roomAmount ||
-																0) +
-															(convertedAmounts[reservation.id]
-																?.expensesAmount || 0)
-														).toLocaleString()}
-													</div>
-												</TableCell>
-												<TableCell className="text-right py-3">
-													<div className="font-medium text-slate-900 text-sm">
-														{getCurrencySymbol(selectedCurrency)}
-														{(
-															convertedAmounts[reservation.id]?.paidAmount || 0
-														).toLocaleString()}
-													</div>
-												</TableCell>
-												<TableCell className="text-right py-3">
-													<div
-														className={`font-medium text-sm ${
-															(
-																convertedAmounts[reservation.id]
-																	?.balanceAmount || 0
-															) > 0
-																? "text-rose-600"
-																: "text-emerald-600"
-														}`}
+											<TableCell className="text-right py-3">
+												<div className="font-medium text-slate-900 text-sm">
+													{getCurrencySymbol(reservation.currency)}
+													{(
+														(reservation.paid_amount || 0) +
+														(reservation.balance_amount || 0)
+													).toLocaleString()}
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-3">
+												<div className="font-medium text-slate-900 text-sm">
+													{getCurrencySymbol(reservation.currency)}
+													{(reservation.paid_amount || 0).toLocaleString()}
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-3">
+												<div
+													className={`font-medium text-sm ${
+														(reservation.balance_amount || 0) > 0
+															? "text-rose-600"
+															: "text-emerald-600"
+													}`}
+												>
+													{getCurrencySymbol(reservation.currency)}
+													{(reservation.balance_amount || 0).toLocaleString()}
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-3">
+												<div className="flex gap-1 justify-end">
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={(e) => {
+															e.stopPropagation();
+															onViewReservation(reservation.id);
+														}}
+														className="h-7 w-7 p-0 hover:bg-slate-100"
 													>
-														{getCurrencySymbol(selectedCurrency)}
-														{(
-															convertedAmounts[reservation.id]?.balanceAmount ||
-															0
-														).toLocaleString()}
-													</div>
-												</TableCell>
-												<TableCell className="text-right py-3">
-													<div className="flex gap-1 justify-end">
+														<Eye className="h-3.5 w-3.5 text-slate-600" />
+													</Button>
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={(e) => {
+															e.stopPropagation();
+															onEditReservation(reservation);
+														}}
+														className="h-7 w-7 p-0 hover:bg-slate-100"
+													>
+														<Edit className="h-3.5 w-3.5 text-slate-600" />
+													</Button>
+													{canShowPaymentButton(reservation) && (
 														<Button
 															variant="ghost"
 															size="sm"
 															onClick={(e) => {
 																e.stopPropagation();
-																onViewReservation(reservation.id);
+																onPayment(
+																	reservation.id,
+																	reservation.balance_amount || 0,
+																	reservation.currency,
+																);
 															}}
-															className="h-7 w-7 p-0 hover:bg-slate-100"
+															className="h-7 w-7 p-0 hover:bg-emerald-50"
 														>
-															<Eye className="h-3.5 w-3.5 text-slate-600" />
+															<CreditCard className="h-3.5 w-3.5 text-emerald-600" />
 														</Button>
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={(e) => {
-																e.stopPropagation();
-																onEditReservation(reservation);
-															}}
-															className="h-7 w-7 p-0 hover:bg-slate-100"
-														>
-															<Edit className="h-3.5 w-3.5 text-slate-600" />
-														</Button>
-														{canShowPaymentButton(reservation) && (
-															<Button
-																variant="ghost"
-																size="sm"
-																onClick={(e) => {
-																	e.stopPropagation();
-																	onPayment(
-																		reservation.id,
-																		reservation.needs_to_pay_usd,
-																		"USD",
-																	);
-																}}
-																className="h-7 w-7 p-0 hover:bg-emerald-50"
-															>
-																<CreditCard className="h-3.5 w-3.5 text-emerald-600" />
-															</Button>
-														)}
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={(e) => {
-																e.stopPropagation();
-																onPrint({
-																	...reservation,
-																	convertedAmounts:
-																		convertedAmounts[reservation.id],
-																	selectedCurrency: selectedCurrency,
-																});
-															}}
-															className="h-7 w-7 p-0 hover:bg-slate-100"
-														>
-															<Printer className="h-3.5 w-3.5 text-slate-600" />
-														</Button>
-													</div>
-												</TableCell>
-											</TableRow>
+													)}
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={(e) => {
+														e.stopPropagation();
+														onPrint({
+															...reservation,
+															selectedCurrency: reservation.currency,
+														});
+													}}
+													className="h-7 w-7 p-0 hover:bg-slate-100"
+												>
+													<Printer className="h-3.5 w-3.5 text-slate-600" />
+												</Button>
+												{onDownloadPdf && (
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={(e) => {
+															e.stopPropagation();
+															onDownloadPdf({
+																...reservation,
+																selectedCurrency: reservation.currency,
+															});
+														}}
+														className="h-7 w-7 p-0 hover:bg-blue-50"
+													>
+														<Download className="h-3.5 w-3.5 text-blue-600" />
+													</Button>
+												)}
+											</div>
+										</TableCell>
+										</TableRow>
 
-											{/* Expanded Row Details */}
-											{isExpanded && (
-												<TableRow className="bg-slate-50/30 border-b">
-													<TableCell colSpan={6} className="py-4">
-														<div className="grid grid-cols-3 gap-6 pl-8">
-															<div className="space-y-3">
-																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t(
-																		"reservations.viewDialog.guestInformation",
-																	)}
+										{/* Expanded Row Details */}
+										{isExpanded && (
+											<TableRow className="bg-slate-50/30 border-b">
+												<TableCell colSpan={6} className="py-4">
+													<div className="grid grid-cols-3 gap-6 pl-8">
+														<div className="space-y-3">
+															<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																{t(
+																	"reservations.viewDialog.guestInformation",
+																)}
 																</h4>
 																<div className="space-y-2">
 																	<div className="flex justify-between text-sm">
@@ -519,93 +438,93 @@ function ReservationsDesktopTableComponent({
 																</div>
 															</div>
 
-															<div className="space-y-3">
-																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t(
-																		"reservations.viewDialog.financialDetails",
-																	)}
-																</h4>
-																<div className="space-y-2">
-																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.roomCharges")}
-																			:
-																		</span>
-																		<span className="font-medium text-slate-900">
-																			{getCurrencySymbol(selectedCurrency)}
-																			{(
-																				convertedAmounts[reservation.id]
-																					?.roomAmount || 0
-																			).toLocaleString()}
-																		</span>
-																	</div>
-																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.expenses")}:
-																		</span>
-																		<span className="font-medium text-slate-900">
-																			{getCurrencySymbol(selectedCurrency)}
-																			{(
-																				convertedAmounts[reservation.id]
-																					?.expensesAmount || 0
-																			).toLocaleString()}
-																		</span>
-																	</div>
-																	<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
-																		<span className="text-slate-700 font-medium">
-																			{t("reservations.table.headers.total")}:
-																		</span>
-																		<span className="font-semibold text-slate-900">
-																			{getCurrencySymbol(selectedCurrency)}
-																			{(
-																				(convertedAmounts[reservation.id]
-																					?.roomAmount || 0) +
-																				(convertedAmounts[reservation.id]
-																					?.expensesAmount || 0)
-																			).toLocaleString()}
-																		</span>
-																	</div>
+														<div className="space-y-3">
+															<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																{t(
+																	"reservations.viewDialog.financialDetails",
+																)}
+															</h4>
+															<div className="space-y-2">
+																<div className="flex justify-between text-sm">
+																	<span className="text-slate-600">
+																		{t("reservations.viewDialog.roomCharges")}
+																		:
+																	</span>
+																	<span className="font-medium text-slate-900">
+																		{getCurrencySymbol(reservation.currency)}
+																		{(
+																			reservation.room_rate *
+																			reservation.nights
+																		).toLocaleString()}
+																	</span>
+																</div>
+																<div className="flex justify-between text-sm">
+																	<span className="text-slate-600">
+																		{t("reservations.viewDialog.expenses")}:
+																	</span>
+																	<span className="font-medium text-slate-900">
+																		{getCurrencySymbol(reservation.currency)}
+																		{Math.max(
+																			0,
+																			(reservation.paid_amount || 0) +
+																				(reservation.balance_amount || 0) -
+																				reservation.total_amount,
+																		).toLocaleString()}
+																	</span>
+																</div>
+																<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
+																	<span className="text-slate-700 font-medium">
+																		{t("reservations.table.headers.total")}:
+																	</span>
+																	<span className="font-semibold text-slate-900">
+																		{getCurrencySymbol(reservation.currency)}
+																		{(
+																			(reservation.paid_amount || 0) +
+																			(reservation.balance_amount || 0)
+																		).toLocaleString()}
+																	</span>
 																</div>
 															</div>
+														</div>
 
-															<div className="space-y-3">
-																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t(
-																		"reservations.reservationActions.quickActions",
-																	)}
-																</h4>
-																<div className="flex flex-row gap-2">
+														<div className="space-y-3">
+															<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																{t(
+																	"reservations.reservationActions.quickActions",
+																)}
+															</h4>
+															<div className="flex flex-row gap-2">
+																<Button
+																	variant="outline"
+																	size="sm"
+																	onClick={() => onAddIncome(reservation)}
+																	disabled={
+																		reservation.status === "checked_out"
+																	}
+																	className="justify-start cursor-pointer text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+																>
+																	<DollarSign className="size-4 mr-2" />
+																	{t("reservations.table.actions.addIncome")}
+																</Button>
+																{canShowPaymentButton(reservation) && (
 																	<Button
 																		variant="outline"
 																		size="sm"
-																		onClick={() => onAddIncome(reservation)}
-																		disabled={
-																			reservation.status === "checked_out"
+																		onClick={() =>
+																			onPayment(
+																				reservation.id,
+																				reservation.balance_amount || 0,
+																				reservation.currency,
+																			)
 																		}
-																		className="justify-start cursor-pointer text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+																		className="justify-start cursor-pointer text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:bg-emerald-50"
 																	>
-																		<DollarSign className="size-4 mr-2" />
-																		{t("reservations.table.actions.addIncome")}
+																		<CreditCard className="size-4 mr-2" />
+																		{t("reservations.table.actions.payNow")}
 																	</Button>
-																	{canShowPaymentButton(reservation) && (
-																		<Button
-																			variant="outline"
-																			size="sm"
-																			onClick={() =>
-																				onPayment(
-																					reservation.id,
-																					reservation.needs_to_pay_usd,
-																					"USD",
-																				)
-																			}
-																			className="justify-start cursor-pointer text-emerald-600 hover:text-emerald-700 border-emerald-200 hover:bg-emerald-50"
-																		>
-																			<CreditCard className="size-4 mr-2" />
-																			{t("reservations.table.actions.payNow")}
-																		</Button>
-																	)}
-																</div>
+																)}
 															</div>
+														</div>
 														</div>
 													</TableCell>
 												</TableRow>
@@ -711,74 +630,89 @@ function ReservationsDesktopTableComponent({
 														</div>
 													</div>
 												</TableCell>
-												<TableCell className="text-right py-3">
-													<div className="font-medium text-slate-700 text-sm">
-														{getCurrencySymbol(selectedCurrency)}
-														{(
-															(convertedAmounts[reservation.id]?.roomAmount ||
-																0) +
-															(convertedAmounts[reservation.id]
-																?.expensesAmount || 0)
-														).toLocaleString()}
-													</div>
-												</TableCell>
-												<TableCell className="text-right py-3">
-													<div className="font-medium text-slate-700 text-sm">
-														{getCurrencySymbol(selectedCurrency)}
-														{(
-															convertedAmounts[reservation.id]?.paidAmount || 0
-														).toLocaleString()}
-													</div>
-												</TableCell>
-												<TableCell className="text-right py-3">
-													<div
-														className={`font-medium text-sm ${
-															(
-																convertedAmounts[reservation.id]
-																	?.balanceAmount || 0
-															) > 0
-																? "text-rose-600"
-																: "text-slate-600"
-														}`}
+											<TableCell className="text-right py-3">
+												<div className="font-medium text-slate-700 text-sm">
+													{getCurrencySymbol(reservation.currency)}
+													{(
+														(reservation.paid_amount || 0) +
+														(reservation.balance_amount || 0)
+													).toLocaleString()}
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-3">
+												<div className="font-medium text-slate-700 text-sm">
+													{getCurrencySymbol(reservation.currency)}
+													{(reservation.paid_amount || 0).toLocaleString()}
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-3">
+												<div
+													className={`font-medium text-sm ${
+														(reservation.balance_amount || 0) > 0
+															? "text-rose-600"
+															: "text-slate-600"
+													}`}
+												>
+													{getCurrencySymbol(reservation.currency)}
+													{(reservation.balance_amount || 0).toLocaleString()}
+												</div>
+											</TableCell>
+											<TableCell className="text-right py-3">
+												<div className="flex gap-1 justify-end">
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={(e) => {
+															e.stopPropagation();
+															onViewReservation(reservation.id);
+														}}
+														className="h-7 w-7 p-0 hover:bg-slate-100"
 													>
-														{getCurrencySymbol(selectedCurrency)}
-														{(
-															convertedAmounts[reservation.id]?.balanceAmount ||
-															0
-														).toLocaleString()}
-													</div>
-												</TableCell>
-												<TableCell className="text-right py-3">
-													<div className="flex gap-1 justify-end">
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={(e) => {
-																e.stopPropagation();
-																onViewReservation(reservation.id);
-															}}
-															className="h-7 w-7 p-0 hover:bg-slate-100"
-														>
-															<Eye className="h-3.5 w-3.5 text-slate-600" />
-														</Button>
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={(e) => {
-																e.stopPropagation();
-																onPrint({
-																	...reservation,
-																	convertedAmounts:
-																		convertedAmounts[reservation.id],
-																	selectedCurrency: selectedCurrency,
-																});
-															}}
-															className="h-7 w-7 p-0 hover:bg-slate-100"
-														>
-															<Printer className="h-3.5 w-3.5 text-slate-600" />
-														</Button>
-													</div>
-												</TableCell>
+														<Eye className="h-3.5 w-3.5 text-slate-600" />
+													</Button>
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={(e) => {
+														e.stopPropagation();
+														onEditReservation(reservation);
+													}}
+													className="h-7 w-7 p-0 hover:bg-slate-100"
+												>
+													<Edit className="h-3.5 w-3.5 text-slate-600" />
+												</Button>
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={(e) => {
+														e.stopPropagation();
+														onPrint({
+															...reservation,
+															selectedCurrency: reservation.currency,
+														});
+													}}
+													className="h-7 w-7 p-0 hover:bg-slate-100"
+												>
+													<Printer className="h-3.5 w-3.5 text-slate-600" />
+												</Button>
+												{onDownloadPdf && (
+													<Button
+														variant="ghost"
+														size="sm"
+														onClick={(e) => {
+															e.stopPropagation();
+															onDownloadPdf({
+																...reservation,
+																selectedCurrency: reservation.currency,
+															});
+														}}
+														className="h-7 w-7 p-0 hover:bg-blue-50"
+													>
+														<Download className="h-3.5 w-3.5 text-blue-600" />
+													</Button>
+												)}
+											</div>
+										</TableCell>
 											</TableRow>
 
 											{/* Expanded Row Details */}
@@ -815,59 +749,59 @@ function ReservationsDesktopTableComponent({
 																</div>
 															</div>
 
-															<div className="space-y-3">
-																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t(
-																		"reservations.viewDialog.financialDetails",
-																	)}
-																</h4>
-																<div className="space-y-2">
-																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.roomCharges")}
-																			:
-																		</span>
-																		<span className="font-medium text-slate-900">
-																			{getCurrencySymbol(selectedCurrency)}
-																			{(
-																				convertedAmounts[reservation.id]
-																					?.roomAmount || 0
-																			).toLocaleString()}
-																		</span>
-																	</div>
-																	<div className="flex justify-between text-sm">
-																		<span className="text-slate-600">
-																			{t("reservations.viewDialog.expenses")}:
-																		</span>
-																		<span className="font-medium text-slate-900">
-																			{getCurrencySymbol(selectedCurrency)}
-																			{(
-																				convertedAmounts[reservation.id]
-																					?.expensesAmount || 0
-																			).toLocaleString()}
-																		</span>
-																	</div>
-																	<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
-																		<span className="text-slate-700 font-medium">
-																			{t("reservations.table.headers.total")}:
-																		</span>
-																		<span className="font-semibold text-slate-900">
-																			{getCurrencySymbol(selectedCurrency)}
-																			{(
-																				(convertedAmounts[reservation.id]
-																					?.roomAmount || 0) +
-																				(convertedAmounts[reservation.id]
-																					?.expensesAmount || 0)
-																			).toLocaleString()}
-																		</span>
-																	</div>
+														<div className="space-y-3">
+															<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																{t(
+																	"reservations.viewDialog.financialDetails",
+																)}
+															</h4>
+															<div className="space-y-2">
+																<div className="flex justify-between text-sm">
+																	<span className="text-slate-600">
+																		{t("reservations.viewDialog.roomCharges")}
+																		:
+																	</span>
+																	<span className="font-medium text-slate-900">
+																		{getCurrencySymbol(reservation.currency)}
+																		{(
+																			reservation.room_rate *
+																			reservation.nights
+																		).toLocaleString()}
+																	</span>
+																</div>
+																<div className="flex justify-between text-sm">
+																	<span className="text-slate-600">
+																		{t("reservations.viewDialog.expenses")}:
+																	</span>
+																	<span className="font-medium text-slate-900">
+																		{getCurrencySymbol(reservation.currency)}
+																		{Math.max(
+																			0,
+																			(reservation.paid_amount || 0) +
+																				(reservation.balance_amount || 0) -
+																				reservation.total_amount,
+																		).toLocaleString()}
+																	</span>
+																</div>
+																<div className="flex justify-between text-sm pt-2 border-t border-slate-200">
+																	<span className="text-slate-700 font-medium">
+																		{t("reservations.table.headers.total")}:
+																	</span>
+																	<span className="font-semibold text-slate-900">
+																		{getCurrencySymbol(reservation.currency)}
+																		{(
+																			(reservation.paid_amount || 0) +
+																			(reservation.balance_amount || 0)
+																		).toLocaleString()}
+																	</span>
 																</div>
 															</div>
+														</div>
 
-															<div className="space-y-3">
-																<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
-																	{t("reservations.table.headers.status")}
-																</h4>
+														<div className="space-y-3">
+															<h4 className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+																{t("reservations.table.headers.status")}
+															</h4>
 																<div className="text-sm text-slate-600">
 																	{t(
 																		"reservations.messages.reservationCompleted",

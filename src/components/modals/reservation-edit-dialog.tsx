@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Check, Copy, Link, Loader2 } from "lucide-react";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -11,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NationalityCombobox } from "@/components/ui/nationality-combobox";
 import { PhoneInput } from "@/components/ui/phone-input";
 import {
 	Select,
@@ -64,6 +76,7 @@ interface Reservation {
 	agent_commission?: number;
 	guide_commission?: number;
 	booking_source?: string;
+	guest_share_token?: string | null;
 }
 
 interface ReservationEditDialogProps {
@@ -83,6 +96,11 @@ export function ReservationEditDialog({
 	const { toast } = useToast();
 	const [isOTPVerified, setIsOTPVerified] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+	const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+	const [guestLink, setGuestLink] = useState<string | null>(null);
+	const [linkCopied, setLinkCopied] = useState(false);
 	const [formData, setFormData] = useState<Partial<Reservation>>({});
 	const [rooms, setRooms] = useState<any[]>([]);
 	const [agents, setAgents] = useState<any[]>([]);
@@ -215,6 +233,14 @@ export function ReservationEditDialog({
 			}
 
 			setFormData(initialFormData);
+			if (reservation.guest_share_token) {
+				const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+				setGuestLink(
+					`${baseUrl}/guest/${reservation.guest_share_token}`,
+				);
+			} else {
+				setGuestLink(null);
+			}
 			fetchRooms();
 			fetchAgents();
 			fetchGuides();
@@ -338,14 +364,116 @@ export function ReservationEditDialog({
 		}
 	};
 
+	const handleDelete = async () => {
+		if (!reservation) return;
+		setIsDeleting(true);
+		try {
+			await supabase
+				.from("booking_payments")
+				.delete()
+				.eq("reservation_id", reservation.id);
+
+			await supabase
+				.from("income")
+				.delete()
+				.eq("reservation_id", reservation.id);
+
+			await supabase
+				.from("additional_services")
+				.delete()
+				.eq("reservation_id", reservation.id);
+
+			const { error } = await supabase
+				.from("reservations")
+				.delete()
+				.eq("id", reservation.id);
+
+			if (error) throw error;
+
+			toast({
+				title: t("common.success"),
+				description: t("reservations.messages.deleteSuccess"),
+			});
+
+			onUpdate();
+			onClose();
+		} catch (error: any) {
+			console.error("Error deleting reservation:", error);
+			toast({
+				title: t("common.error"),
+				description: error.message || t("reservations.messages.deleteError"),
+				variant: "destructive",
+			});
+		} finally {
+			setIsDeleting(false);
+			setShowDeleteConfirm(false);
+		}
+	};
+
+	const handleShareGuestLink = async () => {
+		if (!reservation) return;
+		setIsGeneratingLink(true);
+		try {
+			let token = reservation.guest_share_token;
+
+			if (!token) {
+				token = crypto.randomUUID().replace(/-/g, "") + Date.now().toString(36);
+				const { error } = await supabase
+					.from("reservations")
+					.update({ guest_share_token: token })
+					.eq("id", reservation.id);
+
+				if (error) throw error;
+			}
+
+			const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+			const url = `${baseUrl}/guest/${token}`;
+			setGuestLink(url);
+
+			await navigator.clipboard.writeText(url);
+			setLinkCopied(true);
+			setTimeout(() => setLinkCopied(false), 2000);
+
+			toast({
+				title: "Guest link copied",
+				description: "The guest self-service link has been copied to your clipboard.",
+			});
+		} catch (error: any) {
+			console.error("Error generating guest link:", error);
+			toast({
+				title: "Error",
+				description: error.message || "Failed to generate guest link",
+				variant: "destructive",
+			});
+		} finally {
+			setIsGeneratingLink(false);
+		}
+	};
+
+	const handleCopyGuestLink = async () => {
+		if (!guestLink) return;
+		await navigator.clipboard.writeText(guestLink);
+		setLinkCopied(true);
+		setTimeout(() => setLinkCopied(false), 2000);
+		toast({
+			title: "Copied",
+			description: "Guest link copied to clipboard.",
+		});
+	};
+
 	const handleClose = () => {
 		setIsOTPVerified(false);
+		setGuestLink(null);
+		setLinkCopied(false);
 		onClose();
 	};
+
+	const canDelete = reservation?.status !== "checked_out";
 
 	if (!reservation) return null;
 
 	return (
+		<>
 		<Dialog open={isOpen} onOpenChange={handleClose}>
 			<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
 				<DialogHeader>
@@ -359,6 +487,47 @@ export function ReservationEditDialog({
 				</DialogHeader>
 
 				<div className="space-y-6">
+					{/* Share Guest Link */}
+					<div className="flex flex-wrap items-center gap-2 p-3 bg-muted/50 rounded-lg border">
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							onClick={handleShareGuestLink}
+							disabled={isGeneratingLink}
+						>
+							{isGeneratingLink ? (
+								<Loader2 className="size-4 mr-2 animate-spin" />
+							) : (
+								<Link className="size-4 mr-2" />
+							)}
+							{guestLink ? "Regenerate Guest Link" : "Share Guest Link"}
+						</Button>
+						{guestLink && (
+							<div className="flex items-center gap-2 flex-1 min-w-0">
+								<Input
+									value={guestLink}
+									readOnly
+									className="h-8 text-xs flex-1 min-w-0"
+									onClick={(e) => (e.target as HTMLInputElement).select()}
+								/>
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon"
+									className="size-8 shrink-0"
+									onClick={handleCopyGuestLink}
+								>
+									{linkCopied ? (
+										<Check className="size-4 text-emerald-500" />
+									) : (
+										<Copy className="size-4" />
+									)}
+								</Button>
+							</div>
+						)}
+					</div>
+
 					<div className="grid grid-cols-2 gap-4">
 						<div>
 							<Label>{t("reservations.form.guestName")}</Label>
@@ -395,12 +564,12 @@ export function ReservationEditDialog({
 						</div>
 						<div>
 							<Label>{t("reservations.form.guestNationality")}</Label>
-							<Input
+							<NationalityCombobox
 								value={formData.guest_nationality || ""}
-								onChange={(e) =>
+								onValueChange={(val) =>
 									setFormData({
 										...formData,
-										guest_nationality: e.target.value,
+										guest_nationality: val,
 									})
 								}
 							/>
@@ -720,64 +889,195 @@ export function ReservationEditDialog({
 						/>
 					</div>
 
-					<div className="bg-muted p-4 rounded-lg">
-						<div className="grid grid-cols-3 gap-4 text-xs sm:text-sm">
-							<div>
-								<span className="font-medium">
-									{t("reservations.viewDialog.totalAmount")}:
-								</span>
-								<div className="text-lg">
-									{formData.currency} {formData.total_amount}
-								</div>
-							</div>
-							<div>
-								<span className="font-medium">
-									{t("reservations.viewDialog.paidAmount")}:
-								</span>
-								<div className="text-lg">
-									{formData.currency} {formData.paid_amount || 0}
-								</div>
-							</div>
-							<div>
-								<span className="font-medium">
-									{t("reservations.viewDialog.balanceAmount")}:
-								</span>
-								<div className="text-lg">
-									{formData.currency}{" "}
-									{(formData.total_amount || 0) - (formData.paid_amount || 0)}
-								</div>
+				<div className="grid grid-cols-2 gap-4">
+					<div>
+						<Label>{t("reservations.table.headers.status")}</Label>
+						<Select
+							value={formData.status || ""}
+							onValueChange={(value) =>
+								setFormData({
+									...formData,
+									status: value as Reservation["status"],
+								})
+							}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="tentative">
+									{t("reservations.status.tentative")}
+								</SelectItem>
+								<SelectItem value="pending">
+									{t("reservations.status.pending")}
+								</SelectItem>
+								<SelectItem value="confirmed">
+									{t("reservations.status.confirmed")}
+								</SelectItem>
+								<SelectItem value="checked_in">
+									{t("reservations.status.checked_in")}
+								</SelectItem>
+								<SelectItem value="checked_out">
+									{t("reservations.status.checked_out")}
+								</SelectItem>
+								<SelectItem value="cancelled">
+									{t("reservations.status.cancelled")}
+								</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+					<div>
+						<Label>{t("reservations.form.currency")}</Label>
+						<Select
+							value={formData.currency || "USD"}
+							onValueChange={(value) =>
+								setFormData({
+									...formData,
+									currency: value as Reservation["currency"],
+								})
+							}
+						>
+							<SelectTrigger>
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="LKR">LKR</SelectItem>
+								<SelectItem value="USD">USD</SelectItem>
+								<SelectItem value="EUR">EUR</SelectItem>
+								<SelectItem value="GBP">GBP</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+				</div>
+
+				<div className="bg-muted p-4 rounded-lg space-y-4">
+					<div className="grid grid-cols-3 gap-4">
+						<div>
+							<Label>{t("reservations.viewDialog.totalAmount")}</Label>
+							<div className="text-lg font-medium mt-1">
+								{formData.currency} {(formData.total_amount || 0).toLocaleString()}
 							</div>
 						</div>
+						<div>
+							<Label>{t("reservations.form.advanceAmount")}</Label>
+							<Input
+								type="number"
+								step="0.01"
+								min="0"
+								value={formData.advance_amount || 0}
+								onChange={(e) => {
+									const advance = parseFloat(e.target.value) || 0;
+									setFormData({
+										...formData,
+										advance_amount: advance,
+									});
+								}}
+								className="mt-1"
+							/>
+						</div>
+						<div>
+							<Label>{t("reservations.form.paidAmount")}</Label>
+							<Input
+								type="number"
+								step="0.01"
+								min="0"
+								value={formData.paid_amount || 0}
+								onChange={(e) => {
+									const paid = parseFloat(e.target.value) || 0;
+									setFormData({
+										...formData,
+										paid_amount: paid,
+										balance_amount: (formData.total_amount || 0) - paid,
+									});
+								}}
+								className="mt-1"
+							/>
+						</div>
 					</div>
+					<div className="flex justify-between text-sm pt-2 border-t">
+						<span className="font-medium">
+							{t("reservations.viewDialog.balanceAmount")}:
+						</span>
+						<span
+							className={`font-semibold ${
+								(formData.total_amount || 0) - (formData.paid_amount || 0) > 0
+									? "text-rose-600"
+									: "text-emerald-600"
+							}`}
+						>
+							{formData.currency}{" "}
+							{((formData.total_amount || 0) - (formData.paid_amount || 0)).toLocaleString()}
+						</span>
+					</div>
+				</div>
 
-					<div className="flex justify-between pt-4">
+				<div className="flex justify-between pt-4">
+					<div className="flex gap-2">
+						{canDelete && (
+							<Button
+								variant="destructive"
+								onClick={() => setShowDeleteConfirm(true)}
+								disabled={isDeleting}
+							>
+								{t("reservations.dialog.deleteButton")}
+							</Button>
+						)}
 						<Button variant="outline" onClick={handleClose}>
 							{t("common.cancel")}
 						</Button>
-
-						<div className="flex gap-2">
-							{!isOTPVerified ? (
-								<OTPVerification
-									onVerified={handleOTPVerified}
-									phoneNumber={location?.phone || profile?.phone || ""}
-									locationId={reservation?.location_id}
-									triggerComponent={
-										<Button variant="default">
-											{t("reservations.dialog.verifyAndEnableEditing")}
-										</Button>
-									}
-								/>
-							) : (
-								<Button onClick={handleSubmit} disabled={isSubmitting}>
-									{isSubmitting
-										? t("reservations.dialog.saving")
-										: t("reservations.dialog.saveButton")}
-								</Button>
-							)}
-						</div>
 					</div>
+
+					<div className="flex gap-2">
+						{!isOTPVerified ? (
+							<OTPVerification
+								onVerified={handleOTPVerified}
+								phoneNumber={location?.phone || profile?.phone || ""}
+								locationId={reservation?.location_id}
+								triggerComponent={
+									<Button variant="default">
+										{t("reservations.dialog.verifyAndEnableEditing")}
+									</Button>
+								}
+							/>
+						) : (
+							<Button onClick={handleSubmit} disabled={isSubmitting}>
+								{isSubmitting
+									? t("reservations.dialog.saving")
+									: t("reservations.dialog.saveButton")}
+							</Button>
+						)}
+					</div>
+				</div>
 				</div>
 			</DialogContent>
 		</Dialog>
+
+		<AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+			<AlertDialogContent>
+				<AlertDialogHeader>
+					<AlertDialogTitle>
+						{t("reservations.dialog.deleteTitle")}
+					</AlertDialogTitle>
+					<AlertDialogDescription>
+						{t("reservations.dialog.deleteConfirmation")}
+					</AlertDialogDescription>
+				</AlertDialogHeader>
+				<AlertDialogFooter>
+					<AlertDialogCancel disabled={isDeleting}>
+						{t("reservations.dialog.cancelButton")}
+					</AlertDialogCancel>
+					<AlertDialogAction
+						onClick={handleDelete}
+						disabled={isDeleting}
+						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+					>
+						{isDeleting
+							? t("common.deleting", "Deleting...")
+							: t("reservations.dialog.deleteButton")}
+					</AlertDialogAction>
+				</AlertDialogFooter>
+			</AlertDialogContent>
+		</AlertDialog>
+		</>
 	);
 }

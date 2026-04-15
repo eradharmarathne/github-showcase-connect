@@ -14,7 +14,13 @@
       "monthlyExpenses": "මාසික වියදම්",
       "weeklyProfit": "සතිපතා ලාභය",
       "monthlyProfit": "මාසික ලාභය",
-      "margin": "ආන්තිකය"
+      "margin": "ආන්තිකය",
+      "reservationIncome": "වෙන්කරණ ආදායම",
+      "otherIncome": "වෙනත් ආදායම",
+      "totalIncome": "මුළු ආදායම",
+      "monthlyReservationIncome": "මාසික වෙන්කරණ ආදායම",
+      "monthlyOtherIncome": "මාසික වෙනත් ආදායම",
+      "monthlyTotalIncome": "මාසික මුළු ආදායම"
     },
     "chart": {
       "incomeVsExpenses": "ආදායම් vs වියදම්",
@@ -412,6 +418,11 @@
       "advance": "අත්තිකාරම්",
       "paymentTypes": {
         "room_charge": "කාමර ගාස්තු",
+        "room_payment": "කාමර ගෙවීම",
+        "advance_payment": "අත්තිකාරම් ගෙවීම",
+        "partial_payment": "අර්ධ ගෙවීම",
+        "full_payment": "සම්පූර්ණ ගෙවීම",
+        "Payment Type": "ගෙවීම",
         "additional_service": "අමතර සේවාව",
         "commission": "කොමිස්",
         "other": "වෙනත්"
@@ -421,6 +432,7 @@
         "card": "කාඩ්පත",
         "bank_transfer": "බැංකු මාරු කිරීම",
         "mobile_payment": "ජංගම ගෙවීම",
+        "cheque": "චෙක්පත",
         "other": "වෙනත්"
       }
     },

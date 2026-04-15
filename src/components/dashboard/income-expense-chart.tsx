@@ -1,4 +1,10 @@
-import { ArrowDownCircle, ArrowUpCircle, TrendingUp } from "lucide-react";
+import {
+	ArrowDownCircle,
+	ArrowUpCircle,
+	BedDouble,
+	Receipt,
+	TrendingUp,
+} from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -68,12 +74,14 @@ function IncomeExpenseChartComponent({
 	const [loading, setLoading] = useState(true);
 	const [chartData, setChartData] = useState<ChartData[]>([]);
 	const [todayIncome, setTodayIncome] = useState(0);
+	const [todayReservationIncome, setTodayReservationIncome] = useState(0);
+	const [todayOtherIncome, setTodayOtherIncome] = useState(0);
 	const [todayExpenses, setTodayExpenses] = useState(0);
 	const [weeklyProfit, setWeeklyProfit] = useState(0);
 	const [profitMargin, setProfitMargin] = useState(0);
 	const { tenant } = useAuth();
 	const { t } = useTranslation();
-	const displayCurrency = getDisplayCurrency(); // Get the display currency
+	const displayCurrency = getDisplayCurrency();
 	const isMobile = useIsMobile();
 
 	useEffect(() => {
@@ -84,7 +92,6 @@ function IncomeExpenseChartComponent({
 			}
 
 			try {
-				// Get locations for the tenant first to filter by tenant
 				const { data: tenantLocations } = await supabase
 					.from("locations")
 					.select("id")
@@ -96,6 +103,8 @@ function IncomeExpenseChartComponent({
 				if (tenantLocationIds.length === 0) {
 					setChartData([]);
 					setTodayIncome(0);
+					setTodayReservationIncome(0);
+					setTodayOtherIncome(0);
 					setTodayExpenses(0);
 					setWeeklyProfit(0);
 					setProfitMargin(0);
@@ -103,7 +112,6 @@ function IncomeExpenseChartComponent({
 					return;
 				}
 
-				// Set date range based on selected month or last 30 days
 				const endDate = new Date();
 				const startDate = selectedMonth
 					? new Date(selectedMonth + "-01")
@@ -111,52 +119,117 @@ function IncomeExpenseChartComponent({
 
 				if (selectedMonth) {
 					const [year, month] = selectedMonth.split("-");
-					endDate.setFullYear(parseInt(year), parseInt(month), 0); // Last day of selected month
+					endDate.setFullYear(parseInt(year), parseInt(month), 0);
 				}
 
-				const dateRange = [];
+				const dateRange: string[] = [];
 				const currentDate = new Date(startDate);
 				while (currentDate <= endDate) {
 					dateRange.push(currentDate.toISOString().split("T")[0]);
 					currentDate.setDate(currentDate.getDate() + 1);
 				}
 
-				// Build location filter
+				const startDateStr = startDate.toISOString().split("T")[0];
+				const endDateStr = endDate.toISOString().split("T")[0];
+
 				const locationFilter = !selectedLocation
 					? {}
 					: { location_id: selectedLocation };
 
-				// Fetch income and expenses data
-				const [incomeData, expensesData] = await Promise.all([
-					supabase
-						.from("income")
-						.select("date, amount, currency")
-						.gte("date", startDate.toISOString().split("T")[0])
-						.lte("date", endDate.toISOString().split("T")[0])
-						.in("location_id", tenantLocationIds)
-						.match(locationFilter),
-					supabase
-						.from("expenses")
-						.select("date, amount, currency")
-						.gte("date", startDate.toISOString().split("T")[0])
-						.lte("date", endDate.toISOString().split("T")[0])
-						.in("location_id", tenantLocationIds)
-						.match(locationFilter),
-				]);
+				// Build payments query with location filter via reservations join
+				let paymentsQuery = supabase
+					.from("payments")
+					.select(
+						"created_at, amount, currency, reservations!inner(location_id, tenant_id)",
+					)
+					.eq("reservations.tenant_id", tenant.id)
+					.gte("created_at", `${startDateStr}T00:00:00`)
+					.lte("created_at", `${endDateStr}T23:59:59`);
 
-				// Process data for chart
+				if (selectedLocation) {
+					paymentsQuery = paymentsQuery.eq(
+						"reservations.location_id",
+						selectedLocation,
+					);
+				} else {
+					paymentsQuery = paymentsQuery.in(
+						"reservations.location_id",
+						tenantLocationIds,
+					);
+				}
+
+				const [otherIncomeData, reservationPaymentsData, expensesData] =
+					await Promise.all([
+						// Other income (exclude type='booking' to avoid double-counting)
+						supabase
+							.from("income")
+							.select("date, amount, currency")
+							.neq("type", "booking")
+							.gte("date", startDateStr)
+							.lte("date", endDateStr)
+							.in("location_id", tenantLocationIds)
+							.match(locationFilter),
+						// Reservation payments
+						paymentsQuery,
+						// Expenses (unchanged)
+						supabase
+							.from("expenses")
+							.select("date, amount, currency")
+							.gte("date", startDateStr)
+							.lte("date", endDateStr)
+							.in("location_id", tenantLocationIds)
+							.match(locationFilter),
+					]);
+
+				// Build per-day maps for reservation payments (keyed by date extracted from created_at)
+				const paymentsByDate = new Map<
+					string,
+					{ amount: number; currency: string | null }[]
+				>();
+				for (const payment of reservationPaymentsData.data || []) {
+					const paymentDate = payment.created_at.split("T")[0];
+					if (!paymentsByDate.has(paymentDate)) {
+						paymentsByDate.set(paymentDate, []);
+					}
+					paymentsByDate.get(paymentDate)!.push(payment);
+				}
+
+				// Track per-day breakdown for summary cards
+				const dailyReservationIncome = new Map<string, number>();
+				const dailyOtherIncome = new Map<string, number>();
+
 				const processedData: ChartData[] = await Promise.all(
 					dateRange.map(async (date) => {
-						const dayIncome =
-							incomeData.data?.filter((item) => item.date === date) || [];
+						const dayOtherIncome =
+							otherIncomeData.data?.filter((item) => item.date === date) || [];
+						const dayPayments = paymentsByDate.get(date) || [];
 						const dayExpenses =
 							expensesData.data?.filter((item) => item.date === date) || [];
 
-						// Convert currencies and sum amounts
-						let totalIncome = 0;
+						let reservationIncomeTotal = 0;
+						let otherIncomeTotal = 0;
 						let totalExpenses = 0;
 
-						for (const income of dayIncome) {
+						for (const payment of dayPayments) {
+							try {
+								const convertedAmount = await convertCurrency(
+									payment.amount,
+									payment.currency || "LKR",
+									displayCurrency,
+									tenant.id,
+									selectedLocation,
+								);
+								reservationIncomeTotal += convertedAmount;
+							} catch (error) {
+								logger.error(
+									`Error converting payment currency for date ${date}`,
+									error,
+								);
+								reservationIncomeTotal += payment.amount;
+							}
+						}
+
+						for (const income of dayOtherIncome) {
 							try {
 								const convertedAmount = await convertCurrency(
 									income.amount,
@@ -165,14 +238,13 @@ function IncomeExpenseChartComponent({
 									tenant.id,
 									selectedLocation,
 								);
-								totalIncome += convertedAmount;
+								otherIncomeTotal += convertedAmount;
 							} catch (error) {
 								logger.error(
 									`Error converting income currency for date ${date}`,
 									error,
 								);
-								// Use original amount as fallback if conversion fails
-								totalIncome += income.amount;
+								otherIncomeTotal += income.amount;
 							}
 						}
 
@@ -191,28 +263,31 @@ function IncomeExpenseChartComponent({
 									`Error converting expense currency for date ${date}`,
 									error,
 								);
-								// Use original amount as fallback if conversion fails
 								totalExpenses += expense.amount;
 							}
 						}
 
+						const totalIncome = reservationIncomeTotal + otherIncomeTotal;
+						dailyReservationIncome.set(date, reservationIncomeTotal);
+						dailyOtherIncome.set(date, otherIncomeTotal);
+
 						return {
 							date,
 							income: totalIncome,
-							expenses: -totalExpenses, // Negative for chart display
+							expenses: -totalExpenses,
 							net: totalIncome - totalExpenses,
 						};
 					}),
 				);
 				setChartData(processedData);
 
-				// Calculate today's data
 				const today = new Date().toISOString().split("T")[0];
 				const todayData = processedData.find((item) => item.date === today);
 				setTodayIncome(todayData?.income || 0);
+				setTodayReservationIncome(dailyReservationIncome.get(today) || 0);
+				setTodayOtherIncome(dailyOtherIncome.get(today) || 0);
 				setTodayExpenses(Math.abs(todayData?.expenses || 0));
 
-				// Calculate weekly profit (last 7 days)
 				const last7Days = processedData.slice(-7);
 				const weeklyIncomeTotal = last7Days.reduce(
 					(sum, day) => sum + day.income,
@@ -250,53 +325,90 @@ function IncomeExpenseChartComponent({
 	return (
 		<div className="space-y-4 w-full flex-1">
 			{/* Summary Cards */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
 				<Card className="bg-card border">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
+						<CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
 							{selectedMonth
-								? t("dashboard.summaryCards.monthlyIncome")
-								: t("dashboard.summaryCards.todayIncome")}
+								? t("dashboard.summaryCards.monthlyTotalIncome")
+								: t("dashboard.summaryCards.totalIncome")}
 						</CardTitle>
 						<ArrowUpCircle className="size-4 text-success" />
 					</CardHeader>
-					<CardContent>
-						<div className="text-xl lg:text-2xl font-bold text-success">
+					<CardContent className="px-3 pb-3">
+						<div className="text-lg lg:text-xl font-bold text-success">
 							{formatAmountWithSymbol(todayIncome, displayCurrency)}
 						</div>
-						<p className="text-xs text-muted-foreground">{locationName}</p>
+						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
 				</Card>
 
 				<Card className="bg-card border">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
+						<CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
+							{selectedMonth
+								? t("dashboard.summaryCards.monthlyReservationIncome")
+								: t("dashboard.summaryCards.reservationIncome")}
+						</CardTitle>
+						<BedDouble className="size-4 text-primary" />
+					</CardHeader>
+					<CardContent className="px-3 pb-3">
+						<div className="text-lg lg:text-xl font-bold text-primary">
+							{formatAmountWithSymbol(
+								todayReservationIncome,
+								displayCurrency,
+							)}
+						</div>
+						<p className="text-[10px] text-muted-foreground">{locationName}</p>
+					</CardContent>
+				</Card>
+
+				<Card className="bg-card border">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
+						<CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
+							{selectedMonth
+								? t("dashboard.summaryCards.monthlyOtherIncome")
+								: t("dashboard.summaryCards.otherIncome")}
+						</CardTitle>
+						<Receipt className="size-4 text-cyan-600" />
+					</CardHeader>
+					<CardContent className="px-3 pb-3">
+						<div className="text-lg lg:text-xl font-bold text-cyan-600">
+							{formatAmountWithSymbol(todayOtherIncome, displayCurrency)}
+						</div>
+						<p className="text-[10px] text-muted-foreground">{locationName}</p>
+					</CardContent>
+				</Card>
+
+				<Card className="bg-card border">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
+						<CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
 							{selectedMonth
 								? t("dashboard.summaryCards.monthlyExpenses")
 								: t("dashboard.summaryCards.todayExpenses")}
 						</CardTitle>
 						<ArrowDownCircle className="size-4 text-destructive" />
 					</CardHeader>
-					<CardContent>
-						<div className="text-xl lg:text-2xl font-bold text-destructive">
+					<CardContent className="px-3 pb-3">
+						<div className="text-lg lg:text-xl font-bold text-destructive">
 							{formatAmountWithSymbol(todayExpenses, displayCurrency)}
 						</div>
-						<p className="text-xs text-muted-foreground">{locationName}</p>
+						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
 				</Card>
 
 				<Card className="bg-card border">
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm md:text-base lg:text-lg font-medium text-muted-foreground">
+					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 pt-3 px-3">
+						<CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
 							{t("dashboard.summaryCards.weeklyProfit")}
 						</CardTitle>
 						<TrendingUp className="size-4 text-primary" />
 					</CardHeader>
-					<CardContent>
-						<div className="text-xl lg:text-2xl font-bold text-primary">
+					<CardContent className="px-3 pb-3">
+						<div className="text-lg lg:text-xl font-bold text-primary">
 							{formatAmountWithSymbol(weeklyProfit, displayCurrency)}
 						</div>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-[10px] text-muted-foreground">
 							{profitMargin.toFixed(1)}% {t("dashboard.summaryCards.margin")}
 						</p>
 					</CardContent>

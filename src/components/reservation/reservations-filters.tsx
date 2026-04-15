@@ -1,6 +1,5 @@
-import { Calendar, ChevronDown, MapPin, Search } from "lucide-react";
+import { Calendar, ChevronDown, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CurrencySelector } from "@/components/common/currency-selector";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -17,23 +16,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
-type Currency = string;
-
-interface Location {
-	id: string;
-	name: string;
-}
-
 interface ReservationsFiltersProps {
-	locations: Location[];
-	selectedLocation: string;
-	onLocationChange: (value: string) => void;
 	searchQuery: string;
 	onSearchChange: (value: string) => void;
 	statusFilter: string;
 	onStatusFilterChange: (value: string) => void;
-	selectedCurrency: Currency;
-	onCurrencyChange: (currency: Currency) => void;
 	onNewReservation: () => void;
 	onNewCompactReservation?: () => void;
 }
@@ -43,8 +30,6 @@ export function ReservationsFilters({
 	onSearchChange,
 	statusFilter,
 	onStatusFilterChange,
-	selectedCurrency,
-	onCurrencyChange,
 	onNewReservation,
 	onNewCompactReservation,
 }: ReservationsFiltersProps) {
@@ -90,13 +75,6 @@ export function ReservationsFilters({
 					</SelectItem>
 				</SelectContent>
 			</Select>
-
-			<div className="w-full lg:w-48">
-				<CurrencySelector
-					currency={selectedCurrency}
-					onCurrencyChange={onCurrencyChange}
-				/>
-			</div>
 
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>

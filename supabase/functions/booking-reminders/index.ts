@@ -61,7 +61,7 @@ async function sendSMS(message: string, numbers?: string): Promise<void> {
 	// Send to provided number(s) or both defaults, comma-separated as per Hutch API
 	const smsData = {
 		campaignName: "Daily Bookings",
-		mask: "RathnaSuper",
+		mask: "RetailMastr",
 		numbers:
 			numbers && numbers.trim().length > 0
 				? numbers

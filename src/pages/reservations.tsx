@@ -19,7 +19,6 @@ import { ReservationsHeader } from "@/components/reservation/reservations-header
 import { ReservationsMobileCards } from "@/components/reservation/reservations-mobile-cards";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { useLocationContext } from "@/context/location-context";
 import { useAccountData } from "@/hooks/use-account-data";
 import { useReservationFinancials } from "@/hooks/use-reservation-financials";
 import {
@@ -28,19 +27,13 @@ import {
 } from "@/hooks/use-reservations-data";
 import { useTenant } from "@/hooks/use-tenant";
 
-type Currency = string;
-
 export default function Reservations() {
 	const { t } = useTranslation();
 	const [accounts, setAccounts] = useState([]);
-	const { locations } = useLocationContext();
 	const { refetch } = useReservationsData();
 	const { refetch: refetchFinancials } = useReservationFinancials();
 	const { tenant } = useTenant();
 	const navigate = useNavigate();
-
-	// State management
-	const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USD");
 
 	// Dialog states
 	const [activeTab, setActiveTab] = useState("reservations");
@@ -76,8 +69,8 @@ export default function Reservations() {
 		reservation: any;
 	} | null>(null);
 	const [showEditOTPVerification, setShowEditOTPVerification] = useState(false);
-	const { fetchAccountDetails } = useAccountData(selectedCurrency);
-	const { printReservation } = useReservationPrint();
+	const { fetchAccountDetails } = useAccountData("USD");
+	const { printReservation, downloadReservationPdf } = useReservationPrint();
 
 	useEffect(() => {
 		async function loadAccountDetails() {
@@ -146,8 +139,12 @@ export default function Reservations() {
 		setIsIncomeDialogOpen(true);
 	};
 
-	const handlePrint = (reservation: any) => {
-		printReservation(reservation, tenant);
+	const handlePrint = async (reservation: any) => {
+		await printReservation(reservation, tenant);
+	};
+
+	const handleDownloadPdf = async (reservation: any) => {
+		await downloadReservationPdf(reservation, tenant);
 	};
 
 	const handleIncomeSuccess = () => {
@@ -185,45 +182,39 @@ export default function Reservations() {
 				<ReservationsHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
 				<div className="container mx-auto px-4 sm:px-6 md:px-8">
-					<ReservationsFilters
-						locations={locations}
-						selectedLocation=""
-						searchQuery={searchQuery}
-						statusFilter={statusFilter}
-						selectedCurrency={selectedCurrency}
-						onLocationChange={() => {
-							// Location switching handled by LocationContext
-						}}
-						onSearchChange={setSearchQuery}
-						onStatusFilterChange={setStatusFilter}
-						onCurrencyChange={setSelectedCurrency}
-						onNewReservation={() => setIsNewReservationDialogOpen(true)}
-						onNewCompactReservation={() =>
-							setIsCompactReservationDialogOpen(true)
-						}
-					/>
+				<ReservationsFilters
+					searchQuery={searchQuery}
+					statusFilter={statusFilter}
+					onSearchChange={setSearchQuery}
+					onStatusFilterChange={setStatusFilter}
+					onNewReservation={() => setIsNewReservationDialogOpen(true)}
+					onNewCompactReservation={() =>
+						setIsCompactReservationDialogOpen(true)
+					}
+				/>
 
 					<TabsContent value="reservations" className="space-y-4">
-						<ReservationsMobileCards
-							searchQuery={searchQuery}
-							statusFilter={statusFilter}
-							selectedCurrency={selectedCurrency}
-							onViewReservation={handleViewReservation}
-							onEditReservation={handleEditReservation}
-							onPayment={handlePayment}
-							onAddIncome={handleAddIncome}
-						/>
+				<ReservationsMobileCards
+					searchQuery={searchQuery}
+					statusFilter={statusFilter}
+					selectedCurrency=""
+					onViewReservation={handleViewReservation}
+					onEditReservation={handleEditReservation}
+					onPayment={handlePayment}
+					onAddIncome={handleAddIncome}
+				/>
 
-						<ReservationsDesktopTable
-							searchQuery={searchQuery}
-							statusFilter={statusFilter}
-							selectedCurrency={selectedCurrency}
-							onViewReservation={handleViewReservation}
-							onEditReservation={handleEditReservation}
-							onPayment={handlePayment}
-							onAddIncome={handleAddIncome}
-							onPrint={handlePrint}
-						/>
+				<ReservationsDesktopTable
+					searchQuery={searchQuery}
+					statusFilter={statusFilter}
+					selectedCurrency=""
+					onViewReservation={handleViewReservation}
+					onEditReservation={handleEditReservation}
+					onPayment={handlePayment}
+					onAddIncome={handleAddIncome}
+					onPrint={handlePrint}
+					onDownloadPdf={handleDownloadPdf}
+				/>
 					</TabsContent>
 
 					<TabsContent value="payments" className="space-y-4">

@@ -374,6 +374,8 @@ export function PaymentDialog({
 				currentBooking.location_id,
 			);
 
+			const paymentNumber = `PAY-${Date.now()}`;
+
 			// Create payment record (database trigger will automatically update reservation/external_booking)
 			const { error: paymentError } = await supabase.from("payments").insert({
 				reservation_id: currentBooking.id,
@@ -382,7 +384,7 @@ export function PaymentDialog({
 				currency: accountCurrency,
 				payment_method: formData.payment_method,
 				payment_type: formData.payment_type,
-				payment_number: `PAY-${Date.now()}`, // Generate unique payment number
+				payment_number: paymentNumber,
 				account_id: formData.account_id,
 				notes: formData.notes,
 				reference_number: formData.reference_number || null,
@@ -390,6 +392,27 @@ export function PaymentDialog({
 			});
 
 			if (paymentError) throw paymentError;
+
+			// Also create income record so reservation payments appear in income reports/dashboard
+			const { error: incomeError } = await supabase.from("income").insert({
+				tenant_id: tenant?.id!,
+				location_id: currentBooking.location_id,
+				booking_id: currentBooking.id,
+				amount: convertedAmount,
+				currency: accountCurrency,
+				date: new Date().toISOString().split("T")[0],
+				payment_method: formData.payment_method,
+				type: "booking" as const,
+				account_id: formData.account_id,
+				note:
+					formData.notes ||
+					`Payment for ${reservation?.reservation_number}`,
+				is_advance: formData.payment_type === "advance_payment",
+			});
+
+			if (incomeError) {
+				logger.error("Failed to create income record for payment", incomeError);
+			}
 
 			// If marked as complete, update status to checked_out
 			if (formData.markAsComplete && tenant?.id) {
@@ -401,9 +424,30 @@ export function PaymentDialog({
 
 				if (statusError) {
 					console.error("Error updating booking status:", statusError);
-					// Don't throw error - payment was successful, just status update failed
 				}
 			}
+
+			try {
+				await supabase.functions.invoke("send-sms-notification", {
+					body: {
+						type: "payment",
+						paymentNumber,
+						amount: formData.amount,
+						currency: formData.currency,
+						paymentMethod: formData.payment_method,
+						guestName: reservation?.guest_name,
+						reservationNumber: reservation?.reservation_number,
+						account: selectedAccount?.name || "N/A",
+						locationId: currentBooking.location_id,
+						locationPhone: location?.phone,
+						date: format(new Date(), "MMM dd, yyyy"),
+						note: formData.notes,
+					},
+				});
+			} catch (smsError) {
+				console.error("SMS notification failed:", smsError);
+			}
+
 			toast({
 				title: "Payment Recorded",
 				description: formData.markAsComplete

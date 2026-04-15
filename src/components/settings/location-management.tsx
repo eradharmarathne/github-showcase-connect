@@ -9,6 +9,7 @@ import { usePermissions } from "@/hooks/use-permissions";
 import { useTenant } from "@/hooks/use-tenant";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationContacts } from "./notification-contacts";
 import { Location } from "./types";
 
 export function LocationManagement() {
@@ -350,6 +351,12 @@ export function LocationManagement() {
 												Edit
 											</Button>
 										</div>
+									)}
+									{tenant?.id && (
+										<NotificationContacts
+											locationId={location.id}
+											tenantId={tenant.id}
+										/>
 									)}
 								</div>
 							))}
