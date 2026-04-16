@@ -1,4 +1,4 @@
-import { createAdminClient, supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 
 export interface LocationPermissions extends Record<string, Json | undefined> {
@@ -36,265 +36,64 @@ export interface AddUserToLocationResult {
 }
 
 /**
- * Generates a secure temporary password
- */
-const generateSecurePassword = (): string => {
-	const chars =
-		"ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%&*";
-	let password = "";
-	for (let i = 0; i < 12; i++) {
-		password += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return password;
-};
-
-/**
- * Add a user to a specific location with custom permissions
- * Creates new user if doesn't exist, or adds location to existing user
- * Sends login credentials via email (no invitation tokens)
+ * Add a user to a specific location with custom permissions.
+ * Delegates admin operations (user creation, profile updates) to the
+ * invite-user Edge Function which runs server-side with the service role key.
+ * After the user is created/updated, sends login credentials via email.
  */
 export const addUserToLocation = async (
 	params: AddUserToLocationParams,
 ): Promise<AddUserToLocationResult> => {
 	try {
-		// First check if user exists in profiles using regular client (RLS allows this)
-		const { data: existingProfile, error: profileError } = await supabase
-			.from("profiles")
-			.select("id, email, tenant_id")
-			.eq("email", params.email)
-			.maybeSingle();
+		const { data, error } = await supabase.functions.invoke("invite-user", {
+			body: {
+				email: params.email,
+				tenantId: params.tenantId,
+				locationId: params.locationId,
+				addedBy: params.addedBy,
+				permissions: params.permissions,
+				password: params.password,
+			},
+		});
 
-		if (profileError) {
-			console.error("Error checking existing profile:", profileError);
+		if (error) {
+			console.error("Edge function invocation error:", error);
 			return {
 				success: false,
-				error: `Failed to check existing user: ${profileError.message}`,
+				error: `Failed to invite user: ${error.message}`,
 			};
 		}
 
-		let userId: string;
-		let userCreated = false;
-		let password: string | undefined;
-
-	const adminClient = createAdminClient();
-	if (!adminClient) {
-		return {
-			success: false,
-			error: "Admin operations not available - service role key missing",
-		};
-	}
-
-	if (existingProfile) {
-		// User exists - update tenant if needed and add location access
-		userId = existingProfile.id;
-		userCreated = false;
-
-		if (
-			!existingProfile.tenant_id ||
-			existingProfile.tenant_id !== params.tenantId
-		) {
-			// Use admin client to bypass RLS (admin can't update another user's profile via regular client)
-			const { error: updateError } = await adminClient
-				.from("profiles")
-				.update({
-					tenant_id: params.tenantId,
-				})
-				.eq("id", userId);
-
-			if (updateError) {
-				console.error("Error updating profile:", updateError);
-				return {
-					success: false,
-					error: `Failed to update user profile: ${updateError.message}`,
-				};
-			}
-		}
-	} else {
-		// User doesn't exist in profiles - check if auth user exists
-		const { data: authUsers, error: authError } =
-			await adminClient.auth.admin.listUsers();
-
-		if (authError) {
-			console.error("Error checking auth users:", authError);
+		if (!data?.success) {
 			return {
 				success: false,
-				error: `Failed to check existing auth users: ${authError.message}`,
+				error: data?.error || "Failed to add user to location",
 			};
 		}
 
-		const existingAuthUser = authUsers.users.find(
-			(user: any) => user.email === params.email,
-		);
-
-		if (existingAuthUser) {
-			userId = existingAuthUser.id;
-			userCreated = false;
-
-			// Use admin client + upsert to handle the handle_new_user trigger race
-			const { error: profileCreateError } = await adminClient
-				.from("profiles")
-				.upsert(
-					{
-						id: userId,
-						email: params.email,
-						name: params.email.split("@")[0],
-						tenant_id: params.tenantId,
-					},
-					{ onConflict: "id" },
-				);
-
-			if (profileCreateError) {
-				console.error(
-					"Error creating profile for existing auth user:",
-					profileCreateError,
-				);
-				return {
-					success: false,
-					error: `Failed to create user profile: ${profileCreateError.message}`,
-				};
-			}
-		} else {
-			// User doesn't exist at all - create new user account
-			password = params.password || generateSecurePassword();
-
-			const { data: authData, error: authCreateError } =
-				await adminClient.auth.admin.createUser({
-					email: params.email,
-					password: password,
-					email_confirm: true,
-				});
-
-			if (authCreateError) {
-				console.error("Error creating auth user:", authCreateError);
-				return {
-					success: false,
-					error: `Failed to create user account: ${authCreateError.message}`,
-				};
-			}
-
-			if (!authData.user) {
-				return { success: false, error: "Failed to create user account" };
-			}
-
-			userId = authData.user.id;
-			userCreated = true;
-
-			// Use admin client + upsert: the handle_new_user trigger may have
-			// already created a profile (without tenant_id) by the time we get here
-			const { error: profileCreateError } = await adminClient
-				.from("profiles")
-				.upsert(
-					{
-						id: userId,
-						email: params.email,
-						name: params.email.split("@")[0],
-						tenant_id: params.tenantId,
-					},
-					{ onConflict: "id" },
-				);
-
-			if (profileCreateError) {
-				console.error("Error creating profile:", profileCreateError);
-				return {
-					success: false,
-					error: `Failed to create user profile: ${profileCreateError.message}`,
-				};
-			}
-		}
-	}
-
-		// Create or update user permissions for this location using regular client (RLS allows this)
-		const { data: existingPermissions, error: permError } = await supabase
-			.from("user_permissions")
-			.select("id")
-			.eq("user_id", userId)
-			.eq("location_id", params.locationId)
-			.eq("tenant_id", params.tenantId)
-			.maybeSingle();
-
-		if (permError) {
-			console.error("Error checking permissions:", permError);
-			return {
-				success: false,
-				error: `Failed to check user permissions: ${permError.message}`,
-			};
-		}
-
-		if (!existingPermissions) {
-			// No existing permissions - create new using regular client (RLS allows this)
-			const { error: createPermError } = await supabase
-				.from("user_permissions")
-				.insert({
-					user_id: userId,
-					location_id: params.locationId,
-					tenant_id: params.tenantId,
-					...params.permissions,
-				});
-
-			if (createPermError) {
-				console.error("Error creating permissions:", createPermError);
-				return {
-					success: false,
-					error: `Failed to create user permissions: ${createPermError.message}`,
-				};
-			}
-		} else {
-			// Update existing permissions using regular client (RLS allows this)
-			const { error: updatePermError } = await supabase
-				.from("user_permissions")
-				.update({
-					...params.permissions,
-				})
-				.eq("id", existingPermissions.id);
-
-			if (updatePermError) {
-				console.error("Error updating permissions:", updatePermError);
-				return {
-					success: false,
-					error: `Failed to update user permissions: ${updatePermError.message}`,
-				};
-			}
-		}
-
-		// Send appropriate email
+		// Send appropriate email after successful user creation/update
 		try {
-			if (userCreated && password) {
-				// New user - send credentials
-				const { error: emailError } = await supabase.functions.invoke(
-					"send-user-credentials",
-					{
-						body: {
-							to: params.email,
-							email: params.email,
-							password: password,
-							loginUrl: `${window.location.origin}/auth`,
-							organizationName: "CheckingCheckout",
-							emailType: "new_user_credentials",
-						},
+			if (data.user_created && data.password) {
+				await supabase.functions.invoke("send-user-credentials", {
+					body: {
+						to: params.email,
+						email: params.email,
+						password: data.password,
+						loginUrl: `${window.location.origin}/auth`,
+						organizationName: "CheckingCheckout",
+						emailType: "new_user_credentials",
 					},
-				);
-
-				if (emailError) {
-					console.error("Failed to send credentials email:", emailError);
-				}
+				});
 			} else {
-				// Existing user - send location access notification
-				const { error: emailError } = await supabase.functions.invoke(
-					"send-user-credentials",
-					{
-						body: {
-							to: params.email,
-							email: params.email,
-							loginUrl: `${window.location.origin}/auth`,
-							organizationName: "CheckingCheckout",
-							emailType: "location_access_granted",
-						},
+				await supabase.functions.invoke("send-user-credentials", {
+					body: {
+						to: params.email,
+						email: params.email,
+						loginUrl: `${window.location.origin}/auth`,
+						organizationName: "CheckingCheckout",
+						emailType: "location_access_granted",
 					},
-				);
-
-				if (emailError) {
-					console.error("Failed to send notification email:", emailError);
-				}
+				});
 			}
 		} catch (emailException) {
 			console.error("Exception sending email:", emailException);
@@ -302,11 +101,11 @@ export const addUserToLocation = async (
 
 		return {
 			success: true,
-			user_id: userId,
-			user_created: userCreated,
-			user_exists: !userCreated,
-			permissions_created: true,
-			password: userCreated ? password : undefined,
+			user_id: data.user_id,
+			user_created: data.user_created,
+			user_exists: data.user_exists,
+			permissions_created: data.permissions_created,
+			password: data.password,
 		};
 	} catch (error) {
 		console.error("Exception adding user to location:", error);
