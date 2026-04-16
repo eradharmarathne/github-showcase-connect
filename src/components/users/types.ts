@@ -41,18 +41,18 @@ export interface InvitePermissions {
 }
 
 export const permissionTypes = [
-	{ key: "dashboard", label: "Dashboard Access" },
-	{ key: "income", label: "Income Management" },
-	{ key: "expenses", label: "Expense Management" },
-	{ key: "reports", label: "Reports & Analytics" },
-	{ key: "calendar", label: "Calendar Access" },
-	{ key: "bookings", label: "Booking Management" },
-	{ key: "rooms", label: "Room Management" },
-	{ key: "master_files", label: "Master Files" },
-	{ key: "accounts", label: "Account Management" },
-	{ key: "users", label: "User Management" },
-	{ key: "settings", label: "Settings Access" },
-	{ key: "booking_channels", label: "Booking Channels" },
+	{ key: "access_dashboard", label: "Dashboard Access" },
+	{ key: "access_income", label: "Income Management" },
+	{ key: "access_expenses", label: "Expense Management" },
+	{ key: "access_reports", label: "Reports & Analytics" },
+	{ key: "access_calendar", label: "Calendar Access" },
+	{ key: "access_bookings", label: "Booking Management" },
+	{ key: "access_rooms", label: "Room Management" },
+	{ key: "access_master_files", label: "Master Files" },
+	{ key: "access_accounts", label: "Account Management" },
+	{ key: "access_users", label: "User Management" },
+	{ key: "access_settings", label: "Settings Access" },
+	{ key: "access_booking_channels", label: "Booking Channels" },
 ];
 
 export const defaultInvitePermissions: InvitePermissions = {

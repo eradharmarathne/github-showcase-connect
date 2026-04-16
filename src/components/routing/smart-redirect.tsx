@@ -72,15 +72,17 @@ export const SmartRedirect = () => {
 		return <Navigate to="/onboarding" replace />;
 	}
 
-	// If tenant hasn't completed onboarding, redirect to onboarding
-	if (!tenant.onboarding_completed) {
+	// Only redirect the tenant OWNER to onboarding for incomplete setup.
+	// Invited staff should not be blocked by tenant onboarding/subscription status.
+	const isOwner = profile?.id === tenant.owner_profile_id;
+
+	if (!tenant.onboarding_completed && isOwner) {
 		logger.debug(
-			"Tenant onboarding not completed - redirecting to /onboarding",
+			"Tenant onboarding not completed (owner) - redirecting to /onboarding",
 		);
 		return <Navigate to="/onboarding" replace />;
 	}
 
-	// Check subscription status - if incomplete, pending_payment, or payment_failed, redirect to onboarding
 	const invalidSubscriptionStatuses = [
 		"incomplete",
 		"pending_payment",
@@ -88,11 +90,12 @@ export const SmartRedirect = () => {
 		"expired",
 	];
 	if (
+		isOwner &&
 		tenant.subscription_status &&
 		invalidSubscriptionStatuses.includes(tenant.subscription_status)
 	) {
 		logger.debug(
-			`Tenant has invalid subscription status: ${tenant.subscription_status} - redirecting to /onboarding`,
+			`Tenant has invalid subscription status: ${tenant.subscription_status} (owner) - redirecting to /onboarding`,
 		);
 		return <Navigate to="/onboarding" replace />;
 	}

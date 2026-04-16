@@ -76,129 +76,132 @@ export const addUserToLocation = async (
 		let userCreated = false;
 		let password: string | undefined;
 
-		if (existingProfile) {
-			// User exists - update tenant if needed and add location access
-			userId = existingProfile.id;
-			userCreated = false;
+	const adminClient = createAdminClient();
+	if (!adminClient) {
+		return {
+			success: false,
+			error: "Admin operations not available - service role key missing",
+		};
+	}
 
-			// Update tenant_id if not set or different (regular client with RLS)
-			if (
-				!existingProfile.tenant_id ||
-				existingProfile.tenant_id !== params.tenantId
-			) {
-				const { error: updateError } = await supabase
-					.from("profiles")
-					.update({
-						tenant_id: params.tenantId,
-					})
-					.eq("id", userId);
+	if (existingProfile) {
+		// User exists - update tenant if needed and add location access
+		userId = existingProfile.id;
+		userCreated = false;
 
-				if (updateError) {
-					console.error("Error updating profile:", updateError);
-					return {
-						success: false,
-						error: `Failed to update user profile: ${updateError.message}`,
-					};
-				}
-			}
-		} else {
-			// User doesn't exist in profiles - check if auth user exists
+		if (
+			!existingProfile.tenant_id ||
+			existingProfile.tenant_id !== params.tenantId
+		) {
+			// Use admin client to bypass RLS (admin can't update another user's profile via regular client)
+			const { error: updateError } = await adminClient
+				.from("profiles")
+				.update({
+					tenant_id: params.tenantId,
+				})
+				.eq("id", userId);
 
-			// Get admin client only for auth operations
-			const adminClient = createAdminClient();
-			if (!adminClient) {
+			if (updateError) {
+				console.error("Error updating profile:", updateError);
 				return {
 					success: false,
-					error: "Admin operations not available - service role key missing",
+					error: `Failed to update user profile: ${updateError.message}`,
 				};
-			}
-
-			const { data: authUsers, error: authError } =
-				await adminClient.auth.admin.listUsers();
-
-			if (authError) {
-				console.error("Error checking auth users:", authError);
-				return {
-					success: false,
-					error: `Failed to check existing auth users: ${authError.message}`,
-				};
-			}
-
-			const existingAuthUser = authUsers.users.find(
-				(user: any) => user.email === params.email,
-			);
-
-			if (existingAuthUser) {
-				// Auth user exists but no profile - create profile using regular client
-				userId = existingAuthUser.id;
-				userCreated = false;
-
-				const { error: profileCreateError } = await supabase
-					.from("profiles")
-					.insert({
-						id: userId,
-						email: params.email,
-						name: params.email.split("@")[0],
-						tenant_id: params.tenantId,
-					});
-
-				if (profileCreateError) {
-					console.error(
-						"Error creating profile for existing auth user:",
-						profileCreateError,
-					);
-					return {
-						success: false,
-						error: `Failed to create user profile: ${profileCreateError.message}`,
-					};
-				}
-			} else {
-				// User doesn't exist at all - create new user account
-
-				password = params.password || generateSecurePassword();
-
-				// Create auth user using admin client (auth operations require admin)
-				const { data: authData, error: authCreateError } =
-					await adminClient.auth.admin.createUser({
-						email: params.email,
-						password: password,
-						email_confirm: true,
-					});
-
-				if (authCreateError) {
-					console.error("Error creating auth user:", authCreateError);
-					return {
-						success: false,
-						error: `Failed to create user account: ${authCreateError.message}`,
-					};
-				}
-
-				if (!authData.user) {
-					return { success: false, error: "Failed to create user account" };
-				}
-
-				userId = authData.user.id;
-				userCreated = true;
-
-				// Create profile for new user using regular client (RLS allows this now)
-				const { error: profileCreateError } = await supabase
-					.from("profiles")
-					.insert({
-						id: userId,
-						email: params.email,
-						name: params.email.split("@")[0],
-						tenant_id: params.tenantId,
-					});
-
-				if (profileCreateError) {
-					console.error("Error creating profile:", profileCreateError);
-					return {
-						success: false,
-						error: `Failed to create user profile: ${profileCreateError.message}`,
-					};
-				}
 			}
 		}
+	} else {
+		// User doesn't exist in profiles - check if auth user exists
+		const { data: authUsers, error: authError } =
+			await adminClient.auth.admin.listUsers();
+
+		if (authError) {
+			console.error("Error checking auth users:", authError);
+			return {
+				success: false,
+				error: `Failed to check existing auth users: ${authError.message}`,
+			};
+		}
+
+		const existingAuthUser = authUsers.users.find(
+			(user: any) => user.email === params.email,
+		);
+
+		if (existingAuthUser) {
+			userId = existingAuthUser.id;
+			userCreated = false;
+
+			// Use admin client + upsert to handle the handle_new_user trigger race
+			const { error: profileCreateError } = await adminClient
+				.from("profiles")
+				.upsert(
+					{
+						id: userId,
+						email: params.email,
+						name: params.email.split("@")[0],
+						tenant_id: params.tenantId,
+					},
+					{ onConflict: "id" },
+				);
+
+			if (profileCreateError) {
+				console.error(
+					"Error creating profile for existing auth user:",
+					profileCreateError,
+				);
+				return {
+					success: false,
+					error: `Failed to create user profile: ${profileCreateError.message}`,
+				};
+			}
+		} else {
+			// User doesn't exist at all - create new user account
+			password = params.password || generateSecurePassword();
+
+			const { data: authData, error: authCreateError } =
+				await adminClient.auth.admin.createUser({
+					email: params.email,
+					password: password,
+					email_confirm: true,
+				});
+
+			if (authCreateError) {
+				console.error("Error creating auth user:", authCreateError);
+				return {
+					success: false,
+					error: `Failed to create user account: ${authCreateError.message}`,
+				};
+			}
+
+			if (!authData.user) {
+				return { success: false, error: "Failed to create user account" };
+			}
+
+			userId = authData.user.id;
+			userCreated = true;
+
+			// Use admin client + upsert: the handle_new_user trigger may have
+			// already created a profile (without tenant_id) by the time we get here
+			const { error: profileCreateError } = await adminClient
+				.from("profiles")
+				.upsert(
+					{
+						id: userId,
+						email: params.email,
+						name: params.email.split("@")[0],
+						tenant_id: params.tenantId,
+					},
+					{ onConflict: "id" },
+				);
+
+			if (profileCreateError) {
+				console.error("Error creating profile:", profileCreateError);
+				return {
+					success: false,
+					error: `Failed to create user profile: ${profileCreateError.message}`,
+				};
+			}
+		}
+	}
 
 		// Create or update user permissions for this location using regular client (RLS allows this)
 		const { data: existingPermissions, error: permError } = await supabase

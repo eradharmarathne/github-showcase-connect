@@ -166,18 +166,18 @@ export function EditUserDialog({
 				const { error: permissionError } = await supabase
 					.from("user_permissions")
 					.update({
-						access_dashboard: permissions.dashboard || false,
-						access_income: permissions.income || false,
-						access_expenses: permissions.expenses || false,
-						access_reports: permissions.reports || false,
-						access_calendar: permissions.calendar || false,
-						access_bookings: permissions.bookings || false,
-						access_rooms: permissions.rooms || false,
-						access_master_files: permissions.master_files || false,
-						access_accounts: permissions.accounts || false,
-						access_users: permissions.users || false,
-						access_settings: permissions.settings || false,
-						access_booking_channels: permissions.booking_channels || false,
+						access_dashboard: permissions.access_dashboard || false,
+						access_income: permissions.access_income || false,
+						access_expenses: permissions.access_expenses || false,
+						access_reports: permissions.access_reports || false,
+						access_calendar: permissions.access_calendar || false,
+						access_bookings: permissions.access_bookings || false,
+						access_rooms: permissions.access_rooms || false,
+						access_master_files: permissions.access_master_files || false,
+						access_accounts: permissions.access_accounts || false,
+						access_users: permissions.access_users || false,
+						access_settings: permissions.access_settings || false,
+						access_booking_channels: permissions.access_booking_channels || false,
 					})
 					.eq("user_id", editingUser.id)
 					.eq("location_id", location.id)
