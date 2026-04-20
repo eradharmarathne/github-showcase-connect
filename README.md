@@ -6,6 +6,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-2.0-green.svg)](https://supabase.com/)
 [![License](https://img.shields.io/badge/license-Private-red.svg)](LICENSE)
 
+
 A comprehensive multi-tenant hospitality management system built for hotels, guesthouses, and accommodation providers. Manage reservations, track income/expenses, generate reports, and integrate with major booking channels - all from one centralized platform.
 
 ## 🏨 Features
