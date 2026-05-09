@@ -13,6 +13,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { OTPVerification } from "@/components/auth/otp-verification";
 import { SignatureCapture } from "@/components/media/signature-capture";
+import { RouteLoadingState } from "@/components/routing/route-loading-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -153,7 +154,7 @@ export default function ReservationDetails() {
 	};
 
 	if (loading) {
-		return null;
+		return <RouteLoadingState message="Loading reservation details..." />;
 	}
 
 	if (!reservation) {

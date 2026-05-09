@@ -1,4 +1,5 @@
 import { Navigate } from "react-router";
+import { AnimatedLoadingScreen } from "@/components/common";
 import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
 import { useInvitations } from "@/hooks/use-invitations";
@@ -34,7 +35,12 @@ export const SmartRedirect = () => {
 		(user && !profile)
 	) {
 		logger.debug("Still loading, waiting...");
-		return null;
+		return (
+			<AnimatedLoadingScreen
+				message="Preparing your workspace..."
+				showLogo={true}
+			/>
+		);
 	}
 
 	logger.debug("All data loaded", {

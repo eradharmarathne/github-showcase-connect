@@ -7,6 +7,7 @@ import {
 	ReservationSummaryCard,
 	TravelerExpensesCard,
 } from "@/components/payment";
+import { RouteLoadingState } from "@/components/routing/route-loading-state";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/auth-context";
 import { useTenant } from "@/hooks/use-tenant";
@@ -416,7 +417,7 @@ export default function PaymentForm() {
 	);
 
 	if (loading) {
-		return null;
+		return <RouteLoadingState message="Loading payment details..." />;
 	}
 
 	if (!reservation) {

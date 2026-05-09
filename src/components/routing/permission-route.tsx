@@ -1,8 +1,8 @@
 import { AlertTriangle } from "lucide-react";
-import { useLocation } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePermissions } from "@/hooks/use-permissions";
 import { Tables } from "@/integrations/supabase/types";
+import { RouteLoadingState } from "./route-loading-state";
 
 type UserPermissions = Tables<"user_permissions">;
 type PermissionKey = keyof Omit<
@@ -19,13 +19,11 @@ interface PermissionRouteProps {
 export const PermissionRoute = ({
 	children,
 	permission,
-	fallbackPath = "/dashboard",
 }: PermissionRouteProps) => {
 	const { hasAnyPermission, loading } = usePermissions();
-	const location = useLocation();
 
 	if (loading) {
-		return null;
+		return <RouteLoadingState message="Checking page access..." />;
 	}
 
 	if (!hasAnyPermission(permission)) {

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "@/context/auth-context";
+import { RouteLoadingState } from "./route-loading-state";
 
 interface ProtectedRouteProps {
 	children: React.ReactNode;
@@ -10,7 +11,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 	const location = useLocation();
 
 	if (loading) {
-		return null;
+		return <RouteLoadingState message="Checking your session..." />;
 	}
 
 	if (!user) {

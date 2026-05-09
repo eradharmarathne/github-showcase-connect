@@ -10,7 +10,7 @@ export function AppLoadingWrapper({ children }: AppLoadingWrapperProps) {
 	const { loading, profileLoading, tenantLoading } = useAuth();
 
 	// Show loading screen for initial auth loading or critical data loading
-	const isLoading = loading || (profileLoading && tenantLoading);
+	const isLoading = loading || profileLoading || tenantLoading;
 
 	if (isLoading) {
 		return <AnimatedLoadingScreen message="Loading..." showLogo={true} />;

@@ -23,12 +23,25 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/context/auth-context";
+import { useLocationContext } from "@/context/location-context";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePermissions } from "@/hooks/use-permissions";
+import { RouteLoadingState } from "../routing/route-loading-state";
 
 export function Layout() {
 	const isMobile = useIsMobile();
 	const location = useLocation();
 	const { t } = useTranslation();
+	const { loading, profileLoading, tenantLoading } = useAuth();
+	const { loading: locationsLoading } = useLocationContext();
+	const { loading: permissionsLoading } = usePermissions();
+	const isPageContextLoading =
+		loading ||
+		profileLoading ||
+		tenantLoading ||
+		locationsLoading ||
+		permissionsLoading;
 
 	// Get page title based on current route
 	const getPageTitle = () => {
@@ -145,7 +158,11 @@ export function Layout() {
 
 				{/* Main Content */}
 				<div className="flex flex-1 flex-col gap-4 px-0 sm:px-4 md:px-6 pt-0">
-					<Outlet />
+					{isPageContextLoading ? (
+						<RouteLoadingState message="Loading page data..." />
+					) : (
+						<Outlet />
+					)}
 				</div>
 			</SidebarInset>
 
