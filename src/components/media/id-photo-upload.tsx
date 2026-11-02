@@ -15,12 +15,45 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-interface IDPhoto {
+export interface IDPhoto {
 	filePath: string; // Store the storage file path instead of URL
 	name: string;
 	uploadedAt: Date;
 	type: "passport" | "national_id" | "drivers_license" | "other";
 }
+
+/** Reads the `guest_id_photos` JSON column (array or JSON string) into IDPhoto objects. */
+export const parseIdPhotos = (raw: unknown): IDPhoto[] => {
+	let value = raw;
+	if (typeof value === "string") {
+		try {
+			value = JSON.parse(value);
+		} catch {
+			return [];
+		}
+	}
+	if (!Array.isArray(value)) return [];
+	return value
+		.filter((p) => p && typeof p === "object" && typeof p.filePath === "string")
+		.map((p) => ({
+			filePath: p.filePath,
+			name: p.name || "ID document",
+			type: p.type || "other",
+			uploadedAt: p.uploadedAt ? new Date(p.uploadedAt) : new Date(),
+		}));
+};
+
+/** Converts IDPhoto objects into a JSON-safe value for the `guest_id_photos` column. */
+export const serializeIdPhotos = (photos: IDPhoto[]) =>
+	photos.map((p) => ({
+		filePath: p.filePath,
+		name: p.name,
+		type: p.type,
+		uploadedAt:
+			p.uploadedAt instanceof Date
+				? p.uploadedAt.toISOString()
+				: String(p.uploadedAt),
+	}));
 
 interface IDPhotoUploadProps {
 	photos: IDPhoto[];

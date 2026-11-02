@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { convertCurrency } from "@/utils/currency";
+import { ReservationIdDocuments } from "../reservation/reservation-id-documents";
 
 type Reservation = Tables<"reservations"> & {
 	locations: Tables<"locations"> | null;
@@ -443,6 +444,14 @@ export function ViewReservationDialog({
 								</div>
 							</CardContent>
 						</Card>
+
+						{/* Passport / ID documents - upload at check-in */}
+						{currentBooking?.id && (
+							<ReservationIdDocuments
+								reservationId={currentBooking.id}
+								className="lg:col-span-2 lg:order-last"
+							/>
+						)}
 
 						{/* Stay Details */}
 						<Card>

@@ -1,3 +1,4 @@
+import { type IDPhoto, IDPhotoUpload } from "@/components/media/id-photo-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NationalityCombobox } from "@/components/ui/nationality-combobox";
@@ -22,16 +23,19 @@ interface GuestData {
 	guest_id_number: string;
 	special_requests: string;
 	booking_source: string;
+	guest_id_photos: IDPhoto[];
 }
 
 interface GuestInformationStepProps {
 	guestData: GuestData;
 	onGuestDataChange: (field: string, value: any) => void;
+	uploadPathPrefix?: string;
 }
 
 export function GuestInformationStep({
 	guestData,
 	onGuestDataChange,
+	uploadPathPrefix,
 }: GuestInformationStepProps) {
 	const { preferences: fieldPreferences } = useFormFieldPreferences();
 
@@ -136,6 +140,15 @@ export function GuestInformationStep({
 					</div>
 				)}
 			</div>
+
+			{/* Passport / ID documents */}
+			<IDPhotoUpload
+				photos={guestData.guest_id_photos}
+				onPhotosChange={(photos) => onGuestDataChange("guest_id_photos", photos)}
+				title="Passport / ID Documents"
+				maxPhotos={6}
+				uploadPathPrefix={uploadPathPrefix}
+			/>
 
 			{/* Booking Source */}
 			{fieldPreferences?.show_booking_source !== false && (

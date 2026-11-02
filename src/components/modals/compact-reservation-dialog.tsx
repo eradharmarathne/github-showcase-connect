@@ -3,6 +3,11 @@ import { Calendar, CalendarDays, Save, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CurrencySelector } from "@/components/common/currency-selector";
+import {
+	type IDPhoto,
+	IDPhotoUpload,
+	serializeIdPhotos,
+} from "@/components/media/id-photo-upload";
 import { Button } from "@/components/ui/button";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +64,7 @@ interface ReservationFormData {
 	guest_nationality: string;
 	guest_passport_number: string;
 	guest_id_number: string;
+	guest_id_photos: IDPhoto[];
 
 	// Booking Details
 	room_id: string;
@@ -122,6 +128,7 @@ export function CompactReservationDialog({
 		guest_nationality: "",
 		guest_passport_number: "",
 		guest_id_number: "",
+		guest_id_photos: [],
 		room_id: preSelectedRoomId || "",
 		check_in_date: defaultCheckIn ? format(defaultCheckIn, "yyyy-MM-dd") : "",
 		check_out_date: defaultCheckOut
@@ -374,6 +381,10 @@ export function CompactReservationDialog({
 				status: "tentative" as const,
 				arrival_time: formData.arrival_time || null,
 				special_requests: formData.special_requests || null,
+				guest_id_photos:
+					formData.guest_id_photos.length > 0
+						? serializeIdPhotos(formData.guest_id_photos)
+						: null,
 				booking_source: formData.booking_source,
 				guide_id: formData.guide_id || null,
 				agent_id: formData.agent_id || null,
@@ -470,6 +481,7 @@ export function CompactReservationDialog({
 			guest_nationality: "",
 			guest_passport_number: "",
 			guest_id_number: "",
+		guest_id_photos: [],
 			room_id: preSelectedRoomId || "",
 			check_in_date: defaultCheckIn ? format(defaultCheckIn, "yyyy-MM-dd") : "",
 			check_out_date: defaultCheckOut
@@ -672,6 +684,22 @@ export function CompactReservationDialog({
 											</div>
 										</CardContent>
 									</Card>
+
+									{/* Passport / ID documents */}
+									<IDPhotoUpload
+										photos={formData.guest_id_photos}
+										onPhotosChange={(photos) =>
+											setFormData((prev) => ({
+												...prev,
+												guest_id_photos: photos,
+											}))
+										}
+										title="Passport / ID Documents"
+										maxPhotos={6}
+										uploadPathPrefix={
+											tenant?.id ? `${tenant.id}/id-photos/new` : undefined
+										}
+									/>
 
 									{/* Booking Details */}
 									<Card>
