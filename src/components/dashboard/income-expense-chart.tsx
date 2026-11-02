@@ -1,3 +1,4 @@
+import { AnimatedNumber } from "@/components/common/animated-number";
 import {
 	ArrowDownCircle,
 	ArrowUpCircle,
@@ -337,7 +338,7 @@ function IncomeExpenseChartComponent({
 					</CardHeader>
 					<CardContent className="px-3 pb-3">
 						<div className="text-lg lg:text-xl font-bold text-success">
-							{formatAmountWithSymbol(todayIncome, displayCurrency)}
+							{<AnimatedNumber value={todayIncome} format={(n) => formatAmountWithSymbol(n, displayCurrency)} />}
 						</div>
 						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
@@ -354,10 +355,7 @@ function IncomeExpenseChartComponent({
 					</CardHeader>
 					<CardContent className="px-3 pb-3">
 						<div className="text-lg lg:text-xl font-bold text-primary">
-							{formatAmountWithSymbol(
-								todayReservationIncome,
-								displayCurrency,
-							)}
+							<AnimatedNumber value={todayReservationIncome} format={(n) => formatAmountWithSymbol(n, displayCurrency)} />
 						</div>
 						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
@@ -374,7 +372,7 @@ function IncomeExpenseChartComponent({
 					</CardHeader>
 					<CardContent className="px-3 pb-3">
 						<div className="text-lg lg:text-xl font-bold text-cyan-600">
-							{formatAmountWithSymbol(todayOtherIncome, displayCurrency)}
+							{<AnimatedNumber value={todayOtherIncome} format={(n) => formatAmountWithSymbol(n, displayCurrency)} />}
 						</div>
 						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
@@ -391,7 +389,7 @@ function IncomeExpenseChartComponent({
 					</CardHeader>
 					<CardContent className="px-3 pb-3">
 						<div className="text-lg lg:text-xl font-bold text-destructive">
-							{formatAmountWithSymbol(todayExpenses, displayCurrency)}
+							{<AnimatedNumber value={todayExpenses} format={(n) => formatAmountWithSymbol(n, displayCurrency)} />}
 						</div>
 						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
@@ -406,7 +404,7 @@ function IncomeExpenseChartComponent({
 					</CardHeader>
 					<CardContent className="px-3 pb-3">
 						<div className="text-lg lg:text-xl font-bold text-primary">
-							{formatAmountWithSymbol(weeklyProfit, displayCurrency)}
+							{<AnimatedNumber value={weeklyProfit} format={(n) => formatAmountWithSymbol(n, displayCurrency)} />}
 						</div>
 						<p className="text-[10px] text-muted-foreground">
 							{profitMargin.toFixed(1)}% {t("dashboard.summaryCards.margin")}
