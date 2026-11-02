@@ -116,7 +116,10 @@ export function useReservationsData() {
 	const [loading, setLoading] = useState(true);
 
 	const fetchReservations = useCallback(async () => {
-		if (!selectedLocation || !user) return;
+		if (!selectedLocation || !user) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);
@@ -253,7 +256,10 @@ export function useIncomeData() {
 	const [loading, setLoading] = useState(true);
 
 	const fetchIncomeRecords = useCallback(async () => {
-		if (!selectedLocation || !user) return;
+		if (!selectedLocation || !user) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);

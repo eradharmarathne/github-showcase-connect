@@ -41,7 +41,10 @@ export const useUsersData = (): UseUsersDataReturn => {
 	const { hasPermission } = usePermissions();
 
 	const fetchUsers = useCallback(async () => {
-		if (!tenant?.id) return;
+		if (!tenant?.id) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);

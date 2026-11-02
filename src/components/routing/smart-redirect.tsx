@@ -3,8 +3,10 @@ import { AnimatedLoadingScreen } from "@/components/common";
 import { useAuth } from "@/context/auth-context";
 import { useLocationContext } from "@/context/location-context";
 import { useInvitations } from "@/hooks/use-invitations";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
 import { usePermissions } from "@/hooks/use-permissions";
 import { logger } from "@/lib/logger";
+import { LoadingTimeoutCard } from "./loading-timeout-card";
 
 export const SmartRedirect = () => {
 	const { tenant, tenantLoading, profile, profileLoading, user } = useAuth();
@@ -26,14 +28,25 @@ export const SmartRedirect = () => {
 
 	// Wait for all loading states to complete
 	// Also wait for profile to be fully loaded when user exists
-	if (
+	const stillLoading =
 		loading ||
 		locationsLoading ||
 		tenantLoading ||
 		profileLoading ||
-		invitationsLoading ||
-		(user && !profile)
-	) {
+		invitationsLoading;
+	const waitingForProfile = !stillLoading && !!user && !profile;
+	const timedOut = useLoadingTimeout(stillLoading || waitingForProfile);
+
+	if (stillLoading || waitingForProfile) {
+		// Profile finished loading but is still missing: give it a short grace
+		// period (it may be auto-created), then send the user to onboarding.
+		if (timedOut && waitingForProfile) {
+			logger.debug("Profile missing after timeout - redirecting to /onboarding");
+			return <Navigate to="/onboarding" replace />;
+		}
+		if (timedOut) {
+			return <LoadingTimeoutCard fullScreen />;
+		}
 		logger.debug("Still loading, waiting...");
 		return (
 			<AnimatedLoadingScreen
