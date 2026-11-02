@@ -38,7 +38,10 @@ export const useCalendarData = (): UseCalendarDataReturn => {
 	const { selectedLocation } = useLocationContext();
 
 	const fetchData = useCallback(async () => {
-		if (!tenant?.id) return;
+		if (!tenant?.id) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);

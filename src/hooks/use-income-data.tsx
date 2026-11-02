@@ -34,7 +34,10 @@ export const useIncomeData = (): UseIncomeDataReturn => {
 	const { selectedLocation } = useLocationContext();
 
 	const fetchData = useCallback(async () => {
-		if (!tenant?.id) return;
+		if (!tenant?.id) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);

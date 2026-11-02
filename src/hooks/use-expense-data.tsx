@@ -29,7 +29,10 @@ export const useExpenseData = (): UseExpenseDataReturn => {
 	const { selectedLocation } = useLocationContext();
 
 	const fetchData = useCallback(async () => {
-		if (!tenant?.id) return;
+		if (!tenant?.id) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);

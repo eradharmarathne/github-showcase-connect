@@ -40,7 +40,10 @@ export const useUserPermissions = (): UseUserPermissionsReturn => {
 	const { tenant } = useAuth();
 
 	const fetchPermissions = useCallback(async () => {
-		if (!tenant?.id) return;
+		if (!tenant?.id) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);

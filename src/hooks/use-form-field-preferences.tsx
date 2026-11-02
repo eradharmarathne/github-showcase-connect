@@ -15,7 +15,10 @@ export function useFormFieldPreferences() {
 	const [loading, setLoading] = useState(true);
 
 	const fetchPreferences = useCallback(async () => {
-		if (!tenant?.id) return;
+		if (!tenant?.id) {
+			setLoading(false);
+			return;
+		}
 
 		try {
 			setLoading(true);
