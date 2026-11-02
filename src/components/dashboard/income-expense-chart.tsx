@@ -355,8 +355,7 @@ function IncomeExpenseChartComponent({
 					</CardHeader>
 					<CardContent className="px-3 pb-3">
 						<div className="text-lg lg:text-xl font-bold text-primary">
-							{<AnimatedNumber value={todayReservationIncome,
-								displayCurrency} format={(n) => formatAmountWithSymbol(n, )} />}
+							<AnimatedNumber value={todayReservationIncome} format={(n) => formatAmountWithSymbol(n, displayCurrency)} />
 						</div>
 						<p className="text-[10px] text-muted-foreground">{locationName}</p>
 					</CardContent>
