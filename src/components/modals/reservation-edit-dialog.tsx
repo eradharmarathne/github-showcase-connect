@@ -38,6 +38,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { convertCurrency } from "@/utils/currency";
 import { OTPVerification } from "../auth/otp-verification";
+import { ReservationIdDocuments } from "../reservation/reservation-id-documents";
 
 interface Reservation {
 	id: string;
@@ -585,6 +586,10 @@ export function ReservationEditDialog({
 							}
 						/>
 					</div>
+
+					{reservation?.id && (
+						<ReservationIdDocuments reservationId={reservation.id} />
+					)}
 
 					<div>
 						<Label>{t("reservations.form.bookingSource")}</Label>
