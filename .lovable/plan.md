@@ -1,9 +1,8 @@
 # Run CheckingCheckout on Lovable hosting (instead of Vercel)
 
-## Step 0: bring in your newest code
-- Your push worked. GitHub now has commits up to "Improve web loading states" (May 9).
-- The Jun 4 commit ("Remove extra newline…") is still missing, because your computer's copy wasn't fully up to date. To include it, run `git pull` in your main repo, then push again.
-- The push replaced the earlier history, so Lovable may not pick it up on its own. First I'll check whether this project matches GitHub. If it doesn't, I'll copy the newest pushed files in directly, and every step below uses that code.
+## Step 0: your newest code (checked)
+- Lovable and GitHub now match. The May 9 "Improve web loading states" changes are in this project, and the preview builds without errors.
+- The only thing still missing is the Jun 4 commit, "Remove extra newline before closing statement". It's a tiny formatting tidy-up and doesn't change how the app works. To include it anyway, run `git pull` in your main repo, then push again.
 
 ## What I will do
 1. **Remove Vercel-only parts:** the Vercel build add-on, Vercel visitor stats and the Vercel routing file. Lovable hosting already opens every page link correctly.
