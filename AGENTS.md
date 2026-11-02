@@ -217,3 +217,8 @@ Use skeleton components from `src/components/skeleton/` for consistent loading U
 - Never read service-role keys in browser code; admin work lives only in Edge Functions.
 
 - Subdirectories have their own AGENTS.md (e.g. supabase/); read it before changing files there.
+
+## Loading & App Shell
+- Full-page loading gates must use `useLoadingTimeout` with a retry card; data hooks must `setLoading(false)` on every early return (prevents endless spinners).
+- Home-screen install is manifest-only (`public/manifest.webmanifest`); no app-shell service worker, so previews never serve stale code.
+- New-booking alerts use Supabase Realtime on `reservations` filtered by `tenant_id`, inside `useEffect` with channel cleanup.
