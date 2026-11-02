@@ -7,7 +7,7 @@ import {
 	useVideoConfig,
 } from "remotion";
 
-export interface RecapData {
+export type RecapData = {
 	hotelName: string;
 	monthLabel: string;
 	bookings: number;
@@ -20,7 +20,7 @@ export interface RecapData {
 	topSourceShare: number;
 	busiestDay: string | null;
 	sources: { name: string; count: number }[];
-}
+};
 
 export const SCENE = 75; // frames per scene at 30fps
 export const RECAP_SCENES = 6;
