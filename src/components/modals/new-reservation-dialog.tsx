@@ -1,3 +1,4 @@
+import { celebrateBooking } from "@/components/common/booking-celebration";
 import { Calendar, ChevronLeft, ChevronRight, Save, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -456,6 +457,13 @@ export function NewReservationDialog({
 				description: t("reservations.newDialog.createSuccess", {
 					reservationNumbers: reservationNumbersDisplay,
 				}),
+			});
+
+			celebrateBooking({
+				guestName: reservations[0]?.guest_name,
+				reference: reservationNumbersDisplay,
+				checkIn: reservations[0]?.check_in_date,
+				checkOut: reservations[0]?.check_out_date,
 			});
 
 			// Reset form and close dialog

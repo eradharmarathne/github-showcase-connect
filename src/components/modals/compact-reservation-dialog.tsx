@@ -1,3 +1,4 @@
+import { celebrateBooking } from "@/components/common/booking-celebration";
 import { differenceInDays, format, parseISO } from "date-fns";
 import { Calendar, CalendarDays, Save, User, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -457,6 +458,12 @@ export function CompactReservationDialog({
 				description: `Reservation ${reservationNumber} created successfully`,
 			});
 
+			celebrateBooking({
+				guestName: formData.guest_name,
+				reference: reservationNumber,
+				checkIn: formData.check_in_date,
+				checkOut: formData.check_out_date,
+			});
 			onReservationCreated();
 			onClose();
 			resetForm();

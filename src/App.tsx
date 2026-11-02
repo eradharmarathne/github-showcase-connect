@@ -1,3 +1,4 @@
+import { BookingCelebration } from "@/components/common/booking-celebration";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -80,6 +81,7 @@ const App = () => (
 							<AppLoadingWrapper>
 								<Toaster />
 								<Sonner />
+								<BookingCelebration />
 								<BrowserRouter>
 									<Routes>
 										<Route path="/" element={<AuthRedirect />} />
