@@ -17,12 +17,12 @@ export function celebrateBooking(detail: CelebrationDetail = {}) {
 }
 
 const COLORS = [
-	"hsl(var(--primary))",
+	"var(--primary)",
 	"hsl(45 93% 58%)",
 	"hsl(38 92% 50%)",
 	"hsl(142 71% 45%)",
 	"hsl(199 89% 48%)",
-	"hsl(var(--foreground))",
+	"var(--foreground)",
 ];
 
 const fmt = (d?: string) =>
@@ -126,7 +126,7 @@ export function BookingCelebration() {
 									<motion.path
 										d="M14 27 l8 8 l17 -18"
 										fill="none"
-										stroke="hsl(var(--primary-foreground))"
+										stroke="var(--primary-foreground)"
 										strokeWidth={5}
 										strokeLinecap="round"
 										strokeLinejoin="round"
