@@ -1,4 +1,9 @@
+import { motion } from "framer-motion";
 import { LanguagesIcon } from "lucide-react";
+import { useState } from "react";
+import { useLoadingTimeout } from "@/hooks/use-loading-timeout";
+import { LoadingTimeoutCard } from "../routing/loading-timeout-card";
+import { BookingNotifications } from "@/components/notifications/booking-notifications";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router";
 import LanguageDropdown from "@/components/common/dropdown-language";
@@ -42,6 +47,8 @@ export function Layout() {
 		tenantLoading ||
 		locationsLoading ||
 		permissionsLoading;
+	const timedOut = useLoadingTimeout(isPageContextLoading);
+	const [forceContinue, setForceContinue] = useState(false);
 
 	// Get page title based on current route
 	const getPageTitle = () => {
@@ -157,11 +164,25 @@ export function Layout() {
 				</header>
 
 				{/* Main Content */}
-				<div className="flex flex-1 flex-col gap-4 px-0 sm:px-4 md:px-6 pt-0">
-					{isPageContextLoading ? (
-						<RouteLoadingState message="Loading page data..." />
+				<div
+					className={`flex flex-1 flex-col gap-4 px-0 sm:px-4 md:px-6 pt-0 ${isMobile ? "pb-24" : ""}`}
+				>
+					{isPageContextLoading && !forceContinue ? (
+						timedOut ? (
+							<LoadingTimeoutCard onContinue={() => setForceContinue(true)} />
+						) : (
+							<RouteLoadingState message="Loading page data..." />
+						)
 					) : (
-						<Outlet />
+						<motion.div
+							key={location.pathname}
+							initial={{ opacity: 0, y: 10 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as const }}
+							className="flex flex-1 flex-col gap-4"
+						>
+							<Outlet />
+						</motion.div>
 					)}
 				</div>
 			</SidebarInset>
