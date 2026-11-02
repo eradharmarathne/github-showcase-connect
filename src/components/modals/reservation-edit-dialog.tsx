@@ -368,12 +368,12 @@ export function ReservationEditDialog({
 		if (!reservation) return;
 		setIsDeleting(true);
 		try {
-			await supabase
+			await (supabase as any)
 				.from("booking_payments")
 				.delete()
 				.eq("reservation_id", reservation.id);
 
-			await supabase
+			await (supabase as any)
 				.from("income")
 				.delete()
 				.eq("reservation_id", reservation.id);
