@@ -142,17 +142,13 @@ export function GuestInformationStep({
 			</div>
 
 			{/* Passport / ID documents */}
-			{fieldPreferences?.show_id_photos !== false && (
-				<IDPhotoUpload
-					photos={guestData.guest_id_photos}
-					onPhotosChange={(photos) =>
-						onGuestDataChange("guest_id_photos", photos)
-					}
-					title="Passport / ID Documents"
-					maxPhotos={6}
-					uploadPathPrefix={uploadPathPrefix}
-				/>
-			)}
+			<IDPhotoUpload
+				photos={guestData.guest_id_photos}
+				onPhotosChange={(photos) => onGuestDataChange("guest_id_photos", photos)}
+				title="Passport / ID Documents"
+				maxPhotos={6}
+				uploadPathPrefix={uploadPathPrefix}
+			/>
 
 			{/* Booking Source */}
 			{fieldPreferences?.show_booking_source !== false && (

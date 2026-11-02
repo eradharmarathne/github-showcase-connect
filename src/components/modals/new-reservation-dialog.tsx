@@ -487,6 +487,7 @@ export function NewReservationDialog({
 			guest_id_number: "",
 			special_requests: "",
 			booking_source: "direct",
+			guest_id_photos: [],
 		});
 		setPaymentData({
 			advance_amount: 0,
@@ -502,6 +503,9 @@ export function NewReservationDialog({
 						key={currentStep}
 						guestData={guestData}
 						onGuestDataChange={handleGuestDataChange}
+						uploadPathPrefix={
+							tenant?.id ? `${tenant.id}/id-photos/new` : undefined
+						}
 					/>
 				);
 			case "rooms":
