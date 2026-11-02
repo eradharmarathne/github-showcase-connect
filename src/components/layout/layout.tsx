@@ -149,6 +149,7 @@ export function Layout() {
 							</Breadcrumb>
 						</div>
 						<div className="flex items-center gap-1.5">
+							<BookingNotifications />
 							<FullscreenToggle />
 							<ThemeSwitcher />
 							<LanguageDropdown
