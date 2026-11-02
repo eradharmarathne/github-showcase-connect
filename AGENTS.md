@@ -295,3 +295,7 @@ VITE_SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # For Edge Functions only
 - `components/settings/` - Settings management
 - `components/users/` - User management
 - `components/skeleton/` - Loading skeletons
+
+## Hosting
+- Hosted on Lovable, not Vercel: do not add Vercel plugins, vercel.json, or @vercel/analytics (Lovable hosting handles SPA routing).
+- Never read service-role keys in browser code; admin work lives only in Edge Functions.
