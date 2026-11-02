@@ -6,6 +6,12 @@
 - Some setup is still left over from Vercel hosting: a Vercel build add-on, Vercel visitor stats, and a Vercel routing file.
 - The email step (Resend) depends on a shortcut that only works while developing, so it would stop working once the app is published.
 - The billing (Polar) organization ID isn't set, so the upgrade/checkout button won't work yet.
+- Your main repo, `kalanakt/app.checkingcheckout.com`, is private, so I can't read it. Its newest changes (up to Jun 4) aren't here yet. Lovable can only sync with the repo it created (`github-showcase-connect`), not one that already existed.
+
+## Step 0 — bring in your newest code (you do this)
+Pick one of these:
+- **A (best):** On your computer, open your main project folder and run `git push https://github.com/eradharmarathne/github-showcase-connect.git main --force`. Lovable picks up the changes automatically.
+- **B:** Make `kalanakt/app.checkingcheckout.com` public for a moment and tell me. I'll copy the newest files in here myself.
 
 ## What I will do
 1. **Remove Vercel-only parts** so the app builds cleanly on Lovable:
