@@ -2,6 +2,7 @@ import { Calendar, ChevronLeft, ChevronRight, Save, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { type RoomSelection } from "@/components/reservation/multi-room-selector";
+import { serializeIdPhotos } from "@/components/media/id-photo-upload";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -85,6 +86,7 @@ export function NewReservationDialog({
 		guest_id_number: "",
 		special_requests: "",
 		booking_source: "direct",
+		guest_id_photos: [],
 	});
 
 	const [paymentData, setPaymentData] = useState<PaymentData>({
@@ -357,6 +359,10 @@ export function NewReservationDialog({
 					arrival_time: selection.arrival_time || null,
 					special_requests: guestData.special_requests || null,
 					booking_source: guestData.booking_source,
+					guest_id_photos:
+						guestData.guest_id_photos.length > 0
+							? serializeIdPhotos(guestData.guest_id_photos)
+							: null,
 					created_by: profile.id,
 					tenant_id: tenant.id,
 				};
