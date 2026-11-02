@@ -203,15 +203,6 @@ Use skeleton components from `src/components/skeleton/` for consistent loading U
 - Lib: `/src/lib/` - Utility functions and helpers
 - Integrations: `/src/integrations/supabase/` - Supabase client and types
 
-**Domain-Specific Components:**
-- `components/master-files/` - Agents, Commissions, Guides, Locations, Rooms
-- `components/reports/` - Financial reports and analytics
-- `components/reservation/` - Booking management components
-- `components/calendar/` - Calendar and timeline views
-- `components/settings/` - Settings management
-- `components/users/` - User management
-- `components/skeleton/` - Loading skeletons
-
 ## Hosting
 - Hosted on Lovable, not Vercel: do not add Vercel plugins, vercel.json, or @vercel/analytics (Lovable hosting handles SPA routing).
 - Never read service-role keys in browser code; admin work lives only in Edge Functions.
