@@ -118,7 +118,7 @@ export default function RoomsTab() {
 				.order("created_at", { ascending: false });
 
 			if (error) throw error;
-			setRooms(data || []);
+			setRooms((data || []) as unknown as Room[]);
 		} catch (error) {
 			toast({
 				title: "Error",

@@ -91,8 +91,9 @@ export function EditUserDialog({
 			);
 
 			if (error) throw error;
-			if (data && !data.success) {
-				throw new Error(data.error || "Failed to reset password");
+			const result = data as { success?: boolean; error?: string } | null;
+			if (result && !result.success) {
+				throw new Error(result.error || "Failed to reset password");
 			}
 
 			if (sendCredentials) {

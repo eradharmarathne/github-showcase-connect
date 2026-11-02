@@ -188,7 +188,7 @@ export const useReservationPrint = () => {
 							<div style="padding: 12px 16px; border-bottom: 1px solid #E5E7EB; background: #F8FAFC;">
 								<h3 style="margin: 0; font-size: 12px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Guest Information</h3>
 							</div>
-							<table style="width: 100%; border-collapse: collapse;">${guestRowsHtml}</table>
+							<table style="width: 100%; border-collapse: collapse;">${guestRows}</table>
 						</div>
 					</td>
 					<td style="width: 50%; vertical-align: top;">

@@ -13,7 +13,7 @@ export interface UserPermissions {
 	[key: string]: boolean;
 }
 
-export interface User extends Profile {
+export interface User extends Omit<Profile, "last_sign_in_at" | "avatar_url"> {
 	last_sign_in_at?: string | null;
 	avatar_url?: string | null;
 	permissions: {
