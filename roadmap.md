@@ -5,9 +5,9 @@
 - [x] Phone-friendly spacing above bottom menu
 - [x] Installable app (home screen icon, manifest)
 - [x] New-booking alerts (sound + notification while app is open)
-- [ ] Richer app-open / loading animation
-- [ ] Celebration animation after creating a booking
-- [ ] Count-up numbers on dashboard cards
-- [ ] Monthly recap video (Remotion player with real hotel numbers)
+- [x] Richer app-open / loading animation
+- [x] Celebration animation after creating a booking
+- [x] Count-up numbers on dashboard cards
+- [x] Monthly recap video (Remotion player with real hotel numbers)
 - [ ] Alerts when the app is fully closed (Firebase push) — needs Firebase connection from user
 - [ ] Polar organization ID for billing — waits on user
