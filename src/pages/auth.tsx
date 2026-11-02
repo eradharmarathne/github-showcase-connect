@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
@@ -35,6 +36,13 @@ const FacebookIcon = () => (
 		<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
 	</svg>
 );
+
+const ease = [0.22, 1, 0.36, 1] as const;
+const fadeUp = (delay = 0) => ({
+	initial: { opacity: 0, y: 18 },
+	animate: { opacity: 1, y: 0 },
+	transition: { duration: 0.6, delay, ease },
+});
 
 export default function Auth() {
 	const [isLogin, setIsLogin] = useState(true);
@@ -273,28 +281,28 @@ export default function Auth() {
 			>
 				<div className="flex size-full items-center justify-center bg-gradient-to-br from-black via-gray-900 to-black p-4 sm:p-8 lg:p-16 relative overflow-hidden">
 					{/* Decorative yellow accent glow */}
-					<div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-yellow-500/10 blur-3xl" />
-					<div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-yellow-400/8 blur-2xl" />
+					<motion.div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-yellow-500/10 blur-3xl" animate={{ x: [0, 40, 0], y: [0, -30, 0], scale: [1, 1.15, 1] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} />
+					<motion.div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-yellow-400/10 blur-2xl" animate={{ x: [0, -30, 0], y: [0, 25, 0], scale: [1, 1.2, 1] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
 
 					<div className="relative z-10 text-center">
 						{/* CC Monogram */}
-						<div className="mx-auto mb-8 w-20 h-20 rounded-full bg-yellow-500 flex items-center justify-center shadow-xl shadow-yellow-500/25">
+						<motion.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 180, damping: 14 }} className="mx-auto mb-8 w-20 h-20 rounded-full bg-yellow-500 flex items-center justify-center shadow-xl shadow-yellow-500/25">
 							<span className="text-3xl font-bold text-black tracking-tight">CC</span>
-						</div>
+						</motion.div>
 
 						{/* Shiny brand name */}
-						<h1 className="text-4xl lg:text-5xl font-bold tracking-wide animate-shimmer animate-glow-pulse mb-4">
+						<motion.h1 {...fadeUp(0.15)} className="text-4xl lg:text-5xl font-bold tracking-wide animate-shimmer animate-glow-pulse mb-4">
 							CheckingCheckout
-						</h1>
+						</motion.h1>
 
-						<h2 className="max-w-lg mx-auto text-lg md:text-xl font-medium leading-8 text-gray-300">
+						<motion.h2 {...fadeUp(0.25)} className="max-w-lg mx-auto text-lg md:text-xl font-medium leading-8 text-gray-300">
 							Welcome to Checking &amp; Checkout
-						</h2>
-						<p className="mt-3 text-gray-400 max-w-md mx-auto">
+						</motion.h2>
+						<motion.p {...fadeUp(0.35)} className="mt-3 text-gray-400 max-w-md mx-auto">
 							The all-in-one hotel management solution for small to medium
 							businesses.
-						</p>
-						<div className="mt-12 rounded-xl bg-white/5 p-1.5 ring-1 ring-yellow-500/20">
+						</motion.p>
+						<motion.div initial={{ opacity: 0, y: 40, rotateX: 12 }} animate={{ opacity: 1, y: [0, -8, 0], rotateX: 0 }} transition={{ opacity: { duration: 0.8, delay: 0.45 }, rotateX: { duration: 0.8, delay: 0.45, ease }, y: { duration: 6, delay: 1.2, repeat: Infinity, ease: "easeInOut" } }} style={{ transformPerspective: 1200 }} className="mt-12 rounded-xl bg-white/5 p-1.5 ring-1 ring-yellow-500/20">
 							<img
 								alt="Dashboard screenshot showing data visualization and analytics interface"
 								src="/images/dashboard.png"
@@ -302,13 +310,13 @@ export default function Auth() {
 								height={1442}
 								className="rounded-md shadow-2xl shadow-black/50 ring-1 ring-gray-800/30"
 							/>
-						</div>
+						</motion.div>
 					</div>
 				</div>
 			</aside>
 
 			<div className="flex-1 w-full flex items-center justify-center h-full sm:h-screen">
-				<div className="w-full max-w-md space-y-8 px-4 md:px-8 text-foreground sm:px-0">
+				<motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease }} className="w-full max-w-md space-y-8 px-4 py-10 md:px-8 text-foreground sm:px-0">
 					<div className="space-y-1">
 						<h2 className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground">
 							{isLogin ? "Get started now" : "Create your account"}
@@ -475,7 +483,7 @@ export default function Auth() {
 								: "Already have an account? Sign in"}
 						</button>
 					</div>
-				</div>
+				</motion.div>
 			</div>
 		</div>
 	);
