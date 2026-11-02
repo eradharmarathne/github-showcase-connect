@@ -317,6 +317,14 @@ export default function Auth() {
 
 			<div className="flex-1 w-full flex items-center justify-center h-full sm:h-screen">
 				<motion.div initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, ease }} className="w-full max-w-md space-y-8 px-4 py-10 md:px-8 text-foreground sm:px-0">
+					<motion.div {...fadeUp(0)} className="flex items-center gap-3 sm:hidden">
+						<div className="w-11 h-11 rounded-full bg-yellow-500 flex items-center justify-center shadow-lg shadow-yellow-500/30">
+							<span className="text-lg font-bold text-black">CC</span>
+						</div>
+						<span className="text-xl font-bold tracking-wide animate-shimmer">
+							CheckingCheckout
+						</span>
+					</motion.div>
 					<div className="space-y-1">
 						<h2 className="text-lg md:text-xl lg:text-2xl font-semibold tracking-tight text-foreground">
 							{isLogin ? "Get started now" : "Create your account"}
