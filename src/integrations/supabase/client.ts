@@ -5,8 +5,6 @@ import { brokeredPreviewStorage } from "./previewAuthStorage";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY!;
-const SUPABASE_SERVICE_ROLE_KEY = import.meta.env
-	.VITE_SUPABASE_SERVICE_ROLE_KEY!;
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -51,23 +49,4 @@ function getSupabaseClient(): SupabaseClientType {
 // Single client instance for all operations
 export const supabase = getSupabaseClient();
 
-// For admin operations that truly need service role access, create a temporary client
-export const createAdminClient = () => {
-	// Only create admin client when absolutely necessary and in secure environment
-	if (!SUPABASE_SERVICE_ROLE_KEY) {
-		console.warn("Service role key not available for admin operations");
-		return null;
-	}
-
-	return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-		auth: {
-			autoRefreshToken: false,
-			persistSession: false,
-		},
-		global: {
-			headers: {
-				"X-Client-Info": "checking-checkout-admin-temp",
-			},
-		},
-	});
-};
+// Admin (service role) access lives only in Edge Functions, never in the browser.
