@@ -9,5 +9,5 @@
 - [x] Celebration animation after creating a booking
 - [x] Count-up numbers on dashboard cards
 - [x] Monthly recap video (Remotion player with real hotel numbers)
-- [ ] Alerts when the app is fully closed (Firebase push) — needs Firebase connection from user
+- [ ] Alerts when the app is fully closed (Firebase push) — user skipped the Firebase connection; waits on them
 - [ ] Polar organization ID for billing — waits on user
