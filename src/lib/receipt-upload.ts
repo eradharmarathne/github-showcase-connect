@@ -1,4 +1,4 @@
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/integrations/supabase/config";
+import { SUPABASE_URL } from "@/integrations/supabase/config";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UploadResult {
