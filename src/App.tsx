@@ -85,6 +85,8 @@ const App = () => (
 								<BrowserRouter>
 									<Routes>
 										<Route path="/" element={<AuthRedirect />} />
+										<Route path="/index" element={<RouterNavigate to="/" replace />} />
+										<Route path="/index.html" element={<RouterNavigate to="/" replace />} />
 										<Route path="/auth" element={<Auth />} />
 										<Route path="/auth-callback" element={<AuthCallback />} />
 										<Route path="/ui" element={<Design />} />
