@@ -1,3 +1,4 @@
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/integrations/supabase/config";
 import { addDays, format, isAfter, isBefore } from "date-fns";
 import {
 	Calendar as CalendarIcon,
@@ -235,12 +236,12 @@ export default function PublicBookingPage() {
 			// Create a fresh fetch request without any auth headers
 			// to ensure this works for both logged-in and logged-out users
 			const response = await fetch(
-				`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-public-booking`,
+				`${SUPABASE_URL}/functions/v1/create-public-booking`,
 				{
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+						apikey: SUPABASE_ANON_KEY,
 					},
 					body: JSON.stringify({
 						locationSlug,
