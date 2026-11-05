@@ -1,3 +1,4 @@
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/integrations/supabase/config";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface UploadResult {
@@ -34,7 +35,7 @@ export async function uploadReceiptFile(
 		}
 
 		// Call the Edge Function
-		const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+		const supabaseUrl = SUPABASE_URL;
 		const response = await fetch(`${supabaseUrl}/functions/v1/upload-receipt`, {
 			method: "POST",
 			headers: {
@@ -80,7 +81,7 @@ export async function deleteReceiptFile(fileUrl: string): Promise<boolean> {
 		}
 
 		// Call the Edge Function for deletion
-		const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+		const supabaseUrl = SUPABASE_URL;
 		const response = await fetch(`${supabaseUrl}/functions/v1/upload-receipt`, {
 			method: "DELETE",
 			headers: {

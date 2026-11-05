@@ -1,3 +1,4 @@
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/integrations/supabase/config";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -77,7 +78,7 @@ export async function uploadReceiptFile(
 			// Configure and send request
 			xhr.open(
 				"POST",
-				`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-receipt`,
+				`${SUPABASE_URL}/functions/v1/upload-receipt`,
 			);
 			xhr.setRequestHeader("Authorization", `Bearer ${session.access_token}`);
 			xhr.timeout = 60000; // 60 seconds timeout
@@ -108,7 +109,7 @@ export async function deleteReceiptFile(fileUrl: string): Promise<void> {
 
 		// Call the Edge Function
 		const response = await fetch(
-			`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-receipt`,
+			`${SUPABASE_URL}/functions/v1/upload-receipt`,
 			{
 				method: "DELETE",
 				headers: {
