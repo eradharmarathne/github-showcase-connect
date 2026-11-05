@@ -1,7 +1,7 @@
 import { BookingCelebration } from "@/components/common/booking-celebration";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { Navigate as RouterNavigate, BrowserRouter, Route, Routes } from "react-router";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
